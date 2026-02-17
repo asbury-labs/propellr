@@ -8,6 +8,8 @@
     "build": "turbo run build",
     "build:locales": "turbo run build:locales",
     "test": "turbo run test",
+    "test:browser": "turbo run test:browser",
+    "test:integration": "turbo run test:integration",
     "test:tsc": "turbo run test:tsc",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",

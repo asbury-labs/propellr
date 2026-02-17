@@ -20,6 +20,14 @@
       "dependsOn": ["build"],
       "inputs": ["lib/**", "test/**"]
     },
+    "test:browser": {
+      "dependsOn": ["build"],
+      "inputs": ["test/browser/**"]
+    },
+    "test:integration": {
+      "dependsOn": ["build"],
+      "inputs": ["test/integration/**"]
+    },
     "test:tsc": {
       "inputs": ["typings/**", "axe.d.ts", "tsconfig.json"]
     },

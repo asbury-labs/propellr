@@ -1,0 +1,6 @@
+import actRunner from './act-runner.ts';
+actRunner({
+  id: 'b5c3f8',
+  title: 'HTML page has lang attribute',
+  axeRules: ['html-has-lang']
+});
