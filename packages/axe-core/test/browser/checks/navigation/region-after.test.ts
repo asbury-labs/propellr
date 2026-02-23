@@ -1,9 +1,8 @@
 import { describe, it, expect, afterEach, afterAll } from 'vitest';
+import { checks, MockCheckContext } from '../../../testutils';
 
-declare const axe: any;
-declare const checks: any;
 describe('region-after', function () {
-  const checkContext = axe.testUtils.MockCheckContext();
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     checkContext.reset();

@@ -1,11 +1,15 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checks,
+  getCheckEvaluate,
+  MockCheckContext,
+  shadowSupport
+} from '../../../testutils';
 
-declare const axe: any;
 describe('duplicate-id', function () {
-  const fixture = document.getElementById('fixture');
-  const shadowSupport = axe.testUtils.shadowSupport;
+  const fixture = document.getElementById('fixture')!;
 
-  const checkContext = axe.testUtils.MockCheckContext();
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     fixture.innerHTML = '';
@@ -15,9 +19,9 @@ describe('duplicate-id', function () {
   it('should return true if there is only one element with an ID', function () {
     fixture.innerHTML = '<div id="target"></div>';
     const node = fixture.querySelector('#target');
-    expect(
-      axe.testUtils.getCheckEvaluate('duplicate-id').call(checkContext, node)
-    ).toBe(true);
+    expect(getCheckEvaluate('duplicate-id').call(checkContext, node)).toBe(
+      true
+    );
     expect(checkContext._data).toBe(node.id);
     expect(checkContext._relatedNodes).toEqual([]);
   });
@@ -25,9 +29,9 @@ describe('duplicate-id', function () {
   it('should return false if there are multiple elements with an ID', function () {
     fixture.innerHTML = '<div id="target"></div><div id="target"></div>';
     const node = fixture.querySelector('#target');
-    expect(
-      axe.testUtils.getCheckEvaluate('duplicate-id').call(checkContext, node)
-    ).toBe(false);
+    expect(getCheckEvaluate('duplicate-id').call(checkContext, node)).toBe(
+      false
+    );
     expect(checkContext._data).toBe(node.id);
     expect(checkContext._relatedNodes).toEqual([node.nextSibling]);
   });
@@ -47,9 +51,9 @@ describe('duplicate-id', function () {
       '<div data-testelm="1" id=""></div><div data-testelm="2"  id=""></div>';
     const node = fixture.querySelector('[data-testelm="1"]');
 
-    expect(
-      axe.testUtils.getCheckEvaluate('duplicate-id').call(checkContext, node)
-    ).toBe(true);
+    expect(getCheckEvaluate('duplicate-id').call(checkContext, node)).toBe(
+      true
+    );
   });
 
   it('should allow overwrote ids', function () {
@@ -59,9 +63,9 @@ describe('duplicate-id', function () {
       '</label></form>';
     const node = fixture.querySelector('[data-testelm="1"]');
 
-    expect(
-      axe.testUtils.getCheckEvaluate('duplicate-id').call(checkContext, node)
-    ).toBe(true);
+    expect(getCheckEvaluate('duplicate-id').call(checkContext, node)).toBe(
+      true
+    );
   });
 
   (shadowSupport.v1 ? it : xit)(
@@ -74,9 +78,9 @@ describe('duplicate-id', function () {
       const node = shadow.querySelector('span');
       fixture.appendChild(div);
 
-      expect(
-        axe.testUtils.getCheckEvaluate('duplicate-id').call(checkContext, node)
-      ).toBe(false);
+      expect(getCheckEvaluate('duplicate-id').call(checkContext, node)).toBe(
+        false
+      );
       expect(checkContext._relatedNodes).toHaveLength(1);
       expect(checkContext._relatedNodes).toEqual([shadow.querySelector('p')]);
     }
@@ -91,9 +95,9 @@ describe('duplicate-id', function () {
       shadow.innerHTML = '<span id="target"></span>';
       fixture.appendChild(node);
 
-      expect(
-        axe.testUtils.getCheckEvaluate('duplicate-id').call(checkContext, node)
-      ).toBe(true);
+      expect(getCheckEvaluate('duplicate-id').call(checkContext, node)).toBe(
+        true
+      );
       expect(checkContext._relatedNodes).toHaveLength(0);
     }
   );
@@ -108,9 +112,9 @@ describe('duplicate-id', function () {
       const node = shadow.querySelector('#target');
       fixture.appendChild(div);
 
-      expect(
-        axe.testUtils.getCheckEvaluate('duplicate-id').call(checkContext, node)
-      ).toBe(true);
+      expect(getCheckEvaluate('duplicate-id').call(checkContext, node)).toBe(
+        true
+      );
       expect(checkContext._relatedNodes).toHaveLength(0);
     }
   );
@@ -125,9 +129,9 @@ describe('duplicate-id', function () {
       shadow.innerHTML = '<span id="target"><slot></slot></span>';
       fixture.appendChild(node);
 
-      expect(
-        axe.testUtils.getCheckEvaluate('duplicate-id').call(checkContext, node)
-      ).toBe(false);
+      expect(getCheckEvaluate('duplicate-id').call(checkContext, node)).toBe(
+        false
+      );
       expect(checkContext._relatedNodes).toHaveLength(1);
       expect(checkContext._relatedNodes).toEqual([node.querySelector('p')]);
     }

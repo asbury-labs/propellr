@@ -1,26 +1,23 @@
 import { describe, it, expect, beforeAll } from 'vitest';
+import { checks, queryFixture } from '../../../testutils';
 
-declare const axe: any;
 describe('label-content-name-mismatch tests', function () {
-  const queryFixture = axe.testUtils.queryFixture;
   const check = checks['label-content-name-mismatch'];
   const options = undefined;
 
   const fontApiSupport = !!document.fonts;
 
-  beforeAll(function (done) {
+  beforeAll(async function () {
     if (!fontApiSupport) {
-      done();
+      return;
     }
 
     const materialFont = new FontFace(
       'Material Icons',
       'url(https://fonts.gstatic.com/s/materialicons/v48/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2)'
     );
-    materialFont.load().then(function () {
-      document.fonts.add(materialFont);
-      done();
-    });
+    await materialFont.load();
+    document.fonts.add(materialFont);
   });
 
   it('returns true when visible text and accessible name (`aria-label`) matches (text sanitized)', function () {

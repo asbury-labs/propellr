@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
+import { queryFixture } from '../../testutils';
 
 declare const axe: any;
 describe('is-visible-on-screen-matches', () => {
   const rule = axe.utils.getRule('avoid-inline-spacing');
-  const queryFixture = axe.testUtils.queryFixture;
 
   it('returns true for visible elements', () => {
     const vNode = queryFixture('<p id="target">Hello world</p>');

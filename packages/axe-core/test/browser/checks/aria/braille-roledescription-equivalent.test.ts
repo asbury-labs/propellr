@@ -1,9 +1,12 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  getCheckEvaluate,
+  MockCheckContext
+} from '../../../testutils';
 
-declare const axe: any;
 describe('braille-roledescription-equivalent tests', () => {
-  const { checkSetup, getCheckEvaluate } = axe.testUtils;
-  const checkContext = axe.testUtils.MockCheckContext();
+  const checkContext = MockCheckContext();
   const checkEvaluate = getCheckEvaluate('braille-roledescription-equivalent');
 
   afterEach(() => {

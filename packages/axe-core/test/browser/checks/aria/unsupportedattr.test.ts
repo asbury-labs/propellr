@@ -1,9 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { checkSetup, checks, MockCheckContext } from '../../../testutils';
 
 declare const axe: any;
 describe('unsupportedattr', function () {
-  const checkContext = axe.testUtils.MockCheckContext();
-  const checkSetup = axe.testUtils.checkSetup;
+  const checkContext = MockCheckContext();
   const check = checks['aria-unsupported-attr'];
 
   afterEach(function () {

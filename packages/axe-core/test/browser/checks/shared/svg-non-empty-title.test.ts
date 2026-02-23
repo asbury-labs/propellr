@@ -1,11 +1,14 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  getCheckEvaluate,
+  MockCheckContext
+} from '../../../testutils';
 
-declare const axe: any;
 describe('svg-non-empty-title tests', function () {
-  const fixture = document.getElementById('fixture');
-  const checkContext = axe.testUtils.MockCheckContext();
-  const checkSetup = axe.testUtils.checkSetup;
-  const checkEvaluate = axe.testUtils.getCheckEvaluate('svg-non-empty-title');
+  const fixture = document.getElementById('fixture')!;
+  const checkContext = MockCheckContext();
+  const checkEvaluate = getCheckEvaluate('svg-non-empty-title');
 
   afterEach(function () {
     fixture.innerHTML = '';

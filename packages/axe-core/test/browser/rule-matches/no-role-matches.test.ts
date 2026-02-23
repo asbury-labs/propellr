@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
+import { queryFixture } from '../../testutils';
 
 declare const axe: any;
 describe('link-in-text-block-matches', () => {
   const rule = axe.utils.getRule('definition-list');
-  const { queryFixture } = axe.testUtils;
 
   it('should return true if element does not have a role attribute', () => {
     const vNode = queryFixture('<div id="target"></div>');

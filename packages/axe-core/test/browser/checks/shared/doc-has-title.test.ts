@@ -1,8 +1,8 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { getCheckEvaluate } from '../../../testutils';
 
-declare const axe: any;
 describe('doc-has-title', function () {
-  const fixture = document.getElementById('fixture');
+  const fixture = document.getElementById('fixture')!;
 
   afterEach(function () {
     fixture.innerHTML = '';
@@ -11,18 +11,14 @@ describe('doc-has-title', function () {
   it('should return false if title is empty', function () {
     const orig = document.title;
     document.title = '';
-    expect(axe.testUtils.getCheckEvaluate('doc-has-title')(fixture)).toBe(
-      false
-    );
+    expect(getCheckEvaluate('doc-has-title')(fixture)).toBe(false);
     document.title = orig;
   });
 
   it('should return false if title contains only whitespace', function () {
     const orig = document.title;
     document.title = ' \t\r\n \n   \r \n\t';
-    expect(axe.testUtils.getCheckEvaluate('doc-has-title')(fixture)).toBe(
-      false
-    );
+    expect(getCheckEvaluate('doc-has-title')(fixture)).toBe(false);
     document.title = orig;
   });
 
@@ -30,7 +26,7 @@ describe('doc-has-title', function () {
     const orig = document.title;
     document.title = 'Bananas';
 
-    expect(axe.testUtils.getCheckEvaluate('doc-has-title')(fixture)).toBe(true);
+    expect(getCheckEvaluate('doc-has-title')(fixture)).toBe(true);
     document.title = orig;
   });
 });

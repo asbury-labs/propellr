@@ -1,12 +1,18 @@
 import { describe, it, expect, afterEach, afterAll } from 'vitest';
+import {
+  checkSetup,
+  checks,
+  getCheckEvaluate,
+  MockCheckContext,
+  shadowCheckSetup,
+  shadowSupport
+} from '../../../testutils';
 
 declare const axe: any;
 describe('page-has-*', function () {
-  const fixture = document.getElementById('fixture');
-  const checkContext = new axe.testUtils.MockCheckContext();
-  const checkSetup = axe.testUtils.checkSetup;
-  const shadowSupported = axe.testUtils.shadowSupport.v1;
-  const shadowCheckSetup = axe.testUtils.shadowCheckSetup;
+  const fixture = document.getElementById('fixture')!;
+  const checkContext = new MockCheckContext();
+  const shadowSupported = shadowSupport.v1;
 
   afterEach(function () {
     fixture.innerHTML = '';
@@ -15,7 +21,7 @@ describe('page-has-*', function () {
   });
 
   describe('evaluate', function () {
-    const evaluate = axe.testUtils.getCheckEvaluate('page-has-main');
+    const evaluate = getCheckEvaluate('page-has-main');
 
     it('throws if there is no selector', function () {
       expect(function () {

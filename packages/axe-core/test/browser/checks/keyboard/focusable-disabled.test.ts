@@ -1,13 +1,19 @@
 import { describe, it, expect, afterEach, beforeAll } from 'vitest';
+import {
+  checkSetup,
+  checks,
+  fixtureSetup,
+  flatTreeSetup,
+  MockCheckContext,
+  shadowSupport
+} from '../../../testutils';
 
 declare const axe: any;
 describe('focusable-disabled', function () {
-  const check;
-  const fixture = document.getElementById('fixture');
-  const fixtureSetup = axe.testUtils.fixtureSetup;
-  const shadowSupported = axe.testUtils.shadowSupport.v1;
-  const checkContext = axe.testUtils.MockCheckContext();
-  const checkSetup = axe.testUtils.checkSetup;
+  let check;
+  const fixture = document.getElementById('fixture')!;
+  const shadowSupported = shadowSupport.v1;
+  const checkContext = MockCheckContext();
 
   beforeAll(function () {
     check = checks['focusable-disabled'];
@@ -152,7 +158,7 @@ describe('focusable-disabled', function () {
       const node = fixture.querySelector('#target');
       const shadow = node.attachShadow({ mode: 'open' });
       shadow.innerHTML = '<button>Some text</button>';
-      axe.testUtils.flatTreeSetup(fixture);
+      flatTreeSetup(fixture);
       axe._selectorData = axe.utils.getSelectorData(axe._tree);
       const virtualNode = axe.utils.getNodeFromTree(node);
       const actual = check.evaluate.call(checkContext, node, {}, virtualNode);

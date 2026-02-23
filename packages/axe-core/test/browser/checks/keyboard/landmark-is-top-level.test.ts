@@ -1,12 +1,17 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  checks,
+  MockCheckContext,
+  shadowCheckSetup,
+  shadowSupport
+} from '../../../testutils';
 
 declare const axe: any;
 describe('landmark-is-top-level', () => {
-  const shadowSupported = axe.testUtils.shadowSupport.v1;
-  const checkSetup = axe.testUtils.checkSetup;
-  const shadowCheckSetup = axe.testUtils.shadowCheckSetup;
+  const shadowSupported = shadowSupport.v1;
   const check = checks['landmark-is-top-level'];
-  const checkContext = new axe.testUtils.MockCheckContext();
+  const checkContext = new MockCheckContext();
 
   afterEach(() => {
     checkContext.reset();

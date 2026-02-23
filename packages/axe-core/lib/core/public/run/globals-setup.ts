@@ -6,7 +6,7 @@ export function setupGlobals(context: unknown): void {
   // NOTE: because our polyfills run first, the global window object
   // always exists but may not have things we expect
   const hasWindow = window && 'Node' in window && 'NodeList' in window;
-  const hasDoc = !!document;
+  const hasDoc = typeof document !== 'undefined' && !!document;
   if (hasWindow && hasDoc) {
     return;
   }
@@ -26,7 +26,14 @@ export function setupGlobals(context: unknown): void {
 
   if (!hasWindow) {
     cache.set('globalWindowSet', true);
-    (globalThis as Record<string, unknown>).window = document.defaultView;
+    // Use globalThis.document here since the local `document` shim variable
+    // may still be undefined after we set globalThis.document above
+    (globalThis as Record<string, unknown>).window = (
+      globalThis as Record<string, unknown>
+    ).document
+      ? ((globalThis as Record<string, unknown>).document as Document)
+          .defaultView
+      : undefined;
   }
 }
 

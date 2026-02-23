@@ -1,10 +1,14 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  flatTreeSetup,
+  getCheckEvaluate,
+  shadowSupport
+} from '../../../testutils';
 
 declare const axe: any;
 describe('duplicate-img-label', function () {
-  const fixture = document.getElementById('fixture');
-  const checkSetup = axe.testUtils.checkSetup;
-  const shadowSupport = axe.testUtils.shadowSupport;
+  const fixture = document.getElementById('fixture')!;
 
   afterEach(function () {
     fixture.innerHTML = '';
@@ -14,8 +18,8 @@ describe('duplicate-img-label', function () {
   it('should return false if no text is present', function () {
     fixture.innerHTML = '<button><img id="target" alt="Plain text"></button>';
     const node = fixture.querySelector('#target');
-    axe.testUtils.flatTreeSetup(fixture);
-    const result = axe.testUtils.getCheckEvaluate('duplicate-img-label')(
+    flatTreeSetup(fixture);
+    const result = getCheckEvaluate('duplicate-img-label')(
       node,
       undefined,
       axe.utils.getNodeFromTree(node)
@@ -27,9 +31,9 @@ describe('duplicate-img-label', function () {
     fixture.innerHTML =
       '<button aria-label="Plain text"><img id="target" alt="Plain text"></button>';
     const node = fixture.querySelector('#target');
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     expect(
-      axe.testUtils.getCheckEvaluate('duplicate-img-label')(
+      getCheckEvaluate('duplicate-img-label')(
         node,
         undefined,
         axe.utils.getNodeFromTree(node)
@@ -41,9 +45,9 @@ describe('duplicate-img-label', function () {
     fixture.innerHTML =
       '<button><img id="target" alt="Alt text">Plain text</button>';
     const node = fixture.querySelector('#target');
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     expect(
-      axe.testUtils.getCheckEvaluate('duplicate-img-label')(
+      getCheckEvaluate('duplicate-img-label')(
         node,
         undefined,
         axe.utils.getNodeFromTree(node)
@@ -55,9 +59,9 @@ describe('duplicate-img-label', function () {
     fixture.innerHTML =
       '<button><img id="target" alt="Plain text">Plain text</button>';
     const node = fixture.querySelector('#target');
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     expect(
-      axe.testUtils.getCheckEvaluate('duplicate-img-label')(
+      getCheckEvaluate('duplicate-img-label')(
         node,
         undefined,
         axe.utils.getNodeFromTree(node)
@@ -69,9 +73,9 @@ describe('duplicate-img-label', function () {
     fixture.innerHTML =
       '<button><img id="target" aria-label="Plain text">Plain text</button>';
     const node = fixture.querySelector('#target');
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     expect(
-      axe.testUtils.getCheckEvaluate('duplicate-img-label')(
+      getCheckEvaluate('duplicate-img-label')(
         node,
         undefined,
         axe.utils.getNodeFromTree(node)
@@ -82,9 +86,9 @@ describe('duplicate-img-label', function () {
   it('should return false if img and text are both blank', function () {
     fixture.innerHTML = '<button><img id="target" alt=""></button>';
     const node = fixture.querySelector('#target');
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     expect(
-      axe.testUtils.getCheckEvaluate('duplicate-img-label')(
+      getCheckEvaluate('duplicate-img-label')(
         node,
         undefined,
         axe.utils.getNodeFromTree(node)
@@ -96,9 +100,9 @@ describe('duplicate-img-label', function () {
     fixture.innerHTML =
       '<button><img id="target" alt="Plain text and more">Plain text</button>';
     const node = fixture.querySelector('#target');
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     expect(
-      axe.testUtils.getCheckEvaluate('duplicate-img-label')(
+      getCheckEvaluate('duplicate-img-label')(
         node,
         undefined,
         axe.utils.getNodeFromTree(node)
@@ -110,9 +114,9 @@ describe('duplicate-img-label', function () {
     fixture.innerHTML =
       '<main><img id="target" alt="Plain text and more"><p>Plain text</p></main>';
     const node = fixture.querySelector('#target');
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     expect(
-      axe.testUtils.getCheckEvaluate('duplicate-img-label')(
+      getCheckEvaluate('duplicate-img-label')(
         node,
         undefined,
         axe.utils.getNodeFromTree(node)
@@ -124,9 +128,9 @@ describe('duplicate-img-label', function () {
     fixture.innerHTML =
       '<div aria-label="Plain text"><img id="target" alt="Plain text"></div>';
     const node = fixture.querySelector('#target');
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     expect(
-      axe.testUtils.getCheckEvaluate('duplicate-img-label')(
+      getCheckEvaluate('duplicate-img-label')(
         node,
         { parentSelector: 'div' },
         axe.utils.getNodeFromTree(node)
@@ -143,10 +147,10 @@ describe('duplicate-img-label', function () {
       const shadow = button.attachShadow({ mode: 'open' });
       shadow.innerHTML = '<slot></slot><img id="target" alt="My button">';
       fixture.appendChild(button);
-      axe.testUtils.flatTreeSetup(fixture);
+      flatTreeSetup(fixture);
       const node = shadow.querySelector('#target');
       expect(
-        axe.testUtils.getCheckEvaluate('duplicate-img-label')(
+        getCheckEvaluate('duplicate-img-label')(
           node,
           undefined,
           axe.utils.getNodeFromTree(node)
@@ -165,10 +169,10 @@ describe('duplicate-img-label', function () {
       shadow.innerHTML = '<span>My button</span> <slot></slot>';
 
       fixture.appendChild(button);
-      axe.testUtils.flatTreeSetup(fixture);
+      flatTreeSetup(fixture);
       const node = button.querySelector('#target');
       expect(
-        axe.testUtils.getCheckEvaluate('duplicate-img-label')(
+        getCheckEvaluate('duplicate-img-label')(
           node,
           undefined,
           axe.utils.getNodeFromTree(node)
@@ -188,9 +192,7 @@ describe('duplicate-img-label', function () {
       const checkArgs = checkSetup(button);
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('duplicate-img-label')
-          .apply(null, checkArgs)
+        getCheckEvaluate('duplicate-img-label').apply(null, checkArgs)
       ).toBe(false);
     }
   );

@@ -1,14 +1,19 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import {
+  fixtureSetup,
+  getCheckEvaluate,
+  MockCheckContext
+} from '../../../testutils';
 
 declare const axe: any;
 describe('landmark-is-unique', function () {
-  const checkContext = new axe.testUtils.MockCheckContext();
-  const fixture;
-  const axeFixtureSetup;
+  const checkContext = new MockCheckContext();
+  let fixture;
+  let axeFixtureSetup;
 
   beforeEach(function () {
     fixture = document.getElementById('fixture');
-    axeFixtureSetup = axe.testUtils.fixtureSetup;
+    axeFixtureSetup = fixtureSetup;
   });
 
   afterEach(function () {
@@ -26,9 +31,12 @@ describe('landmark-is-unique', function () {
     axe._tree = axe.utils.getFlattenedTree(fixture);
     const virtualNode = axe.utils.getNodeFromTree(axe._tree[0], node);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('landmark-is-unique')
-        .call(checkContext, node, {}, virtualNode)
+      getCheckEvaluate('landmark-is-unique').call(
+        checkContext,
+        node,
+        {},
+        virtualNode
+      )
     ).toBe(true);
     expect(checkContext._data).toEqual(expectedData);
     expect(checkContext._relatedNodes).toEqual([node]);
@@ -44,9 +52,12 @@ describe('landmark-is-unique', function () {
     axe._tree = axe.utils.getFlattenedTree(fixture);
     const virtualNode = axe.utils.getNodeFromTree(axe._tree[0], node);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('landmark-is-unique')
-        .call(checkContext, node, {}, virtualNode)
+      getCheckEvaluate('landmark-is-unique').call(
+        checkContext,
+        node,
+        {},
+        virtualNode
+      )
     ).toBe(true);
     expect(checkContext._data).toEqual(expectedData);
     expect(checkContext._relatedNodes).toEqual([node]);

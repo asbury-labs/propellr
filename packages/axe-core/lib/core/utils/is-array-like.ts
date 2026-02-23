@@ -1,3 +1,5 @@
+import isNode from '../../commons/dom/is-node';
+
 /**
  * Checks if a value is array-like.
  *
@@ -10,6 +12,6 @@ export default function isArrayLike(arr: unknown): arr is ArrayLike<unknown> {
     typeof arr === 'object' &&
     typeof (arr as { length?: unknown }).length === 'number' &&
     // Avoid DOM weirdness
-    arr instanceof window.Node === false
+    !isNode(arr)
   );
 }

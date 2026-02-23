@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
+import { checks, getCheckEvaluate } from '../../../testutils';
 
-declare const axe: any;
 describe('frame-tested', function () {
-  const checkEvaluate = axe.testUtils.getCheckEvaluate('frame-tested');
+  const checkEvaluate = getCheckEvaluate('frame-tested');
   const frameTestedAfter = checks['frame-tested'].after;
 
   describe('evaluate', function () {

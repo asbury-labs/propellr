@@ -1,12 +1,15 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  fixtureSetup,
+  getCheckEvaluate,
+  MockCheckContext,
+  shadowSupport
+} from '../../../testutils';
 
-declare const axe: any;
 describe('listitem', function () {
-  const shadowSupport = axe.testUtils.shadowSupport;
-  const checkContext = axe.testUtils.MockCheckContext();
-  const checkSetup = axe.testUtils.checkSetup;
-  const fixtureSetup = axe.testUtils.fixtureSetup;
-  const checkEvaluate = axe.testUtils.getCheckEvaluate('listitem');
+  const checkContext = MockCheckContext();
+  const checkEvaluate = getCheckEvaluate('listitem');
 
   afterEach(function () {
     checkContext.reset();

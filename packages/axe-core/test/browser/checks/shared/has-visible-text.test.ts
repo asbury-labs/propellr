@@ -1,9 +1,13 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  getCheckEvaluate,
+  MockCheckContext
+} from '../../../testutils';
 
 declare const axe: any;
 describe('has-visible-text', function () {
-  const checkSetup = axe.testUtils.checkSetup;
-  const checkContext = axe.testUtils.MockCheckContext();
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     checkContext.reset();
@@ -12,9 +16,7 @@ describe('has-visible-text', function () {
   it('should return false if there is no visible text', function () {
     const params = checkSetup('<p id="target"></p>');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('has-visible-text')
-        .apply(checkContext, params)
+      getCheckEvaluate('has-visible-text').apply(checkContext, params)
     ).toBe(false);
   });
 
@@ -23,18 +25,14 @@ describe('has-visible-text', function () {
       '<p id="target"><span style="display:none">hello!</span></p>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('has-visible-text')
-        .apply(checkContext, params)
+      getCheckEvaluate('has-visible-text').apply(checkContext, params)
     ).toBe(false);
   });
 
   it('should return true if there is visible text', function () {
     const params = checkSetup('<p id="target">hello!</p>');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('has-visible-text')
-        .apply(checkContext, params)
+      getCheckEvaluate('has-visible-text').apply(checkContext, params)
     ).toBe(true);
   });
 
@@ -44,9 +42,7 @@ describe('has-visible-text', function () {
         nodeName: 'article'
       });
 
-      expect(
-        axe.testUtils.getCheckEvaluate('has-visible-text')(null, {}, node)
-      ).toBe(false);
+      expect(getCheckEvaluate('has-visible-text')(null, {}, node)).toBe(false);
     });
 
     it('should return incomplete if no other properties are set', function () {
@@ -55,7 +51,7 @@ describe('has-visible-text', function () {
       });
 
       expect(
-        axe.testUtils.getCheckEvaluate('has-visible-text')(null, {}, node)
+        getCheckEvaluate('has-visible-text')(null, {}, node)
       ).toBeUndefined();
     });
 
@@ -65,9 +61,7 @@ describe('has-visible-text', function () {
       });
       node.children = [];
 
-      expect(
-        axe.testUtils.getCheckEvaluate('has-visible-text')(null, {}, node)
-      ).toBe(false);
+      expect(getCheckEvaluate('has-visible-text')(null, {}, node)).toBe(false);
     });
 
     it('should return true if there is visible text', function () {
@@ -81,9 +75,7 @@ describe('has-visible-text', function () {
       });
       node.children = [child];
 
-      expect(
-        axe.testUtils.getCheckEvaluate('has-visible-text')(null, {}, node)
-      ).toBe(true);
+      expect(getCheckEvaluate('has-visible-text')(null, {}, node)).toBe(true);
     });
   });
 });

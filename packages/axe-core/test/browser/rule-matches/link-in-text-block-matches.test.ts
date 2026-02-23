@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
+import { fixtureSetup } from '../../testutils';
 
 declare const axe: any;
 describe('link-in-text-block-matches', () => {
-  const { fixtureSetup } = axe.testUtils;
   const rule = axe.utils.getRule('link-in-text-block');
 
   it('should return true if link is in text block', () => {

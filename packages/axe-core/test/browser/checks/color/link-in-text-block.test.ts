@@ -1,12 +1,16 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import {
+  flatTreeSetup,
+  getCheckEvaluate,
+  MockCheckContext,
+  shadowSupport
+} from '../../../testutils';
 
-declare const axe: any;
 describe('link-in-text-block', () => {
-  const fixture = document.getElementById('fixture');
-  const shadowSupport = axe.testUtils.shadowSupport;
+  const fixture = document.getElementById('fixture')!;
   let styleElm;
 
-  const checkContext = axe.testUtils.MockCheckContext();
+  const checkContext = MockCheckContext();
 
   beforeAll(() => {
     styleElm = document.createElement('style');
@@ -85,7 +89,7 @@ describe('link-in-text-block', () => {
       linkId +
       '">link</a>' +
       '</p>';
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     return document.getElementById(linkId);
   }
 
@@ -104,13 +108,11 @@ describe('link-in-text-block', () => {
         '	</a> inside block </p> inside block' +
         '</span> outside block </div>';
 
-      axe.testUtils.flatTreeSetup(fixture);
+      flatTreeSetup(fixture);
       const linkElm = document.getElementById('link');
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('link-in-text-block')
-          .call(checkContext, linkElm)
+        getCheckEvaluate('link-in-text-block').call(checkContext, linkElm)
       ).toBe(false);
       expect(checkContext._data.messageKey).toBe('fgContrast');
     });
@@ -129,12 +131,10 @@ describe('link-in-text-block', () => {
         const linkElm = shadow.querySelector('a');
         fixture.appendChild(parentElm);
 
-        axe.testUtils.flatTreeSetup(fixture);
+        flatTreeSetup(fixture);
 
         expect(
-          axe.testUtils
-            .getCheckEvaluate('link-in-text-block')
-            .call(checkContext, linkElm)
+          getCheckEvaluate('link-in-text-block').call(checkContext, linkElm)
         ).toBe(false);
         expect(checkContext._data.messageKey).toBe('fgContrast');
       }
@@ -151,13 +151,11 @@ describe('link-in-text-block', () => {
         shadow.innerHTML = '<p><slot></slot></p>';
         fixture.appendChild(div);
 
-        axe.testUtils.flatTreeSetup(fixture);
+        flatTreeSetup(fixture);
         const linkElm = div.querySelector('a');
 
         expect(
-          axe.testUtils
-            .getCheckEvaluate('link-in-text-block')
-            .call(checkContext, linkElm)
+          getCheckEvaluate('link-in-text-block').call(checkContext, linkElm)
         ).toBe(false);
         expect(checkContext._data.messageKey).toBe('fgContrast');
       }
@@ -184,9 +182,7 @@ describe('link-in-text-block', () => {
         }
       );
       expect(
-        axe.testUtils
-          .getCheckEvaluate('link-in-text-block')
-          .call(checkContext, linkElm)
+        getCheckEvaluate('link-in-text-block').call(checkContext, linkElm)
       ).toBeUndefined();
       expect(checkContext._data.messageKey).toBe('bgImage');
       expect(checkContext._relatedNodes[0]).toBe(linkElm.parentNode);
@@ -202,9 +198,7 @@ describe('link-in-text-block', () => {
         }
       );
       expect(
-        axe.testUtils
-          .getCheckEvaluate('link-in-text-block')
-          .call(checkContext, linkElm)
+        getCheckEvaluate('link-in-text-block').call(checkContext, linkElm)
       ).toBe(false);
       expect(checkContext._data.messageKey).toBe('fgContrast');
     });
@@ -221,9 +215,7 @@ describe('link-in-text-block', () => {
         }
       );
       expect(
-        axe.testUtils
-          .getCheckEvaluate('link-in-text-block')
-          .call(checkContext, linkElm)
+        getCheckEvaluate('link-in-text-block').call(checkContext, linkElm)
       ).toBe(false);
       expect(checkContext._data.messageKey).toBe('fgContrast');
     });
@@ -240,9 +232,7 @@ describe('link-in-text-block', () => {
         }
       );
       expect(
-        axe.testUtils
-          .getCheckEvaluate('link-in-text-block')
-          .call(checkContext, linkElm)
+        getCheckEvaluate('link-in-text-block').call(checkContext, linkElm)
       ).toBe(false);
       expect(checkContext._data.messageKey).toBe('bgContrast');
       expect(checkContext._relatedNodes[0]).toBe(linkElm.parentNode);
@@ -260,9 +250,7 @@ describe('link-in-text-block', () => {
         }
       );
       expect(
-        axe.testUtils
-          .getCheckEvaluate('link-in-text-block')
-          .call(checkContext, linkElm)
+        getCheckEvaluate('link-in-text-block').call(checkContext, linkElm)
       ).toBe(true);
       expect(checkContext._relatedNodes[0]).toBe(linkElm.parentNode);
     });
@@ -279,9 +267,7 @@ describe('link-in-text-block', () => {
         }
       );
       expect(
-        axe.testUtils
-          .getCheckEvaluate('link-in-text-block')
-          .call(checkContext, linkElm)
+        getCheckEvaluate('link-in-text-block').call(checkContext, linkElm)
       ).toBe(true);
       expect(checkContext._relatedNodes[0]).toBe(linkElm.parentNode);
     });
@@ -294,12 +280,10 @@ describe('link-in-text-block', () => {
         ' </a> inside block </p> inside block' +
         '</span> outside block </div>';
 
-      axe.testUtils.flatTreeSetup(fixture);
+      flatTreeSetup(fixture);
       const linkElm = document.getElementById('link');
 
-      axe.testUtils
-        .getCheckEvaluate('link-in-text-block')
-        .call(checkContext, linkElm);
+      getCheckEvaluate('link-in-text-block').call(checkContext, linkElm);
 
       expect(checkContext._data).toEqual({
         messageKey: 'fgContrast',
@@ -322,9 +306,7 @@ describe('link-in-text-block', () => {
         }
       );
       expect(
-        axe.testUtils
-          .getCheckEvaluate('link-in-text-block')
-          .call(checkContext, linkElm)
+        getCheckEvaluate('link-in-text-block').call(checkContext, linkElm)
       ).toBe(false);
 
       expect(checkContext._data).toEqual({
@@ -347,9 +329,9 @@ describe('link-in-text-block', () => {
           }
         );
         expect(
-          axe.testUtils
-            .getCheckEvaluate('link-in-text-block')
-            .call(checkContext, linkElm, { allowSameColor: true })
+          getCheckEvaluate('link-in-text-block').call(checkContext, linkElm, {
+            allowSameColor: true
+          })
         ).toBe(true);
         expect(checkContext._relatedNodes[0]).toBe(linkElm.parentNode);
       });
@@ -364,9 +346,9 @@ describe('link-in-text-block', () => {
           }
         );
         expect(
-          axe.testUtils
-            .getCheckEvaluate('link-in-text-block')
-            .call(checkContext, linkElm, { allowSameColor: false })
+          getCheckEvaluate('link-in-text-block').call(checkContext, linkElm, {
+            allowSameColor: false
+          })
         ).toBe(false);
         expect(checkContext._data.messageKey).toBe('fgContrast');
         expect(checkContext._relatedNodes[0]).toBe(linkElm.parentNode);

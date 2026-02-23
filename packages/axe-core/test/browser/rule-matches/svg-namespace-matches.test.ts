@@ -1,14 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { fixtureSetup } from '../../testutils';
 
 declare const axe: any;
 describe('svg-namespace-matches', function () {
   let rule;
   let fixture;
-  let axeFixtureSetup;
 
   beforeEach(function () {
     fixture = document.getElementById('fixture');
-    axeFixtureSetup = axe.testUtils.fixtureSetup;
     rule = axe.utils.getRule('svg-img-alt');
   });
 
@@ -17,30 +16,28 @@ describe('svg-namespace-matches', function () {
   });
 
   it('returns true when passed an SVG element', function () {
-    axeFixtureSetup('<svg><title>Pretty picture</title></svg>');
+    fixtureSetup('<svg><title>Pretty picture</title></svg>');
     const node = fixture.querySelector('svg');
     const virtualNode = axe.utils.getNodeFromTree(axe._tree[0], node);
     expect(rule.matches(node, virtualNode)).toBe(true);
   });
 
   it('returns true when passed an SVG circle element', function () {
-    axeFixtureSetup(
-      '<svg><circle><title>Pretty picture</title></circle></svg>'
-    );
+    fixtureSetup('<svg><circle><title>Pretty picture</title></circle></svg>');
     const node = fixture.querySelector('circle');
     const virtualNode = axe.utils.getNodeFromTree(axe._tree[0], node);
     expect(rule.matches(node, virtualNode)).toBe(true);
   });
 
   it('returns false when passed an HTML element', function () {
-    axeFixtureSetup('<h1>Hello world</h1>');
+    fixtureSetup('<h1>Hello world</h1>');
     const node = fixture.querySelector('h1');
     const virtualNode = axe.utils.getNodeFromTree(axe._tree[0], node);
     expect(rule.matches(node, virtualNode)).toBe(false);
   });
 
   it('returns false when passed a custom HTML element', function () {
-    axeFixtureSetup('<xx-heading>Hello world</xx-heading>');
+    fixtureSetup('<xx-heading>Hello world</xx-heading>');
     const node = fixture.querySelector('xx-heading');
     const virtualNode = axe.utils.getNodeFromTree(axe._tree[0], node);
     expect(rule.matches(node, virtualNode)).toBe(false);

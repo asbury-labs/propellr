@@ -1,12 +1,17 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  getCheckEvaluate,
+  MockCheckContext,
+  queryFixture,
+  shadowCheckSetup,
+  shadowSupport
+} from '../../../testutils';
 
 declare const axe: any;
 describe('internal-link-present', function () {
-  const fixture = document.getElementById('fixture');
-  const shadowSupported = axe.testUtils.shadowSupport.v1;
-  const checkContext = axe.testUtils.MockCheckContext();
-  const shadowCheckSetup = axe.testUtils.shadowCheckSetup;
-  const queryFixture = axe.testUtils.queryFixture;
+  const fixture = document.getElementById('fixture')!;
+  const shadowSupported = shadowSupport.v1;
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     fixture.innerHTML = '';
@@ -17,18 +22,24 @@ describe('internal-link-present', function () {
   it('should return true when an internal link is found', function () {
     const vNode = queryFixture('<div id="target"><a href="#haha">hi</a></div>');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('internal-link-present')
-        .call(checkContext, null, {}, vNode)
+      getCheckEvaluate('internal-link-present').call(
+        checkContext,
+        null,
+        {},
+        vNode
+      )
     ).toBe(true);
   });
 
   it('should return false when a hashbang URL was used', function () {
     const vNode = queryFixture('<div id="target"><a href="#!foo">hi</a></div>');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('internal-link-present')
-        .call(checkContext, null, {}, vNode)
+      getCheckEvaluate('internal-link-present').call(
+        checkContext,
+        null,
+        {},
+        vNode
+      )
     ).toBe(false);
   });
 
@@ -37,9 +48,12 @@ describe('internal-link-present', function () {
       '<div id="target"><a href="#/home">hi</a></div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('internal-link-present')
-        .call(checkContext, null, {}, vNode)
+      getCheckEvaluate('internal-link-present').call(
+        checkContext,
+        null,
+        {},
+        vNode
+      )
     ).toBe(false);
   });
 
@@ -48,9 +62,12 @@ describe('internal-link-present', function () {
       '<div id="target"><a href="#!/home">hi</a></div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('internal-link-present')
-        .call(checkContext, null, {}, vNode)
+      getCheckEvaluate('internal-link-present').call(
+        checkContext,
+        null,
+        {},
+        vNode
+      )
     ).toBe(false);
   });
 
@@ -59,9 +76,12 @@ describe('internal-link-present', function () {
       '<div id="target"><a href="http://www.deque.com/#haha">hi</a></div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('internal-link-present')
-        .call(checkContext, null, {}, vNode)
+      getCheckEvaluate('internal-link-present').call(
+        checkContext,
+        null,
+        {},
+        vNode
+      )
     ).toBe(false);
   });
 
@@ -74,9 +94,12 @@ describe('internal-link-present', function () {
       );
       const vNode = params[2];
       expect(
-        axe.testUtils
-          .getCheckEvaluate('internal-link-present')
-          .call(checkContext, null, {}, vNode)
+        getCheckEvaluate('internal-link-present').call(
+          checkContext,
+          null,
+          {},
+          vNode
+        )
       ).toBe(true);
     }
   );

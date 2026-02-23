@@ -1,12 +1,15 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  getCheckEvaluate,
+  MockCheckContext,
+  shadowCheckSetup,
+  shadowSupport
+} from '../../../testutils';
 
 declare const axe: any;
 describe('same-caption-summary', function () {
-  const checkSetup = axe.testUtils.checkSetup;
-  const shadowCheckSetup = axe.testUtils.shadowCheckSetup;
-  const shadowSupport = axe.testUtils.shadowSupport;
-
-  const checkContext = axe.testUtils.MockCheckContext();
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     checkContext.reset();
@@ -19,9 +22,7 @@ describe('same-caption-summary', function () {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('same-caption-summary')
-        .apply(checkContext, params)
+      getCheckEvaluate('same-caption-summary').apply(checkContext, params)
     ).toBe(false);
   });
 
@@ -31,9 +32,7 @@ describe('same-caption-summary', function () {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('same-caption-summary')
-        .apply(checkContext, params)
+      getCheckEvaluate('same-caption-summary').apply(checkContext, params)
     ).toBe(false);
   });
 
@@ -43,9 +42,7 @@ describe('same-caption-summary', function () {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('same-caption-summary')
-        .apply(checkContext, params)
+      getCheckEvaluate('same-caption-summary').apply(checkContext, params)
     ).toBe(false);
   });
 
@@ -55,9 +52,7 @@ describe('same-caption-summary', function () {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('same-caption-summary')
-        .apply(checkContext, params)
+      getCheckEvaluate('same-caption-summary').apply(checkContext, params)
     ).toBe(true);
   });
 
@@ -75,9 +70,7 @@ describe('same-caption-summary', function () {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('same-caption-summary')
-        .apply(checkContext, params)
+      getCheckEvaluate('same-caption-summary').apply(checkContext, params)
     ).toBe(true);
   });
 
@@ -97,9 +90,7 @@ describe('same-caption-summary', function () {
       );
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('same-caption-summary')
-          .apply(checkContext, params)
+        getCheckEvaluate('same-caption-summary').apply(checkContext, params)
       ).toBe(true);
     }
   );

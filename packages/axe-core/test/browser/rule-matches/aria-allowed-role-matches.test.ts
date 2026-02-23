@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { queryFixture } from '../../testutils';
 
 declare const axe: any;
 describe('aria-allowed-role-matches', function () {
-  const queryFixture = axe.testUtils.queryFixture;
   let rule;
 
   beforeEach(function () {

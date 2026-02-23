@@ -1,11 +1,17 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  flatTreeSetup,
+  getCheckEvaluate,
+  MockCheckContext,
+  shadowSupport
+} from '../../../testutils';
 
 declare const axe: any;
 describe('aria-required-parent', function () {
-  const fixture = document.getElementById('fixture');
-  const shadowSupported = axe.testUtils.shadowSupport.v1;
-  const checkContext = axe.testUtils.MockCheckContext();
-  const checkSetup = axe.testUtils.checkSetup;
+  const fixture = document.getElementById('fixture')!;
+  const shadowSupported = shadowSupport.v1;
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     fixture.innerHTML = '';
@@ -18,9 +24,7 @@ describe('aria-required-parent', function () {
       '<div><p role="listitem" id="target">Nothing here.</p></div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-required-parent')
-        .apply(checkContext, params)
+      getCheckEvaluate('aria-required-parent').apply(checkContext, params)
     ).toBe(false);
     expect(checkContext._data).toEqual(['list']);
   });
@@ -35,15 +39,13 @@ describe('aria-required-parent', function () {
         .attachShadow({ mode: 'open' });
       shadowRoot.innerHTML = '<p role="listitem" id="target">Nothing here.</p>';
 
-      axe.testUtils.flatTreeSetup(fixture);
+      flatTreeSetup(fixture);
       const shadowContent = shadowRoot.querySelector('#target');
       const virtualTarget = axe.utils.getNodeFromTree(shadowContent);
 
       const params = [shadowContent, undefined, virtualTarget];
       expect(
-        axe.testUtils
-          .getCheckEvaluate('aria-required-parent')
-          .apply(checkContext, params)
+        getCheckEvaluate('aria-required-parent').apply(checkContext, params)
       ).toBe(false);
       expect(checkContext._data).toEqual(['list']);
     }
@@ -55,9 +57,7 @@ describe('aria-required-parent', function () {
       '<div id="parent"><p role="listitem" id="target">Nothing here.</p></div>';
     const params = checkSetup(snippet);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-required-parent')
-        .apply(checkContext, params)
+      getCheckEvaluate('aria-required-parent').apply(checkContext, params)
     ).toBe(true);
   });
 
@@ -67,9 +67,7 @@ describe('aria-required-parent', function () {
         '<div><p role="listitem" id="target">Nothing here.</p></div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-required-parent')
-        .apply(checkContext, params)
+      getCheckEvaluate('aria-required-parent').apply(checkContext, params)
     ).toBe(false);
     expect(checkContext._data).toEqual(['list']);
   });
@@ -79,9 +77,7 @@ describe('aria-required-parent', function () {
       '<div role="list" aria-owns="target"></div><div><p role="listitem" id="target">Nothing here.</p></div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-required-parent')
-        .apply(checkContext, params)
+      getCheckEvaluate('aria-required-parent').apply(checkContext, params)
     ).toBe(true);
   });
 
@@ -90,9 +86,7 @@ describe('aria-required-parent', function () {
       '<div role="grid"><p role="row" id="target">Nothing here.</p></div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-required-parent')
-        .apply(checkContext, params)
+      getCheckEvaluate('aria-required-parent').apply(checkContext, params)
     ).toBe(true);
   });
 
@@ -101,9 +95,7 @@ describe('aria-required-parent', function () {
       '<div role="list"><p role="listitem" id="target">Nothing here.</p></div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-required-parent')
-        .apply(checkContext, params)
+      getCheckEvaluate('aria-required-parent').apply(checkContext, params)
     ).toBe(true);
   });
 
@@ -112,9 +104,7 @@ describe('aria-required-parent', function () {
       '<div role="list"><div role="tabpanel"><p role="listitem" id="target">Nothing here.</p></div></div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-required-parent')
-        .apply(checkContext, params)
+      getCheckEvaluate('aria-required-parent').apply(checkContext, params)
     ).toBe(false);
   });
 
@@ -123,9 +113,7 @@ describe('aria-required-parent', function () {
       '<div role="list"><div role="presentation"><p role="listitem" id="target">Nothing here.</p></div></div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-required-parent')
-        .apply(checkContext, params)
+      getCheckEvaluate('aria-required-parent').apply(checkContext, params)
     ).toBe(true);
   });
 
@@ -134,9 +122,7 @@ describe('aria-required-parent', function () {
       '<ul role="menu"><li role="group"><button role="menuitem" id="target">Nothing here.</button></li></ul>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-required-parent')
-        .apply(checkContext, params)
+      getCheckEvaluate('aria-required-parent').apply(checkContext, params)
     ).toBe(true);
   });
 
@@ -145,9 +131,7 @@ describe('aria-required-parent', function () {
       '<ul role="none"><li role="group"><button role="menuitem" id="target">Nothing here.</button></li></ul>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-required-parent')
-        .apply(checkContext, params)
+      getCheckEvaluate('aria-required-parent').apply(checkContext, params)
     ).toBe(false);
     expect(checkContext._data).toEqual(['menu', 'menubar']);
   });
@@ -157,9 +141,7 @@ describe('aria-required-parent', function () {
       '<div role="menu"><div role="group"><p role="listitem" id="target">Nothing here.</p></div></div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-required-parent')
-        .apply(checkContext, params)
+      getCheckEvaluate('aria-required-parent').apply(checkContext, params)
     ).toBe(false);
   });
 
@@ -177,9 +159,7 @@ describe('aria-required-parent', function () {
       );
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('aria-required-parent')
-          .apply(checkContext, params)
+        getCheckEvaluate('aria-required-parent').apply(checkContext, params)
       ).toBe(true);
     });
 
@@ -196,9 +176,7 @@ describe('aria-required-parent', function () {
       );
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('aria-required-parent')
-          .apply(checkContext, params)
+        getCheckEvaluate('aria-required-parent').apply(checkContext, params)
       ).toBe(false);
     });
 
@@ -215,9 +193,7 @@ describe('aria-required-parent', function () {
       );
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('aria-required-parent')
-          .apply(checkContext, params)
+        getCheckEvaluate('aria-required-parent').apply(checkContext, params)
       ).toBe(false);
     });
   });
@@ -227,9 +203,7 @@ describe('aria-required-parent', function () {
       '<div role="list"><div role="none"><p role="listitem" id="target">Nothing here.</p></div></div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-required-parent')
-        .apply(checkContext, params)
+      getCheckEvaluate('aria-required-parent').apply(checkContext, params)
     ).toBe(true);
   });
 
@@ -238,9 +212,7 @@ describe('aria-required-parent', function () {
       '<div role="list" aria-owns="target"><div role="navigation"><p role="listitem" id="target">Nothing here.</p></div></div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-required-parent')
-        .apply(checkContext, params)
+      getCheckEvaluate('aria-required-parent').apply(checkContext, params)
     ).toBe(true);
   });
 
@@ -249,9 +221,7 @@ describe('aria-required-parent', function () {
       '<div role="tree"><div role="none"><div role="group"><div role="none"><div role="group"><div role="treeitem" id="target">Nothing here.</div></div></div></div></div></div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-required-parent')
-        .apply(checkContext, params)
+      getCheckEvaluate('aria-required-parent').apply(checkContext, params)
     ).toBe(true);
   });
 
@@ -265,15 +235,13 @@ describe('aria-required-parent', function () {
         .attachShadow({ mode: 'open' });
       shadowRoot.innerHTML = '<p role="listitem" id="target">Nothing here.</p>';
 
-      axe.testUtils.flatTreeSetup(fixture);
+      flatTreeSetup(fixture);
       const shadowContent = shadowRoot.querySelector('#target');
       const virtualTarget = axe.utils.getNodeFromTree(shadowContent);
 
       const params = [shadowContent, undefined, virtualTarget];
       expect(
-        axe.testUtils
-          .getCheckEvaluate('aria-required-parent')
-          .apply(checkContext, params)
+        getCheckEvaluate('aria-required-parent').apply(checkContext, params)
       ).toBe(true);
     }
   );
@@ -289,15 +257,13 @@ describe('aria-required-parent', function () {
         .attachShadow({ mode: 'open' });
       shadowRoot.innerHTML = '<p role="listitem" id="target">Nothing here.</p>';
 
-      axe.testUtils.flatTreeSetup(fixture);
+      flatTreeSetup(fixture);
       const shadowContent = shadowRoot.querySelector('#target');
       const virtualTarget = axe.utils.getNodeFromTree(shadowContent);
 
       const params = [shadowContent, undefined, virtualTarget];
       expect(
-        axe.testUtils
-          .getCheckEvaluate('aria-required-parent')
-          .apply(checkContext, params)
+        getCheckEvaluate('aria-required-parent').apply(checkContext, params)
       ).toBe(false);
     }
   );

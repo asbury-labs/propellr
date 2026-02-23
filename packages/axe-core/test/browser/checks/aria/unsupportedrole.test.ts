@@ -1,10 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { checkSetup, checks, MockCheckContext } from '../../../testutils';
 
 declare const axe: any;
-declare const checks: any;
 describe('unsupportedrole', function () {
-  const checkContext = axe.testUtils.MockCheckContext();
-  const checkSetup = axe.testUtils.checkSetup;
+  const checkContext = MockCheckContext();
   const check = checks.unsupportedrole;
   afterEach(function () {
     checkContext.reset();
@@ -31,11 +30,11 @@ describe('unsupportedrole', function () {
   });
 
   it('should return false if applied to a supported role', function () {
-    const params = checkSetup('<div id="target" role="alert">Contents</div>');
+    let params = checkSetup('<div id="target" role="alert">Contents</div>');
     expect(check.evaluate.apply(checkContext, params)).toBe(false);
     expect(checkContext._data).toBeNull();
 
-    const params = checkSetup('<button id="target">Contents</button>');
+    params = checkSetup('<button id="target">Contents</button>');
     expect(check.evaluate.apply(checkContext, params)).toBe(false);
     expect(checkContext._data).toBeNull();
   });

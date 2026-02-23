@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { flatTreeSetup } from '../../testutils';
 
 declare const axe: any;
 describe('inserted-into-focus-order-matches', function () {
   const fixture = document.getElementById('fixture');
-  const flatTreeSetup = axe.testUtils.flatTreeSetup;
   let rule;
 
   beforeEach(function () {

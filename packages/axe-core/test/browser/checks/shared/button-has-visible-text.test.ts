@@ -1,10 +1,14 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  getCheckEvaluate,
+  MockCheckContext
+} from '../../../testutils';
 
 declare const axe: any;
 describe('button-has-visible-text', function () {
-  const fixture = document.getElementById('fixture');
-  const checkSetup = axe.testUtils.checkSetup;
-  const checkContext = axe.testUtils.MockCheckContext();
+  const fixture = document.getElementById('fixture')!;
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     fixture.innerHTML = '';
@@ -15,9 +19,7 @@ describe('button-has-visible-text', function () {
     const checkArgs = checkSetup('<button></button>', 'button');
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('button-has-visible-text')
-        .apply(checkContext, checkArgs)
+      getCheckEvaluate('button-has-visible-text').apply(checkContext, checkArgs)
     ).toBe(false);
   });
 
@@ -25,9 +27,7 @@ describe('button-has-visible-text', function () {
     const checkArgs = checkSetup('<button>Name</button>', 'button');
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('button-has-visible-text')
-        .apply(checkContext, checkArgs)
+      getCheckEvaluate('button-has-visible-text').apply(checkContext, checkArgs)
     ).toBe(true);
   });
 
@@ -38,9 +38,7 @@ describe('button-has-visible-text', function () {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('button-has-visible-text')
-        .apply(checkContext, checkArgs)
+      getCheckEvaluate('button-has-visible-text').apply(checkContext, checkArgs)
     ).toBe(true);
   });
 
@@ -48,9 +46,7 @@ describe('button-has-visible-text', function () {
     const checkArgs = checkSetup('<div role="button"></div>', '[role=button]');
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('button-has-visible-text')
-        .apply(checkContext, checkArgs)
+      getCheckEvaluate('button-has-visible-text').apply(checkContext, checkArgs)
     ).toBe(false);
   });
 
@@ -61,11 +57,7 @@ describe('button-has-visible-text', function () {
       });
 
       expect(
-        axe.testUtils.getCheckEvaluate('button-has-visible-text')(
-          null,
-          {},
-          node
-        )
+        getCheckEvaluate('button-has-visible-text')(null, {}, node)
       ).toBeUndefined();
     });
 
@@ -75,13 +67,9 @@ describe('button-has-visible-text', function () {
       });
       node.children = [];
 
-      expect(
-        axe.testUtils.getCheckEvaluate('button-has-visible-text')(
-          null,
-          {},
-          node
-        )
-      ).toBe(false);
+      expect(getCheckEvaluate('button-has-visible-text')(null, {}, node)).toBe(
+        false
+      );
     });
 
     it('should return true if a button element has text', function () {
@@ -95,13 +83,9 @@ describe('button-has-visible-text', function () {
       });
       node.children = [child];
 
-      expect(
-        axe.testUtils.getCheckEvaluate('button-has-visible-text')(
-          null,
-          {},
-          node
-        )
-      ).toBe(true);
+      expect(getCheckEvaluate('button-has-visible-text')(null, {}, node)).toBe(
+        true
+      );
     });
   });
 });

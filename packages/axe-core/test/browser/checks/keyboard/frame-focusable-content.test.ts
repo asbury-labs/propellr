@@ -1,12 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { getCheckEvaluate, queryFixture } from '../../../testutils';
 
-declare const axe: any;
 describe('frame-focusable-content tests', function () {
-  const fixture = document.querySelector('#fixture');
-  const queryFixture = axe.testUtils.queryFixture;
-  const frameFocusableContent = axe.testUtils.getCheckEvaluate(
-    'frame-focusable-content'
-  );
+  const fixture = document.querySelector('#fixture')!;
+  const frameFocusableContent = getCheckEvaluate('frame-focusable-content');
 
   afterEach(function () {
     fixture.innerHTML = '';

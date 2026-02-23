@@ -1,19 +1,20 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  getCheckEvaluate,
+  MockCheckContext
+} from '../../../testutils';
 
-declare const axe: any;
 describe('inline-style-property tests', () => {
-  const fixture = document.getElementById('fixture');
-  const checkSetup = axe.testUtils.checkSetup;
+  const fixture = document.getElementById('fixture')!;
 
   afterEach(() => {
     fixture.innerHTML = '';
   });
 
   describe('important-letter-spacing check', () => {
-    const checkEvaluate = axe.testUtils.getCheckEvaluate(
-      'important-letter-spacing'
-    );
-    const checkContext = axe.testUtils.MockCheckContext();
+    const checkEvaluate = getCheckEvaluate('important-letter-spacing');
+    const checkContext = MockCheckContext();
     afterEach(() => {
       checkContext.reset();
     });
@@ -183,10 +184,8 @@ describe('inline-style-property tests', () => {
   });
 
   describe('important-word-spacing check', () => {
-    const checkEvaluate = axe.testUtils.getCheckEvaluate(
-      'important-word-spacing'
-    );
-    const checkContext = axe.testUtils.MockCheckContext();
+    const checkEvaluate = getCheckEvaluate('important-word-spacing');
+    const checkContext = MockCheckContext();
     afterEach(() => {
       checkContext.reset();
     });
@@ -235,10 +234,8 @@ describe('inline-style-property tests', () => {
   });
 
   describe('important-line-height check', () => {
-    const checkEvaluate = axe.testUtils.getCheckEvaluate(
-      'important-line-height'
-    );
-    const checkContext = axe.testUtils.MockCheckContext();
+    const checkEvaluate = getCheckEvaluate('important-line-height');
+    const checkContext = MockCheckContext();
     afterEach(() => {
       checkContext.reset();
     });
@@ -318,10 +315,8 @@ describe('inline-style-property tests', () => {
   });
 
   describe('With options configured for font-size', () => {
-    const checkEvaluate = axe.testUtils.getCheckEvaluate(
-      'important-letter-spacing'
-    );
-    const checkContext = axe.testUtils.MockCheckContext();
+    const checkEvaluate = getCheckEvaluate('important-letter-spacing');
+    const checkContext = MockCheckContext();
     const options = {
       cssProperty: 'font-size',
       minValue: 16,

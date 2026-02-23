@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { checks } from '../../../testutils';
 
-declare const checks: any;
 describe('exists', function () {
   it('should return undefined', function () {
     expect(checks.exists.evaluate()).toBeUndefined();

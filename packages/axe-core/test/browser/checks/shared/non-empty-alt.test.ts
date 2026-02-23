@@ -1,11 +1,14 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  getCheckEvaluate,
+  MockCheckContext
+} from '../../../testutils';
 
-declare const axe: any;
 describe('non-empty-alt', function () {
-  const fixture = document.getElementById('fixture');
-  const checkSetup = axe.testUtils.checkSetup;
-  const checkEvaluate = axe.testUtils.getCheckEvaluate('non-empty-alt');
-  const checkContext = axe.testUtils.MockCheckContext();
+  const fixture = document.getElementById('fixture')!;
+  const checkEvaluate = getCheckEvaluate('non-empty-alt');
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     fixture.innerHTML = '';

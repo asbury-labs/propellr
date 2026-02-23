@@ -1,10 +1,16 @@
+// @vitest-environment node
 import { describe, it, expect } from 'vitest';
 import fs from 'fs';
 import path from 'path';
+import { createRequire } from 'node:module';
 import { globSync } from 'glob';
-import axe from '../../dist/axe.js';
 
-const localeFiles = globSync(path.join(__dirname, '../../locales/*.json'));
+const require = createRequire(import.meta.url);
+const axe = require('../../dist/axe.js');
+
+const localeFiles = globSync(
+  path.join(import.meta.dirname, '../../locales/*.json')
+);
 
 describe('locales', function () {
   localeFiles.forEach(function (localeFile) {

@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { queryFixture, queryShadowFixture } from '../../testutils';
 
 declare const axe: any;
 describe('widget-not-inline-matches', () => {
   let rule;
-  const { queryFixture, queryShadowFixture } = axe.testUtils;
 
   beforeEach(() => {
     rule = axe.utils.getRule('target-size');

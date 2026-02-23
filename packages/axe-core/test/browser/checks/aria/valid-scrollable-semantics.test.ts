@@ -1,10 +1,13 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  flatTreeSetup,
+  getCheckEvaluate,
+  MockCheckContext
+} from '../../../testutils';
 
-declare const axe: any;
 describe('valid-scrollable-semantics', function () {
-  const fixture = document.getElementById('fixture');
-  const flatTreeSetup = axe.testUtils.flatTreeSetup;
-  const checkContext = axe.testUtils.MockCheckContext();
+  const fixture = document.getElementById('fixture')!;
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     fixture.innerHTML = '';
@@ -17,9 +20,7 @@ describe('valid-scrollable-semantics', function () {
     fixture.appendChild(node);
     flatTreeSetup(fixture);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('valid-scrollable-semantics')
-        .call(checkContext, node)
+      getCheckEvaluate('valid-scrollable-semantics').call(checkContext, node)
     ).toBe(false);
   });
 
@@ -29,9 +30,7 @@ describe('valid-scrollable-semantics', function () {
     fixture.appendChild(node);
     flatTreeSetup(fixture);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('valid-scrollable-semantics')
-        .call(checkContext, node)
+      getCheckEvaluate('valid-scrollable-semantics').call(checkContext, node)
     ).toBe(false);
   });
 
@@ -41,9 +40,7 @@ describe('valid-scrollable-semantics', function () {
     fixture.appendChild(node);
     flatTreeSetup(fixture);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('valid-scrollable-semantics')
-        .call(checkContext, node)
+      getCheckEvaluate('valid-scrollable-semantics').call(checkContext, node)
     ).toBe(true);
   });
 
@@ -53,9 +50,7 @@ describe('valid-scrollable-semantics', function () {
     fixture.appendChild(node);
     flatTreeSetup(fixture);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('valid-scrollable-semantics')
-        .call(checkContext, node)
+      getCheckEvaluate('valid-scrollable-semantics').call(checkContext, node)
     ).toBe(true);
   });
 
@@ -65,9 +60,7 @@ describe('valid-scrollable-semantics', function () {
     fixture.appendChild(node);
     flatTreeSetup(fixture);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('valid-scrollable-semantics')
-        .call(checkContext, node)
+      getCheckEvaluate('valid-scrollable-semantics').call(checkContext, node)
     ).toBe(true);
   });
 
@@ -77,9 +70,7 @@ describe('valid-scrollable-semantics', function () {
     fixture.appendChild(node);
     flatTreeSetup(fixture);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('valid-scrollable-semantics')
-        .call(checkContext, node)
+      getCheckEvaluate('valid-scrollable-semantics').call(checkContext, node)
     ).toBe(true);
   });
 
@@ -89,9 +80,7 @@ describe('valid-scrollable-semantics', function () {
     fixture.appendChild(node);
     flatTreeSetup(fixture);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('valid-scrollable-semantics')
-        .call(checkContext, node)
+      getCheckEvaluate('valid-scrollable-semantics').call(checkContext, node)
     ).toBe(true);
   });
 
@@ -101,9 +90,7 @@ describe('valid-scrollable-semantics', function () {
     fixture.appendChild(node);
     flatTreeSetup(fixture);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('valid-scrollable-semantics')
-        .call(checkContext, node)
+      getCheckEvaluate('valid-scrollable-semantics').call(checkContext, node)
     ).toBe(true);
   });
 
@@ -113,9 +100,7 @@ describe('valid-scrollable-semantics', function () {
     fixture.appendChild(node);
     flatTreeSetup(fixture);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('valid-scrollable-semantics')
-        .call(checkContext, node)
+      getCheckEvaluate('valid-scrollable-semantics').call(checkContext, node)
     ).toBe(true);
   });
 
@@ -125,9 +110,7 @@ describe('valid-scrollable-semantics', function () {
     fixture.appendChild(node);
     flatTreeSetup(fixture);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('valid-scrollable-semantics')
-        .call(checkContext, node)
+      getCheckEvaluate('valid-scrollable-semantics').call(checkContext, node)
     ).toBe(true);
   });
 
@@ -137,9 +120,7 @@ describe('valid-scrollable-semantics', function () {
     fixture.appendChild(node);
     flatTreeSetup(fixture);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('valid-scrollable-semantics')
-        .call(checkContext, node)
+      getCheckEvaluate('valid-scrollable-semantics').call(checkContext, node)
     ).toBe(true);
   });
 
@@ -148,9 +129,7 @@ describe('valid-scrollable-semantics', function () {
     fixture.appendChild(node);
     flatTreeSetup(fixture);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('valid-scrollable-semantics')
-        .call(checkContext, node)
+      getCheckEvaluate('valid-scrollable-semantics').call(checkContext, node)
     ).toBe(true);
   });
 
@@ -159,9 +138,7 @@ describe('valid-scrollable-semantics', function () {
     fixture.appendChild(node);
     flatTreeSetup(fixture);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('valid-scrollable-semantics')
-        .call(checkContext, node)
+      getCheckEvaluate('valid-scrollable-semantics').call(checkContext, node)
     ).toBe(true);
   });
 
@@ -170,9 +147,7 @@ describe('valid-scrollable-semantics', function () {
     fixture.appendChild(node);
     flatTreeSetup(fixture);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('valid-scrollable-semantics')
-        .call(checkContext, node)
+      getCheckEvaluate('valid-scrollable-semantics').call(checkContext, node)
     ).toBe(true);
   });
 
@@ -181,9 +156,7 @@ describe('valid-scrollable-semantics', function () {
     fixture.appendChild(node);
     flatTreeSetup(fixture);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('valid-scrollable-semantics')
-        .call(checkContext, node)
+      getCheckEvaluate('valid-scrollable-semantics').call(checkContext, node)
     ).toBe(true);
   });
 
@@ -193,9 +166,7 @@ describe('valid-scrollable-semantics', function () {
     fixture.appendChild(node);
     flatTreeSetup(fixture);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('valid-scrollable-semantics')
-        .call(checkContext, node)
+      getCheckEvaluate('valid-scrollable-semantics').call(checkContext, node)
     ).toBe(true);
   });
 
@@ -205,9 +176,7 @@ describe('valid-scrollable-semantics', function () {
     fixture.appendChild(node);
     flatTreeSetup(fixture);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('valid-scrollable-semantics')
-        .call(checkContext, node)
+      getCheckEvaluate('valid-scrollable-semantics').call(checkContext, node)
     ).toBe(true);
   });
 
@@ -218,9 +187,11 @@ describe('valid-scrollable-semantics', function () {
       fixture.appendChild(node);
       flatTreeSetup(fixture);
       expect(
-        axe.testUtils
-          .getCheckEvaluate('valid-scrollable-semantics')
-          .call(checkContext, node, { roles: ['banner'] })
+        getCheckEvaluate('valid-scrollable-semantics').call(
+          checkContext,
+          node,
+          { roles: ['banner'] }
+        )
       ).toBe(true);
     });
   });

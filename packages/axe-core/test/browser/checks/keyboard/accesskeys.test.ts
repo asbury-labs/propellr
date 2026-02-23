@@ -1,11 +1,14 @@
 import { describe, it, expect, afterEach, afterAll } from 'vitest';
+import {
+  checkSetup,
+  checks,
+  getCheckEvaluate,
+  MockCheckContext
+} from '../../../testutils';
 
-declare const axe: any;
-declare const checks: any;
 describe('accesskeys', () => {
-  const checkSetup = axe.testUtils.checkSetup;
-  const checkContext = axe.testUtils.MockCheckContext();
-  const checkEvaluate = axe.testUtils.getCheckEvaluate('accesskeys');
+  const checkContext = MockCheckContext();
+  const checkEvaluate = getCheckEvaluate('accesskeys');
 
   afterEach(() => {
     checkContext.reset();

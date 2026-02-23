@@ -1,13 +1,20 @@
+// @vitest-environment node
 import { describe, it, expect } from 'vitest';
 import { JSDOM } from 'jsdom';
 import fs from 'fs';
 import path from 'path';
-import axe from '../../../dist/axe.js';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+const axe = require('../../../dist/axe.js');
 
 describe('node axe-core', function () {
   it('should run axe on a jsdom document', async function () {
     const domStr = fs.readFileSync(
-      path.join(__dirname, '../../integration/full/all-rules/all-rules.html'),
+      path.join(
+        import.meta.dirname,
+        '../../integration/full/all-rules/all-rules.html'
+      ),
       'utf8'
     );
     const dom = new JSDOM(domStr);

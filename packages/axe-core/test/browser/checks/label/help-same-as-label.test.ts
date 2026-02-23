@@ -1,8 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { flatTreeSetup, getCheckEvaluate } from '../../../testutils';
 
 declare const axe: any;
 describe('help-same-as-label', function () {
-  const fixture = document.getElementById('fixture');
+  const fixture = document.getElementById('fixture')!;
 
   afterEach(function () {
     fixture.innerHTML = '';
@@ -16,9 +17,9 @@ describe('help-same-as-label', function () {
     node.setAttribute('aria-label', 'Duplicate');
 
     fixture.appendChild(node);
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     expect(
-      axe.testUtils.getCheckEvaluate('help-same-as-label')(
+      getCheckEvaluate('help-same-as-label')(
         node,
         undefined,
         axe.utils.getNodeFromTree(node)
@@ -38,9 +39,9 @@ describe('help-same-as-label', function () {
     fixture.appendChild(node);
     fixture.appendChild(dby);
 
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     expect(
-      axe.testUtils.getCheckEvaluate('help-same-as-label')(
+      getCheckEvaluate('help-same-as-label')(
         node,
         undefined,
         axe.utils.getNodeFromTree(node)
@@ -55,9 +56,9 @@ describe('help-same-as-label', function () {
 
     fixture.appendChild(node);
 
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     expect(
-      axe.testUtils.getCheckEvaluate('help-same-as-label')(
+      getCheckEvaluate('help-same-as-label')(
         node,
         undefined,
         axe.utils.getNodeFromTree(node)
@@ -76,9 +77,9 @@ describe('help-same-as-label', function () {
     fixture.appendChild(node);
     fixture.appendChild(dby);
 
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     expect(
-      axe.testUtils.getCheckEvaluate('help-same-as-label')(
+      getCheckEvaluate('help-same-as-label')(
         node,
         undefined,
         axe.utils.getNodeFromTree(node)

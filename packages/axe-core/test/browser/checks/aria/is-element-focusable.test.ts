@@ -1,10 +1,13 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  getCheckEvaluate,
+  MockCheckContext
+} from '../../../testutils';
 
-declare const axe: any;
 describe('is-element-focusable', function () {
-  const checkSetup = axe.testUtils.checkSetup;
-  const checkContext = axe.testUtils.MockCheckContext();
-  const isFocusable = axe.testUtils.getCheckEvaluate('is-element-focusable');
+  const checkContext = MockCheckContext();
+  const isFocusable = getCheckEvaluate('is-element-focusable');
 
   afterEach(function () {
     checkContext.reset();

@@ -1,13 +1,18 @@
 import { describe, it, expect, afterEach, beforeAll } from 'vitest';
+import {
+  checkSetup,
+  checks,
+  fixtureSetup,
+  MockCheckContext,
+  shadowSupport
+} from '../../../testutils';
 
 declare const axe: any;
 describe('focusable-content tests', function () {
-  const check;
-  const fixture = document.getElementById('fixture');
-  const fixtureSetup = axe.testUtils.fixtureSetup;
-  const shadowSupported = axe.testUtils.shadowSupport.v1;
-  const checkContext = axe.testUtils.MockCheckContext();
-  const checkSetup = axe.testUtils.checkSetup;
+  let check;
+  const fixture = document.getElementById('fixture')!;
+  const shadowSupported = shadowSupport.v1;
+  const checkContext = MockCheckContext();
 
   beforeAll(function () {
     check = checks['focusable-content'];

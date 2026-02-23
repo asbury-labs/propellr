@@ -1,14 +1,20 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  fixtureSetup,
+  flatTreeSetup,
+  getCheckEvaluate,
+  MockCheckContext,
+  shadowCheckSetup,
+  shadowSupport
+} from '../../../testutils';
 
 declare const axe: any;
 describe('color-contrast', function () {
-  const fixture = document.getElementById('fixture');
-  const fixtureSetup = axe.testUtils.fixtureSetup;
-  const checkSetup = axe.testUtils.checkSetup;
-  const shadowSupported = axe.testUtils.shadowSupport.v1;
-  const shadowCheckSetup = axe.testUtils.shadowCheckSetup;
-  const checkContext = axe.testUtils.MockCheckContext();
-  const contrastEvaluate = axe.testUtils.getCheckEvaluate('color-contrast');
+  const fixture = document.getElementById('fixture')!;
+  const shadowSupported = shadowSupport.v1;
+  const checkContext = MockCheckContext();
+  const contrastEvaluate = getCheckEvaluate('color-contrast');
 
   afterEach(function () {
     fixture.innerHTML = '';
@@ -949,7 +955,7 @@ describe('color-contrast', function () {
     shadow.innerHTML =
       '<div id="shadowContainer" style="position: absolute; background: black;"><slot></slot></div>';
     const shadowContainer = shadow.querySelector('#shadowContainer');
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
 
     const target = fixture.querySelector('#target');
     const vNode = axe.utils.getNodeFromTree(target);

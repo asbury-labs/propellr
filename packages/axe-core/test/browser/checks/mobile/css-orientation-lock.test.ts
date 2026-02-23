@@ -1,8 +1,8 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { checks, MockCheckContext } from '../../../testutils';
 
-declare const axe: any;
 describe('css-orientation-lock tests', function () {
-  const checkContext = axe.testUtils.MockCheckContext();
+  const checkContext = MockCheckContext();
   const check = checks['css-orientation-lock'];
   const dynamicDoc = document.implementation.createHTMLDocument(
     'Dynamic document for CSS Orientation Lock tests'

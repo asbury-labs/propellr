@@ -1,11 +1,15 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  checks,
+  getCheckEvaluate,
+  MockCheckContext,
+  shadowCheckSetup,
+  shadowSupport
+} from '../../../testutils';
 
-declare const axe: any;
 describe('hidden-explicit-label', function () {
-  const shadowSupport = axe.testUtils.shadowSupport;
-  const shadowCheckSetup = axe.testUtils.shadowCheckSetup;
-  const checkContext = axe.testUtils.MockCheckContext();
-  const checkSetup = axe.testUtils.checkSetup;
+  const checkContext = MockCheckContext();
   const check = checks['hidden-explicit-label'];
 
   afterEach(function () {
@@ -97,9 +101,9 @@ describe('hidden-explicit-label', function () {
           type: 'text'
         }
       });
-      expect(
-        axe.testUtils.getCheckEvaluate('hidden-explicit-label')(null, {}, vNode)
-      ).toBe(false);
+      expect(getCheckEvaluate('hidden-explicit-label')(null, {}, vNode)).toBe(
+        false
+      );
     });
 
     it('should return undefined if it has id', function () {
@@ -111,7 +115,7 @@ describe('hidden-explicit-label', function () {
         }
       });
       expect(
-        axe.testUtils.getCheckEvaluate('hidden-explicit-label')(null, {}, vNode)
+        getCheckEvaluate('hidden-explicit-label')(null, {}, vNode)
       ).toBeUndefined();
     });
   });

@@ -1,9 +1,12 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  getCheckEvaluate,
+  MockCheckContext,
+  queryFixture
+} from '../../../testutils';
 
-declare const axe: any;
 describe('meta-viewport', function () {
-  const queryFixture = axe.testUtils.queryFixture;
-  const checkContext = axe.testUtils.MockCheckContext();
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     checkContext.reset();
@@ -16,9 +19,7 @@ describe('meta-viewport', function () {
       );
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('meta-viewport')
-          .call(checkContext, null, null, vNode)
+        getCheckEvaluate('meta-viewport').call(checkContext, null, null, vNode)
       ).toBe(false);
       expect(checkContext._data).toEqual('user-scalable=no');
     });
@@ -29,9 +30,7 @@ describe('meta-viewport', function () {
       );
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('meta-viewport')
-          .call(checkContext, null, null, vNode)
+        getCheckEvaluate('meta-viewport').call(checkContext, null, null, vNode)
       ).toBe(false);
     });
 
@@ -41,9 +40,7 @@ describe('meta-viewport', function () {
       );
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('meta-viewport')
-          .call(checkContext, null, null, vNode)
+        getCheckEvaluate('meta-viewport').call(checkContext, null, null, vNode)
       ).toBe(false);
     });
 
@@ -53,9 +50,7 @@ describe('meta-viewport', function () {
       );
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('meta-viewport')
-          .call(checkContext, null, null, vNode)
+        getCheckEvaluate('meta-viewport').call(checkContext, null, null, vNode)
       ).toBe(false);
     });
 
@@ -64,9 +59,7 @@ describe('meta-viewport', function () {
         '<meta id="target" name="viewport" content="foo=bar, cats=dogs, user-scalable=yes, more-stuff=ok">'
       );
 
-      expect(
-        axe.testUtils.getCheckEvaluate('meta-viewport')(null, null, vNode)
-      ).toBe(true);
+      expect(getCheckEvaluate('meta-viewport')(null, null, vNode)).toBe(true);
     });
 
     it('should return false on maximum-scale=yes (translates to 1)', function () {
@@ -74,9 +67,7 @@ describe('meta-viewport', function () {
         '<meta id="target" name="viewport" content="maximum-scale=yes">'
       );
       expect(
-        axe.testUtils
-          .getCheckEvaluate('meta-viewport')
-          .call(checkContext, null, null, vNode)
+        getCheckEvaluate('meta-viewport').call(checkContext, null, null, vNode)
       ).toBe(false);
     });
 
@@ -85,9 +76,7 @@ describe('meta-viewport', function () {
         '<meta id="target" name="viewport" content="maximum-scale=-1">'
       );
       expect(
-        axe.testUtils
-          .getCheckEvaluate('meta-viewport')
-          .call(checkContext, null, null, vNode)
+        getCheckEvaluate('meta-viewport').call(checkContext, null, null, vNode)
       ).toBe(true);
     });
 
@@ -97,7 +86,7 @@ describe('meta-viewport', function () {
       );
 
       expect(
-        axe.testUtils.getCheckEvaluate('meta-viewport').call(
+        getCheckEvaluate('meta-viewport').call(
           checkContext,
           null,
           {
@@ -112,9 +101,7 @@ describe('meta-viewport', function () {
       );
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('meta-viewport')
-          .call(checkContext, null, null, vNode)
+        getCheckEvaluate('meta-viewport').call(checkContext, null, null, vNode)
       ).toBe(true);
     });
 
@@ -124,7 +111,7 @@ describe('meta-viewport', function () {
       );
 
       expect(
-        axe.testUtils.getCheckEvaluate('meta-viewport').call(
+        getCheckEvaluate('meta-viewport').call(
           checkContext,
           null,
           {
@@ -142,9 +129,7 @@ describe('meta-viewport', function () {
       );
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('meta-viewport')
-          .call(checkContext, null, null, vNode)
+        getCheckEvaluate('meta-viewport').call(checkContext, null, null, vNode)
       ).toBe(true);
     });
 
@@ -153,9 +138,7 @@ describe('meta-viewport', function () {
         '<meta id="target" name="viewport" content="user-scalable=1, minimal-ui">'
       );
 
-      expect(
-        axe.testUtils.getCheckEvaluate('meta-viewport')(null, null, vNode)
-      ).toBe(true);
+      expect(getCheckEvaluate('meta-viewport')(null, null, vNode)).toBe(true);
     });
 
     it('should not crash if viewport property does not have a value', function () {
@@ -176,9 +159,7 @@ describe('meta-viewport', function () {
       );
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('meta-viewport')
-          .call(checkContext, null, null, vNode)
+        getCheckEvaluate('meta-viewport').call(checkContext, null, null, vNode)
       ).toBe(false);
       expect(checkContext._data).toEqual('user-scalable=no');
     });
@@ -189,9 +170,7 @@ describe('meta-viewport', function () {
       );
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('meta-viewport')
-          .call(checkContext, null, null, vNode)
+        getCheckEvaluate('meta-viewport').call(checkContext, null, null, vNode)
       ).toBe(false);
       expect(checkContext._data).toEqual('user-scalable=no');
     });
@@ -202,9 +181,7 @@ describe('meta-viewport', function () {
       );
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('meta-viewport')
-          .call(checkContext, null, null, vNode)
+        getCheckEvaluate('meta-viewport').call(checkContext, null, null, vNode)
       ).toBe(false);
     });
 
@@ -214,9 +191,7 @@ describe('meta-viewport', function () {
       );
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('meta-viewport')
-          .call(checkContext, null, null, vNode)
+        getCheckEvaluate('meta-viewport').call(checkContext, null, null, vNode)
       ).toBe(false);
     });
 
@@ -226,9 +201,7 @@ describe('meta-viewport', function () {
       );
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('meta-viewport')
-          .call(checkContext, null, null, vNode)
+        getCheckEvaluate('meta-viewport').call(checkContext, null, null, vNode)
       ).toBe(true);
     });
 
@@ -238,9 +211,7 @@ describe('meta-viewport', function () {
       );
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('meta-viewport')
-          .call(checkContext, null, null, vNode)
+        getCheckEvaluate('meta-viewport').call(checkContext, null, null, vNode)
       ).toBe(true);
 
       const vNode = queryFixture(
@@ -248,7 +219,7 @@ describe('meta-viewport', function () {
       );
 
       expect(
-        axe.testUtils.getCheckEvaluate('meta-viewport').call(
+        getCheckEvaluate('meta-viewport').call(
           checkContext,
           null,
           {
@@ -265,7 +236,7 @@ describe('meta-viewport', function () {
       );
 
       expect(
-        axe.testUtils.getCheckEvaluate('meta-viewport').call(
+        getCheckEvaluate('meta-viewport').call(
           checkContext,
           null,
           {
@@ -282,9 +253,7 @@ describe('meta-viewport', function () {
       );
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('meta-viewport')
-          .call(checkContext, null, null, vNode)
+        getCheckEvaluate('meta-viewport').call(checkContext, null, null, vNode)
       ).toBe(true);
     });
   });

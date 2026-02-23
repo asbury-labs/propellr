@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { fixtureSetup, shadowSupport } from '../../testutils';
 
 declare const axe: any;
 describe('landmark-unique-matches', function () {
   let rule;
   let fixture;
-  let axeFixtureSetup;
-  const shadowSupport = axe.testUtils.shadowSupport.v1;
+  const shadowSupportV1 = shadowSupport.v1;
   const sectioningContentElements = ['article', 'aside', 'nav', 'section'];
   const excludedDescendantsForHeadersFooters =
     sectioningContentElements.concat('main');
@@ -13,19 +13,18 @@ describe('landmark-unique-matches', function () {
 
   beforeEach(function () {
     fixture = document.getElementById('fixture');
-    axeFixtureSetup = axe.testUtils.fixtureSetup;
     rule = axe.utils.getRule('landmark-unique');
   });
 
   it('should not match because not a landmark', function () {
-    axeFixtureSetup('<h1>some heading</h1>');
+    fixtureSetup('<h1>some heading</h1>');
     const node = fixture.querySelector('h1');
     const virtualNode = axe.utils.getNodeFromTree(axe._tree[0], node);
     expect(rule.matches(node, virtualNode)).toBe(false);
   });
 
   it('should pass because is a landmark', function () {
-    axeFixtureSetup('<div role="banner">some banner</div>');
+    fixtureSetup('<div role="banner">some banner</div>');
     const node = fixture.querySelector('div');
     fixture.appendChild(node);
     const virtualNode = axe.utils.getNodeFromTree(axe._tree[0], node);
@@ -33,7 +32,7 @@ describe('landmark-unique-matches', function () {
   });
 
   it('should not match because landmark is hidden', function () {
-    axeFixtureSetup('<div role="banner">some banner</div>');
+    fixtureSetup('<div role="banner">some banner</div>');
     const node = fixture.querySelector('div');
     node.style.display = 'none';
     fixture.appendChild(node);
@@ -48,7 +47,7 @@ describe('landmark-unique-matches', function () {
       it(
         'should match because it is a ' + elementType + ' with a label',
         function () {
-          axeFixtureSetup(
+          fixtureSetup(
             '<' +
               elementType +
               ' aria-label="sample label">some ' +
@@ -66,7 +65,7 @@ describe('landmark-unique-matches', function () {
       it(
         'should not match because it is a ' + elementType + ' without a label',
         function () {
-          axeFixtureSetup(
+          fixtureSetup(
             '<' +
               elementType +
               '>some ' +
@@ -92,7 +91,7 @@ describe('landmark-unique-matches', function () {
             ' is contained inside an ' +
             exclusionType,
           function () {
-            axeFixtureSetup(
+            fixtureSetup(
               '<' +
                 exclusionType +
                 ' aria-label="sample label"><' +
@@ -115,9 +114,7 @@ describe('landmark-unique-matches', function () {
           elementType +
           ' is not contained inside the excluded descendants',
         function () {
-          axeFixtureSetup(
-            '<' + elementType + '>an element</' + elementType + '>'
-          );
+          fixtureSetup('<' + elementType + '>an element</' + elementType + '>');
           const node = fixture.querySelector(elementType);
           const virtualNode = axe.utils.getNodeFromTree(axe._tree[0], node);
           expect(rule.matches(node, virtualNode)).toBe(true);
@@ -133,7 +130,7 @@ describe('landmark-unique-matches', function () {
           exclusionType +
           ' and has no label',
         function () {
-          axeFixtureSetup(
+          fixtureSetup(
             '<' +
               exclusionType +
               '><aside data-test>an element</aside></' +
@@ -149,7 +146,7 @@ describe('landmark-unique-matches', function () {
       it(
         'should match because aside within ' + exclusionType + ' has a label',
         function () {
-          axeFixtureSetup(
+          fixtureSetup(
             '<' +
               exclusionType +
               '><aside aria-label="sample label" data-test>an element</aside></' +
@@ -164,20 +161,20 @@ describe('landmark-unique-matches', function () {
     });
 
     it('should match because aside is not scoped to a sectioning content element', function () {
-      axeFixtureSetup('<aside>an element</aside>');
+      fixtureSetup('<aside>an element</aside>');
       const node = fixture.querySelector('aside');
       const virtualNode = axe.utils.getNodeFromTree(axe._tree[0], node);
       expect(rule.matches(node, virtualNode)).toBe(true);
     });
   });
 
-  if (shadowSupport) {
+  if (shadowSupportV1) {
     it('return true for landmarks contained within shadow dom', function () {
       const container = document.createElement('div');
       const shadow = container.attachShadow({ mode: 'open' });
       shadow.innerHTML = '<footer></footer>';
 
-      axeFixtureSetup(container);
+      fixtureSetup(container);
       const vNode = axe.utils.querySelectorAll(axe._tree[0], 'footer')[0];
       expect(rule.matches(vNode.actualNode, vNode)).toBe(true);
     });
@@ -211,7 +208,7 @@ describe('landmark-unique-matches', function () {
                 exclusionType +
                 '>';
 
-              axeFixtureSetup(container);
+              fixtureSetup(container);
               const virtualNode = axe.utils.querySelectorAll(
                 axe._tree[0],
                 elementType
@@ -230,7 +227,7 @@ describe('landmark-unique-matches', function () {
           function () {
             shadow.innerHTML =
               '<' + elementType + '>an element</' + elementType + '>';
-            axeFixtureSetup(container);
+            fixtureSetup(container);
             const virtualNode = axe.utils.querySelectorAll(
               axe._tree[0],
               elementType
@@ -265,7 +262,7 @@ describe('landmark-unique-matches', function () {
               exclusionType +
               '>';
 
-            axeFixtureSetup(container);
+            fixtureSetup(container);
             const virtualNode = axe.utils.querySelectorAll(
               axe._tree[0],
               'aside[data-test]'
@@ -285,7 +282,7 @@ describe('landmark-unique-matches', function () {
               '><aside aria-label="sample label" data-test>an element</aside></' +
               exclusionType +
               '>';
-            axeFixtureSetup(container);
+            fixtureSetup(container);
             const virtualNode = axe.utils.querySelectorAll(
               axe._tree[0],
               'aside[data-test]'
@@ -299,7 +296,7 @@ describe('landmark-unique-matches', function () {
 
       it('should match because aside is not scoped to a sectioning content element', function () {
         shadow.innerHTML = '<aside>an element</aside>';
-        axeFixtureSetup(container);
+        fixtureSetup(container);
         const virtualNode = axe.utils.querySelectorAll(
           axe._tree[0],
           'aside'

@@ -1,11 +1,14 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  getCheckEvaluate,
+  MockCheckContext,
+  queryFixture
+} from '../../../testutils';
 
-declare const axe: any;
 describe('presentational-role', function () {
-  const fixture = document.getElementById('fixture');
-  const queryFixture = axe.testUtils.queryFixture;
-  const checkEvaluate = axe.testUtils.getCheckEvaluate('presentational-role');
-  const checkContext = axe.testUtils.MockCheckContext();
+  const fixture = document.getElementById('fixture')!;
+  const checkEvaluate = getCheckEvaluate('presentational-role');
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     fixture.innerHTML = '';

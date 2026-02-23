@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { fixtureSetup } from '../../testutils';
 
 declare const axe: any;
 describe('data-table-matches', function () {
   const fixture = document.getElementById('fixture');
-  const fixtureSetup = axe.testUtils.fixtureSetup;
   let rule;
 
   beforeEach(function () {

@@ -1,10 +1,14 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  getCheckEvaluate,
+  MockCheckContext
+} from '../../../testutils';
 
 declare const axe: any;
 describe('deprecatedrole', function () {
-  const checkContext = axe.testUtils.MockCheckContext();
-  const checkSetup = axe.testUtils.checkSetup;
-  const checkEvaluate = axe.testUtils.getCheckEvaluate('deprecatedrole');
+  const checkContext = MockCheckContext();
+  const checkEvaluate = getCheckEvaluate('deprecatedrole');
   afterEach(function () {
     checkContext.reset();
     axe.reset();
@@ -45,11 +49,11 @@ describe('deprecatedrole', function () {
   });
 
   it('returns false if applied to a non-deprecated role', function () {
-    const params = checkSetup('<div id="target" role="button">Contents</div>');
+    let params = checkSetup('<div id="target" role="button">Contents</div>');
     expect(checkEvaluate.apply(checkContext, params)).toBe(false);
     expect(checkContext._data).toBeNull();
 
-    const params = checkSetup('<button id="target">Contents</button>');
+    params = checkSetup('<button id="target">Contents</button>');
     expect(checkEvaluate.apply(checkContext, params)).toBe(false);
     expect(checkContext._data).toBeNull();
   });

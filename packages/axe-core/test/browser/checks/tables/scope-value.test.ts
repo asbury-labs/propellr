@@ -1,8 +1,8 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { getCheckEvaluate } from '../../../testutils';
 
-declare const axe: any;
 describe('scope-value', function () {
-  const fixture = document.getElementById('fixture');
+  const fixture = document.getElementById('fixture')!;
 
   afterEach(function () {
     fixture.innerHTML = '';
@@ -12,14 +12,14 @@ describe('scope-value', function () {
     fixture.innerHTML = '<table><tr><td scope="col"></td></tr></table>';
     const node = fixture.querySelector('td');
 
-    expect(axe.testUtils.getCheckEvaluate('scope-value')(node)).toBe(true);
+    expect(getCheckEvaluate('scope-value')(node)).toBe(true);
   });
 
   it('should return true if scope is "row"', function () {
     fixture.innerHTML = '<table><tr><td scope="row"></td></tr></table>';
     const node = fixture.querySelector('td');
 
-    expect(axe.testUtils.getCheckEvaluate('scope-value')(node)).toBe(true);
+    expect(getCheckEvaluate('scope-value')(node)).toBe(true);
   });
 
   it('should return false otherwise', function () {
@@ -27,7 +27,7 @@ describe('scope-value', function () {
       '<table><tr><td scope="hahahahanothx"></td></tr></table>';
     const node = fixture.querySelector('td');
 
-    expect(axe.testUtils.getCheckEvaluate('scope-value')(node)).toBe(false);
+    expect(getCheckEvaluate('scope-value')(node)).toBe(false);
   });
 
   it('should support options.values', function () {
@@ -36,7 +36,7 @@ describe('scope-value', function () {
     const node = fixture.querySelector('td');
 
     expect(
-      axe.testUtils.getCheckEvaluate('scope-value')(node, {
+      getCheckEvaluate('scope-value')(node, {
         values: ['hahahahanothx']
       })
     ).toBe(true);

@@ -1,8 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { flatTreeSetup, getCheckEvaluate } from '../../../testutils';
 
 declare const axe: any;
 describe('title-only', function () {
-  const fixture = document.getElementById('fixture');
+  const fixture = document.getElementById('fixture')!;
 
   afterEach(function () {
     fixture.innerHTML = '';
@@ -16,10 +17,10 @@ describe('title-only', function () {
 
     fixture.appendChild(node);
 
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
 
     expect(
-      axe.testUtils.getCheckEvaluate('title-only')(
+      getCheckEvaluate('title-only')(
         node,
         undefined,
         axe.utils.getNodeFromTree(node)
@@ -27,7 +28,7 @@ describe('title-only', function () {
     ).toBe(true);
     node.setAttribute('aria-label', 'woop');
     expect(
-      axe.testUtils.getCheckEvaluate('title-only')(
+      getCheckEvaluate('title-only')(
         node,
         undefined,
         axe.utils.getNodeFromTree(node)
@@ -46,10 +47,10 @@ describe('title-only', function () {
     fixture.appendChild(node);
     fixture.appendChild(dby);
 
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
 
     expect(
-      axe.testUtils.getCheckEvaluate('title-only')(
+      getCheckEvaluate('title-only')(
         node,
         undefined,
         axe.utils.getNodeFromTree(node)
@@ -57,7 +58,7 @@ describe('title-only', function () {
     ).toBe(true);
     node.setAttribute('aria-label', 'woop');
     expect(
-      axe.testUtils.getCheckEvaluate('title-only')(
+      getCheckEvaluate('title-only')(
         node,
         undefined,
         axe.utils.getNodeFromTree(node)

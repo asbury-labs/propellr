@@ -1,11 +1,14 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  fixtureSetup,
+  getCheckEvaluate,
+  MockCheckContext
+} from '../../../testutils';
 
-declare const axe: any;
 describe('td-headers-attr', function () {
-  const fixture = document.getElementById('fixture');
-  const checkContext = axe.testUtils.MockCheckContext();
-  const fixtureSetup = axe.testUtils.fixtureSetup;
-  const check = axe.testUtils.getCheckEvaluate('td-headers-attr');
+  const fixture = document.getElementById('fixture')!;
+  const checkContext = MockCheckContext();
+  const check = getCheckEvaluate('td-headers-attr');
 
   afterEach(function () {
     checkContext.reset();
@@ -72,7 +75,7 @@ describe('td-headers-attr', function () {
   });
 
   it('returns false if the header is a table cell', function () {
-    const node;
+    let node;
 
     fixtureSetup(
       '<table>' +
@@ -120,7 +123,7 @@ describe('td-headers-attr', function () {
   });
 
   it('returns true if table cell referenced as header with role rowheader or columnheader', function () {
-    const node;
+    let node;
 
     fixtureSetup(`
       <table>

@@ -1,13 +1,19 @@
 import { describe, it, expect, afterEach, beforeAll } from 'vitest';
+import {
+  checkSetup,
+  checks,
+  fixtureSetup,
+  flatTreeSetup,
+  MockCheckContext,
+  shadowSupport
+} from '../../../testutils';
 
 declare const axe: any;
 describe('focusable-not-tabbable', function () {
-  const check;
-  const fixture = document.getElementById('fixture');
-  const fixtureSetup = axe.testUtils.fixtureSetup;
-  const shadowSupported = axe.testUtils.shadowSupport.v1;
-  const checkContext = axe.testUtils.MockCheckContext();
-  const checkSetup = axe.testUtils.checkSetup;
+  let check;
+  const fixture = document.getElementById('fixture')!;
+  const shadowSupported = shadowSupport.v1;
+  const checkContext = MockCheckContext();
 
   beforeAll(function () {
     check = checks['focusable-not-tabbable'];
@@ -101,7 +107,7 @@ describe('focusable-not-tabbable', function () {
       const node = fixture.querySelector('#target');
       const shadow = node.attachShadow({ mode: 'open' });
       shadow.innerHTML = '<p tabindex="0">btn</p>';
-      axe.testUtils.flatTreeSetup(fixture);
+      flatTreeSetup(fixture);
       axe._selectorData = axe.utils.getSelectorData(axe._tree);
       const virtualNode = axe.utils.getNodeFromTree(node);
       const actual = check.evaluate.call(checkContext, node, {}, virtualNode);

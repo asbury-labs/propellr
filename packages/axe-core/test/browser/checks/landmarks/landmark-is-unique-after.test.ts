@@ -1,8 +1,8 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { checks, MockCheckContext } from '../../../testutils';
 
-declare const axe: any;
 describe('landmark-is-unique-after', function () {
-  const checkContext = axe.testUtils.MockCheckContext();
+  const checkContext = MockCheckContext();
   function createResult(result, data) {
     return {
       result: result,

@@ -1,11 +1,15 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  getCheckEvaluate,
+  MockCheckContext,
+  queryFixture
+} from '../../../testutils';
 
 declare const axe: any;
 describe('aria-required-attr', () => {
-  const { queryFixture, checkSetup } = axe.testUtils;
-  const checkContext = axe.testUtils.MockCheckContext();
-  const requiredAttrCheck =
-    axe.testUtils.getCheckEvaluate('aria-required-attr');
+  const checkContext = MockCheckContext();
+  const requiredAttrCheck = getCheckEvaluate('aria-required-attr');
 
   afterEach(() => {
     checkContext.reset();

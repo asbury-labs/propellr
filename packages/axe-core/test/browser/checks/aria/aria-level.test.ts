@@ -1,10 +1,13 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  getCheckEvaluate,
+  MockCheckContext
+} from '../../../testutils';
 
-declare const axe: any;
 describe('aria-prohibited-attr', function () {
-  const checkContext = axe.testUtils.MockCheckContext();
-  const checkSetup = axe.testUtils.checkSetup;
-  const checkEvaluate = axe.testUtils.getCheckEvaluate('aria-level');
+  const checkContext = MockCheckContext();
+  const checkEvaluate = getCheckEvaluate('aria-level');
 
   afterEach(function () {
     checkContext.reset();

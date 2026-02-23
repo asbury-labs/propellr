@@ -1,12 +1,13 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  getCheckEvaluate,
+  MockCheckContext
+} from '../../../testutils';
 
-declare const axe: any;
 describe('has-global-aria-attribute', function () {
-  const checkSetup = axe.testUtils.checkSetup;
-  const checkContext = axe.testUtils.MockCheckContext();
-  const hasGlobalAriaAttribute = axe.testUtils.getCheckEvaluate(
-    'has-global-aria-attribute'
-  );
+  const checkContext = MockCheckContext();
+  const hasGlobalAriaAttribute = getCheckEvaluate('has-global-aria-attribute');
 
   afterEach(function () {
     checkContext.reset();

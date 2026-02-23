@@ -1,10 +1,10 @@
-import { describe, it, expect, afterEach, beforeAll } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
+import { queryFixture, shadowSupport } from '../../testutils';
 
 declare const axe: any;
 describe('scrollable-region-focusable-matches', function () {
   const fixture = document.getElementById('fixture');
-  const queryFixture = axe.testUtils.queryFixture;
-  const shadowSupported = axe.testUtils.shadowSupport.v1;
+  const shadowSupported = shadowSupport.v1;
   const rule = axe.utils.getRule('scrollable-region-focusable');
 
   afterEach(function () {
@@ -187,43 +187,44 @@ describe('scrollable-region-focusable-matches', function () {
     expect(actual).toBe(true);
   });
 
-  describe('shadowDOM - scrollable-region-focusable-matches', function () {
-    beforeAll(function () {
-      if (!shadowSupported) {
-        this.skip();
-      }
-    });
+  describe.skipIf(!shadowSupported)(
+    'shadowDOM - scrollable-region-focusable-matches',
+    function () {
+      afterEach(function () {
+        axe._tree = undefined;
+      });
 
-    afterEach(function () {
-      axe._tree = undefined;
-    });
+      it('returns false when shadowDOM element does not overflow', function () {
+        fixture.innerHTML = '<div></div>';
 
-    it('returns false when shadowDOM element does not overflow', function () {
-      fixture.innerHTML = '<div></div>';
+        const root = fixture.firstChild.attachShadow({ mode: 'open' });
+        const slotted = document.createElement('div');
+        slotted.innerHTML =
+          '<p id="target" style="width: 12em; height: 2em; border: dotted;">Sed.</p>';
+        root.appendChild(slotted);
+        const tree = (axe._tree = axe.utils.getFlattenedTree(
+          fixture.firstChild
+        ));
+        const target = axe.utils.querySelectorAll(tree, 'p')[0];
+        const actual = rule.matches(target.actualNode, target);
+        expect(actual).toBe(false);
+      });
 
-      const root = fixture.firstChild.attachShadow({ mode: 'open' });
-      const slotted = document.createElement('div');
-      slotted.innerHTML =
-        '<p id="target" style="width: 12em; height: 2em; border: dotted;">Sed.</p>';
-      root.appendChild(slotted);
-      const tree = (axe._tree = axe.utils.getFlattenedTree(fixture.firstChild));
-      const target = axe.utils.querySelectorAll(tree, 'p')[0];
-      const actual = rule.matches(target.actualNode, target);
-      expect(actual).toBe(false);
-    });
+      it('returns true when shadowDOM element has overflow', function () {
+        fixture.innerHTML = '<div></div>';
 
-    it('returns true when shadowDOM element has overflow', function () {
-      fixture.innerHTML = '<div></div>';
-
-      const root = fixture.firstChild.attachShadow({ mode: 'open' });
-      const slotted = document.createElement('div');
-      slotted.innerHTML =
-        '<p id="target" style="width: 12em; height: 2em; border: dotted; overflow: auto;">This is a repeated long sentence, This is a repeated long sentence, This is a repeated long sentence, This is a repeated long sentence, This is a repeated long sentence.</p>';
-      root.appendChild(slotted);
-      const tree = (axe._tree = axe.utils.getFlattenedTree(fixture.firstChild));
-      const target = axe.utils.querySelectorAll(tree, 'p')[0];
-      const actual = rule.matches(target.actualNode, target);
-      expect(actual).toBe(true);
-    });
-  });
+        const root = fixture.firstChild.attachShadow({ mode: 'open' });
+        const slotted = document.createElement('div');
+        slotted.innerHTML =
+          '<p id="target" style="width: 12em; height: 2em; border: dotted; overflow: auto;">This is a repeated long sentence, This is a repeated long sentence, This is a repeated long sentence, This is a repeated long sentence, This is a repeated long sentence.</p>';
+        root.appendChild(slotted);
+        const tree = (axe._tree = axe.utils.getFlattenedTree(
+          fixture.firstChild
+        ));
+        const target = axe.utils.querySelectorAll(tree, 'p')[0];
+        const actual = rule.matches(target.actualNode, target);
+        expect(actual).toBe(true);
+      });
+    }
+  );
 });

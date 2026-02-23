@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { fixtureSetup, shadowSupport } from '../../testutils';
 
 declare const axe: any;
 describe('landmark-has-body-context', function () {
-  const fixtureSetup = axe.testUtils.fixtureSetup;
   let rule;
-  const shadowSupport = axe.testUtils.shadowSupport.v1;
+  const shadowSupported = shadowSupport.v1;
 
   beforeEach(function () {
     rule = axe.utils.getRule('landmark-banner-is-top-level');
@@ -31,7 +31,7 @@ describe('landmark-has-body-context', function () {
     expect(rule.matches(vNode.actualNode, vNode)).toBe(false);
   });
 
-  (shadowSupport ? it : xit)(
+  (shadowSupported ? it : xit)(
     'returns false for elements contained in a landmark in a shadow DOM tree',
     function () {
       // Safari has a bug in 12.0 that throws an error when calling

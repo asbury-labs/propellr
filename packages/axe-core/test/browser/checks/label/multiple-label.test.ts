@@ -1,11 +1,15 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  fixtureSetup,
+  getCheckEvaluate,
+  MockCheckContext,
+  shadowSupport
+} from '../../../testutils';
 
-declare const axe: any;
 describe('multiple-label', function () {
-  const fixture = document.getElementById('fixture');
-  const shadowSupported = axe.testUtils.shadowSupport.v1;
-  const checkContext = axe.testUtils.MockCheckContext();
-  const fixtureSetup = axe.testUtils.fixtureSetup;
+  const fixture = document.getElementById('fixture')!;
+  const shadowSupported = shadowSupport.v1;
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     checkContext.reset();
@@ -19,9 +23,7 @@ describe('multiple-label', function () {
     const l1 = fixture.querySelector('#l1');
     const l2 = fixture.querySelector('#l2');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('multiple-label')
-        .call(checkContext, target)
+      getCheckEvaluate('multiple-label').call(checkContext, target)
     ).toBeUndefined();
     expect(checkContext._relatedNodes).toEqual([l1, l2]);
   });
@@ -30,11 +32,9 @@ describe('multiple-label', function () {
     fixtureSetup('<label id="l1"><input type="text" id="target"></label>');
     const target = fixture.querySelector('#target');
     const l1 = fixture.querySelector('#l1');
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('multiple-label')
-        .call(checkContext, target)
-    ).toBe(false);
+    expect(getCheckEvaluate('multiple-label').call(checkContext, target)).toBe(
+      false
+    );
     expect(checkContext._relatedNodes).toEqual([l1]);
   });
 
@@ -50,9 +50,7 @@ describe('multiple-label', function () {
     const l2 = fixture.querySelector('#l2');
     const l3 = fixture.querySelector('#l3');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('multiple-label')
-        .call(checkContext, target)
+      getCheckEvaluate('multiple-label').call(checkContext, target)
     ).toBeUndefined();
     expect(checkContext._relatedNodes).toEqual([l1, l2, l3]);
   });
@@ -63,11 +61,9 @@ describe('multiple-label', function () {
     );
     const target = fixture.querySelector('#target');
     const l1 = fixture.querySelector('#l1');
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('multiple-label')
-        .call(checkContext, target)
-    ).toBe(false);
+    expect(getCheckEvaluate('multiple-label').call(checkContext, target)).toBe(
+      false
+    );
     expect(checkContext._relatedNodes).toEqual([l1]);
   });
 
@@ -79,11 +75,9 @@ describe('multiple-label', function () {
     );
     const target = fixture.querySelector('#test-input2');
     const l1 = fixture.querySelector('#l1');
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('multiple-label')
-        .call(checkContext, target)
-    ).toBe(false);
+    expect(getCheckEvaluate('multiple-label').call(checkContext, target)).toBe(
+      false
+    );
     expect(checkContext._relatedNodes).toEqual([l1]);
   });
 
@@ -95,9 +89,7 @@ describe('multiple-label', function () {
     const l1 = fixture.querySelector('#l1');
     const l2 = fixture.querySelector('#l2');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('multiple-label')
-        .call(checkContext, target)
+      getCheckEvaluate('multiple-label').call(checkContext, target)
     ).toBeUndefined();
     expect(checkContext._relatedNodes).toEqual([l1, l2]);
   });
@@ -113,9 +105,7 @@ describe('multiple-label', function () {
     const l1 = fixture.querySelector('#l1');
     const l3 = fixture.querySelector('#l3');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('multiple-label')
-        .call(checkContext, target)
+      getCheckEvaluate('multiple-label').call(checkContext, target)
     ).toBeUndefined();
     expect(checkContext._relatedNodes).toEqual([l1, l3]);
   });
@@ -130,9 +120,7 @@ describe('multiple-label', function () {
     const l1 = fixture.querySelector('#l1');
     const l2 = fixture.querySelector('#l2');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('multiple-label')
-        .call(checkContext, target)
+      getCheckEvaluate('multiple-label').call(checkContext, target)
     ).toBeUndefined();
     expect(checkContext._relatedNodes).toEqual([l1, l2]);
   });
@@ -147,9 +135,7 @@ describe('multiple-label', function () {
     const l1 = fixture.querySelector('#l1');
     const l2 = fixture.querySelector('#l2');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('multiple-label')
-        .call(checkContext, target)
+      getCheckEvaluate('multiple-label').call(checkContext, target)
     ).toBeUndefined();
     expect(checkContext._relatedNodes).toEqual([l1, l2]);
   });
@@ -162,9 +148,7 @@ describe('multiple-label', function () {
     const l1 = fixture.querySelector('#l1');
     const l2 = fixture.querySelector('#l2');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('multiple-label')
-        .call(checkContext, target)
+      getCheckEvaluate('multiple-label').call(checkContext, target)
     ).toBeUndefined();
     expect(checkContext._relatedNodes).toEqual([l1, l2]);
   });
@@ -174,11 +158,9 @@ describe('multiple-label', function () {
       '<label for="target">Foo<input type="text" id="target"></label>'
     );
     const target = fixture.querySelector('#target');
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('multiple-label')
-        .call(checkContext, target)
-    ).toBe(false);
+    expect(getCheckEvaluate('multiple-label').call(checkContext, target)).toBe(
+      false
+    );
   });
 
   it('should return undefined given multiple labels and no aria-labelledby', function () {
@@ -193,9 +175,7 @@ describe('multiple-label', function () {
     );
     const target = fixture.querySelector('#A');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('multiple-label')
-        .call(checkContext, target)
+      getCheckEvaluate('multiple-label').call(checkContext, target)
     ).toBeUndefined();
   });
 
@@ -211,9 +191,7 @@ describe('multiple-label', function () {
     );
     const target = fixture.querySelector('#B');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('multiple-label')
-        .call(checkContext, target)
+      getCheckEvaluate('multiple-label').call(checkContext, target)
     ).toBeUndefined();
   });
 
@@ -224,11 +202,9 @@ describe('multiple-label', function () {
         '<label for="D" id="E">Excuse</label>'
     );
     const target = fixture.querySelector('#D');
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('multiple-label')
-        .call(checkContext, target)
-    ).toBe(false);
+    expect(getCheckEvaluate('multiple-label').call(checkContext, target)).toBe(
+      false
+    );
   });
 
   it('should return false given multiple labels, one label AT visible, and aria-labelledby for all', function () {
@@ -238,11 +214,9 @@ describe('multiple-label', function () {
         '<label for="F" id="H">Excuse</label>'
     );
     const target = fixture.querySelector('#F');
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('multiple-label')
-        .call(checkContext, target)
-    ).toBe(false);
+    expect(getCheckEvaluate('multiple-label').call(checkContext, target)).toBe(
+      false
+    );
   });
 
   it('should return false given multiple labels, one label visible, and no aria-labelledby', function () {
@@ -252,11 +226,9 @@ describe('multiple-label', function () {
         '<label for="I" >Excuse</label>'
     );
     const target = fixture.querySelector('#I');
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('multiple-label')
-        .call(checkContext, target)
-    ).toBe(false);
+    expect(getCheckEvaluate('multiple-label').call(checkContext, target)).toBe(
+      false
+    );
   });
 
   it('should return undefined given multiple labels, all visible, aria-labelledby for all', function () {
@@ -271,9 +243,7 @@ describe('multiple-label', function () {
     );
     const target = fixture.querySelector('#J');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('multiple-label')
-        .call(checkContext, target)
+      getCheckEvaluate('multiple-label').call(checkContext, target)
     ).toBeUndefined();
   });
 
@@ -285,9 +255,7 @@ describe('multiple-label', function () {
     );
     const target = fixture.querySelector('#Q');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('multiple-label')
-        .call(checkContext, target)
+      getCheckEvaluate('multiple-label').call(checkContext, target)
     ).toBeUndefined();
   });
 
@@ -302,9 +270,10 @@ describe('multiple-label', function () {
       const shadowTarget = target.shadowRoot;
       fixtureSetup();
       expect(
-        axe.testUtils
-          .getCheckEvaluate('multiple-label')
-          .call(checkContext, shadowTarget.firstElementChild)
+        getCheckEvaluate('multiple-label').call(
+          checkContext,
+          shadowTarget.firstElementChild
+        )
       ).toBe(false);
     }
   );
@@ -322,9 +291,10 @@ describe('multiple-label', function () {
       fixtureSetup();
       const shadowTarget = target.shadowRoot;
       expect(
-        axe.testUtils
-          .getCheckEvaluate('multiple-label')
-          .call(checkContext, shadowTarget.firstElementChild)
+        getCheckEvaluate('multiple-label').call(
+          checkContext,
+          shadowTarget.firstElementChild
+        )
       ).toBe(false);
     }
   );
@@ -342,9 +312,10 @@ describe('multiple-label', function () {
       fixtureSetup();
       const shadowTarget = target.shadowRoot;
       expect(
-        axe.testUtils
-          .getCheckEvaluate('multiple-label')
-          .call(checkContext, shadowTarget.firstElementChild)
+        getCheckEvaluate('multiple-label').call(
+          checkContext,
+          shadowTarget.firstElementChild
+        )
       ).toBeUndefined();
     }
   );

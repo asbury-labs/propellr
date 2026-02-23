@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
+import { queryFixture, queryShadowFixture, html } from '../../testutils';
 
 declare const axe: any;
 describe('summary-interactive-matches', () => {
   const rule = axe.utils.getRule('summary-name');
-  const { queryFixture, queryShadowFixture, html } = axe.testUtils;
 
   it('is true for an interactive summary', () => {
     const vNode = queryFixture(html`

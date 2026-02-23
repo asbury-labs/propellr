@@ -1,5 +1,6 @@
 import { createFrameContext } from './create-frame-context';
 import { getNodeFromTree, shadowSelectAll } from '../../utils';
+import isNode from '../../../commons/dom/is-node';
 
 interface ContextLike {
   include: unknown[];
@@ -31,10 +32,10 @@ export function parseSelectorArray(
   for (let i = 0, l = context[type].length; i < l; i++) {
     const item = context[type][i];
     // Handle nodes
-    if (item instanceof window.Node) {
-      if ((item as Document).documentElement instanceof window.Node) {
+    if (isNode(item)) {
+      if (isNode((item as Document).documentElement)) {
         result.push(context.flatTree[0]);
-      } else if ((item as ShadowRoot).host instanceof window.Node) {
+      } else if (isNode((item as ShadowRoot).host)) {
         // Item is a shadow root. We only cache instances of `Element`,
         // not `DocumentFragment`, so instead of the shadow root itself,
         // we'll push all of its children to context.

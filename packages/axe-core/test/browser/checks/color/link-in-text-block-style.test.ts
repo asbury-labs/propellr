@@ -1,17 +1,19 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import {
+  flatTreeSetup,
+  getCheckEvaluate,
+  MockCheckContext,
+  queryFixture,
+  shadowSupport
+} from '../../../testutils';
 
-declare const axe: any;
 describe('link-in-text-block-style', () => {
-  const fixture = document.getElementById('fixture');
-  const shadowSupport = axe.testUtils.shadowSupport;
+  const fixture = document.getElementById('fixture')!;
   let styleElm;
 
-  const checkContext = axe.testUtils.MockCheckContext();
+  const checkContext = MockCheckContext();
 
-  const { queryFixture } = axe.testUtils;
-  const linkInBlockStyleCheck = axe.testUtils.getCheckEvaluate(
-    'link-in-text-block-style'
-  );
+  const linkInBlockStyleCheck = getCheckEvaluate('link-in-text-block-style');
 
   beforeAll(() => {
     styleElm = document.createElement('style');
@@ -90,7 +92,7 @@ describe('link-in-text-block-style', () => {
       linkId +
       '">link</a>' +
       '</p>';
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     return document.getElementById(linkId);
   }
 
@@ -109,7 +111,7 @@ describe('link-in-text-block-style', () => {
         '	</a> inside block </p> inside block' +
         '</span> outside block </div>';
 
-      axe.testUtils.flatTreeSetup(fixture);
+      flatTreeSetup(fixture);
       const linkElm = document.getElementById('link');
 
       expect(linkInBlockStyleCheck.call(checkContext, linkElm)).toBe(false);
@@ -125,7 +127,7 @@ describe('link-in-text-block-style', () => {
         const linkElm = shadow.querySelector('a');
         fixture.appendChild(parentElm);
 
-        axe.testUtils.flatTreeSetup(fixture);
+        flatTreeSetup(fixture);
 
         expect(linkInBlockStyleCheck.call(checkContext, linkElm)).toBe(true);
       }
@@ -142,7 +144,7 @@ describe('link-in-text-block-style', () => {
         shadow.innerHTML = '<p><slot></slot></p>';
         fixture.appendChild(div);
 
-        axe.testUtils.flatTreeSetup(fixture);
+        flatTreeSetup(fixture);
         const linkElm = div.querySelector('a');
 
         expect(linkInBlockStyleCheck.call(checkContext, linkElm)).toBe(true);

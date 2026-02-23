@@ -1,11 +1,11 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { checks, MockCheckContext, queryFixture } from '../../../testutils';
 
 declare const axe: any;
 describe('identical-links-same-purpose tests', function () {
-  const fixture = document.getElementById('fixture');
-  const queryFixture = axe.testUtils.queryFixture;
+  const fixture = document.getElementById('fixture')!;
   const check = checks['identical-links-same-purpose'];
-  const checkContext = axe.testUtils.MockCheckContext();
+  const checkContext = MockCheckContext();
   const options = {};
 
   afterEach(function () {

@@ -1,5 +1,6 @@
 import standards from '../../standards';
 import AbstractVirtualNode from '../../core/base/virtual-node/abstract-virtual-node';
+import isNode from '../dom/is-node';
 
 declare const axe: any;
 
@@ -12,10 +13,7 @@ declare const axe: any;
  * @return {Mixed} String if a matching role and its type are found, otherwise `null`
  */
 function getRoleType(role: any): string | null {
-  if (
-    role instanceof AbstractVirtualNode ||
-    (window?.Node && role instanceof window.Node)
-  ) {
+  if (role instanceof AbstractVirtualNode || isNode(role)) {
     role = axe.commons.aria.getRole(role);
   }
   const roleDef = standards.ariaRoles[role];

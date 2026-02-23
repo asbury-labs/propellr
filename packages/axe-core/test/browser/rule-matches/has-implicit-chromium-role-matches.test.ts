@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { queryFixture } from '../../testutils';
 
 declare const axe: any;
 describe('has-implicit-chromium-role-matches', function () {
   let rule;
   const fixture = document.getElementById('fixture');
-  const queryFixture = axe.testUtils.queryFixture;
 
   beforeEach(function () {
     rule = axe.utils.getRule('presentation-role-conflict');

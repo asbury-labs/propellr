@@ -1,9 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import {
+  flatTreeSetup,
+  getCheckEvaluate,
+  MockCheckContext,
+  queryFixture
+} from '../../../testutils';
 
-declare const axe: any;
 describe('xml-lang-mismatch', function () {
-  const checkContext = axe.testUtils.MockCheckContext();
-  const queryFixture = axe.testUtils.queryFixture;
+  const checkContext = MockCheckContext();
 
   beforeEach(function () {
     // using a div element (instead of html), as the check is agnostic of element type
@@ -20,29 +24,28 @@ describe('xml-lang-mismatch', function () {
   it('should return false if a only lang is supplied', function () {
     const vNode = queryFixture('<div id="target" lang="en"></div>');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('xml-lang-mismatch')
-        .call(checkContext, null, {}, vNode)
+      getCheckEvaluate('xml-lang-mismatch').call(checkContext, null, {}, vNode)
     ).toBe(false);
   });
 
   it('should return false if a only xml:lang is supplied albeit with region', function () {
     const vNode = queryFixture('<div id="target" xml:lang="fr-FR"></div>');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('xml-lang-mismatch')
-        .call(checkContext, null, {}, vNode)
+      getCheckEvaluate('xml-lang-mismatch').call(checkContext, null, {}, vNode)
     ).toBe(false);
   });
 
   it('should return false if lang is undefined', function () {
     const node = document.createElement('div');
     node.setAttribute('lang', undefined);
-    const tree = axe.testUtils.flatTreeSetup(node);
+    const tree = flatTreeSetup(node);
     expect(
-      axe.testUtils
-        .getCheckEvaluate('xml-lang-mismatch')
-        .call(checkContext, null, {}, tree[0])
+      getCheckEvaluate('xml-lang-mismatch').call(
+        checkContext,
+        null,
+        {},
+        tree[0]
+      )
     ).toBe(false);
   });
 
@@ -51,9 +54,7 @@ describe('xml-lang-mismatch', function () {
       '<div id="target" xml:lang="en-GB" lang="en-GB"></div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('xml-lang-mismatch')
-        .call(checkContext, null, {}, vNode)
+      getCheckEvaluate('xml-lang-mismatch').call(checkContext, null, {}, vNode)
     ).toBe(true);
   });
 
@@ -62,9 +63,7 @@ describe('xml-lang-mismatch', function () {
       '<div id="target" xml:lang="en-US" lang="en-GB"></div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('xml-lang-mismatch')
-        .call(checkContext, null, {}, vNode)
+      getCheckEvaluate('xml-lang-mismatch').call(checkContext, null, {}, vNode)
     ).toBe(true);
   });
 
@@ -72,9 +71,12 @@ describe('xml-lang-mismatch', function () {
     const vNode = queryFixture(
       '<div id="target" xml:lang="fr-FR" lang="en"></div>'
     );
-    const actual = axe.testUtils
-      .getCheckEvaluate('xml-lang-mismatch')
-      .call(checkContext, null, {}, vNode);
+    const actual = getCheckEvaluate('xml-lang-mismatch').call(
+      checkContext,
+      null,
+      {},
+      vNode
+    );
     expect(actual).toBe(false);
   });
 });

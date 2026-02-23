@@ -1,11 +1,17 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  checks,
+  fixtureSetup,
+  MockCheckContext,
+  shadowSupport
+} from '../../../testutils';
 
 declare const axe: any;
 describe('page-no-duplicate', () => {
-  const fixture = document.getElementById('fixture');
-  const checkContext = new axe.testUtils.MockCheckContext();
-  const checkSetup = axe.testUtils.checkSetup;
-  const shadowSupported = axe.testUtils.shadowSupport.v1;
+  const fixture = document.getElementById('fixture')!;
+  const checkContext = new MockCheckContext();
+  const shadowSupported = shadowSupport.v1;
 
   const check = checks['page-no-duplicate-main'];
 
@@ -78,7 +84,7 @@ describe('page-no-duplicate', () => {
           .querySelector('#shadow')
           .attachShadow({ mode: 'open' });
         shadow.innerHTML = '<main></main>';
-        axe.testUtils.fixtureSetup(div);
+        fixtureSetup(div);
         const vNode = axe.utils.querySelectorAll(axe._tree, '#target')[0];
 
         expect(
@@ -102,7 +108,7 @@ describe('page-no-duplicate', () => {
           .querySelector('#shadow')
           .attachShadow({ mode: 'open' });
         shadow.innerHTML = '<main></main>';
-        axe.testUtils.fixtureSetup(div);
+        fixtureSetup(div);
         const vNode = axe.utils.querySelectorAll(axe._tree, '#target')[0];
 
         expect(
@@ -172,7 +178,7 @@ describe('page-no-duplicate', () => {
           '<header id="shadow"></header><footer id="target"></footer>';
         div.querySelector('#shadow').attachShadow({ mode: 'open' }).innerHTML =
           '<footer></footer>';
-        axe.testUtils.fixtureSetup(div);
+        fixtureSetup(div);
         const vNode = axe.utils.querySelectorAll(axe._tree, '#target')[0];
 
         expect(
@@ -248,7 +254,7 @@ describe('page-no-duplicate', () => {
           '<article id="shadow"></article><footer id="target"></footer>';
         div.querySelector('#shadow').attachShadow({ mode: 'open' }).innerHTML =
           '<footer></footer>';
-        axe.testUtils.fixtureSetup(div);
+        fixtureSetup(div);
         const vNode = axe.utils.querySelectorAll(axe._tree, '#target')[0];
 
         expect(

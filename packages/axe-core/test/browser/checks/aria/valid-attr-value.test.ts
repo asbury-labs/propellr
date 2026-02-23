@@ -1,16 +1,19 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  fixtureSetup,
+  getCheckEvaluate,
+  MockCheckContext,
+  queryFixture,
+  shadowCheckSetup,
+  shadowSupport
+} from '../../../testutils';
 
 declare const axe: any;
 describe('aria-valid-attr-value', function () {
-  const fixture = document.getElementById('fixture');
-  const queryFixture = axe.testUtils.queryFixture;
-  const checkContext = axe.testUtils.MockCheckContext();
-  const fixtureSetup = axe.testUtils.fixtureSetup;
-  const shadowCheckSetup = axe.testUtils.shadowCheckSetup;
-  const shadowSupported = axe.testUtils.shadowSupport.v1;
-  const validAttrValueCheck = axe.testUtils.getCheckEvaluate(
-    'aria-valid-attr-value'
-  );
+  const fixture = document.getElementById('fixture')!;
+  const checkContext = MockCheckContext();
+  const shadowSupported = shadowSupport.v1;
+  const validAttrValueCheck = getCheckEvaluate('aria-valid-attr-value');
 
   afterEach(function () {
     fixture.innerHTML = '';

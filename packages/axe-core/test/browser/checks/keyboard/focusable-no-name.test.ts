@@ -1,13 +1,17 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  getCheckEvaluate,
+  MockCheckContext,
+  shadowCheckSetup,
+  shadowSupport
+} from '../../../testutils';
 
 declare const axe: any;
 describe('focusable-no-name', function () {
-  const fixture = document.getElementById('fixture');
-  const checkSetup = axe.testUtils.checkSetup;
-  const shadowCheckSetup = axe.testUtils.shadowCheckSetup;
-  const shadowSupport = axe.testUtils.shadowSupport;
+  const fixture = document.getElementById('fixture')!;
 
-  const checkContext = axe.testUtils.MockCheckContext();
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     fixture.innerHTML = '';
@@ -18,27 +22,21 @@ describe('focusable-no-name', function () {
   it('should pass if tabindex < 0', function () {
     const params = checkSetup('<a href="#" tabindex="-1" id="target"></a>');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('focusable-no-name')
-        .apply(checkContext, params)
+      getCheckEvaluate('focusable-no-name').apply(checkContext, params)
     ).toBe(false);
   });
 
   it('should pass element is not natively focusable', function () {
     const params = checkSetup('<span role="link" href="#" id="target"></span>');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('focusable-no-name')
-        .apply(checkContext, params)
+      getCheckEvaluate('focusable-no-name').apply(checkContext, params)
     ).toBe(false);
   });
 
   it('should fail if element is tabbable with no name - native', function () {
     const params = checkSetup('<a href="#" id="target"></a>');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('focusable-no-name')
-        .apply(checkContext, params)
+      getCheckEvaluate('focusable-no-name').apply(checkContext, params)
     ).toBe(true);
   });
 
@@ -47,18 +45,14 @@ describe('focusable-no-name', function () {
       '<span tabindex="0" role="link" id="target" href="#"></spam>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('focusable-no-name')
-        .apply(checkContext, params)
+      getCheckEvaluate('focusable-no-name').apply(checkContext, params)
     ).toBe(true);
   });
 
   it('should pass if the element is tabbable but has an accessible name', function () {
     const params = checkSetup('<a href="#" title="Hello" id="target"></a>');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('focusable-no-name')
-        .apply(checkContext, params)
+      getCheckEvaluate('focusable-no-name').apply(checkContext, params)
     ).toBe(false);
   });
 
@@ -71,9 +65,7 @@ describe('focusable-no-name', function () {
       );
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('focusable-no-name')
-          .apply(checkContext, params)
+        getCheckEvaluate('focusable-no-name').apply(checkContext, params)
       ).toBe(false);
     }
   );
@@ -88,13 +80,9 @@ describe('focusable-no-name', function () {
         }
       });
 
-      expect(
-        axe.testUtils.getCheckEvaluate('focusable-no-name')(
-          null,
-          {},
-          serialNode
-        )
-      ).toBe(false);
+      expect(getCheckEvaluate('focusable-no-name')(null, {}, serialNode)).toBe(
+        false
+      );
     });
 
     it('should pass element is not natively focusable', function () {
@@ -106,13 +94,9 @@ describe('focusable-no-name', function () {
         }
       });
 
-      expect(
-        axe.testUtils.getCheckEvaluate('focusable-no-name')(
-          null,
-          {},
-          serialNode
-        )
-      ).toBe(false);
+      expect(getCheckEvaluate('focusable-no-name')(null, {}, serialNode)).toBe(
+        false
+      );
     });
 
     it('should fail if element is tabbable with no name - native', function () {
@@ -124,13 +108,9 @@ describe('focusable-no-name', function () {
       });
       serialNode.children = [];
 
-      expect(
-        axe.testUtils.getCheckEvaluate('focusable-no-name')(
-          null,
-          {},
-          serialNode
-        )
-      ).toBe(true);
+      expect(getCheckEvaluate('focusable-no-name')(null, {}, serialNode)).toBe(
+        true
+      );
     });
 
     it('should return undefined if element is tabbable with no name nor children - native', function () {
@@ -142,11 +122,7 @@ describe('focusable-no-name', function () {
       });
 
       expect(
-        axe.testUtils.getCheckEvaluate('focusable-no-name')(
-          null,
-          {},
-          serialNode
-        )
+        getCheckEvaluate('focusable-no-name')(null, {}, serialNode)
       ).toBeUndefined();
     });
 
@@ -160,13 +136,9 @@ describe('focusable-no-name', function () {
       });
       serialNode.children = [];
 
-      expect(
-        axe.testUtils.getCheckEvaluate('focusable-no-name')(
-          null,
-          {},
-          serialNode
-        )
-      ).toBe(false);
+      expect(getCheckEvaluate('focusable-no-name')(null, {}, serialNode)).toBe(
+        false
+      );
     });
   });
 });

@@ -1,4 +1,11 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  fixtureSetup,
+  getCheckEvaluate,
+  MockCheckContext,
+  shadowSupport
+} from '../../../testutils';
 
 declare const axe: any;
 // NOTE: due to how the region check works to return the top-most
@@ -8,13 +15,10 @@ declare const axe: any;
 // adding the region node forces the check to not return the #fixture
 // as the top-most element but instead use the #target element.
 describe('region', function () {
-  const fixture = document.getElementById('fixture');
-  const shadowSupport = axe.testUtils.shadowSupport;
-  const checkSetup = axe.testUtils.checkSetup;
-  const fixtureSetup = axe.testUtils.fixtureSetup;
-  const checkEvaluate = axe.testUtils.getCheckEvaluate('region');
+  const fixture = document.getElementById('fixture')!;
+  const checkEvaluate = getCheckEvaluate('region');
 
-  const checkContext = new axe.testUtils.MockCheckContext();
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     fixture.innerHTML = '';

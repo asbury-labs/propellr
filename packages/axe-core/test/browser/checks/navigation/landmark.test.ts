@@ -1,12 +1,15 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  getCheckEvaluate,
+  MockCheckContext,
+  shadowSupport
+} from '../../../testutils';
 
-declare const axe: any;
 describe('landmark', function () {
-  const fixture = document.getElementById('fixture');
-  const checkSetup = axe.testUtils.checkSetup;
-  const shadowSupport = axe.testUtils.shadowSupport;
-  const checkEvaluate = axe.testUtils.getCheckEvaluate('landmark');
-  const checkContext = axe.testUtils.MockCheckContext();
+  const fixture = document.getElementById('fixture')!;
+  const checkEvaluate = getCheckEvaluate('landmark');
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     fixture.innerHTML = '';

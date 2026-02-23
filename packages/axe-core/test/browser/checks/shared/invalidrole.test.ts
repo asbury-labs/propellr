@@ -1,11 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { checks, MockCheckContext, queryFixture } from '../../../testutils';
 
-declare const axe: any;
-declare const checks: any;
 describe('invalidrole', function () {
-  const fixture = document.getElementById('fixture');
-  const queryFixture = axe.testUtils.queryFixture;
-  const checkContext = axe.testUtils.MockCheckContext();
+  const fixture = document.getElementById('fixture')!;
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     fixture.innerHTML = '';

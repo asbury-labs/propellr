@@ -1,10 +1,16 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  flatTreeSetup,
+  getCheckEvaluate,
+  MockCheckContext,
+  shadowSupport
+} from '../../../testutils';
 
 declare const axe: any;
 describe('th-has-data-cells', () => {
-  const fixture = document.getElementById('fixture');
-  const shadowSupport = axe.testUtils.shadowSupport.v1;
-  const checkContext = axe.testUtils.MockCheckContext();
+  const fixture = document.getElementById('fixture')!;
+  const shadowSupported = shadowSupport.v1;
+  const checkContext = MockCheckContext();
 
   afterEach(() => {
     checkContext.reset();
@@ -17,13 +23,11 @@ describe('th-has-data-cells', () => {
       '  <tr> <th>hi</th> <td>hello</td> </tr>' +
       '</table>';
 
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     const node = fixture.querySelector('table');
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('th-has-data-cells')
-        .call(checkContext, node)
-    ).toBe(true);
+    expect(getCheckEvaluate('th-has-data-cells').call(checkContext, node)).toBe(
+      true
+    );
   });
 
   it('should return true each non-empty column header has a cell', () => {
@@ -33,13 +37,11 @@ describe('th-has-data-cells', () => {
       '  <tr> <td>hi</td> <td>hello</td></tr>' +
       '</table>';
 
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     const node = fixture.querySelector('table');
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('th-has-data-cells')
-        .call(checkContext, node)
-    ).toBe(true);
+    expect(getCheckEvaluate('th-has-data-cells').call(checkContext, node)).toBe(
+      true
+    );
   });
 
   it('should return true if referred to with headers attr', () => {
@@ -49,13 +51,11 @@ describe('th-has-data-cells', () => {
       '  <tr> <th id="a">H</th> <th id="b">H</th> </tr>' +
       '</table>';
 
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     const node = fixture.querySelector('table');
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('th-has-data-cells')
-        .call(checkContext, node)
-    ).toBe(true);
+    expect(getCheckEvaluate('th-has-data-cells').call(checkContext, node)).toBe(
+      true
+    );
   });
 
   it('should return true if referred to with aria-labelledby', () => {
@@ -65,13 +65,11 @@ describe('th-has-data-cells', () => {
       '  <tr> <th id="a">H</th> <th id="b">H</th> </tr>' +
       '</table>';
 
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     const node = fixture.querySelector('table');
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('th-has-data-cells')
-        .call(checkContext, node)
-    ).toBe(true);
+    expect(getCheckEvaluate('th-has-data-cells').call(checkContext, node)).toBe(
+      true
+    );
   });
 
   it('should return true if the th element is empty', () => {
@@ -80,13 +78,11 @@ describe('th-has-data-cells', () => {
       '  <tr> <th></th> <th></th> </tr>' +
       '  <tr> <th></th> <th></th> </tr>' +
       '</table>';
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     const node = fixture.querySelector('table');
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('th-has-data-cells')
-        .call(checkContext, node)
-    ).toBe(true);
+    expect(getCheckEvaluate('th-has-data-cells').call(checkContext, node)).toBe(
+      true
+    );
   });
 
   it('should return true when the td has a content element', () => {
@@ -101,13 +97,11 @@ describe('th-has-data-cells', () => {
       '  <tr> <th>hi</th> <td><span role="img"></span></td> </tr>' +
       '</table>';
 
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     const node = fixture.querySelector('table');
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('th-has-data-cells')
-        .call(checkContext, node)
-    ).toBe(true);
+    expect(getCheckEvaluate('th-has-data-cells').call(checkContext, node)).toBe(
+      true
+    );
   });
 
   it('should return undefined if a th has no data cells', () => {
@@ -117,12 +111,10 @@ describe('th-has-data-cells', () => {
       '  <tr> <th>hi</th> </tr>' +
       '</table>';
 
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     const node = fixture.querySelector('table');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('th-has-data-cells')
-        .call(checkContext, node)
+      getCheckEvaluate('th-has-data-cells').call(checkContext, node)
     ).toBeUndefined();
   });
 
@@ -133,13 +125,11 @@ describe('th-has-data-cells', () => {
       '  <tr> <th>hi</th> <td></td> </tr>' +
       '</table>';
 
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     const node = fixture.querySelector('table');
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('th-has-data-cells')
-        .call(checkContext, node)
-    ).toBe(true);
+    expect(getCheckEvaluate('th-has-data-cells').call(checkContext, node)).toBe(
+      true
+    );
   });
 
   it('should return undefined if a td with role=columnheader is used that has no data cells', () => {
@@ -148,12 +138,10 @@ describe('th-has-data-cells', () => {
       '  <tr> <td>axe</td> <td role="columnheader">AXE</th> </tr>' +
       '</table>';
 
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     const node = fixture.querySelector('table');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('th-has-data-cells')
-        .call(checkContext, node)
+      getCheckEvaluate('th-has-data-cells').call(checkContext, node)
     ).toBeUndefined();
   });
 
@@ -170,16 +158,14 @@ describe('th-has-data-cells', () => {
       '</tr>' +
       '</table>';
 
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     const node = fixture.querySelector('table');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('th-has-data-cells')
-        .call(checkContext, node)
+      getCheckEvaluate('th-has-data-cells').call(checkContext, node)
     ).toBeUndefined();
   });
 
-  (shadowSupport ? it : xit)('recognizes shadow tree content', () => {
+  (shadowSupported ? it : xit)('recognizes shadow tree content', () => {
     fixture.innerHTML = '<div id="shadow"> <b>data</b> </div>';
     const shadow = fixture
       .querySelector('#shadow')
@@ -190,12 +176,10 @@ describe('th-has-data-cells', () => {
       '  <tr> <td><slot></slot></td> </tr>' +
       '</table>';
 
-    axe.testUtils.flatTreeSetup(fixture);
+    flatTreeSetup(fixture);
     const node = axe.utils.querySelectorAll(axe._tree, 'table')[0].actualNode;
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('th-has-data-cells')
-        .call(checkContext, node)
-    ).toBe(true);
+    expect(getCheckEvaluate('th-has-data-cells').call(checkContext, node)).toBe(
+      true
+    );
   });
 });

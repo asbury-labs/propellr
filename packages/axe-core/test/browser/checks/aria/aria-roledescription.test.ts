@@ -1,9 +1,12 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  getCheckEvaluate,
+  MockCheckContext,
+  queryFixture
+} from '../../../testutils';
 
-declare const axe: any;
 describe('aria-roledescription', function () {
-  const checkContext = axe.testUtils.MockCheckContext();
-  const queryFixture = axe.testUtils.queryFixture;
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     checkContext.reset();
@@ -13,7 +16,7 @@ describe('aria-roledescription', function () {
     const vNode = queryFixture(
       '<button aria-roledescription="Awesome Button" id="target">Click</button>'
     );
-    const actual = axe.testUtils.getCheckEvaluate('aria-roledescription').call(
+    const actual = getCheckEvaluate('aria-roledescription').call(
       checkContext,
       null,
       {
@@ -29,7 +32,7 @@ describe('aria-roledescription', function () {
     const vNode = queryFixture(
       '<div role="radio" aria-roledescription="Awesome Radio" id="target">Click</div>'
     );
-    const actual = axe.testUtils.getCheckEvaluate('aria-roledescription').call(
+    const actual = getCheckEvaluate('aria-roledescription').call(
       checkContext,
       null,
       {
@@ -45,9 +48,12 @@ describe('aria-roledescription', function () {
     const vNode = queryFixture(
       '<div role="main" aria-roledescription="Awesome Main" id="target">The main element</div>'
     );
-    const actual = axe.testUtils
-      .getCheckEvaluate('aria-roledescription')
-      .call(checkContext, null, {}, vNode);
+    const actual = getCheckEvaluate('aria-roledescription').call(
+      checkContext,
+      null,
+      {},
+      vNode
+    );
     expect(actual).toBe(undefined);
     expect(checkContext._data).toBeNull();
   });
@@ -56,9 +62,12 @@ describe('aria-roledescription', function () {
     const vNode = queryFixture(
       '<div aria-roledescription="Awesome Main" id="target">The main element</div>'
     );
-    const actual = axe.testUtils
-      .getCheckEvaluate('aria-roledescription')
-      .call(checkContext, null, {}, vNode);
+    const actual = getCheckEvaluate('aria-roledescription').call(
+      checkContext,
+      null,
+      {},
+      vNode
+    );
     expect(actual).toBe(false);
     expect(checkContext._data).toBeNull();
   });
@@ -67,9 +76,12 @@ describe('aria-roledescription', function () {
     const vNode = queryFixture(
       '<div role="presentation" aria-roledescription="Awesome Main" id="target">The main element</div>'
     );
-    const actual = axe.testUtils
-      .getCheckEvaluate('aria-roledescription')
-      .call(checkContext, null, {}, vNode);
+    const actual = getCheckEvaluate('aria-roledescription').call(
+      checkContext,
+      null,
+      {},
+      vNode
+    );
     expect(actual).toBe(false);
     expect(checkContext._data).toBeNull();
   });
@@ -79,9 +91,12 @@ describe('aria-roledescription', function () {
       '<div role="none" aria-roledescription="Awesome Main" id="target">The main element</div>'
     );
 
-    const actual = axe.testUtils
-      .getCheckEvaluate('aria-roledescription')
-      .call(checkContext, null, {}, vNode);
+    const actual = getCheckEvaluate('aria-roledescription').call(
+      checkContext,
+      null,
+      {},
+      vNode
+    );
     expect(actual).toBe(false);
     expect(checkContext._data).toBeNull();
   });

@@ -1,9 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { queryFixture } from '../../testutils';
 
 declare const axe: any;
 describe('identical-links-same-purpose-matches tests', function () {
   const fixture = document.getElementById('fixture');
-  const queryFixture = axe.testUtils.queryFixture;
   const rule = axe.utils.getRule('identical-links-same-purpose');
 
   afterEach(function () {

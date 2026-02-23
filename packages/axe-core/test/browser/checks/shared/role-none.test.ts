@@ -1,10 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { getCheckEvaluate, queryFixture } from '../../../testutils';
 
-declare const axe: any;
 describe('role-none', function () {
-  const fixture = document.getElementById('fixture');
-  const queryFixture = axe.testUtils.queryFixture;
-  const checkEvaluate = axe.testUtils.getCheckEvaluate('role-none');
+  const fixture = document.getElementById('fixture')!;
+  const checkEvaluate = getCheckEvaluate('role-none');
 
   afterEach(function () {
     fixture.innerHTML = '';

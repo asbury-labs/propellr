@@ -1,8 +1,8 @@
 import { describe, it, expect, afterEach, afterAll } from 'vitest';
+import { checks } from '../../../testutils';
 
-declare const axe: any;
 describe('identical-links-same-purpose-after tests', function () {
-  const fixture = document.getElementById('fixture');
+  const fixture = document.getElementById('fixture')!;
   const check = checks['identical-links-same-purpose'];
 
   afterEach(function () {

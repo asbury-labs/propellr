@@ -1,0 +1,121 @@
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { captureError } from '../../../testutils';
+
+declare const axe: any;
+describe('axe.utils.sendCommandToFrame', () => {
+  const fixture = document.getElementById('fixture');
+  let params;
+
+  beforeEach(() => {
+    params = { command: 'rules' };
+  });
+
+  afterEach(() => {
+    fixture.innerHTML = '';
+    axe._tree = undefined;
+    axe._selectorData = undefined;
+  });
+
+  const assertNotCalled = () => {
+    expect(false).toBeTruthy();
+  };
+
+  it('should return results from frames', () => {
+    return new Promise<void>((done, reject) => {
+      const frame = document.createElement('iframe');
+      frame.addEventListener('load', () => {
+        axe.utils.sendCommandToFrame(
+          frame,
+          params,
+          captureError(res => {
+            expect(res).toHaveLength(1);
+            expect(res[0].id).toBe('html');
+            done();
+          }, reject),
+          () => {
+            reject(new Error('sendCommandToFrame should not error'));
+          }
+        );
+      });
+
+      frame.id = 'level0';
+      frame.src = '../mock/frames/test.html';
+      fixture.appendChild(frame);
+    });
+  });
+
+  it('adjusts skips ping with options.pingWaitTime=0', () => {
+    return new Promise<void>((done, reject) => {
+      const frame = document.createElement('iframe');
+      params = {
+        command: 'rules',
+        options: { pingWaitTime: 0 }
+      };
+
+      frame.addEventListener('load', () => {
+        const topics = [];
+        frame.contentWindow.addEventListener('message', event => {
+          try {
+            topics.push(JSON.parse(event.data).topic);
+          } catch {
+            /* ignore */
+          }
+        });
+        axe.utils.sendCommandToFrame(
+          frame,
+          params,
+          captureError(() => {
+            try {
+              expect(topics).toEqual(['axe.start']);
+              done();
+            } catch (e) {
+              reject(e);
+            }
+          }, reject),
+          () => {
+            reject(new Error('sendCommandToFrame should not error'));
+          }
+        );
+      });
+
+      frame.id = 'level0';
+      frame.src = '../mock/frames/test.html';
+      fixture.appendChild(frame);
+    });
+  });
+
+  it('should timeout if there is no response from frame', () => {
+    return new Promise<void>(done => {
+      const orig = window.setTimeout;
+      window.setTimeout = (fn, to) => {
+        if (to === 30000) {
+          expect('timeout set').toBeTruthy();
+          fn();
+        } else {
+          // ping timeout
+          return orig(fn, to);
+        }
+        return 'cats';
+      };
+
+      const frame = document.createElement('iframe');
+      frame.addEventListener('load', () => {
+        axe._tree = axe.utils.getFlattenedTree(document.documentElement);
+        axe.utils.sendCommandToFrame(
+          frame,
+          params,
+          result => {
+            expect(result).toBe(null);
+            done();
+          },
+          assertNotCalled
+        );
+        window.setTimeout = orig;
+      });
+
+      frame.id = 'level0';
+      frame.src = '../mock/frames/zombie-frame.html';
+      fixture.appendChild(frame);
+    });
+  });
+});

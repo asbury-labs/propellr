@@ -1,11 +1,11 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { checks, MockCheckContext, queryFixture } from '../../../testutils';
 
 declare const axe: any;
 describe('no-implicit-explicit-label', function () {
-  const fixture = document.getElementById('fixture');
-  const queryFixture = axe.testUtils.queryFixture;
+  const fixture = document.getElementById('fixture')!;
   const check = checks['no-implicit-explicit-label'];
-  const checkContext = axe.testUtils.MockCheckContext();
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     fixture.innerHTML = '';

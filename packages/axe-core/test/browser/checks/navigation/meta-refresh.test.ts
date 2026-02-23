@@ -1,10 +1,13 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  getCheckEvaluate,
+  MockCheckContext
+} from '../../../testutils';
 
-declare const axe: any;
 describe('meta-refresh', function () {
-  const checkContext = axe.testUtils.MockCheckContext();
-  const checkSetup = axe.testUtils.checkSetup;
-  const metaRefreshCheck = axe.testUtils.getCheckEvaluate('meta-refresh');
+  const checkContext = MockCheckContext();
+  const metaRefreshCheck = getCheckEvaluate('meta-refresh');
 
   afterEach(function () {
     checkContext.reset();

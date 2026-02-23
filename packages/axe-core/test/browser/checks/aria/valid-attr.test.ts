@@ -1,9 +1,13 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  getCheckEvaluate,
+  MockCheckContext,
+  queryFixture
+} from '../../../testutils';
 
 declare const axe: any;
 describe('aria-valid-attr', function () {
-  const queryFixture = axe.testUtils.queryFixture;
-  const checkContext = axe.testUtils.MockCheckContext();
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     checkContext.reset();
@@ -14,9 +18,7 @@ describe('aria-valid-attr', function () {
       '<div id="target" tabindex="1" aria-cats="true" aria-dogs="true"></div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-valid-attr')
-        .call(checkContext, null, null, vNode)
+      getCheckEvaluate('aria-valid-attr').call(checkContext, null, null, vNode)
     ).toBe(false);
     expect(checkContext._data).toEqual(['aria-cats', 'aria-dogs']);
   });
@@ -26,9 +28,7 @@ describe('aria-valid-attr', function () {
       '<div id="target" tabindex="1" aria-selected="true"></div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-valid-attr')
-        .call(checkContext, null, null, vNode)
+      getCheckEvaluate('aria-valid-attr').call(checkContext, null, null, vNode)
     ).toBe(true);
     expect(checkContext._data).toBeNull();
   });
@@ -48,9 +48,7 @@ describe('aria-valid-attr', function () {
       '<div id="target" tabindex="1" aria-mccheddarton="true"></div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-valid-attr')
-        .call(checkContext, null, null, vNode)
+      getCheckEvaluate('aria-valid-attr').call(checkContext, null, null, vNode)
     ).toBe(true);
     expect(checkContext._data).toBeNull();
   });
@@ -61,9 +59,12 @@ describe('aria-valid-attr', function () {
         '<div id="target" aria-bats="cat" aria-puppies="2"></div>'
       );
       expect(
-        axe.testUtils
-          .getCheckEvaluate('aria-valid-attr')
-          .call(checkContext, null, ['aria-bats', 'aria-puppies'], vNode)
+        getCheckEvaluate('aria-valid-attr').call(
+          checkContext,
+          null,
+          ['aria-bats', 'aria-puppies'],
+          vNode
+        )
       ).toBe(true);
     });
   });

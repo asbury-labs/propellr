@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { queryFixture } from '../../testutils';
 
 declare const axe: any;
 describe('aria-hidden-focus-matches', function () {
   let rule;
-  const queryFixture = axe.testUtils.queryFixture;
 
   beforeEach(function () {
     rule = axe.utils.getRule('aria-hidden-focus');

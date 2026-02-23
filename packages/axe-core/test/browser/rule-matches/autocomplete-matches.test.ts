@@ -1,9 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { queryFixture } from '../../testutils';
 
 declare const axe: any;
 describe('autocomplete-matches', function () {
   const fixture = document.getElementById('fixture');
-  const queryFixture = axe.testUtils.queryFixture;
   const rule = axe.utils.getRule('autocomplete-valid');
 
   afterEach(function () {

@@ -1,13 +1,14 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { checks } from '../../../testutils';
 
 describe('caption-faked', function () {
-  const fixture = document.getElementById('fixture');
+  const fixture = document.getElementById('fixture')!;
 
   afterEach(function () {
     fixture.innerHTML = '';
   });
 
-  const captionFaked;
+  let captionFaked: any;
   beforeEach(function () {
     captionFaked = checks['caption-faked'];
   });

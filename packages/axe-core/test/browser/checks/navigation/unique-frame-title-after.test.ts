@@ -1,9 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { checks, MockCheckContext } from '../../../testutils';
 
-declare const axe: any;
 /*eslint indent: 0*/
 describe('unique-frame-title-after', function () {
-  const checkContext = axe.testUtils.MockCheckContext();
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     checkContext.reset();

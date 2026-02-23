@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { queryFixture } from '../../testutils';
 
 declare const axe: any;
 describe('nested-interactive-matches', function () {
   const fixture = document.querySelector('#fixture');
-  const queryFixture = axe.testUtils.queryFixture;
   let rule;
 
   beforeEach(function () {

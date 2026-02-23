@@ -1,11 +1,14 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  getCheckEvaluate,
+  MockCheckContext,
+  queryFixture
+} from '../../../testutils';
 
-declare const axe: any;
 describe('avoid-inline-spacing tests', function () {
-  const fixture = document.getElementById('fixture');
-  const queryFixture = axe.testUtils.queryFixture;
-  const checkEvaluate = axe.testUtils.getCheckEvaluate('avoid-inline-spacing');
-  const checkContext = axe.testUtils.MockCheckContext();
+  const fixture = document.getElementById('fixture')!;
+  const checkEvaluate = getCheckEvaluate('avoid-inline-spacing');
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     fixture.innerHTML = '';

@@ -1,9 +1,13 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  getCheckEvaluate,
+  MockCheckContext,
+  queryFixture
+} from '../../../testutils';
 
 declare const axe: any;
 describe('aria-allowed-attr', () => {
-  const queryFixture = axe.testUtils.queryFixture;
-  const checkContext = axe.testUtils.MockCheckContext();
+  const checkContext = MockCheckContext();
 
   afterEach(() => {
     checkContext.reset();
@@ -15,9 +19,12 @@ describe('aria-allowed-attr', () => {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-allowed-attr')
-        .call(checkContext, null, null, vNode)
+      getCheckEvaluate('aria-allowed-attr').call(
+        checkContext,
+        null,
+        null,
+        vNode
+      )
     ).toBe(false);
     expect(checkContext._data).toEqual(['aria-selected="true"']);
   });
@@ -28,9 +35,12 @@ describe('aria-allowed-attr', () => {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-allowed-attr')
-        .call(checkContext, null, null, vNode)
+      getCheckEvaluate('aria-allowed-attr').call(
+        checkContext,
+        null,
+        null,
+        vNode
+      )
     ).toBe(true);
   });
 
@@ -40,9 +50,12 @@ describe('aria-allowed-attr', () => {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-allowed-attr')
-        .call(checkContext, null, null, vNode)
+      getCheckEvaluate('aria-allowed-attr').call(
+        checkContext,
+        null,
+        null,
+        vNode
+      )
     ).toBe(false);
     expect(checkContext._data).toEqual(['aria-selected="true"']);
   });
@@ -53,9 +66,12 @@ describe('aria-allowed-attr', () => {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-allowed-attr')
-        .call(checkContext, null, null, vNode)
+      getCheckEvaluate('aria-allowed-attr').call(
+        checkContext,
+        null,
+        null,
+        vNode
+      )
     ).toBe(true);
     expect(checkContext._data).toBeNull();
   });
@@ -66,9 +82,12 @@ describe('aria-allowed-attr', () => {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-allowed-attr')
-        .call(checkContext, null, null, vNode)
+      getCheckEvaluate('aria-allowed-attr').call(
+        checkContext,
+        null,
+        null,
+        vNode
+      )
     ).toBe(false);
     expect(checkContext._data).toEqual(['aria-selected="true"']);
   });
@@ -79,9 +98,12 @@ describe('aria-allowed-attr', () => {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-allowed-attr')
-        .call(checkContext, null, null, vNode)
+      getCheckEvaluate('aria-allowed-attr').call(
+        checkContext,
+        null,
+        null,
+        vNode
+      )
     ).toBe(true);
     expect(checkContext._data).toBeNull();
   });
@@ -92,9 +114,12 @@ describe('aria-allowed-attr', () => {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-allowed-attr')
-        .call(checkContext, null, null, vNode)
+      getCheckEvaluate('aria-allowed-attr').call(
+        checkContext,
+        null,
+        null,
+        vNode
+      )
     ).toBe(true);
     expect(checkContext._data).toBeNull();
   });
@@ -105,9 +130,12 @@ describe('aria-allowed-attr', () => {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-allowed-attr')
-        .call(checkContext, null, null, vNode)
+      getCheckEvaluate('aria-allowed-attr').call(
+        checkContext,
+        null,
+        null,
+        vNode
+      )
     ).toBe(true);
     expect(checkContext._data).toBeNull();
   });
@@ -118,9 +146,12 @@ describe('aria-allowed-attr', () => {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-allowed-attr')
-        .call(checkContext, null, null, vNode)
+      getCheckEvaluate('aria-allowed-attr').call(
+        checkContext,
+        null,
+        null,
+        vNode
+      )
     ).toBe(false);
     expect(checkContext._data).toEqual(['aria-required="true"']);
   });
@@ -131,9 +162,12 @@ describe('aria-allowed-attr', () => {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-allowed-attr')
-        .call(checkContext, null, null, vNode)
+      getCheckEvaluate('aria-allowed-attr').call(
+        checkContext,
+        null,
+        null,
+        vNode
+      )
     ).toBe(true);
     expect(checkContext._data).toBeNull();
   });
@@ -144,9 +178,12 @@ describe('aria-allowed-attr', () => {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-allowed-attr')
-        .call(checkContext, null, null, vNode)
+      getCheckEvaluate('aria-allowed-attr').call(
+        checkContext,
+        null,
+        null,
+        vNode
+      )
     ).toBe(false);
     expect(checkContext._data).toEqual(['aria-multiline="true"']);
   });
@@ -157,9 +194,12 @@ describe('aria-allowed-attr', () => {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-allowed-attr')
-        .call(checkContext, null, null, vNode)
+      getCheckEvaluate('aria-allowed-attr').call(
+        checkContext,
+        null,
+        null,
+        vNode
+      )
     ).toBe(false);
     expect(checkContext._data).toEqual(['aria-multiline="false"']);
   });
@@ -168,9 +208,12 @@ describe('aria-allowed-attr', () => {
     const vNode = queryFixture('<div id="target" aria-multiline="true"></div>');
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-allowed-attr')
-        .call(checkContext, null, null, vNode)
+      getCheckEvaluate('aria-allowed-attr').call(
+        checkContext,
+        null,
+        null,
+        vNode
+      )
     ).toBe(false);
     expect(checkContext._data).toEqual(['aria-multiline="true"']);
   });
@@ -181,9 +224,12 @@ describe('aria-allowed-attr', () => {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-allowed-attr')
-        .call(checkContext, null, null, vNode)
+      getCheckEvaluate('aria-allowed-attr').call(
+        checkContext,
+        null,
+        null,
+        vNode
+      )
     ).toBeUndefined();
     expect(checkContext._data).not.toBeNull();
   });
@@ -194,9 +240,12 @@ describe('aria-allowed-attr', () => {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-allowed-attr')
-        .call(checkContext, null, null, vNode)
+      getCheckEvaluate('aria-allowed-attr').call(
+        checkContext,
+        null,
+        null,
+        vNode
+      )
     ).toBe(false);
     expect(checkContext._data).not.toBeNull();
   });
@@ -207,9 +256,12 @@ describe('aria-allowed-attr', () => {
     );
 
     expect(
-      axe.testUtils
-        .getCheckEvaluate('aria-allowed-attr')
-        .call(checkContext, null, null, vNode)
+      getCheckEvaluate('aria-allowed-attr').call(
+        checkContext,
+        null,
+        null,
+        vNode
+      )
     ).toBe(false);
     expect(checkContext._data).not.toBeNull();
   });
@@ -231,13 +283,16 @@ describe('aria-allowed-attr', () => {
       );
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('aria-allowed-attr')
-          .call(checkContext, null, null, vNode)
+        getCheckEvaluate('aria-allowed-attr').call(
+          checkContext,
+          null,
+          null,
+          vNode
+        )
       ).toBe(false);
 
       expect(
-        axe.testUtils.getCheckEvaluate('aria-allowed-attr').call(
+        getCheckEvaluate('aria-allowed-attr').call(
           checkContext,
           null,
           {
@@ -271,15 +326,21 @@ describe('aria-allowed-attr', () => {
       };
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('aria-allowed-attr')
-          .call(checkContext, null, null, vNode)
+        getCheckEvaluate('aria-allowed-attr').call(
+          checkContext,
+          null,
+          null,
+          vNode
+        )
       ).toBe(false);
 
       expect(
-        axe.testUtils
-          .getCheckEvaluate('aria-allowed-attr')
-          .call(checkContext, null, options, vNode)
+        getCheckEvaluate('aria-allowed-attr').call(
+          checkContext,
+          null,
+          options,
+          vNode
+        )
       ).toBe(true);
     });
   });

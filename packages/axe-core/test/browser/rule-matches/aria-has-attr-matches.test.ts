@@ -1,9 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { queryFixture, fixtureSetup } from '../../testutils';
 
 declare const axe: any;
 describe('aria-has-attr-matches', function () {
-  const queryFixture = axe.testUtils.queryFixture;
-  const fixtureSetup = axe.testUtils.fixtureSetup;
   let rule;
 
   beforeEach(function () {

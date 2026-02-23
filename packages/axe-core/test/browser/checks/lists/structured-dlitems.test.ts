@@ -1,10 +1,12 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  getCheckEvaluate,
+  shadowSupport
+} from '../../../testutils';
 
-declare const axe: any;
 describe('structured-dlitems', function () {
-  const fixture = document.getElementById('fixture');
-  const checkSetup = axe.testUtils.checkSetup;
-  const shadowSupport = axe.testUtils.shadowSupport;
+  const fixture = document.getElementById('fixture')!;
 
   afterEach(function () {
     fixture.innerHTML = '';
@@ -12,30 +14,24 @@ describe('structured-dlitems', function () {
 
   it('should return false if the list has no contents', function () {
     const checkArgs = checkSetup('<dl id="target"></dl>');
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('structured-dlitems')
-        .apply(null, checkArgs)
-    ).toBe(false);
+    expect(getCheckEvaluate('structured-dlitems').apply(null, checkArgs)).toBe(
+      false
+    );
   });
 
   it('should return true if the list has only a dd', function () {
     const checkArgs = checkSetup('<dl id="target"><dd>A list</dd></dl>');
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('structured-dlitems')
-        .apply(null, checkArgs)
-    ).toBe(true);
+    expect(getCheckEvaluate('structured-dlitems').apply(null, checkArgs)).toBe(
+      true
+    );
   });
 
   it('should return true if the list has only a dt', function () {
     const checkArgs = checkSetup('<dl id="target"><dt>A list</dt></dl>');
 
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('structured-dlitems')
-        .apply(null, checkArgs)
-    ).toBe(true);
+    expect(getCheckEvaluate('structured-dlitems').apply(null, checkArgs)).toBe(
+      true
+    );
   });
 
   it('should return true if the list has dt and dd in the incorrect order', function () {
@@ -43,11 +39,9 @@ describe('structured-dlitems', function () {
       '<dl id="target"><dd>A list</dd><dt>An item</dt></dl>'
     );
 
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('structured-dlitems')
-        .apply(null, checkArgs)
-    ).toBe(true);
+    expect(getCheckEvaluate('structured-dlitems').apply(null, checkArgs)).toBe(
+      true
+    );
   });
 
   it('should return true if the list has dt and dd in the correct order as non-child descendants', function () {
@@ -55,11 +49,9 @@ describe('structured-dlitems', function () {
       '<dl id="target"><dd><dl><dt>An item</dt><dd>A list</dd></dl></dd></dl>'
     );
 
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('structured-dlitems')
-        .apply(null, checkArgs)
-    ).toBe(true);
+    expect(getCheckEvaluate('structured-dlitems').apply(null, checkArgs)).toBe(
+      true
+    );
   });
 
   it('should return false if the list has dt and dd in the correct order', function () {
@@ -67,11 +59,9 @@ describe('structured-dlitems', function () {
       '<dl id="target"><dt>An item</dt><dd>A list</dd></dl>'
     );
 
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('structured-dlitems')
-        .apply(null, checkArgs)
-    ).toBe(false);
+    expect(getCheckEvaluate('structured-dlitems').apply(null, checkArgs)).toBe(
+      false
+    );
   });
 
   it('should return false if the list has a correctly-ordered dt and dd with other content', function () {
@@ -79,11 +69,9 @@ describe('structured-dlitems', function () {
       '<dl id="target"><dt>Stuff</dt><dt>Item one</dt><dd>Description</dd><p>Not a list</p></dl>'
     );
 
-    expect(
-      axe.testUtils
-        .getCheckEvaluate('structured-dlitems')
-        .apply(null, checkArgs)
-    ).toBe(false);
+    expect(getCheckEvaluate('structured-dlitems').apply(null, checkArgs)).toBe(
+      false
+    );
   });
 
   (shadowSupport.v1 ? it : xit)(
@@ -96,9 +84,7 @@ describe('structured-dlitems', function () {
 
       const checkArgs = checkSetup(node, 'dl');
       expect(
-        axe.testUtils
-          .getCheckEvaluate('structured-dlitems')
-          .apply(null, checkArgs)
+        getCheckEvaluate('structured-dlitems').apply(null, checkArgs)
       ).toBe(false);
     }
   );
@@ -113,9 +99,7 @@ describe('structured-dlitems', function () {
 
       const checkArgs = checkSetup(node, 'dl');
       expect(
-        axe.testUtils
-          .getCheckEvaluate('structured-dlitems')
-          .apply(null, checkArgs)
+        getCheckEvaluate('structured-dlitems').apply(null, checkArgs)
       ).toBe(true);
     }
   );

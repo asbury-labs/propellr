@@ -1,14 +1,16 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  checks,
+  getCheckEvaluate,
+  MockCheckContext,
+  queryFixture
+} from '../../../testutils';
 
-declare const axe: any;
 describe('no-focusable-content tests', function () {
-  const queryFixture = axe.testUtils.queryFixture;
-  const noFocusableContent = axe.testUtils.getCheckEvaluate(
-    'no-focusable-content'
-  );
-  const checkSetup = axe.testUtils.checkSetup;
+  const noFocusableContent = getCheckEvaluate('no-focusable-content');
   const check = checks['no-focusable-content'];
-  const checkContext = new axe.testUtils.MockCheckContext();
+  const checkContext = new MockCheckContext();
 
   afterEach(function () {
     checkContext.reset();

@@ -1,9 +1,8 @@
 import { describe, it, expect } from 'vitest';
+import { getCheckEvaluate, queryFixture } from '../../../testutils';
 
-declare const axe: any;
 describe('aria-labelledby', () => {
-  const queryFixture = axe.testUtils.queryFixture;
-  const checkEvaluate = axe.testUtils.getCheckEvaluate('aria-labelledby');
+  const checkEvaluate = getCheckEvaluate('aria-labelledby');
 
   it('should return true if an aria-labelledby and its target is present', () => {
     const node = queryFixture(

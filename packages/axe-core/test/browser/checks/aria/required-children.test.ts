@@ -1,14 +1,18 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  flatTreeSetup,
+  getCheckEvaluate,
+  MockCheckContext,
+  shadowSupport
+} from '../../../testutils';
 
 declare const axe: any;
 describe('aria-required-children', () => {
-  const fixture = document.getElementById('fixture');
-  const shadowSupported = axe.testUtils.shadowSupport.v1;
-  const checkContext = axe.testUtils.MockCheckContext();
-  const checkSetup = axe.testUtils.checkSetup;
-  const requiredChildrenCheck = axe.testUtils.getCheckEvaluate(
-    'aria-required-children'
-  );
+  const fixture = document.getElementById('fixture')!;
+  const shadowSupported = shadowSupport.v1;
+  const checkContext = MockCheckContext();
+  const requiredChildrenCheck = getCheckEvaluate('aria-required-children');
 
   afterEach(() => {
     fixture.innerHTML = '';
@@ -34,7 +38,7 @@ describe('aria-required-children', () => {
       const shadowRoot = target.attachShadow({ mode: 'open' });
       shadowRoot.innerHTML = '<p>Nothing here.</p>';
 
-      axe.testUtils.flatTreeSetup(fixture);
+      flatTreeSetup(fixture);
       const virtualTarget = axe.utils.getNodeFromTree(target);
 
       const params = [target, undefined, virtualTarget];
@@ -61,7 +65,7 @@ describe('aria-required-children', () => {
       const shadowRoot = target.attachShadow({ mode: 'open' });
       shadowRoot.innerHTML = '<p>Nothing here.</p>';
 
-      axe.testUtils.flatTreeSetup(fixture);
+      flatTreeSetup(fixture);
       const virtualTarget = axe.utils.getNodeFromTree(target);
 
       const params = [target, undefined, virtualTarget];

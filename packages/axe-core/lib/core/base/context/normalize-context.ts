@@ -7,6 +7,7 @@ import {
   isLabelledFramesSelector,
   isLabelledShadowDomSelector
 } from '../../utils';
+import isNode from '../../../commons/dom/is-node';
 
 interface NormalizedContext {
   include: unknown[];
@@ -85,7 +86,7 @@ function normalizeContextList(selectorList: unknown = []): unknown[] {
 }
 
 function normalizeContextSelector(selector: unknown): unknown {
-  if (selector instanceof window.Node) {
+  if (isNode(selector)) {
     return selector; // Nodes must not be wrapped in an array
   }
   if (typeof selector === 'string') {

@@ -1,9 +1,13 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  getCheckEvaluate,
+  MockCheckContext
+} from '../../../testutils';
 
 declare const axe: any;
 describe('aria-conditional-attr', () => {
-  const { checkSetup, getCheckEvaluate } = axe.testUtils;
-  const checkContext = axe.testUtils.MockCheckContext();
+  const checkContext = MockCheckContext();
   const ariaConditionalCheck = getCheckEvaluate('aria-conditional-attr');
 
   afterEach(() => {
@@ -157,10 +161,10 @@ describe('aria-conditional-attr', () => {
     });
 
     describe('checked state', () => {
-      const fixture = document.querySelector('#fixture');
+      const fixture = document.querySelector('#fixture')!;
 
       it('returns true for aria-checked="true" on a [checked] checkbox', () => {
-        fixture.innerHTML = `<input type="checkbox" aria-checked="true" checked>`;
+        fixture!.innerHTML = `<input type="checkbox" aria-checked="true" checked>`;
         const root = axe.setup(fixture);
         const vNode = axe.utils.querySelectorAll(root, 'input')[0];
 
@@ -171,8 +175,8 @@ describe('aria-conditional-attr', () => {
       });
 
       it('returns true for aria-checked="true" on a clicked checkbox', () => {
-        fixture.innerHTML = `<input type="checkbox" aria-checked="true">`;
-        fixture.firstChild.click(); // set checked state
+        fixture!.innerHTML = `<input type="checkbox" aria-checked="true">`;
+        (fixture!.firstChild as HTMLElement).click(); // set checked state
         const root = axe.setup(fixture);
         const vNode = axe.utils.querySelectorAll(root, 'input')[0];
 
@@ -231,9 +235,10 @@ describe('aria-conditional-attr', () => {
 
     describe('indeterminate state', () => {
       function asIndeterminateVirtualNode(html) {
-        const fixture = document.querySelector('#fixture');
+        const fixture = document.querySelector('#fixture')!;
         fixture.innerHTML = html;
-        fixture.querySelector('input').indeterminate = true;
+        (fixture.querySelector('input') as HTMLInputElement).indeterminate =
+          true;
         const root = axe.setup(fixture);
         return axe.utils.querySelectorAll(root, 'input')[0];
       }

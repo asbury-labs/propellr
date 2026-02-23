@@ -1,11 +1,8 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { checkSetup, checks, shadowSupport } from '../../../testutils';
 
-declare const axe: any;
-declare const checks: any;
 describe('dlitem', function () {
-  const fixture = document.getElementById('fixture');
-  const checkSetup = axe.testUtils.checkSetup;
-  const shadowSupport = axe.testUtils.shadowSupport;
+  const fixture = document.getElementById('fixture')!;
 
   afterEach(function () {
     fixture.innerHTML = '';

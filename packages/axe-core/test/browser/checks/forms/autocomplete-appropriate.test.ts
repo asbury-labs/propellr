@@ -1,11 +1,15 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import {
+  checkSetup,
+  getCheckEvaluate,
+  MockCheckContext
+} from '../../../testutils';
 
 declare const axe: any;
 describe('autocomplete-appropriate', function () {
-  const fixture = document.getElementById('fixture');
-  const checkSetup = axe.testUtils.checkSetup;
-  const checkContext = axe.testUtils.MockCheckContext();
-  const evaluate = axe.testUtils.getCheckEvaluate('autocomplete-appropriate');
+  const fixture = document.getElementById('fixture')!;
+  const checkContext = MockCheckContext();
+  const evaluate = getCheckEvaluate('autocomplete-appropriate');
 
   beforeEach(function () {
     axe._tree = undefined;

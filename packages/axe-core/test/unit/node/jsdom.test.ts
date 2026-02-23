@@ -1,10 +1,10 @@
-/**
- * @deprecated Per PRD-00 Section 4.4 — jsdom tests are being migrated to Vitest.
- * These tests validate axe-core behavior in a jsdom (Node.js) environment.
- */
+// @vitest-environment node
 import { describe, it, expect, afterEach } from 'vitest';
 import { JSDOM } from 'jsdom';
-import axe from '../../../dist/axe.js';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+const axe = require('../../../dist/axe.js');
 
 const domStr =
   '<!DOCTYPE html>' +
@@ -35,7 +35,7 @@ describe('jsdom axe-core', () => {
   });
 
   it('should unset globals so it can run with a new set of globals', () => {
-    const dom = new JSDOM(domStr);
+    let dom = new JSDOM(domStr);
 
     return axe
       .run(dom.window.document.documentElement, {

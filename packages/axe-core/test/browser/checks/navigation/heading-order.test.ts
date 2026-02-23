@@ -1,9 +1,13 @@
 import { describe, it, expect, afterEach, afterAll } from 'vitest';
+import {
+  checks,
+  getCheckEvaluate,
+  MockCheckContext,
+  queryFixture
+} from '../../../testutils';
 
-declare const axe: any;
 describe('heading-order', function () {
-  const checkContext = axe.testUtils.MockCheckContext();
-  const queryFixture = axe.testUtils.queryFixture;
+  const checkContext = MockCheckContext();
 
   afterEach(function () {
     checkContext.reset();
@@ -14,9 +18,7 @@ describe('heading-order', function () {
       '<div role="heading" aria-level="1" id="target">One</div><div role="heading" aria-level="3">Three</div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('heading-order')
-        .call(checkContext, null, {}, vNode, {})
+      getCheckEvaluate('heading-order').call(checkContext, null, {}, vNode, {})
     ).toBe(true);
     expect(checkContext._data).toEqual({
       headingOrder: [
@@ -37,9 +39,7 @@ describe('heading-order', function () {
       '<div role="heading" aria-level="-1" id="target">One</div><div role="heading">Two</div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('heading-order')
-        .call(checkContext, null, {}, vNode, {})
+      getCheckEvaluate('heading-order').call(checkContext, null, {}, vNode, {})
     ).toBe(true);
     expect(checkContext._data).toEqual({
       headingOrder: [
@@ -60,9 +60,7 @@ describe('heading-order', function () {
       '<div role="heading" aria-level="12" id="target">One</div>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('heading-order')
-        .call(checkContext, null, {}, vNode, {})
+      getCheckEvaluate('heading-order').call(checkContext, null, {}, vNode, {})
     ).toBe(true);
     expect(checkContext._data).toEqual({
       headingOrder: [
@@ -77,9 +75,7 @@ describe('heading-order', function () {
   it('should store the correct header level for hn tags and return true', function () {
     const vNode = queryFixture('<h1 id="target">One</h1><h3>Three</h3>');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('heading-order')
-        .call(checkContext, null, {}, vNode, {})
+      getCheckEvaluate('heading-order').call(checkContext, null, {}, vNode, {})
     ).toBe(true);
     expect(checkContext._data).toEqual({
       headingOrder: [
@@ -100,9 +96,7 @@ describe('heading-order', function () {
       '<h1 aria-level="2" id="target">Two</h1><h3 aria-level="4">Four</h3>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('heading-order')
-        .call(checkContext, null, {}, vNode, {})
+      getCheckEvaluate('heading-order').call(checkContext, null, {}, vNode, {})
     ).toBe(true);
     expect(checkContext._data).toEqual({
       headingOrder: [
@@ -120,9 +114,9 @@ describe('heading-order', function () {
 
   it('should ignore aria-level on iframe when not used with role=heading', function () {
     const vNode = queryFixture('<iframe aria-level="2" id="target"></iframe>');
-    axe.testUtils
-      .getCheckEvaluate('heading-order')
-      .call(checkContext, null, {}, vNode, { initiator: true });
+    getCheckEvaluate('heading-order').call(checkContext, null, {}, vNode, {
+      initiator: true
+    });
     expect(checkContext._data).toEqual({
       headingOrder: [
         {
@@ -138,9 +132,7 @@ describe('heading-order', function () {
       '<h1 role="heading" id="target">One</h1><h3 role="heading">Three</h3>'
     );
     expect(
-      axe.testUtils
-        .getCheckEvaluate('heading-order')
-        .call(checkContext, null, {}, vNode, {})
+      getCheckEvaluate('heading-order').call(checkContext, null, {}, vNode, {})
     ).toBe(true);
     expect(checkContext._data).toEqual({
       headingOrder: [
@@ -159,9 +151,7 @@ describe('heading-order', function () {
   it('should return the heading level when an hn tag has an invalid aria-level', function () {
     const vNode = queryFixture('<h1 aria-level="-1" id="target">One</h1>');
     expect(
-      axe.testUtils
-        .getCheckEvaluate('heading-order')
-        .call(checkContext, null, {}, vNode, {})
+      getCheckEvaluate('heading-order').call(checkContext, null, {}, vNode, {})
     ).toBe(true);
     expect(checkContext._data).toEqual({
       headingOrder: [
@@ -177,9 +167,9 @@ describe('heading-order', function () {
     const vNode = queryFixture(
       '<h1 id="target">One</h1><iframe></iframe><h3>Three</h3>'
     );
-    axe.testUtils
-      .getCheckEvaluate('heading-order')
-      .call(checkContext, null, {}, vNode, { initiator: true });
+    getCheckEvaluate('heading-order').call(checkContext, null, {}, vNode, {
+      initiator: true
+    });
     expect(checkContext._data).toEqual({
       headingOrder: [
         {

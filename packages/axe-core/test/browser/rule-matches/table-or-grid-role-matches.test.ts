@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
+import { queryFixture } from '../../testutils';
 
 declare const axe: any;
 describe('table-or-grid-role-matches', () => {
-  const { queryFixture } = axe.testUtils;
   const rule = axe.utils.getRule('td-headers-attr');
 
   it(`returns true for tables without role`, () => {

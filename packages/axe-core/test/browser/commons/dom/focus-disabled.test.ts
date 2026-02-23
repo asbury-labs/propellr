@@ -1,0 +1,92 @@
+import { describe, it, expect } from 'vitest';
+import { queryFixture, queryShadowFixture } from '../../../testutils';
+
+declare const axe: any;
+describe('dom.focus-disabled', () => {
+  const focusDisabled = axe.commons.dom.focusDisabled;
+
+  it('returns false for non-disabled element', () => {
+    const vNode = queryFixture('<span id="target"></span>');
+
+    expect(focusDisabled(vNode)).toBe(false);
+  });
+
+  it('returns true for disabled element which is allowed to be disabled', () => {
+    const vNode = queryFixture('<button id="target" disabled></button>');
+
+    expect(focusDisabled(vNode)).toBe(true);
+  });
+
+  it('returns false for disabled element which is not allowed to be disabled', () => {
+    const vNode = queryFixture('<span id="target" disabled></span>');
+
+    expect(focusDisabled(vNode)).toBe(false);
+  });
+
+  it('returns true if parent fieldset is disabled', () => {
+    const vNode = queryFixture(
+      '<fieldset disabled><input id="target"/></fieldset>'
+    );
+
+    expect(focusDisabled(vNode)).toBe(true);
+  });
+
+  it('returns false if element is inside a legend inside a disabled fieldset', () => {
+    const vNode = queryFixture(
+      '<fieldset disabled><legend><input id="target"/></legend></fieldset>'
+    );
+
+    expect(focusDisabled(vNode)).toBe(false);
+  });
+
+  it('returns false for disabled fieldset outside shadow tree', () => {
+    const vNode = queryShadowFixture(
+      '<fieldset disabled><div id="shadow"></div></fieldset>',
+      '<input id="target"/>'
+    );
+
+    expect(focusDisabled(vNode)).toBe(false);
+  });
+
+  it('returns true if element is hidden for everyone', () => {
+    const vNode = queryFixture('<button id="target" hidden></button>');
+
+    expect(focusDisabled(vNode)).toBe(true);
+  });
+
+  it('returns true for element with inert', () => {
+    const vNode = queryFixture('<button id="target" inert></button>');
+
+    expect(focusDisabled(vNode)).toBe(true);
+  });
+
+  it('returns true for ancestor with inert', () => {
+    const vNode = queryFixture(
+      '<div inert><div><button id="target"></button></div></div>'
+    );
+
+    expect(focusDisabled(vNode)).toBe(true);
+  });
+
+  it('returns true for ancestor with inert outside shadow tree', () => {
+    const vNode = queryShadowFixture(
+      '<div inert><div id="shadow"></div></div>',
+      '<input id="target"/>'
+    );
+
+    expect(focusDisabled(vNode)).toBe(true);
+  });
+
+  describe('SerialVirtualNode', () => {
+    it('returns false if element is hidden for everyone', () => {
+      const vNode = new axe.SerialVirtualNode({
+        nodeName: 'button',
+        attributes: {
+          hidden: true
+        }
+      });
+
+      expect(focusDisabled(vNode)).toBe(false);
+    });
+  });
+});

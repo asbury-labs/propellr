@@ -67,7 +67,10 @@ function axeGlobalPlugin(): Plugin {
       const outDir = options.dir || resolve(__dirname, 'dist');
       const shim = [
         'var axe = {};',
-        'if (typeof window === "undefined") { var window = typeof globalThis !== "undefined" ? globalThis : {}; }'
+        // Use globalThis property assignment (not var) so that setupGlobals
+        // can update window/document and all code sees the new values.
+        'if (typeof window === "undefined") { globalThis.window = typeof globalThis !== "undefined" ? globalThis : {}; }',
+        'if (typeof document === "undefined") { globalThis.document = globalThis.window ? globalThis.window.document : undefined; }'
       ].join('\n');
 
       for (const [fileName, chunk] of Object.entries(bundle)) {
@@ -97,14 +100,23 @@ function axeGlobalPlugin(): Plugin {
           insertPos = 0;
         }
 
-        writeFileSync(
-          filePath,
+        let patched =
           content.slice(0, insertPos) +
-            '\n' +
-            shim +
-            '\n' +
-            content.slice(insertPos)
+          '\n' +
+          shim +
+          '\n' +
+          content.slice(insertPos);
+
+        // The UMD factory creates `axeExport` and returns it, but `load()`
+        // configures `_audit` on the outer `axe` object. Since
+        // `Object.assign(axe, axeExport)` already copies everything TO axe,
+        // we return `axe` instead — it has all methods + the configured audit.
+        patched = patched.replace(
+          /\n\treturn axeExport;\n\}\);/,
+          '\n\treturn axe;\n});'
         );
+
+        writeFileSync(filePath, patched);
       }
     }
   };

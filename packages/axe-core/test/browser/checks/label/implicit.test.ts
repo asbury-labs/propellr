@@ -1,11 +1,14 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  fixtureSetup,
+  getCheckEvaluate,
+  MockCheckContext
+} from '../../../testutils';
 
-declare const axe: any;
 describe('implicit-label', () => {
-  const fixtureSetup = axe.testUtils.fixtureSetup;
-  const checkSetup = axe.testUtils.checkSetup;
-  const checkEvaluate = axe.testUtils.getCheckEvaluate('implicit-label');
-  const checkContext = axe.testUtils.MockCheckContext();
+  const checkEvaluate = getCheckEvaluate('implicit-label');
+  const checkContext = MockCheckContext();
 
   afterEach(() => {
     checkContext.reset();

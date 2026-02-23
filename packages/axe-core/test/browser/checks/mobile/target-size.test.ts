@@ -1,12 +1,15 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import {
+  checkSetup,
+  checks,
+  MockCheckContext,
+  shadowCheckSetup
+} from '../../../testutils';
 
-declare const axe: any;
 describe('target-size tests', () => {
-  const checkContext = axe.testUtils.MockCheckContext();
-  const checkSetup = axe.testUtils.checkSetup;
-  const shadowCheckSetup = axe.testUtils.shadowCheckSetup;
+  const checkContext = MockCheckContext();
   const check = checks['target-size'];
-  const fixture = document.querySelector('#fixture');
+  const fixture = document.querySelector('#fixture')!;
 
   function elmIds(elms) {
     return Array.from(elms).map(elm => {

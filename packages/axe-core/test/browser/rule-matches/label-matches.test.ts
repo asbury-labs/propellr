@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { queryFixture } from '../../testutils';
 
 declare const axe: any;
 describe('label-matches', function () {
   const fixture = document.getElementById('fixture');
-  const queryFixture = axe.testUtils.queryFixture;
   let rule;
 
   beforeEach(function () {

@@ -1,6 +1,7 @@
 import toArray from './to-array';
 import DqElement from './dq-element';
 import AbstractVirtualNode from '../base/virtual-node/abstract-virtual-node';
+import isNode from '../../commons/dom/is-node';
 
 /**
  * Helper to denote which checks are asyncronous and provide callbacks and pass data back to the CheckResult
@@ -31,13 +32,7 @@ function checkHelper(
       checkResult.data = data;
     },
     relatedNodes(nodes: unknown) {
-      if (!window.Node) {
-        return;
-      }
-      if (
-        nodes instanceof window.Node ||
-        nodes instanceof AbstractVirtualNode
-      ) {
+      if (isNode(nodes) || nodes instanceof AbstractVirtualNode) {
         nodes = [nodes];
       } else {
         nodes = toArray(nodes as ArrayLike<unknown>);
@@ -48,7 +43,7 @@ function checkHelper(
           node = (node as AbstractVirtualNode & { actualNode?: Node })
             .actualNode;
         }
-        if (node instanceof window.Node) {
+        if (isNode(node)) {
           const dqElm = new DqElement(node as Node);
           (checkResult.relatedNodes as unknown[]).push(dqElm);
         }
