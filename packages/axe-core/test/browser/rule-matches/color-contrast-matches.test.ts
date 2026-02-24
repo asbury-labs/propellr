@@ -4,8 +4,6 @@ import { flatTreeSetup } from '../../testutils';
 declare const axe: any;
 describe('color-contrast-matches', function () {
   const fixture = document.getElementById('fixture');
-  const shadowSupport =
-    document.body && typeof document.body.attachShadow === 'function';
   let rule;
 
   beforeEach(function () {
@@ -440,139 +438,136 @@ describe('color-contrast-matches', function () {
     expect(rule.matches(target, axe.utils.getNodeFromTree(target))).toBe(false);
   });
 
-  if (shadowSupport) {
-    it('should match a descendant of an element across a shadow boundary', function () {
-      fixture.innerHTML =
-        '<div id="parent" style="background-color: #000;">' + '</div>';
+  it('should match a descendant of an element across a shadow boundary', function () {
+    fixture.innerHTML =
+      '<div id="parent" style="background-color: #000;">' + '</div>';
 
-      const shadowRoot = document
-        .getElementById('parent')
-        .attachShadow({ mode: 'open' });
-      shadowRoot.innerHTML =
-        '<div id="shadowTarget" style="color: #333">Text</div>';
+    const shadowRoot = document
+      .getElementById('parent')
+      .attachShadow({ mode: 'open' });
+    shadowRoot.innerHTML =
+      '<div id="shadowTarget" style="color: #333">Text</div>';
 
-      const shadowTarget =
-        fixture.firstChild.shadowRoot.querySelector('#shadowTarget');
-      flatTreeSetup(fixture);
-      expect(
-        rule.matches(shadowTarget, axe.utils.getNodeFromTree(shadowTarget))
-      ).toBe(true);
-    });
+    const shadowTarget =
+      fixture.firstChild.shadowRoot.querySelector('#shadowTarget');
+    flatTreeSetup(fixture);
+    expect(
+      rule.matches(shadowTarget, axe.utils.getNodeFromTree(shadowTarget))
+    ).toBe(true);
+  });
 
-    it('should look at the correct root node when looking up an explicit label and disabled input', function () {
-      fixture.innerHTML = '<div id="parent">' + '<input id="input">' + '</div>';
+  it('should look at the correct root node when looking up an explicit label and disabled input', function () {
+    fixture.innerHTML = '<div id="parent">' + '<input id="input">' + '</div>';
 
-      const shadowRoot = document
-        .getElementById('parent')
-        .attachShadow({ mode: 'open' });
-      shadowRoot.innerHTML =
-        '<div id="shadowParent">' +
-        '<label for="input" id="shadowLabel">Label</label>' +
-        '<input id="input" disabled>' +
-        '</div>';
+    const shadowRoot = document
+      .getElementById('parent')
+      .attachShadow({ mode: 'open' });
+    shadowRoot.innerHTML =
+      '<div id="shadowParent">' +
+      '<label for="input" id="shadowLabel">Label</label>' +
+      '<input id="input" disabled>' +
+      '</div>';
 
-      const shadowLabel =
-        fixture.firstChild.shadowRoot.querySelector('#shadowLabel');
-      flatTreeSetup(fixture);
-      expect(
-        rule.matches(shadowLabel, axe.utils.getNodeFromTree(shadowLabel))
-      ).toBe(false);
-    });
+    const shadowLabel =
+      fixture.firstChild.shadowRoot.querySelector('#shadowLabel');
+    flatTreeSetup(fixture);
+    expect(
+      rule.matches(shadowLabel, axe.utils.getNodeFromTree(shadowLabel))
+    ).toBe(false);
+  });
 
-    it('should look at the correct root node when looking up implicit label and disabled input', function () {
-      fixture.innerHTML = '<div id="parent">' + '<input>' + '</div>';
+  it('should look at the correct root node when looking up implicit label and disabled input', function () {
+    fixture.innerHTML = '<div id="parent">' + '<input>' + '</div>';
 
-      const shadowRoot = document
-        .getElementById('parent')
-        .attachShadow({ mode: 'open' });
-      shadowRoot.innerHTML =
-        '<div id="shadowParent">' +
-        '<label id="shadowLabel">Label <input disabled></label>' +
-        '</div>';
+    const shadowRoot = document
+      .getElementById('parent')
+      .attachShadow({ mode: 'open' });
+    shadowRoot.innerHTML =
+      '<div id="shadowParent">' +
+      '<label id="shadowLabel">Label <input disabled></label>' +
+      '</div>';
 
-      const shadowLabel =
-        fixture.firstChild.shadowRoot.querySelector('#shadowLabel');
-      flatTreeSetup(fixture);
-      expect(
-        rule.matches(shadowLabel, axe.utils.getNodeFromTree(shadowLabel))
-      ).toBe(false);
-    });
+    const shadowLabel =
+      fixture.firstChild.shadowRoot.querySelector('#shadowLabel');
+    flatTreeSetup(fixture);
+    expect(
+      rule.matches(shadowLabel, axe.utils.getNodeFromTree(shadowLabel))
+    ).toBe(false);
+  });
 
-    it("should look at the correct root node for a disabled control's label associated w/ aria-labelledby", function () {
-      fixture.innerHTML = '<div id="parent">' + '<input id="input">' + '</div>';
+  it("should look at the correct root node for a disabled control's label associated w/ aria-labelledby", function () {
+    fixture.innerHTML = '<div id="parent">' + '<input id="input">' + '</div>';
 
-      const shadowRoot = document
-        .getElementById('parent')
-        .attachShadow({ mode: 'open' });
-      shadowRoot.innerHTML =
-        '<div id="shadowParent">' +
-        '<label id="shadowLabel">Label</label>' +
-        '<input aria-labelledby="shadowLabel" disabled>' +
-        '</div>';
+    const shadowRoot = document
+      .getElementById('parent')
+      .attachShadow({ mode: 'open' });
+    shadowRoot.innerHTML =
+      '<div id="shadowParent">' +
+      '<label id="shadowLabel">Label</label>' +
+      '<input aria-labelledby="shadowLabel" disabled>' +
+      '</div>';
 
-      const shadowLabel =
-        fixture.firstChild.shadowRoot.querySelector('#shadowLabel');
-      flatTreeSetup(fixture);
-      expect(
-        rule.matches(shadowLabel, axe.utils.getNodeFromTree(shadowLabel))
-      ).toBe(false);
-    });
+    const shadowLabel =
+      fixture.firstChild.shadowRoot.querySelector('#shadowLabel');
+    flatTreeSetup(fixture);
+    expect(
+      rule.matches(shadowLabel, axe.utils.getNodeFromTree(shadowLabel))
+    ).toBe(false);
+  });
 
-    it('should handle input/label spread across the shadow boundary', function () {
-      fixture.innerHTML = '<label>Text <div id="firstChild"></div></label>';
+  it('should handle input/label spread across the shadow boundary', function () {
+    fixture.innerHTML = '<label>Text <div id="firstChild"></div></label>';
 
-      const container = document.getElementById('firstChild');
-      const shadowRoot = container.attachShadow({ mode: 'open' });
-      shadowRoot.innerHTML = '<input type="text" id="input" disabled />';
+    const container = document.getElementById('firstChild');
+    const shadowRoot = container.attachShadow({ mode: 'open' });
+    shadowRoot.innerHTML = '<input type="text" id="input" disabled />';
 
-      const shadowTarget = container.shadowRoot.querySelector('#input');
-      flatTreeSetup(fixture);
-      expect(
-        rule.matches(shadowTarget, axe.utils.getNodeFromTree(shadowTarget))
-      ).toBe(false);
-    });
+    const shadowTarget = container.shadowRoot.querySelector('#input');
+    flatTreeSetup(fixture);
+    expect(
+      rule.matches(shadowTarget, axe.utils.getNodeFromTree(shadowTarget))
+    ).toBe(false);
+  });
 
-    it('should look at the children of a virtual node for overlap', function () {
-      fixture.innerHTML =
-        '<div id="parent">' +
-        '<div id="firstChild" style="background-color: #ccc; color: #fff;"></div>' +
-        '</div>';
+  it('should look at the children of a virtual node for overlap', function () {
+    fixture.innerHTML =
+      '<div id="parent">' +
+      '<div id="firstChild" style="background-color: #ccc; color: #fff;"></div>' +
+      '</div>';
 
-      const shadowRoot = document
-        .getElementById('firstChild')
-        .attachShadow({ mode: 'open' });
-      shadowRoot.innerHTML =
-        'Some text' +
-        '<p style="color: #fff;" id="shadowTarget">Other text</p>';
+    const shadowRoot = document
+      .getElementById('firstChild')
+      .attachShadow({ mode: 'open' });
+    shadowRoot.innerHTML =
+      'Some text' + '<p style="color: #fff;" id="shadowTarget">Other text</p>';
 
-      const firstChild = fixture.querySelector('#firstChild');
-      flatTreeSetup(fixture);
-      expect(
-        rule.matches(firstChild, axe.utils.getNodeFromTree(firstChild))
-      ).toBe(true);
-    });
+    const firstChild = fixture.querySelector('#firstChild');
+    flatTreeSetup(fixture);
+    expect(
+      rule.matches(firstChild, axe.utils.getNodeFromTree(firstChild))
+    ).toBe(true);
+  });
 
-    it('should handle an input added through slotted content', function () {
-      fixture.innerHTML =
-        '<label>Option 1 <span class="slotted">' +
-        '<input type="text" name="slottedLabel" />' +
-        '</span></label>';
+  it('should handle an input added through slotted content', function () {
+    fixture.innerHTML =
+      '<label>Option 1 <span class="slotted">' +
+      '<input type="text" name="slottedLabel" />' +
+      '</span></label>';
 
-      function createContentSlotted() {
-        const group = document.createElement('span');
-        group.innerHTML = '<slot></slot>';
-        return group;
-      }
+    function createContentSlotted() {
+      const group = document.createElement('span');
+      group.innerHTML = '<slot></slot>';
+      return group;
+    }
 
-      const slotted = fixture.querySelector('.slotted');
-      const shadowRoot = slotted.attachShadow({ mode: 'open' });
-      shadowRoot.appendChild(createContentSlotted());
+    const slotted = fixture.querySelector('.slotted');
+    const shadowRoot = slotted.attachShadow({ mode: 'open' });
+    shadowRoot.appendChild(createContentSlotted());
 
-      const input = slotted.querySelector('input');
-      flatTreeSetup(fixture);
-      expect(rule.matches(input, axe.utils.getNodeFromTree(input))).toBe(true);
-    });
-  }
+    const input = slotted.querySelector('input');
+    flatTreeSetup(fixture);
+    expect(rule.matches(input, axe.utils.getNodeFromTree(input))).toBe(true);
+  });
 
   describe('with font icons', () => {
     beforeAll(async () => {
@@ -595,7 +590,7 @@ describe('color-contrast-matches', function () {
     });
 
     it('is false for multiple icons', () => {
-      fixture.innerHTML = `<div id="target" style="font-family: \'Material Icons\'">
+      fixture.innerHTML = `<div id="target" style="font-family: 'Material Icons'">
           check star favorite
         </div>`;
       const target = fixture.querySelector('#target');

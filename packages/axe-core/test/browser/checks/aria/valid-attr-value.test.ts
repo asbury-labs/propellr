@@ -1,18 +1,10 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  fixtureSetup,
-  getCheckEvaluate,
-  MockCheckContext,
-  queryFixture,
-  shadowCheckSetup,
-  shadowSupport
-} from '../../../testutils';
+import { fixtureSetup, getCheckEvaluate, MockCheckContext, queryFixture, shadowCheckSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('aria-valid-attr-value', function () {
   const fixture = document.getElementById('fixture')!;
   const checkContext = MockCheckContext();
-  const shadowSupported = shadowSupport.v1;
   const validAttrValueCheck = getCheckEvaluate('aria-valid-attr-value');
 
   afterEach(function () {
@@ -202,7 +194,7 @@ describe('aria-valid-attr-value', function () {
     });
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'should return undefined on aria-describedby when the element is in a different shadow tree',
     function () {
       const params = shadowCheckSetup(
@@ -230,7 +222,7 @@ describe('aria-valid-attr-value', function () {
     });
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'should return undefined on aria-labelledby when the element is in a different shadow tree',
     function () {
       const params = shadowCheckSetup(

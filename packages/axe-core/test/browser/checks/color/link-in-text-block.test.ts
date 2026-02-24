@@ -1,10 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import {
-  flatTreeSetup,
-  getCheckEvaluate,
-  MockCheckContext,
-  shadowSupport
-} from '../../../testutils';
+import { flatTreeSetup, getCheckEvaluate, MockCheckContext } from '../../../testutils';
 
 describe('link-in-text-block', () => {
   const fixture = document.getElementById('fixture')!;
@@ -117,7 +112,7 @@ describe('link-in-text-block', () => {
       expect(checkContext._data.messageKey).toBe('fgContrast');
     });
 
-    (shadowSupport.v1 ? it : xit)(
+    it(
       'works with the block outside the shadow tree',
       () => {
         const parentElm = document.createElement('div');
@@ -140,7 +135,7 @@ describe('link-in-text-block', () => {
       }
     );
 
-    (shadowSupport.v1 ? it : xit)(
+    it(
       'works with the link inside the shadow tree slot',
       () => {
         const div = document.createElement('div');

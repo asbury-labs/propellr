@@ -1,5 +1,4 @@
 import { describe, it, afterEach, expect } from 'vitest';
-import { shadowSupport } from '../../../testutils';
 
 declare const axe: any;
 function createContentIDR() {
@@ -19,7 +18,6 @@ function makeShadowTreeIDR(node) {
 
 describe('dom.idrefs', function () {
   const fixture = document.getElementById('fixture');
-  const shadowSupported = shadowSupport.v1;
 
   afterEach(function () {
     fixture.innerHTML = '';
@@ -42,7 +40,7 @@ describe('dom.idrefs', function () {
     );
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'should find only referenced nodes within the current root: shadow DOM',
     function () {
       // shadow DOM v1 - note: v0 is compatible with this code, so no need
@@ -59,7 +57,7 @@ describe('dom.idrefs', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'should find only referenced nodes within the current root: document',
     function () {
       // shadow DOM v1 - note: v0 is compatible with this code, so no need

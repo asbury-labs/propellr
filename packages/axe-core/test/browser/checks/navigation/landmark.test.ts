@@ -1,10 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  checkSetup,
-  getCheckEvaluate,
-  MockCheckContext,
-  shadowSupport
-} from '../../../testutils';
+import { checkSetup, getCheckEvaluate, MockCheckContext } from '../../../testutils';
 
 describe('landmark', function () {
   const fixture = document.getElementById('fixture')!;
@@ -31,7 +26,7 @@ describe('landmark', function () {
     expect(checkEvaluate.apply(checkContext, checkArgs)).toBe(false);
   });
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should not automatically pass if there is a shadow tree',
     function () {
       const node = document.createElement('div');
@@ -43,7 +38,7 @@ describe('landmark', function () {
     }
   );
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should find elements inside shadow trees',
     function () {
       const node = document.createElement('div');
@@ -55,7 +50,7 @@ describe('landmark', function () {
     }
   );
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should find elements slotted in shadow trees',
     function () {
       const node = document.createElement('div');

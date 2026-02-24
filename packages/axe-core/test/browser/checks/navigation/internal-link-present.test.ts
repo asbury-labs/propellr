@@ -1,16 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  getCheckEvaluate,
-  MockCheckContext,
-  queryFixture,
-  shadowCheckSetup,
-  shadowSupport
-} from '../../../testutils';
+import { getCheckEvaluate, MockCheckContext, queryFixture, shadowCheckSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('internal-link-present', function () {
   const fixture = document.getElementById('fixture')!;
-  const shadowSupported = shadowSupport.v1;
   const checkContext = MockCheckContext();
 
   afterEach(function () {
@@ -85,7 +78,7 @@ describe('internal-link-present', function () {
     ).toBe(false);
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'should return true when internal link is found in shadow dom',
     function () {
       const params = shadowCheckSetup(

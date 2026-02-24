@@ -5,7 +5,7 @@ describe('axe.utils.getScrollState', () => {
   let mockWin;
   const getScrollState = axe.utils.getScrollState;
 
-  let fixture = document.getElementById('fixture');
+  const fixture = document.getElementById('fixture');
 
   beforeEach(() => {
     mockWin = {
@@ -56,12 +56,12 @@ describe('axe.utils.getScrollState', () => {
       '</div>' +
       '</div>';
 
-    let tgt1 = document.getElementById('tgt1');
-    let tgt2 = document.getElementById('tgt2');
+    const tgt1 = document.getElementById('tgt1');
+    const tgt2 = document.getElementById('tgt2');
     tgt1.scrollTop = 10;
     tgt2.scrollTop = 20;
 
-    let scrollState = getScrollState();
+    const scrollState = getScrollState();
 
     expect(
       scrollState.find(scroll => {
@@ -81,9 +81,9 @@ describe('axe.utils.getScrollState', () => {
       '<div style="height: 100px" id="tgt2"> Han Solo </div>' +
       '</div>';
 
-    let tgt1 = document.getElementById('tgt1');
-    let tgt2 = document.getElementById('tgt2');
-    let scrollState = getScrollState();
+    const tgt1 = document.getElementById('tgt1');
+    const tgt2 = document.getElementById('tgt2');
+    const scrollState = getScrollState();
 
     expect(
       scrollState.find(scroll => {
@@ -106,9 +106,9 @@ describe('axe.utils.getScrollState', () => {
       '</div>' +
       '</div>';
 
-    let tgt1 = document.getElementById('tgt1');
-    let tgt2 = document.getElementById('tgt2');
-    let scrollState = getScrollState();
+    const tgt1 = document.getElementById('tgt1');
+    const tgt2 = document.getElementById('tgt2');
+    const scrollState = getScrollState();
 
     expect(
       scrollState.find(scroll => {
@@ -137,7 +137,7 @@ describe('axe.utils.getScrollState', () => {
 describe('axe.utils.setScrollState', () => {
   const setScrollState = axe.utils.setScrollState;
 
-  let fixture = document.getElementById('fixture');
+  const fixture = document.getElementById('fixture');
   afterEach(() => {
     fixture.innerHTML = '';
   });

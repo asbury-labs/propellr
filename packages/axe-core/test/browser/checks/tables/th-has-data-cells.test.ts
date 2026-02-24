@@ -1,15 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  flatTreeSetup,
-  getCheckEvaluate,
-  MockCheckContext,
-  shadowSupport
-} from '../../../testutils';
+import { flatTreeSetup, getCheckEvaluate, MockCheckContext } from '../../../testutils';
 
 declare const axe: any;
 describe('th-has-data-cells', () => {
   const fixture = document.getElementById('fixture')!;
-  const shadowSupported = shadowSupport.v1;
   const checkContext = MockCheckContext();
 
   afterEach(() => {
@@ -165,7 +159,7 @@ describe('th-has-data-cells', () => {
     ).toBeUndefined();
   });
 
-  (shadowSupported ? it : xit)('recognizes shadow tree content', () => {
+  it('recognizes shadow tree content', () => {
     fixture.innerHTML = '<div id="shadow"> <b>data</b> </div>';
     const shadow = fixture
       .querySelector('#shadow')

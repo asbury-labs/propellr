@@ -1,5 +1,4 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { shadowSupport } from '../../../testutils';
 
 declare const axe: any;
 function makeShadowTreeGRN(node) {
@@ -11,7 +10,6 @@ function makeShadowTreeGRN(node) {
 
 describe('axe.utils.getRootNode', () => {
   const fixture = document.getElementById('fixture');
-  const shadowSupported = shadowSupport.v1;
 
   afterEach(() => {
     fixture.innerHTML = '';
@@ -19,14 +17,14 @@ describe('axe.utils.getRootNode', () => {
 
   it('should return the document when the node is just a normal node', () => {
     fixture.innerHTML = '<div id="target"></div>';
-    let node = document.getElementById('target');
+    const node = document.getElementById('target');
     expect(axe.utils.getRootNode(node) === document).toBe(true);
   });
   it('should return the document when the node is disconnected', () => {
-    let node = document.createElement('div');
+    const node = document.createElement('div');
     expect(axe.utils.getRootNode(node) === document).toBe(true);
   });
-  (shadowSupported ? it : xit)(
+  it(
     'should return the shadow root when it is inside the shadow DOM',
     () => {
       let shadEl;

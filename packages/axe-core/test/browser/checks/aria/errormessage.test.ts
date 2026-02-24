@@ -1,15 +1,8 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  getCheckEvaluate,
-  MockCheckContext,
-  queryFixture,
-  shadowCheckSetup,
-  shadowSupport
-} from '../../../testutils';
+import { getCheckEvaluate, MockCheckContext, queryFixture, shadowCheckSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('aria-errormessage', function () {
-  const shadowSupported = shadowSupport.v1;
   const checkContext = MockCheckContext();
 
   afterEach(function () {
@@ -352,7 +345,7 @@ describe('aria-errormessage', function () {
     ).toBe(true);
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'should return undefined if aria-errormessage value crosses shadow boundary',
     function () {
       const params = shadowCheckSetup(
@@ -365,7 +358,7 @@ describe('aria-errormessage', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'should return false if aria-errormessage and invalid reference are both inside shadow dom',
     function () {
       const params = shadowCheckSetup(
@@ -379,7 +372,7 @@ describe('aria-errormessage', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'should return true if aria-errormessage and valid reference are both inside shadow dom',
     function () {
       const params = shadowCheckSetup(

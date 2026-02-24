@@ -1,16 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  checkSetup,
-  flatTreeSetup,
-  getCheckEvaluate,
-  MockCheckContext,
-  shadowSupport
-} from '../../../testutils';
+import { checkSetup, flatTreeSetup, getCheckEvaluate, MockCheckContext } from '../../../testutils';
 
 declare const axe: any;
 describe('aria-required-parent', function () {
   const fixture = document.getElementById('fixture')!;
-  const shadowSupported = shadowSupport.v1;
   const checkContext = MockCheckContext();
 
   afterEach(function () {
@@ -29,7 +22,7 @@ describe('aria-required-parent', function () {
     expect(checkContext._data).toEqual(['list']);
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'should detect missing required parent across shadow boundary',
     function () {
       fixture.innerHTML = '<div id="target"></div>';
@@ -225,7 +218,7 @@ describe('aria-required-parent', function () {
     ).toBe(true);
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'should pass when required parent is present across shadow boundary',
     function () {
       fixture.innerHTML = '<div role="list" id="parent"></div>';
@@ -246,7 +239,7 @@ describe('aria-required-parent', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'should fail when aria-owns context crosses shadow boundary',
     function () {
       fixture.innerHTML =

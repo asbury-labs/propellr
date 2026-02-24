@@ -1,11 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import {
-  flatTreeSetup,
-  getCheckEvaluate,
-  MockCheckContext,
-  queryFixture,
-  shadowSupport
-} from '../../../testutils';
+import { flatTreeSetup, getCheckEvaluate, MockCheckContext, queryFixture } from '../../../testutils';
 
 describe('link-in-text-block-style', () => {
   const fixture = document.getElementById('fixture')!;
@@ -117,7 +111,7 @@ describe('link-in-text-block-style', () => {
       expect(linkInBlockStyleCheck.call(checkContext, linkElm)).toBe(false);
     });
 
-    (shadowSupport.v1 ? it : xit)(
+    it(
       'works with the block outside the shadow tree',
       () => {
         const parentElm = document.createElement('div');
@@ -133,7 +127,7 @@ describe('link-in-text-block-style', () => {
       }
     );
 
-    (shadowSupport.v1 ? it : xit)(
+    it(
       'works with the link inside the shadow tree slot',
       () => {
         const div = document.createElement('div');

@@ -1,13 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import {
-  queryFixture,
-  injectIntoFixture,
-  shadowSupport
-} from '../../../testutils';
+import { queryFixture, injectIntoFixture } from '../../../testutils';
 
 declare const axe: any;
 describe('dom.getTabbableElements', function () {
-  const shadowSupported = shadowSupport.v1;
   const getTabbableElementsFn = axe.commons.dom.getTabbableElements;
 
   it('returns tabbable elms when node contains tabbable element', function () {
@@ -47,7 +42,7 @@ describe('dom.getTabbableElements', function () {
     expect(actual).toHaveLength(0);
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'returns tabbable elms when element contains tabbable element inside shadowDOM',
     function () {
       const fixture = injectIntoFixture('<div id="target"></div>`');
@@ -63,7 +58,7 @@ describe('dom.getTabbableElements', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'returns empty [] when element contains disabled (tabbable) element inside shadowDOM',
     function () {
       const fixture = injectIntoFixture('<div id="target"></div>`');
@@ -78,7 +73,7 @@ describe('dom.getTabbableElements', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'returns empty [] when element does not contain tabbable element inside shadowDOM',
     function () {
       const fixture = injectIntoFixture('<div id="target"></div>`');

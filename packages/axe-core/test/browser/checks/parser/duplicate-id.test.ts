@@ -1,10 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  checks,
-  getCheckEvaluate,
-  MockCheckContext,
-  shadowSupport
-} from '../../../testutils';
+import { checks, getCheckEvaluate, MockCheckContext } from '../../../testutils';
 
 describe('duplicate-id', function () {
   const fixture = document.getElementById('fixture')!;
@@ -68,7 +63,7 @@ describe('duplicate-id', function () {
     );
   });
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should find duplicate IDs in the same shadow DOM',
     function () {
       const div = document.createElement('div');
@@ -86,7 +81,7 @@ describe('duplicate-id', function () {
     }
   );
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should ignore duplicate IDs if they are in different document roots',
     function () {
       const node = document.createElement('div');
@@ -102,7 +97,7 @@ describe('duplicate-id', function () {
     }
   );
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should ignore same IDs outside shadow trees',
     function () {
       const div = document.createElement('div');
@@ -119,7 +114,7 @@ describe('duplicate-id', function () {
     }
   );
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should compare slotted content with the light DOM',
     function () {
       const node = document.createElement('div');

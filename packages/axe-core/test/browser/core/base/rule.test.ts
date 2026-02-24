@@ -186,7 +186,7 @@ describe('Rule', () => {
         return new Promise<void>((done, reject) => {
           const div = document.createElement('div');
           fixture.appendChild(div);
-          let success = false,
+          const success = false,
             rule = new Rule({
               matches: (node, virtualNode) => {
                 expect(virtualNode.actualNode).toBe(div);
@@ -213,7 +213,7 @@ describe('Rule', () => {
         return new Promise<void>((done, reject) => {
           const div = document.createElement('div');
           fixture.appendChild(div);
-          let success = false,
+          const success = false,
             rule = new Rule({
               matches: (node, virtualNode, context) => {
                 expect(context).toBeDefined();
@@ -951,7 +951,7 @@ describe('Rule', () => {
         const div = document.createElement('div');
         div.setAttribute('style', '#fff');
         fixture.appendChild(div);
-        let success = false;
+        const success = false;
         const rule = new Rule({
           matches: () => {
             throw new Error('this is an error');

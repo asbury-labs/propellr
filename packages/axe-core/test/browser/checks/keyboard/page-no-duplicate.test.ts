@@ -1,17 +1,10 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  checkSetup,
-  checks,
-  fixtureSetup,
-  MockCheckContext,
-  shadowSupport
-} from '../../../testutils';
+import { checkSetup, checks, fixtureSetup, MockCheckContext } from '../../../testutils';
 
 declare const axe: any;
 describe('page-no-duplicate', () => {
   const fixture = document.getElementById('fixture')!;
   const checkContext = new MockCheckContext();
-  const shadowSupported = shadowSupport.v1;
 
   const check = checks['page-no-duplicate-main'];
 
@@ -73,7 +66,7 @@ describe('page-no-duplicate', () => {
       expect(check.evaluate.apply(checkContext, params)).toBe(true);
     });
 
-    (shadowSupported ? it : xit)(
+    it(
       'should return false if there is a second matching element inside the shadow dom',
       () => {
         const options = { selector: 'main' };
@@ -96,7 +89,7 @@ describe('page-no-duplicate', () => {
       }
     );
 
-    (shadowSupported ? it : xit)(
+    it(
       'should return true if there is a second matching element inside the shadow dom but only one is visible to screenreaders',
       () => {
         const options = { selector: 'main' };
@@ -165,7 +158,7 @@ describe('page-no-duplicate', () => {
       expect(check.evaluate.apply(checkContext, params)).toBe(true);
     });
 
-    (shadowSupported ? it : xit)(
+    it(
       'elements if its ancestor is outside the shadow DOM tree',
       () => {
         const options = {
@@ -241,7 +234,7 @@ describe('page-no-duplicate', () => {
       expect(check.evaluate.apply(checkContext, params)).toBe(true);
     });
 
-    (shadowSupported ? it : xit)(
+    it(
       "should pass if element's ancestor is outside the shadow DOM tree",
       () => {
         const options = {

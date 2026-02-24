@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 declare const axe: any;
 function setShadowId(vNode, shadowId) {
   vNode.shadowId = shadowId;
-  for (var i = 0; i < vNode.children.length; i++) {
+  for (let i = 0; i < vNode.children.length; i++) {
     setShadowId(vNode.children[i], shadowId);
   }
 }
@@ -60,7 +60,7 @@ describe('axe.utils.querySelectorAllFilter', () => {
   afterEach(() => {});
 
   const tests = ['without cache', 'with cache'];
-  for (var i = 0; i < tests.length; i++) {
+  for (let i = 0; i < tests.length; i++) {
     const describeName = tests[i];
     describe(describeName, () => {
       afterEach(() => {});
@@ -89,52 +89,52 @@ describe('axe.utils.querySelectorAllFilter', () => {
 
           // this would return 4 nodes if we were still using the
           // top-level cache
-          let result = axe.utils.querySelectorAllFilter(nodes[0], 'li');
+          const result = axe.utils.querySelectorAllFilter(nodes[0], 'li');
           expect(result.length).toBe(2);
         });
       }
 
       it('should find nodes using just the tag', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, 'li');
+        const result = axe.utils.querySelectorAllFilter(dom, 'li');
         expect(result.length).toBe(4);
       });
       it('should find nodes using parent selector', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, 'ul > li');
+        const result = axe.utils.querySelectorAllFilter(dom, 'ul > li');
         expect(result.length).toBe(4);
       });
       it('should NOT find nodes using parent selector', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, 'div > li');
+        const result = axe.utils.querySelectorAllFilter(dom, 'div > li');
         expect(result.length).toBe(0);
       });
       it('should find nodes using nested parent selectors', () => {
-        let result = axe.utils.querySelectorAllFilter(
+        const result = axe.utils.querySelectorAllFilter(
           dom,
           'span > span > span > span'
         );
         expect(result.length).toBe(2);
       });
       it('should find nodes using hierarchical selector', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, 'div li');
+        const result = axe.utils.querySelectorAllFilter(dom, 'div li');
         expect(result.length).toBe(4);
       });
       it('should find nodes using class selector', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, '.breaking');
+        const result = axe.utils.querySelectorAllFilter(dom, '.breaking');
         expect(result.length).toBe(2);
       });
       it('should find nodes using hierarchical class selector', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, '.first .breaking');
+        const result = axe.utils.querySelectorAllFilter(dom, '.first .breaking');
         expect(result.length).toBe(2);
       });
       it('should NOT find nodes using hierarchical class selector', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, '.second .breaking');
+        const result = axe.utils.querySelectorAllFilter(dom, '.second .breaking');
         expect(result.length).toBe(0);
       });
       it('should find nodes using multiple class selector', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, '.second.third');
+        const result = axe.utils.querySelectorAllFilter(dom, '.second.third');
         expect(result.length).toBe(1);
       });
       it('should find nodes using id', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, '#one');
+        const result = axe.utils.querySelectorAllFilter(dom, '#one');
         expect(result.length).toBe(1);
       });
 
@@ -144,14 +144,14 @@ describe('axe.utils.querySelectorAllFilter', () => {
       // tree (i.e. without cache)
       if (describeName === 'without cache') {
         it('should find nodes using id, but not in shadow DOM', () => {
-          let result = axe.utils.querySelectorAllFilter(
+          const result = axe.utils.querySelectorAllFilter(
             dom[0].children[0],
             '#one'
           );
           expect(result.length).toBe(1);
         });
         it('should find nodes using id, within a shadow DOM', () => {
-          let result = axe.utils.querySelectorAllFilter(
+          const result = axe.utils.querySelectorAllFilter(
             dom[0].children[0].children[2],
             '#one'
           );
@@ -160,103 +160,103 @@ describe('axe.utils.querySelectorAllFilter', () => {
       }
 
       it('should find nodes using attribute', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, '[role]');
+        const result = axe.utils.querySelectorAllFilter(dom, '[role]');
         expect(result.length).toBe(2);
       });
       it('should find nodes using attribute with value', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, '[role=tab]');
+        const result = axe.utils.querySelectorAllFilter(dom, '[role=tab]');
         expect(result.length).toBe(1);
       });
       it('should find nodes using attribute with value', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, '[role="button"]');
+        const result = axe.utils.querySelectorAllFilter(dom, '[role="button"]');
         expect(result.length).toBe(1);
       });
       it('should find nodes using parent attribute with value', () => {
-        let result = axe.utils.querySelectorAllFilter(
+        const result = axe.utils.querySelectorAllFilter(
           dom,
           '[data-a11yhero="faulkner"] > ul'
         );
         expect(result.length).toBe(1);
       });
       it('should find nodes using hierarchical attribute with value', () => {
-        let result = axe.utils.querySelectorAllFilter(
+        const result = axe.utils.querySelectorAllFilter(
           dom,
           '[data-a11yhero="faulkner"] li'
         );
         expect(result.length).toBe(2);
       });
       it('should find nodes using :not selector with class', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, 'div:not(.first)');
+        const result = axe.utils.querySelectorAllFilter(dom, 'div:not(.first)');
         expect(result.length).toBe(2);
       });
       it('should find nodes using :not selector with matching id', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, 'div:not(#one)');
+        const result = axe.utils.querySelectorAllFilter(dom, 'div:not(#one)');
         expect(result.length).toBe(2);
       });
       it('should find nodes using :not selector with matching attribute selector', () => {
-        let result = axe.utils.querySelectorAllFilter(
+        const result = axe.utils.querySelectorAllFilter(
           dom,
           'div:not([data-a11yhero])'
         );
         expect(result.length).toBe(2);
       });
       it('should find nodes using :not selector with matching attribute selector with value', () => {
-        let result = axe.utils.querySelectorAllFilter(
+        const result = axe.utils.querySelectorAllFilter(
           dom,
           'div:not([data-a11yhero=faulkner])'
         );
         expect(result.length).toBe(2);
       });
       it('should find nodes using :not selector with bogus attribute selector with value', () => {
-        let result = axe.utils.querySelectorAllFilter(
+        const result = axe.utils.querySelectorAllFilter(
           dom,
           'div:not([data-a11yhero=wilco])'
         );
         expect(result.length).toBe(3);
       });
       it('should find nodes using :not selector with bogus id', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, 'div:not(#thangy)');
+        const result = axe.utils.querySelectorAllFilter(dom, 'div:not(#thangy)');
         expect(result.length).toBe(3);
       });
       it('should find nodes using :not selector with attribute', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, 'div:not([id])');
+        const result = axe.utils.querySelectorAllFilter(dom, 'div:not([id])');
         expect(result.length).toBe(2);
       });
       it('should find nodes hierarchically using :not selector', () => {
-        let result = axe.utils.querySelectorAllFilter(
+        const result = axe.utils.querySelectorAllFilter(
           dom,
           'div:not(.first) li'
         );
         expect(result.length).toBe(2);
       });
       it('should find same nodes hierarchically using more :not selector', () => {
-        let result = axe.utils.querySelectorAllFilter(
+        const result = axe.utils.querySelectorAllFilter(
           dom,
           'div:not(.first) li:not(.breaking)'
         );
         expect(result.length).toBe(2);
       });
       it('should NOT find nodes hierarchically using :not selector', () => {
-        let result = axe.utils.querySelectorAllFilter(
+        const result = axe.utils.querySelectorAllFilter(
           dom,
           'div:not(.second) li:not(.breaking)'
         );
         expect(result.length).toBe(0);
       });
       it('should find nodes using ^= attribute selector', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, '[class^="sec"]');
+        const result = axe.utils.querySelectorAllFilter(dom, '[class^="sec"]');
         expect(result.length).toBe(1);
       });
       it('should find nodes using $= attribute selector', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, '[id$="ne"]');
+        const result = axe.utils.querySelectorAllFilter(dom, '[id$="ne"]');
         expect(result.length).toBe(3);
       });
       it('should find nodes using *= attribute selector', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, '[role*="t"]');
+        const result = axe.utils.querySelectorAllFilter(dom, '[role*="t"]');
         expect(result.length).toBe(2);
       });
       it('should put it all together', () => {
-        let result = axe.utils.querySelectorAllFilter(
+        const result = axe.utils.querySelectorAllFilter(
           dom,
           '.first[data-a11yhero="faulkner"] > ul li.breaking'
         );
@@ -270,13 +270,13 @@ describe('axe.utils.querySelectorAllFilter', () => {
         expect(divOnes.length).toBeLessThan(divs.length + ones.length);
       });
       it('should return nodes sorted by document position', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, 'ul, #one');
+        const result = axe.utils.querySelectorAllFilter(dom, 'ul, #one');
         expect(result[0].actualNode.nodeName).toBe('UL');
         expect(result[1].actualNode.nodeName).toBe('DIV');
         expect(result[2].actualNode.nodeName).toBe('UL');
       });
       it('should filter the returned nodes when passed a filter function', () => {
-        let result = axe.utils.querySelectorAllFilter(dom, 'ul, #one', node => {
+        const result = axe.utils.querySelectorAllFilter(dom, 'ul, #one', node => {
           return node.actualNode.nodeName !== 'UL';
         });
         expect(result[0].actualNode.nodeName).toBe('DIV');
@@ -293,7 +293,7 @@ describe('axe.utils.querySelectorAll', () => {
     dom = getTestDom();
   });
   it('should find nodes using just the tag', () => {
-    let result = axe.utils.querySelectorAll(dom, 'li');
+    const result = axe.utils.querySelectorAll(dom, 'li');
     expect(result.length).toBe(4);
   });
 });

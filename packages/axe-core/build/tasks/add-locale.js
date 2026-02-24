@@ -1,17 +1,17 @@
 /*eslint-env node */
 'use strict';
-var clone = require('clone');
-var buildManual = require('../build-manual');
+const clone = require('clone');
+const buildManual = require('../build-manual');
 
-module.exports = function (grunt) {
+module.exports = function  exports(grunt) {
   function mergeMessages(newMessages, oldMessages) {
-    Object.keys(newMessages).forEach(function (key) {
+    Object.keys(newMessages).forEach(function  exports(key) {
       if (!oldMessages.hasOwnProperty(key)) {
         return;
       }
 
-      var newValue = newMessages[key];
-      var oldValue = oldMessages[key];
+      const newValue = newMessages[key];
+      const oldValue = oldMessages[key];
 
       if (typeof newValue === 'object') {
         // the message format might be changed, ignore old message
@@ -31,8 +31,8 @@ module.exports = function (grunt) {
   grunt.registerMultiTask(
     'add-locale',
     'Task for localizing messages in rules and checks',
-    function () {
-      var options = this.options({
+    function  exports() {
+      const options = this.options({
         rules: ['lib/rules/**/*.json'],
         checks: ['lib/checks/**/*.json'],
         misc: ['lib/misc/**/*.json'],
@@ -41,27 +41,27 @@ module.exports = function (grunt) {
         lang: 'xxx'
       });
 
-      this.files.forEach(function (file) {
-        var commons = file.src[0];
+      this.files.forEach(function  exports(file) {
+        const commons = file.src[0];
 
-        buildManual(grunt, options, commons, function (result) {
-          var locale = {
+        buildManual(grunt, options, commons, function  exports(result) {
+          const locale = {
             lang: options.lang,
-            rules: result.rules.reduce(function (out, rule) {
+            rules: result.rules.reduce(function  rules(out, rule) {
               out[rule.id] = rule.metadata;
               return out;
             }, {}),
-            checks: result.checks.reduce(function (out, check) {
+            checks: result.checks.reduce(function  checks(out, check) {
               if (check.metadata) {
                 out[check.id] = check.metadata.messages;
               }
               return out;
             }, {}),
-            failureSummaries: result.misc.reduce(function (out, misc) {
+            failureSummaries: result.misc.reduce(function  failureSummaries(out, misc) {
               out[misc.type] = misc.metadata;
               return out;
             }, {}),
-            incompleteFallbackMessage: result.misc.reduce(function (out, misc) {
+            incompleteFallbackMessage: result.misc.reduce(function  incompleteFallbackMessage(out, misc) {
               return misc.incompleteFallbackMessage
                 ? misc.incompleteFallbackMessage
                 : out;
@@ -69,9 +69,9 @@ module.exports = function (grunt) {
           };
 
           // update locale file if exists
-          var localeFile = './locales/' + options.lang + '.json';
+          const localeFile = './locales/' + options.lang + '.json';
           if (grunt.file.exists(localeFile)) {
-            var oldMessages = grunt.file.readJSON(localeFile);
+            const oldMessages = grunt.file.readJSON(localeFile);
 
             // mergeMessages mutates out
             mergeMessages(locale, oldMessages);

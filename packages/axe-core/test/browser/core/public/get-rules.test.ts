@@ -82,13 +82,13 @@ describe('axe.getRules', () => {
   });
 
   it('should not return nothing', () => {
-    let retValue = axe.getRules(['bob']);
+    const retValue = axe.getRules(['bob']);
     expect(Array.isArray(retValue)).toBe(true);
     expect(retValue).toHaveLength(0);
   });
 
   it('should return all rules if given no tags - undefined', () => {
-    let retValue = axe.getRules();
+    const retValue = axe.getRules();
     expect(retValue[0].ruleId).toBe('awesomeRule1');
     expect(retValue[0].description).toBe('some interesting information');
     expect(retValue[0].help).toBe('halp');
@@ -112,7 +112,7 @@ describe('axe.getRules', () => {
   });
 
   it('should return all rules if given empty array', () => {
-    let retValue = axe.getRules([]);
+    const retValue = axe.getRules([]);
     expect(retValue[0].ruleId).toBe('awesomeRule1');
     expect(retValue[0].description).toBe('some interesting information');
     expect(retValue[0].help).toBe('halp');

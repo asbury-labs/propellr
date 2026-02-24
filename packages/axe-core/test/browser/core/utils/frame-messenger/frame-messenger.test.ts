@@ -137,8 +137,8 @@ describe('frame-messenger', () => {
       allowedOrigins: [window.location.origin, 'http://customOrigin.com']
     });
 
-    let spy = vi.spyOn(frameWin, 'postMessage');
-    let posted = respondable(frameWin, 'greeting');
+    const spy = vi.spyOn(frameWin, 'postMessage');
+    const posted = respondable(frameWin, 'greeting');
     expect(posted).toBe(true);
     expect(spy.mock.calls.length).toBe(2);
     expect(spy.firstCall.args[1]).toEqual(window.location.origin);
@@ -150,8 +150,8 @@ describe('frame-messenger', () => {
       allowedOrigins: ['<same_origin>']
     });
 
-    let spy = vi.spyOn(frameWin, 'postMessage');
-    let posted = respondable(frameWin, 'greeting');
+    const spy = vi.spyOn(frameWin, 'postMessage');
+    const posted = respondable(frameWin, 'greeting');
     expect(posted).toBe(true);
     expect(spy.mock.calls.length).toBe(1);
     expect(spy.firstCall.args[1]).toEqual(window.location.origin);
@@ -162,8 +162,8 @@ describe('frame-messenger', () => {
       allowedOrigins: ['http://customOrigin.com', '<unsafe_all_origins>']
     });
 
-    let spy = vi.spyOn(frameWin, 'postMessage');
-    let posted = respondable(frameWin, 'greeting');
+    const spy = vi.spyOn(frameWin, 'postMessage');
+    const posted = respondable(frameWin, 'greeting');
     expect(posted).toBe(true);
     expect(spy.mock.calls.length).toBe(1);
     expect(spy.firstCall.args[1]).toBe('*');
@@ -173,16 +173,16 @@ describe('frame-messenger', () => {
     axe.configure({
       allowedOrigins: []
     });
-    let spy = vi.spyOn(frameWin, 'postMessage');
-    let posted = respondable(frameWin, 'greeting');
+    const spy = vi.spyOn(frameWin, 'postMessage');
+    const posted = respondable(frameWin, 'greeting');
     expect(posted).toBe(false);
     expect(spy.called).toBe(false);
   });
 
   it('does not post message if no allowed origins', () => {
     axe._audit.allowedOrigins = null;
-    let spy = vi.spyOn(frameWin, 'postMessage');
-    let posted = respondable(frameWin, 'greeting');
+    const spy = vi.spyOn(frameWin, 'postMessage');
+    const posted = respondable(frameWin, 'greeting');
     expect(posted).toBe(false);
     expect(spy.called).toBe(false);
   });
@@ -191,8 +191,8 @@ describe('frame-messenger', () => {
     axe.configure({
       allowedOrigins: []
     });
-    let spy = vi.spyOn(frameWin, 'postMessage');
-    let posted = respondable(frameWin, 'greeting');
+    const spy = vi.spyOn(frameWin, 'postMessage');
+    const posted = respondable(frameWin, 'greeting');
     expect(posted).toBe(false);
     expect(spy.called).toBe(false);
   });
@@ -231,13 +231,13 @@ describe('frame-messenger', () => {
 
   describe('isInFrame', () => {
     it('is false for the page window', () => {
-      let frameRespondable = frameWin.axe.utils.respondable;
+      const frameRespondable = frameWin.axe.utils.respondable;
       expect(respondable.isInFrame()).toBe(false);
       expect(frameRespondable.isInFrame(window)).toBe(false);
     });
 
     it('is true for iframes', () => {
-      let frameRespondable = frameWin.axe.utils.respondable;
+      const frameRespondable = frameWin.axe.utils.respondable;
       expect(frameRespondable.isInFrame()).toBe(true);
       expect(respondable.isInFrame(frameWin)).toBe(true);
     });

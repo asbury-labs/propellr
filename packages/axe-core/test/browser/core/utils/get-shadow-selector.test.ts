@@ -1,10 +1,8 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { shadowSupport } from '../../../testutils';
 
 declare const axe: any;
 describe('axe.utils.getShadowSelector', () => {
   const fixture = document.getElementById('fixture');
-  const shadowTest = shadowSupport.v1 ? it : xit;
   const getShadowSelector = axe.utils.getShadowSelector;
 
   function generator(node) {
@@ -49,7 +47,7 @@ describe('axe.utils.getShadowSelector', () => {
     expect(called).toBe(true);
   });
 
-  shadowTest('returns the output of the generator for light DOM', () => {
+  it('returns the output of the generator for light DOM', () => {
     fixture.innerHTML = '<div><h1>Hello world</h1></div>';
     const div = fixture.querySelector('div');
     const h1 = fixture.querySelector('h1');
@@ -59,7 +57,7 @@ describe('axe.utils.getShadowSelector', () => {
     expect(getShadowSelector(generator, h1)).toBe('h1');
   });
 
-  shadowTest('returns an array of outputs for each shadow tree host', () => {
+  it('returns an array of outputs for each shadow tree host', () => {
     const node = document.createElement('section');
     fixture.appendChild(node);
 

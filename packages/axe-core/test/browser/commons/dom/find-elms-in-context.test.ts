@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { shadowSupport, fixtureSetup } from '../../../testutils';
+import { fixtureSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('dom.findElmsInContext', function () {
@@ -23,7 +23,7 @@ describe('dom.findElmsInContext', function () {
     ).toEqual(Array.from(document.querySelectorAll('b[name=foo]')));
   });
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'ignores elements inside shadow tree',
     function () {
       const node = document.createElement('div');
@@ -43,7 +43,7 @@ describe('dom.findElmsInContext', function () {
     }
   );
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'can search elements limited to the shadow tree',
     function () {
       const node = document.createElement('div');

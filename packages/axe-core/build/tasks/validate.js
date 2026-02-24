@@ -1,7 +1,7 @@
 /*eslint-env node */
 'use strict';
 
-var revalidator = require('revalidator').validate,
+const revalidator = require('revalidator').validate,
   fs = require('fs'),
   path = require('path');
 
@@ -10,8 +10,8 @@ function fileExists(v, o) {
     return true;
   }
 
-  var file = path.resolve(path.dirname(o._path), v);
-  var exists;
+  const file = path.resolve(path.dirname(o._path), v);
+  let exists;
   try {
     exists = fs.existsSync(file);
   } catch {
@@ -21,7 +21,7 @@ function fileExists(v, o) {
 }
 
 function hasUniqueId() {
-  var seen = {};
+  const seen = {};
   return function (v, o) {
     if (!seen[v]) {
       seen[v] = o;
@@ -51,7 +51,7 @@ function hasMultipleOutcomes(messages) {
 }
 
 function createSchemas() {
-  var schemas = {};
+  const schemas = {};
 
   schemas.tool = {
     properties: {
@@ -237,12 +237,12 @@ function createSchemas() {
 }
 
 function validateFiles(grunt, files, schema, type) {
-  var valid = true;
+  let valid = true;
   files.forEach(function (f) {
     f.src.forEach(function (pathArg) {
-      var file = grunt.file.readJSON(pathArg);
+      const file = grunt.file.readJSON(pathArg);
       file._path = pathArg;
-      var result = revalidator(file, schema);
+      const result = revalidator(file, schema);
       if (!result.valid) {
         result.errors.forEach(function (err) {
           grunt.log.error(pathArg, err.property + ' ' + err.message);
@@ -264,11 +264,11 @@ function validateFiles(grunt, files, schema, type) {
   return valid;
 }
 
-module.exports = function (grunt) {
+module.exports = function  exports(grunt) {
   grunt.registerMultiTask(
     'validate',
     'Task for validating API schema for checks and rules',
-    function () {
+    function  exports() {
       const { type } = this.options();
       const schemas = createSchemas();
       const schema = schemas[type];

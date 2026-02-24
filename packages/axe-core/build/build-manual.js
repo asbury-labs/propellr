@@ -1,8 +1,8 @@
 /*eslint-env node */
 'use strict';
 
-var path = require('path');
-var templates = require('./templates');
+const path = require('path');
+const templates = require('./templates');
 
 module.exports = function build(grunt, options, commons, callback) {
   options.getFiles = options.hasOwnProperty('getFiles')
@@ -10,11 +10,11 @@ module.exports = function build(grunt, options, commons, callback) {
     : true;
 
   function parseObject(src) {
-    var files = grunt.file.expand(src);
-    return files.map(function (file) {
-      var json = grunt.file.readJSON(file);
-      var dirname = path.dirname(file);
-      Object.keys(templates).forEach(function (templateName) {
+    const files = grunt.file.expand(src);
+    return files.map(function  exports(file) {
+      const json = grunt.file.readJSON(file);
+      const dirname = path.dirname(file);
+      Object.keys(templates).forEach(function  exports(templateName) {
         if (json[templateName] && json[templateName].endsWith('.js')) {
           json[templateName] = path.resolve(dirname, json[templateName]);
           if (options.getFiles) {

@@ -1,18 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  checkSetup,
-  fixtureSetup,
-  flatTreeSetup,
-  getCheckEvaluate,
-  MockCheckContext,
-  shadowCheckSetup,
-  shadowSupport
-} from '../../../testutils';
+import { checkSetup, fixtureSetup, flatTreeSetup, getCheckEvaluate, MockCheckContext, shadowCheckSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('color-contrast', function () {
   const fixture = document.getElementById('fixture')!;
-  const shadowSupported = shadowSupport.v1;
   const checkContext = MockCheckContext();
   const contrastEvaluate = getCheckEvaluate('color-contrast');
 
@@ -932,7 +923,7 @@ describe('color-contrast', function () {
     });
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'returns colors across Shadow DOM boundaries',
     function () {
       const params = shadowCheckSetup(
@@ -946,7 +937,7 @@ describe('color-contrast', function () {
     }
   );
 
-  (shadowSupported ? it : xit)('handles <slot> elements', () => {
+  it('handles <slot> elements', () => {
     fixture.innerHTML =
       '<div id="container" style="height: 100px;"><p id="target" style="color: #333;">Slotted text</p></div>';
     const container = fixture.querySelector('#container');

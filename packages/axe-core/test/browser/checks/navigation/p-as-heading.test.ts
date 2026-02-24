@@ -1,18 +1,11 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  checkSetup,
-  getCheckEvaluate,
-  MockCheckContext,
-  shadowCheckSetup,
-  shadowSupport
-} from '../../../testutils';
+import { checkSetup, getCheckEvaluate, MockCheckContext, shadowCheckSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('p-as-heading', function () {
   const fixture = document.getElementById('fixture')!;
 
   const checkContext = MockCheckContext();
-  const shadowSupported = shadowSupport.v1;
 
   const testOptions = {
     margins: [{ weight: 100 }, { italic: true }, { size: 1.2 }]
@@ -291,7 +284,7 @@ describe('p-as-heading', function () {
     });
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'returns undefined instead of false if the element is inside a blockquote in light dom',
     function () {
       const params = shadowCheckSetup(
@@ -305,7 +298,7 @@ describe('p-as-heading', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'returns true over undefined from within a blockquote in light dom',
     function () {
       const params = shadowCheckSetup(

@@ -3,10 +3,10 @@ import { captureError } from '../../../testutils';
 
 declare const axe: any;
 describe('runRules', () => {
-  let ver = axe.version.substring(0, axe.version.lastIndexOf('.'));
+  const ver = axe.version.substring(0, axe.version.lastIndexOf('.'));
 
   function iframeReady(src, context, id, cb) {
-    let i = document.createElement('iframe');
+    const i = document.createElement('iframe');
     i.addEventListener('load', () => {
       cb();
     });
@@ -45,7 +45,7 @@ describe('runRules', () => {
     return frame;
   }
 
-  let fixture = document.getElementById('fixture');
+  const fixture = document.getElementById('fixture');
 
   let isNotCalled;
   beforeEach(() => {
@@ -74,7 +74,7 @@ describe('runRules', () => {
         messages: {}
       });
 
-      let frame = document.createElement('iframe');
+      const frame = document.createElement('iframe');
       frame.src = '../mock/frames/frame-frame.html';
 
       frame.addEventListener('load', () => {
@@ -108,14 +108,14 @@ describe('runRules', () => {
         messages: {}
       });
 
-      let frame = document.createElement('iframe');
+      const frame = document.createElement('iframe');
       frame.addEventListener('load', () => {
         setTimeout(() => {
           axe._runRules(
             document,
             {},
             captureError(r => {
-              let nodes = r[0].passes.map(detail => {
+              const nodes = r[0].passes.map(detail => {
                 return detail.node.selector;
               });
               expect(nodes).toEqual([
@@ -175,7 +175,7 @@ describe('runRules', () => {
         fixture,
         'context-test',
         () => {
-          let div = document.createElement('div');
+          const div = document.createElement('div');
           fixture.appendChild(div);
 
           axe._runRules(
@@ -349,7 +349,7 @@ describe('runRules', () => {
       fixture.innerHTML =
         '<div id="t1"><span></span></div><div id="t2"><em></em></div>';
 
-      let $test = {
+      const $test = {
         0: fixture.querySelector('#t1'),
         1: fixture.querySelector('#t2'),
         length: 2
@@ -387,7 +387,7 @@ describe('runRules', () => {
       fixture.innerHTML =
         '<div class="foo" id="t1"><span></span></div><div class="foo" id="t2"><em></em></div>';
 
-      let test = fixture.querySelectorAll('.foo');
+      const test = fixture.querySelectorAll('.foo');
       axe.run(
         test,
         captureError((err, results) => {
@@ -721,7 +721,7 @@ describe('runRules', () => {
         messages: {}
       });
       fixture.innerHTML = '<div id="outer"></div>';
-      let outer = document.getElementById('outer');
+      const outer = document.getElementById('outer');
 
       iframeReady('../mock/frames/context.html', outer, 'target', () => {
         axe._runRules(
@@ -769,7 +769,7 @@ describe('runRules', () => {
         rejectCalled = true;
       }
 
-      let log = axe.log;
+      const log = axe.log;
       axe.log = e => {
         expect(e.message).toBe('err');
         axe.log = log;
@@ -792,7 +792,7 @@ describe('runRules', () => {
         messages: {}
       });
 
-      let frame = document.createElement('iframe');
+      const frame = document.createElement('iframe');
       frame.src = '../mock/frames/frame-frame.html';
 
       frame.addEventListener('load', () => {

@@ -127,9 +127,9 @@ describe('reporters - raw', () => {
   it('should serialize DqElements', () => {
     return new Promise<void>((done, reject) => {
       axe.getReporter('rawEnv')(runResults, {}, results => {
-        for (var i = 0; i < results.length; i++) {
+        for (let i = 0; i < results.length; i++) {
           const result = results[i];
-          for (var j = 0; j < result.passes.length; j++) {
+          for (let j = 0; j < result.passes.length; j++) {
             const p = result.passes[j];
             expect(p.node).not.toBeInstanceOf(axe.utils.DqElement);
           }
@@ -141,7 +141,7 @@ describe('reporters - raw', () => {
 
   it('does not throw on serialized nodes', () => {
     return new Promise<void>((done, reject) => {
-      let rawReporter = axe.getReporter('rawEnv');
+      const rawReporter = axe.getReporter('rawEnv');
       rawReporter(runResults, {}, serializedResults => {
         expect(() => {
           rawReporter(serializedResults, {}, () => {
@@ -154,7 +154,7 @@ describe('reporters - raw', () => {
 
   it('uses nodeSerializer', () => {
     return new Promise<void>((done, reject) => {
-      let rawReporter = axe.getReporter('raw');
+      const rawReporter = axe.getReporter('raw');
       const spy = vi.spyOn(axe.utils.nodeSerializer, 'mapRawNodeResults');
       rawReporter(
         runResults,

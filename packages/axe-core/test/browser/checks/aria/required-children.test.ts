@@ -1,16 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  checkSetup,
-  flatTreeSetup,
-  getCheckEvaluate,
-  MockCheckContext,
-  shadowSupport
-} from '../../../testutils';
+import { checkSetup, flatTreeSetup, getCheckEvaluate, MockCheckContext } from '../../../testutils';
 
 declare const axe: any;
 describe('aria-required-children', () => {
   const fixture = document.getElementById('fixture')!;
-  const shadowSupported = shadowSupport.v1;
   const checkContext = MockCheckContext();
   const requiredChildrenCheck = getCheckEvaluate('aria-required-children');
 
@@ -29,7 +22,7 @@ describe('aria-required-children', () => {
     expect(checkContext._data).toEqual(['listitem']);
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'should detect missing sole required child in shadow tree',
     () => {
       fixture.innerHTML = '<div id="target" role="list"></div>';
@@ -56,7 +49,7 @@ describe('aria-required-children', () => {
     expect(checkContext._data).toEqual(['rowgroup', 'row']);
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'should detect missing multiple required children in shadow tree when one required',
     () => {
       fixture.innerHTML = '<div role="grid" id="target"></div>';

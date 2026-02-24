@@ -77,7 +77,7 @@ describe('axe.configure', () => {
     expect(() => {
       (axe.configure({ rules: [{ foo: 'bar' }] }),
         TypeError,
-        /Configured rule "{foo:\"bar\"}" is invalid/);
+        /Configured rule "{foo:"bar"}" is invalid/);
     }).toThrow();
   });
 
@@ -204,7 +204,7 @@ describe('axe.configure', () => {
     expect(() => {
       (axe.configure({ checks: [{ foo: 'bar' }] }),
         TypeError,
-        /Configured check "{foo:\"bar\"}" is invalid/);
+        /Configured check "{foo:"bar"}" is invalid/);
     }).toThrow();
   });
 
@@ -384,8 +384,8 @@ describe('axe.configure', () => {
         }
       });
 
-      let audit = axe._audit;
-      let localeData = audit.data;
+      const audit = axe._audit;
+      const localeData = audit.data;
 
       expect(localeData.rules.greeting.help).toBe('hi');
       expect(localeData.rules.greeting.description).toBe('hello');
@@ -411,8 +411,8 @@ describe('axe.configure', () => {
         }
       });
 
-      let audit = axe._audit;
-      let localeData = audit.data;
+      const audit = axe._audit;
+      const localeData = audit.data;
 
       expect(localeData.rules.greeting.help).toBe('ABCDEFGHIKLMNOPQRSTVXYZ');
       expect(localeData.rules.greeting.description).toBe('hello');
@@ -454,8 +454,8 @@ describe('axe.configure', () => {
         }
       });
 
-      let audit = axe._audit;
-      let localeData = audit.data;
+      const audit = axe._audit;
+      const localeData = audit.data;
 
       expect(typeof localeData.checks.banana.messages.fail === 'function').toBe(
         true
@@ -475,8 +475,8 @@ describe('axe.configure', () => {
         }
       });
 
-      let audit = axe._audit;
-      let localeData = audit.data;
+      const audit = axe._audit;
+      const localeData = audit.data;
 
       expect(typeof localeData.checks.banana.messages.fail === 'string').toBe(
         true
@@ -519,8 +519,8 @@ describe('axe.configure', () => {
         }
       });
 
-      let audit = axe._audit;
-      let localeData = audit.data;
+      const audit = axe._audit;
+      const localeData = audit.data;
 
       expect(localeData.failureSummaries.any.failureMessage).toBe('foo');
       expect(localeData.failureSummaries.none.failureMessage).toBe('bar');
@@ -559,8 +559,8 @@ describe('axe.configure', () => {
         }
       });
 
-      let audit = axe._audit;
-      let localeData = audit.data;
+      const audit = axe._audit;
+      const localeData = audit.data;
 
       expect(localeData.failureSummaries.any.failureMessage).toBe('foo');
       expect(localeData.failureSummaries.none.failureMessage()).toBe(
@@ -594,8 +594,8 @@ describe('axe.configure', () => {
         }
       });
 
-      let audit = axe._audit;
-      let localeData = audit.data;
+      const audit = axe._audit;
+      const localeData = audit.data;
 
       expect(
         localeData.failureSummaries.any.failureMessage(['1', '2', '3'])
@@ -796,8 +796,8 @@ describe('axe.configure', () => {
           ]
         });
 
-        let audit = axe._audit;
-        let localeData = audit.data;
+        const audit = axe._audit;
+        const localeData = audit.data;
 
         expect(localeData.rules.greeting.help).toBe('hi');
       });
@@ -990,7 +990,7 @@ describe('axe.configure', () => {
           }
         });
 
-        let ariaAttr = axe._audit.standards.ariaAttrs.newAttr;
+        const ariaAttr = axe._audit.standards.ariaAttrs.newAttr;
         expect(ariaAttr.type).toBe('string');
       });
 
@@ -1016,7 +1016,7 @@ describe('axe.configure', () => {
           }
         });
 
-        let ariaAttr = axe._audit.standards.ariaAttrs.newAttr;
+        const ariaAttr = axe._audit.standards.ariaAttrs.newAttr;
         expect(ariaAttr.type).toBe('mntoken');
         expect(ariaAttr.values).toEqual(['foo', 'bar']);
       });
@@ -1043,7 +1043,7 @@ describe('axe.configure', () => {
           }
         });
 
-        let ariaAttr = axe._audit.standards.ariaAttrs.newAttr;
+        const ariaAttr = axe._audit.standards.ariaAttrs.newAttr;
         expect(ariaAttr.type).toBe('mntokens');
         expect(ariaAttr.values).toEqual(['foo', 'bar']);
       });
@@ -1070,7 +1070,7 @@ describe('axe.configure', () => {
           }
         });
 
-        let ariaAttr = axe._audit.standards.ariaAttrs.newAttr;
+        const ariaAttr = axe._audit.standards.ariaAttrs.newAttr;
         expect(ariaAttr.values).toEqual(['baz']);
       });
     });

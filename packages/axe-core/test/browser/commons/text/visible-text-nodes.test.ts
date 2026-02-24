@@ -1,10 +1,9 @@
 import { describe, it, afterEach, expect } from 'vitest';
-import { queryFixture, shadowSupport } from '../../../testutils';
+import { queryFixture } from '../../../testutils';
 
 declare const axe: any;
 describe('text.visibleTextNodes', function () {
   const fixture = document.getElementById('fixture');
-  const shadowSupported = shadowSupport.v1;
   const visibleTextNodes = axe.commons.text.visibleTextNodes;
 
   afterEach(function () {
@@ -85,7 +84,7 @@ describe('text.visibleTextNodes', function () {
     expect(nodes[0].actualNode.nodeValue).toBe('Hello');
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'should correctly handle slotted elements',
     function () {
       function createContentSlotted() {

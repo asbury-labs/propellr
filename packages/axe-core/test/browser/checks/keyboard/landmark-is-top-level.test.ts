@@ -1,15 +1,8 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  checkSetup,
-  checks,
-  MockCheckContext,
-  shadowCheckSetup,
-  shadowSupport
-} from '../../../testutils';
+import { checkSetup, checks, MockCheckContext, shadowCheckSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('landmark-is-top-level', () => {
-  const shadowSupported = shadowSupport.v1;
   const check = checks['landmark-is-top-level'];
   const checkContext = new MockCheckContext();
 
@@ -81,7 +74,7 @@ describe('landmark-is-top-level', () => {
     expect(checkContext._data).toEqual({ role: 'banner' });
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'should test if the landmark in shadow DOM is top level',
     () => {
       const params = shadowCheckSetup(

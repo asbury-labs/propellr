@@ -59,7 +59,7 @@ export function getPunctuationRegExp(): RegExp {
    * Reference: https://en.wikipedia.org/wiki/Supplemental_Punctuation
    * -> \u2E00-\u2E7F Reference
    */
-  return /[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&£¢¥§€()*+,\-.\/:;<=>?@\[\]^_`{|}~±]/g;
+  return /[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&£¢¥§€()*+,\-./:;<=>?@[\]^_`{|}~±]/g;
 }
 
 /**

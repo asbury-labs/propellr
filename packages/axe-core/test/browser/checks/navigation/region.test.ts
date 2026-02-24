@@ -1,11 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  checkSetup,
-  fixtureSetup,
-  getCheckEvaluate,
-  MockCheckContext,
-  shadowSupport
-} from '../../../testutils';
+import { checkSetup, fixtureSetup, getCheckEvaluate, MockCheckContext } from '../../../testutils';
 
 declare const axe: any;
 // NOTE: due to how the region check works to return the top-most
@@ -427,7 +421,7 @@ describe('region', function () {
     expect(checkEvaluate.apply(checkContext, checkArgs)).toBe(true);
   });
 
-  (shadowSupport.v1 ? it : xit)('should test Shadow tree content', function () {
+  it('should test Shadow tree content', function () {
     const div = document.createElement('div');
     const shadow = div.attachShadow({ mode: 'open' });
     shadow.innerHTML = 'Some text';
@@ -445,7 +439,7 @@ describe('region', function () {
     ).toBe(false);
   });
 
-  (shadowSupport.v1 ? it : xit)('should test slotted content', function () {
+  it('should test slotted content', function () {
     const div = document.createElement('div');
     div.innerHTML = 'Some content';
     const shadow = div.attachShadow({ mode: 'open' });
@@ -455,7 +449,7 @@ describe('region', function () {
     expect(checkEvaluate.apply(checkContext, checkArgs)).toBe(true);
   });
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should ignore skiplink targets inside shadow trees',
     function () {
       const div = document.createElement('div');
@@ -480,7 +474,7 @@ describe('region', function () {
     }
   );
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should find the skiplink in shadow DOM',
     function () {
       const div = document.createElement('div');

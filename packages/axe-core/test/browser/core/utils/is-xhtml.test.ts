@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 declare const axe: any;
 describe('axe.utils.isXHTML', () => {
   it('should return true on any document that is XHTML', () => {
-    let doc = document.implementation.createDocument(
+    const doc = document.implementation.createDocument(
       'http://www.w3.org/1999/xhtml',
       'html',
       null
@@ -12,7 +12,7 @@ describe('axe.utils.isXHTML', () => {
   });
 
   it('should return false on any document that is HTML', () => {
-    let doc = document.implementation.createHTMLDocument('Monkeys');
+    const doc = document.implementation.createHTMLDocument('Monkeys');
     expect(axe.utils.isXHTML(doc)).toBe(false);
   });
 

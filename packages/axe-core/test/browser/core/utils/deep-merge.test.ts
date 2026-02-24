@@ -5,8 +5,8 @@ describe('utils.deepMerge', () => {
   const deepMerge = axe.utils.deepMerge;
 
   it('should merge two objects', () => {
-    let obj1 = { a: 'one' };
-    let obj2 = { b: 'two' };
+    const obj1 = { a: 'one' };
+    const obj2 = { b: 'two' };
 
     expect(deepMerge(obj1, obj2)).toEqual({
       a: 'one',
@@ -15,8 +15,8 @@ describe('utils.deepMerge', () => {
   });
 
   it('should not modify the objects', () => {
-    let obj1 = { a: 'one' };
-    let obj2 = { a: 'two' };
+    const obj1 = { a: 'one' };
+    const obj2 = { a: 'two' };
     deepMerge(obj1, obj2);
 
     expect(obj1).toEqual({ a: 'one' });
@@ -24,24 +24,24 @@ describe('utils.deepMerge', () => {
   });
 
   it('should return a new object', () => {
-    let obj1 = { a: 'one' };
-    let obj2 = { a: 'two' };
-    let obj3 = deepMerge(obj1, obj2);
+    const obj1 = { a: 'one' };
+    const obj2 = { a: 'two' };
+    const obj3 = deepMerge(obj1, obj2);
 
     expect(obj1).not.toBe(obj3);
     expect(obj2).not.toBe(obj3);
   });
 
   it('should not merge arrays', () => {
-    let obj1 = { a: ['one', 'two'] };
-    let obj2 = { a: ['three'] };
+    const obj1 = { a: ['one', 'two'] };
+    const obj2 = { a: ['three'] };
 
     expect(deepMerge(obj1, obj2)).toEqual({ a: ['three'] });
   });
 
   it('should merge nested objects', () => {
-    let obj1 = { a: { a: ['one'] } };
-    let obj2 = { a: { a: ['one', 'two'], b: 'three' } };
+    const obj1 = { a: { a: ['one'] } };
+    const obj2 = { a: { a: ['one', 'two'], b: 'three' } };
 
     expect(deepMerge(obj1, obj2)).toEqual({
       a: {
@@ -52,9 +52,9 @@ describe('utils.deepMerge', () => {
   });
 
   it('should accept multiple objects', () => {
-    let obj1 = { a: { a: ['one'] } };
-    let obj2 = { a: { a: ['one', 'two'], b: 'three' } };
-    let obj3 = { a: { b: 'four' }, b: 'five' };
+    const obj1 = { a: { a: ['one'] } };
+    const obj2 = { a: { a: ['one', 'two'], b: 'three' } };
+    const obj3 = { a: { b: 'four' }, b: 'five' };
 
     expect(deepMerge(obj1, obj2, obj3)).toEqual({
       a: {

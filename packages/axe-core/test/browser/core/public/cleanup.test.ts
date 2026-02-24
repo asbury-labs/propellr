@@ -90,7 +90,7 @@ describe('cleanup', () => {
       createFrames(() => {
         axe._load({});
 
-        let frame = fixture.querySelector('iframe');
+        const frame = fixture.querySelector('iframe');
         const win = frame.contentWindow;
         win.addEventListener('message', message => {
           const data = JSON.parse(message.data);

@@ -22,7 +22,7 @@ describe('matches.fromDefinition', function () {
       'div',
       ['div', 'span'],
       /div/,
-      function (nodeName) {
+      function  matchers(nodeName) {
         return nodeName === 'div';
       }
     ];
@@ -46,7 +46,7 @@ describe('matches.fromDefinition', function () {
       'bar',
       ['bar', 'baz'],
       /bar/,
-      function (attributeName) {
+      function  matchers(attributeName) {
         return attributeName === 'bar';
       }
     ];
@@ -74,7 +74,7 @@ describe('matches.fromDefinition', function () {
       'text',
       ['text', 'password'],
       /text/,
-      function (type) {
+      function  matchers(type) {
         return type === 'text';
       }
     ];
@@ -104,7 +104,7 @@ describe('matches.fromDefinition', function () {
       'textbox',
       ['textbox', 'combobox'],
       /textbox/,
-      function (attributeName) {
+      function  matchers(attributeName) {
         return attributeName === 'textbox';
       }
     ];
@@ -128,7 +128,7 @@ describe('matches.fromDefinition', function () {
       'textbox',
       ['textbox', 'combobox'],
       /textbox/,
-      function (attributeName) {
+      function  matchers(attributeName) {
         return attributeName === 'textbox';
       }
     ];
@@ -152,7 +152,7 @@ describe('matches.fromDefinition', function () {
       'textbox',
       ['textbox', 'combobox'],
       /textbox/,
-      function (attributeName) {
+      function  matchers(attributeName) {
         return attributeName === 'textbox';
       }
     ];

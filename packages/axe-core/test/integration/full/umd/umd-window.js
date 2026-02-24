@@ -11,13 +11,13 @@ describe('UMD window', function () {
   });
 
   it('should resolve Promise(s)', function (done) {
-    var p1 = new Promise(function (resolve) {
-      setTimeout(function () {
+    const p1 = new Promise(function  p1(resolve) {
+      setTimeout(function  p1() {
         resolve('Hello');
       });
     });
-    var p2 = new Promise(function (resolve) {
-      setTimeout(function () {
+    const p2 = new Promise(function  p2(resolve) {
+      setTimeout(function  p2() {
         resolve('World!');
       });
     });

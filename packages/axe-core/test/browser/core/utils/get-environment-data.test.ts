@@ -25,20 +25,20 @@ describe('utils.getEnvironmentData', () => {
   });
 
   it('should return a `testEngine` property', () => {
-    let data = getEnvironmentData();
+    const data = getEnvironmentData();
     expect(typeof data.testEngine).toBe('object');
     expect(data.testEngine.name).toBe('axe-core');
     expect(data.testEngine.version).toBe(axe.version);
   });
 
   it('should return a `testRunner` property', () => {
-    let data = getEnvironmentData();
+    const data = getEnvironmentData();
     expect(typeof data.testRunner).toBe('object');
     expect(data.testRunner.name).toBe(axe._audit.brand);
   });
 
   it('should return a `testEnvironment` property', () => {
-    let data = getEnvironmentData();
+    const data = getEnvironmentData();
     expect(typeof data.testEnvironment).toBe('object');
     expect(data.testEnvironment.userAgent).toBeTruthy();
     expect(data.testEnvironment.windowWidth).toBeTruthy();
@@ -48,12 +48,12 @@ describe('utils.getEnvironmentData', () => {
   });
 
   it('should return a `timestamp` property`', () => {
-    let data = getEnvironmentData();
+    const data = getEnvironmentData();
     expect(data.timestamp).toBeDefined();
   });
 
   it('should return a `url` property', () => {
-    let data = getEnvironmentData();
+    const data = getEnvironmentData();
     expect(data.url).toBeDefined();
   });
 
@@ -61,7 +61,7 @@ describe('utils.getEnvironmentData', () => {
   // other supported environments as what this is testing should be done in
   // those environment tests
   it('gets data from the `win` parameter when passed', () => {
-    let data = getEnvironmentData(null, {
+    const data = getEnvironmentData(null, {
       screen: {
         orientation: {
           type: 'fictional',

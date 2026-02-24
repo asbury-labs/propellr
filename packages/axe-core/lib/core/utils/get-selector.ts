@@ -119,7 +119,7 @@ export function getSelectorData(domTree: unknown): SelectorData {
     attributes: {}
   };
 
-  let domTreeArr = Array.isArray(domTree) ? domTree : [domTree];
+  const domTreeArr = Array.isArray(domTree) ? domTree : [domTree];
   let currentLevel = domTreeArr.slice();
   const stack: unknown[][] = [];
   while (currentLevel.length) {

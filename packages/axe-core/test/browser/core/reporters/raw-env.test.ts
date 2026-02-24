@@ -126,9 +126,9 @@ describe('reporters - raw-env', () => {
 
   it('should serialize DqElements (#1195)', () => {
     axe.getReporter('rawEnv')(runResults, {}, results => {
-      for (var i = 0; i < results.length; i++) {
+      for (let i = 0; i < results.length; i++) {
         const result = results[i];
-        for (var j = 0; j < result.passes.length; j++) {
+        for (let j = 0; j < result.passes.length; j++) {
           const p = result.passes[j];
           expect(p.node).not.toBeInstanceOf(axe.utils.DqElement);
         }

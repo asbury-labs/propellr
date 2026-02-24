@@ -8,7 +8,7 @@ describe('axe.utils.collectResultsFromFrames', () => {
   const origSetTimeout = window.setTimeout;
 
   function contextSetup(scope) {
-    let context = new Context(scope);
+    const context = new Context(scope);
     axe._tree = context.flatTree;
     axe._selectorData = axe.utils.getSelectorData(context.flatTree);
 
@@ -36,9 +36,9 @@ describe('axe.utils.collectResultsFromFrames', () => {
         return 'cats';
       };
 
-      let frame = document.createElement('iframe');
+      const frame = document.createElement('iframe');
       frame.addEventListener('load', () => {
-        let context = contextSetup(document);
+        const context = contextSetup(document);
 
         axe.utils.collectResultsFromFrames(
           context,
@@ -73,10 +73,10 @@ describe('axe.utils.collectResultsFromFrames', () => {
         return 'cats';
       };
 
-      let frame = document.createElement('iframe');
+      const frame = document.createElement('iframe');
       frame.addEventListener('load', () => {
-        let context = contextSetup(document);
-        let params = { pingWaitTime: 90000 };
+        const context = contextSetup(document);
+        const params = { pingWaitTime: 90000 };
 
         axe.utils.collectResultsFromFrames(
           context,
@@ -110,9 +110,9 @@ describe('axe.utils.collectResultsFromFrames', () => {
         return 'cats';
       };
 
-      let frame = document.createElement('iframe');
+      const frame = document.createElement('iframe');
       frame.addEventListener('load', () => {
-        let context = contextSetup(document);
+        const context = contextSetup(document);
         axe.utils.collectResultsFromFrames(
           context,
           {},
@@ -146,10 +146,10 @@ describe('axe.utils.collectResultsFromFrames', () => {
         return 'cats';
       };
 
-      let frame = document.createElement('iframe');
+      const frame = document.createElement('iframe');
       frame.addEventListener('load', () => {
-        let context = contextSetup(document);
-        let params = { frameWaitTime: 90000 };
+        const context = contextSetup(document);
+        const params = { frameWaitTime: 90000 };
 
         axe.utils.collectResultsFromFrames(
           context,
@@ -191,9 +191,9 @@ describe('axe.utils.collectResultsFromFrames', () => {
         messages: {}
       });
 
-      let frame = document.createElement('iframe');
+      const frame = document.createElement('iframe');
       frame.addEventListener('load', () => {
-        let context = contextSetup(document);
+        const context = contextSetup(document);
 
         axe.utils.collectResultsFromFrames(
           context,
@@ -218,9 +218,9 @@ describe('axe.utils.collectResultsFromFrames', () => {
 
   it('returns errors send from the frame', () => {
     return new Promise<void>((done, reject) => {
-      let frame = document.createElement('iframe');
+      const frame = document.createElement('iframe');
       frame.addEventListener('load', () => {
-        let context = contextSetup(document);
+        const context = contextSetup(document);
         axe.utils.collectResultsFromFrames(
           context,
           {},

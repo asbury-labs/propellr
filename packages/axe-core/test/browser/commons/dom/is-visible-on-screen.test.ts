@@ -1,11 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { queryFixture, shadowSupport, flatTreeSetup } from '../../../testutils';
+import { queryFixture, flatTreeSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('dom.isVisibleOnScreen', function () {
   const fixture = document.querySelector('#fixture');
   const isIE11 = false;
-  const shadowSupported = shadowSupport.v1;
   const isVisibleOnScreen = axe.commons.dom.isVisibleOnScreen;
 
   it('should return true on statically-positioned, visible elements', function () {
@@ -270,7 +269,7 @@ describe('dom.isVisibleOnScreen', function () {
     expect(actual).toBe(false);
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'returns false for `AREA` element that is inside shadowDOM',
     function () {
       fixture.innerHTML = '<div id="container"></div>';
@@ -347,7 +346,7 @@ describe('dom.isVisibleOnScreen', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'should correctly handle visible slotted elements',
     function () {
       function createContentSlotted() {
@@ -368,7 +367,7 @@ describe('dom.isVisibleOnScreen', function () {
       expect(isVisibleOnScreen(el.actualNode)).toBe(true);
     }
   );
-  (shadowSupported ? it : xit)(
+  it(
     'should correctly handle hidden slotted elements',
     function () {
       function createContentSlotted() {

@@ -1,18 +1,10 @@
 import { describe, it, expect, afterEach, beforeAll } from 'vitest';
-import {
-  checkSetup,
-  checks,
-  fixtureSetup,
-  flatTreeSetup,
-  MockCheckContext,
-  shadowSupport
-} from '../../../testutils';
+import { checkSetup, checks, fixtureSetup, flatTreeSetup, MockCheckContext } from '../../../testutils';
 
 declare const axe: any;
 describe('focusable-disabled', function () {
   let check;
   const fixture = document.getElementById('fixture')!;
-  const shadowSupported = shadowSupport.v1;
   const checkContext = MockCheckContext();
 
   beforeAll(function () {
@@ -58,7 +50,7 @@ describe('focusable-disabled', function () {
     expect(actual).toBe(true);
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'returns false when content is in a disabled fieldset but in another shadow tree',
     function () {
       const fieldset = document.createElement('fieldset');
@@ -148,7 +140,7 @@ describe('focusable-disabled', function () {
     expect(actual).toBe(true);
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'returns false when focusable content inside shadowDOM, that can be disabled',
     function () {
       // Note:

@@ -1,17 +1,10 @@
 import { describe, it, expect, afterEach, beforeAll } from 'vitest';
-import {
-  checkSetup,
-  checks,
-  fixtureSetup,
-  MockCheckContext,
-  shadowSupport
-} from '../../../testutils';
+import { checkSetup, checks, fixtureSetup, MockCheckContext } from '../../../testutils';
 
 declare const axe: any;
 describe('focusable-content tests', function () {
   let check;
   const fixture = document.getElementById('fixture')!;
-  const shadowSupported = shadowSupport.v1;
   const checkContext = MockCheckContext();
 
   beforeAll(function () {
@@ -98,11 +91,6 @@ describe('focusable-content tests', function () {
   });
 
   describe('shadowDOM - focusable content', function () {
-    beforeAll(function () {
-      if (!shadowSupported) {
-        this.skip();
-      }
-    });
 
     it('returns true when content element can be focused', function () {
       fixtureSetup('<div id="target">' + '</div>');

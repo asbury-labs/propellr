@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { shadowSupport } from '../../../testutils';
 
 declare const axe: any;
 describe('utils.selector-cache', () => {
@@ -9,7 +8,6 @@ describe('utils.selector-cache', () => {
   const getNodesMatchingExpression =
     axe._thisWillBeDeletedDoNotUse.utils.getNodesMatchingExpression;
   const convertSelector = axe.utils.convertSelector;
-  const shadowSupported = shadowSupport.v1;
 
   let vNode;
   beforeEach(() => {
@@ -139,17 +137,14 @@ describe('utils.selector-cache', () => {
       expect(getNodesMatchingExpression(tree, expression)).toEqual([vNode]);
     });
 
-    (shadowSupported ? it : xit)(
-      'should only return nodes matching shadowId when matching by id',
-      () => {
-        fixture.innerHTML =
-          '<div id="target"></div><div data-shadow><div id="target"></div></div>';
-        tree = createTree();
-        const expression = convertSelector('#target');
-        const expected = [tree[0].children[0]];
-        expect(getNodesMatchingExpression(tree, expression)).toEqual(expected);
-      }
-    );
+    it('should only return nodes matching shadowId when matching by id', () => {
+      fixture.innerHTML =
+        '<div id="target"></div><div data-shadow><div id="target"></div></div>';
+      tree = createTree();
+      const expression = convertSelector('#target');
+      const expected = [tree[0].children[0]];
+      expect(getNodesMatchingExpression(tree, expression)).toEqual(expected);
+    });
 
     it('should return a list of matching nodes by class', () => {
       const expression = convertSelector('.foo');

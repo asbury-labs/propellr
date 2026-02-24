@@ -1,13 +1,13 @@
 describe('run-partial, page-level', function () {
   'use strict';
-  var ruleName = 'bypass';
-  var runPartialRecursive = axe.testUtils.runPartialRecursive;
-  var clone = axe.utils.clone;
+  const ruleName = 'bypass';
+  const runPartialRecursive = axe.testUtils.runPartialRecursive;
+  const clone = axe.utils.clone;
 
   beforeEach(function (done) {
     axe.testUtils.awaitNestedLoad(function () {
       // Stop messing with my tests Mocha!
-      var heading = document.querySelector('#mocha h1');
+      const heading = document.querySelector('#mocha h1');
       if (heading) {
         heading.outerHTML = '<div><b>bypass iframe test fail</b></div>';
       }
@@ -16,9 +16,9 @@ describe('run-partial, page-level', function () {
   });
 
   it('gives the same empty results as axe.run with a pageLevel rule', function (done) {
-    var options = { runOnly: ruleName };
+    const options = { runOnly: ruleName };
     // pageLevel rules are inapplicable when they don't test the entire page
-    var context = { include: ['article'] };
+    const context = { include: ['article'] };
     Promise.all(runPartialRecursive(clone(context), options))
       .then(function (partialResults) {
         return Promise.all([
@@ -27,8 +27,8 @@ describe('run-partial, page-level', function () {
         ]);
       })
       .then(function (results) {
-        var axeRunPartialResult = results[0];
-        var axeRunResult = results[1];
+        const axeRunPartialResult = results[0];
+        const axeRunResult = results[1];
         assert.lengthOf(axeRunPartialResult.incomplete, 0);
         assert.lengthOf(axeRunPartialResult.passes, 0);
         axe.testUtils.assertResultsDeepEqual(axeRunPartialResult, axeRunResult);
@@ -38,8 +38,8 @@ describe('run-partial, page-level', function () {
   });
 
   it('gives the same failed results as axe.run with a pageLevel rule', function (done) {
-    var options = { runOnly: ruleName };
-    var context = { exclude: [] };
+    const options = { runOnly: ruleName };
+    const context = { exclude: [] };
     Promise.all(runPartialRecursive(clone(context), options))
       .then(function (partialResults) {
         return Promise.all([
@@ -48,13 +48,13 @@ describe('run-partial, page-level', function () {
         ]);
       })
       .then(function (results) {
-        var axeRunPartialResult = results[0];
-        var axeRunResult = results[1];
+        const axeRunPartialResult = results[0];
+        const axeRunResult = results[1];
         assert.isObject(axeRunPartialResult);
         assert.isObject(axeRunResult);
 
         // Check the node is the one we expect
-        var nodes = axeRunPartialResult.incomplete[0].nodes;
+        const nodes = axeRunPartialResult.incomplete[0].nodes;
         assert.lengthOf(nodes, 1);
         assert.deepEqual(nodes[0].target, ['html']);
 

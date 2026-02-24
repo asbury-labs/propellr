@@ -1,16 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  checkSetup,
-  getCheckEvaluate,
-  MockCheckContext,
-  shadowCheckSetup,
-  shadowSupport
-} from '../../../testutils';
+import { checkSetup, getCheckEvaluate, MockCheckContext, shadowCheckSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('header-present', function () {
   const fixture = document.getElementById('fixture')!;
-  const shadowSupported = shadowSupport.v1;
   const checkContext = MockCheckContext();
 
   afterEach(function () {
@@ -74,7 +67,7 @@ describe('header-present', function () {
     );
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'should return true if heading is in shadow dom',
     function () {
       const params = shadowCheckSetup('<div id="target"><div>', '<h1></h1>');

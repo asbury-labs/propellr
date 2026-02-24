@@ -7,7 +7,7 @@ describe('axe.utils.publishMetaData', () => {
   });
 
   it('should pull data from rules from axe._audit.data', () => {
-    let expected = {
+    const expected = {
       foo: 'bar',
       bob: 'loblaw'
     };
@@ -21,7 +21,7 @@ describe('axe.utils.publishMetaData', () => {
       }
     });
 
-    let result = {
+    const result = {
       id: 'cats',
       nodes: []
     };
@@ -32,7 +32,7 @@ describe('axe.utils.publishMetaData', () => {
   });
 
   it('should pull data from checks from axe._audit.data', () => {
-    let expected = {
+    const expected = {
       foo: 'bar',
       bob: 'loblaw'
     };
@@ -46,7 +46,7 @@ describe('axe.utils.publishMetaData', () => {
       }
     });
 
-    let result = {
+    const result = {
       id: 'foo',
       nodes: [
         {
@@ -111,7 +111,7 @@ describe('axe.utils.publishMetaData', () => {
       }
     });
 
-    let result = {
+    const result = {
       id: 'cats',
       nodes: [
         {
@@ -276,7 +276,7 @@ describe('axe.utils.publishMetaData', () => {
       }
     });
 
-    let result = {
+    const result = {
       id: 'cats',
       nodes: [
         {
@@ -392,7 +392,7 @@ describe('axe.utils.publishMetaData', () => {
       }
     });
 
-    let result = {
+    const result = {
       id: 'cats',
       nodes: [
         {
@@ -520,7 +520,7 @@ describe('axe.utils.publishMetaData', () => {
       }
     });
 
-    let result = {
+    const result = {
       id: 'cats',
       nodes: [
         {
@@ -660,7 +660,7 @@ describe('axe.utils.publishMetaData', () => {
       }
     });
 
-    let result = {
+    const result = {
       id: 'cats',
       nodes: [
         {
@@ -822,7 +822,7 @@ describe('axe.utils.publishMetaData', () => {
   });
 
   it('should pull tags off rule object', () => {
-    let expected = {
+    const expected = {
       foo: 'bar',
       bob: 'loblaw'
     };
@@ -841,7 +841,7 @@ describe('axe.utils.publishMetaData', () => {
       }
     });
 
-    let result = {
+    const result = {
       id: 'foo',
       nodes: [
         {
@@ -880,7 +880,7 @@ describe('axe.utils.publishMetaData', () => {
         }
       });
 
-      let result = {
+      const result = {
         id: 'cats',
         nodes: [
           {
@@ -969,7 +969,7 @@ describe('axe.utils.publishMetaData', () => {
         }
       });
 
-      let result = {
+      const result = {
         id: 'cats',
         nodes: [
           {
@@ -1069,7 +1069,7 @@ describe('axe.utils.publishMetaData', () => {
         }
       });
 
-      let result = {
+      const result = {
         id: 'cats',
         nodes: [
           {
@@ -1185,7 +1185,7 @@ describe('axe.utils.publishMetaData', () => {
       }
     });
 
-    let result = {
+    const result = {
       id: 'cats',
       nodes: [
         {

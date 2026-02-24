@@ -1,5 +1,5 @@
 import { describe, it, beforeAll, afterAll, afterEach, expect } from 'vitest';
-import { html, shadowSupport, flatTreeSetup } from '../../../testutils';
+import { html, flatTreeSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('text.accessibleTextVirtual', () => {
@@ -741,7 +741,7 @@ describe('text.accessibleTextVirtual', () => {
     }
   );
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should only find aria-labelledby element in the same context ',
     () => {
       fixture.innerHTML = html`
@@ -774,7 +774,7 @@ describe('text.accessibleTextVirtual', () => {
     }
   );
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should find attributes within a shadow tree',
     () => {
       fixture.innerHTML = html` <div id="shadow"></div> `;
@@ -792,7 +792,7 @@ describe('text.accessibleTextVirtual', () => {
     }
   );
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should find attributes within a slot on the shadow tree',
     () => {
       fixture.innerHTML =
@@ -811,7 +811,7 @@ describe('text.accessibleTextVirtual', () => {
     }
   );
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should find fallback content for shadow DOM',
     () => {
       fixture.innerHTML = html` <div id="shadow"></div> `;
@@ -892,7 +892,7 @@ describe('text.accessibleTextVirtual', () => {
       expect(axe.commons.text.accessibleTextVirtual(target)).toBe('Hello');
     });
 
-    (shadowSupport.v1 ? it : xit)(
+    it(
       'should check within the composed (shadow) tree',
       () => {
         const node = document.createElement('div');

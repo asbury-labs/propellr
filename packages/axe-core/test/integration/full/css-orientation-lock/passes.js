@@ -1,9 +1,9 @@
 describe('css-orientation-lock passes test', function () {
   'use strict';
 
-  var shadowSupported = axe.testUtils.shadowSupport.v1;
+  const shadowSupported = axe.testUtils.shadowSupport.v1;
 
-  var styleSheets = [
+  const styleSheets = [
     {
       href: 'https://stackpath.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css'
     },
@@ -39,7 +39,7 @@ describe('css-orientation-lock passes test', function () {
         // check for violation
         assert.property(res, 'passes');
         assert.lengthOf(res.passes, 1);
-        var checkedNode = res.passes[0].nodes[0];
+        const checkedNode = res.passes[0].nodes[0];
         assert.isTrue(/html/i.test(checkedNode.html));
 
         done();
@@ -52,8 +52,8 @@ describe('css-orientation-lock passes test', function () {
     function (done) {
       // here although media styles are pumped into shadow dom
       // they are not orientation locks, so returns as passes
-      var fixture = document.getElementById('shadow-fixture');
-      var shadow = fixture.attachShadow({ mode: 'open' });
+      const fixture = document.getElementById('shadow-fixture');
+      const shadow = fixture.attachShadow({ mode: 'open' });
       shadow.innerHTML =
         '<style> @media screen and (min-width: 10px) and (max-width: 2000px) { .shadowDiv { transform: rotate(90deg); } } </style>' +
         '<div class="green">green</div>' +
@@ -74,10 +74,10 @@ describe('css-orientation-lock passes test', function () {
           assert.property(res, 'passes');
           assert.lengthOf(res.passes, 1);
 
-          var checkedNode = res.passes[0].nodes[0];
+          const checkedNode = res.passes[0].nodes[0];
           assert.isTrue(/html/i.test(checkedNode.html));
 
-          var checkResult = checkedNode.all[0];
+          const checkResult = checkedNode.all[0];
           assert.lengthOf(checkResult.relatedNodes, 0);
 
           done();

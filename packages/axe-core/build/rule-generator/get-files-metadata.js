@@ -66,7 +66,7 @@ const getRuleMatchesFileMeta = (
   ruleHasMatches,
   ruleHasUnitTestAssets
 ) => {
-  let files = [];
+  const files = [];
 
   if (ruleHasMatches) {
     const fnName = `${camelCase(ruleName)}Matches`;
@@ -228,7 +228,7 @@ const getChecksFileMeta = (ruleChecks, ruleHasUnitTestAssets) => {
  * @returns {Array<Object>} meta data of files
  */
 const getIntegrationTestAssets = (ruleName, ruleHasIntegrationTestAssets) => {
-  let files = [];
+  const files = [];
 
   if (ruleHasIntegrationTestAssets) {
     const htmlFile = {

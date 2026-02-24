@@ -19,7 +19,7 @@ const addr = `http://localhost:${serverPort}/WAI/content-assets/wcag-act-rules/`
 const testCaseJson = require(testCaseJsonPath);
 
 module.exports = ({ id, title, axeRules, skipTests = [] }) => {
-  describe(`${title} (${id})`, function () {
+  describe(`${title} (${id})`, function  exports() {
     let driver, server;
     const testcases = testCaseJson.testcases.filter(
       ({ ruleId }) => ruleId === id
@@ -70,7 +70,7 @@ module.exports = ({ id, title, axeRules, skipTests = [] }) => {
             `Expected 0 violations for testcase ${testcase.testcaseId}`
           );
         } else {
-          var issues = results.violations[0] || results.incomplete[0];
+          const issues = results.violations[0] || results.incomplete[0];
           assert.isDefined(
             issues,
             `Expected violations or incomplete for testcase ${testcase.testcaseId}`

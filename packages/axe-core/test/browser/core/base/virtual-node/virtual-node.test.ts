@@ -56,7 +56,7 @@ describe('VirtualNode', () => {
 
         it('should be undefined for a text node', () => {
           node = document.createTextNode('text content');
-          let vNode = new VirtualNode(node);
+          const vNode = new VirtualNode(node);
           expect(vNode.props[prop]).toBe(undefined);
         });
 
@@ -68,7 +68,7 @@ describe('VirtualNode', () => {
               throw new Error('Unqueryable value');
             }
           });
-          let vNode = new VirtualNode(node);
+          const vNode = new VirtualNode(node);
           expect(() => node[prop]).toThrow();
           expect(() => vNode.props[prop]).not.toThrow();
           expect(vNode.props[prop]).toBe(undefined);

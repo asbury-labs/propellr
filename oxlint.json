@@ -62,7 +62,7 @@
       }
     },
     {
-      "files": ["packages/axe-core/test/**/*.js"],
+      "files": ["packages/axe-core/test/integration/**/*.js"],
       "env": {
         "mocha": true,
         "browser": true

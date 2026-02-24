@@ -1,11 +1,9 @@
 import { describe, it, beforeAll, afterEach, expect } from 'vitest';
-import { shadowSupport } from '../../../testutils';
 
 declare const axe: any;
 describe('aria.isAccessibleRef', function () {
   const fixture = document.getElementById('fixture');
   const isAccessibleRef = axe.commons.aria.isAccessibleRef;
-  const shadowSupportV1 = shadowSupport.v1;
 
   function setLookup(attrs) {
     axe.configure({
@@ -55,7 +53,7 @@ describe('aria.isAccessibleRef', function () {
     expect(isAccessibleRef(node)).toBe(true);
   });
 
-  (shadowSupportV1 ? it : xit)('works inside shadow DOM', function () {
+  it('works inside shadow DOM', function () {
     setLookup({ 'aria-bar': { type: 'idref' } });
     fixture.innerHTML = '<div id="foo"></div>';
 
@@ -68,7 +66,7 @@ describe('aria.isAccessibleRef', function () {
     expect(isAccessibleRef(node)).toBe(true);
   });
 
-  (shadowSupportV1 ? it : xit)(
+  it(
     'returns false for IDREFs inside shadow DOM',
     function () {
       setLookup({ 'aria-foo': { type: 'idrefs' } });
@@ -84,7 +82,7 @@ describe('aria.isAccessibleRef', function () {
     }
   );
 
-  (shadowSupportV1 ? it : xit)(
+  it(
     'returns false for IDREFs outside shadow DOM',
     function () {
       setLookup({ 'aria-bar': { type: 'idref' } });

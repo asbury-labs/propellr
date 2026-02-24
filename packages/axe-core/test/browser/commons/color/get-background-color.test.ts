@@ -1,11 +1,9 @@
 import { describe, it, beforeEach, afterEach, expect } from 'vitest';
-import { shadowSupport, flatTreeSetup } from '../../../testutils';
+import { flatTreeSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('color.getBackgroundColor', function () {
   const fixture = document.getElementById('fixture');
-
-  const shadowSupported = shadowSupport.v1;
 
   /**
    * Assert that two Colors are close-to-equal.
@@ -790,7 +788,7 @@ describe('color.getBackgroundColor', function () {
     expect(actual.alpha).toBeCloseTo(1, 0);
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'finds colors in shadow boundaries',
     function () {
       fixture.innerHTML = '<div id="container"></div>';
@@ -810,7 +808,7 @@ describe('color.getBackgroundColor', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'finds colors across shadow boundaries',
     function () {
       fixture.innerHTML =
@@ -828,7 +826,7 @@ describe('color.getBackgroundColor', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'should count an implicit label as a background element inside shadow dom',
     function () {
       fixture.innerHTML = '<div id="container"></div>';
@@ -845,7 +843,7 @@ describe('color.getBackgroundColor', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'finds colors for absolutely positioned elements across shadow boundaries',
     function () {
       fixture.innerHTML =
@@ -864,7 +862,7 @@ describe('color.getBackgroundColor', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'finds a color for absolutely positioned content when background is in shadow dom',
     function () {
       fixture.innerHTML =
@@ -883,7 +881,7 @@ describe('color.getBackgroundColor', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'finds colors for content rendered across multiple shadow boundaries',
     function () {
       fixture.innerHTML =
@@ -910,7 +908,7 @@ describe('color.getBackgroundColor', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'finds colors for multiline elements across shadow boundaries',
     function () {
       fixture.innerHTML =
@@ -927,7 +925,7 @@ describe('color.getBackgroundColor', function () {
     }
   );
 
-  (shadowSupported ? xit : xit)(
+  xit(
     'returns null for multiline elements not fully covering parents across shadow boundaries',
     function () {
       fixture.innerHTML =
@@ -943,7 +941,7 @@ describe('color.getBackgroundColor', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'returns a color for slotted content',
     function () {
       fixture.innerHTML = '<div id="container"></div>';

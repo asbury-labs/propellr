@@ -154,7 +154,7 @@ describe('axe.utils.aggregateResult', () => {
   });
 
   it('creates an object with arrays as properties for each result', () => {
-    let resultObject = axe.utils.aggregateResult(results);
+    const resultObject = axe.utils.aggregateResult(results);
 
     expect(Array.isArray(resultObject.passes)).toBe(true);
     expect(Array.isArray(resultObject.violations)).toBe(true);
@@ -164,8 +164,8 @@ describe('axe.utils.aggregateResult', () => {
 
   it('copies failures and passes to their respective arrays on the result object', () => {
     // insert 1 pass and 1 fail
-    let input = [results[0], results[1]];
-    let resultObject = axe.utils.aggregateResult(input);
+    const input = [results[0], results[1]];
+    const resultObject = axe.utils.aggregateResult(input);
 
     expect(resultObject.passes).toHaveLength(1);
     expect(resultObject.violations).toHaveLength(1);
@@ -183,8 +183,8 @@ describe('axe.utils.aggregateResult', () => {
 
   it('creates a duplicate of the result for each outcome it has', () => {
     // insert 1 fail, containing a pass, a fail and a cantTell result
-    let input = [results[2]];
-    let resultObject = axe.utils.aggregateResult(input);
+    const input = [results[2]];
+    const resultObject = axe.utils.aggregateResult(input);
 
     expect(resultObject.passes).toHaveLength(1);
     expect(resultObject.violations).toHaveLength(1);
@@ -199,8 +199,8 @@ describe('axe.utils.aggregateResult', () => {
 
   it('moves inapplicable results only to the inapplicable array', () => {
     // insert 1 fail, containing a pass, a fail and a cantTell result
-    let input = [results[3]];
-    let resultObject = axe.utils.aggregateResult(input);
+    const input = [results[3]];
+    const resultObject = axe.utils.aggregateResult(input);
 
     expect(resultObject.passes).toHaveLength(0);
     expect(resultObject.violations).toHaveLength(0);

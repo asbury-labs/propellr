@@ -1,17 +1,16 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { shadowSupport } from '../../../testutils';
 
 declare const axe: any;
 function createContentHidden() {
-  let group = document.createElement('div');
+  const group = document.createElement('div');
   group.innerHTML =
     '<label id="mylabel">Label</label><input aria-labelledby="mylabel" type="text" />';
   return group;
 }
 
 function makeShadowTreeHidden(node) {
-  let root = node.attachShadow({ mode: 'open' });
-  let div = document.createElement('div');
+  const root = node.attachShadow({ mode: 'open' });
+  const div = document.createElement('div');
   div.className = 'parent';
   root.appendChild(div);
   div.appendChild(createContentHidden());
@@ -19,14 +18,13 @@ function makeShadowTreeHidden(node) {
 
 describe('axe.utils.isHidden', () => {
   const fixture = document.getElementById('fixture');
-  const shadowSupported = shadowSupport.v1;
 
   afterEach(() => {
     fixture.innerHTML = '';
   });
 
   it('should return false on detached elements', () => {
-    let el = document.createElement('div');
+    const el = document.createElement('div');
     el.innerHTML = 'I am not visible because I am detached!';
 
     expect(axe.utils.isHidden(el)).toBe(true);
@@ -40,7 +38,7 @@ describe('axe.utils.isHidden', () => {
     fixture.innerHTML =
       '<div id="target" aria-hidden="true">Hidden from screen readers</div>';
 
-    let el = document.getElementById('target');
+    const el = document.getElementById('target');
     expect(axe.utils.isHidden(el)).toBe(true);
   });
 
@@ -48,7 +46,7 @@ describe('axe.utils.isHidden', () => {
     fixture.innerHTML =
       '<div id="target" style="display: none">Hidden from screen readers</div>';
 
-    let el = document.getElementById('target');
+    const el = document.getElementById('target');
     expect(axe.utils.isHidden(el)).toBe(true);
   });
 
@@ -56,7 +54,7 @@ describe('axe.utils.isHidden', () => {
     fixture.innerHTML =
       '<div aria-hidden="true"><div id="target">Hidden from screen readers</div></div>';
 
-    let el = document.getElementById('target');
+    const el = document.getElementById('target');
     expect(axe.utils.isHidden(el)).toBe(true);
   });
 
@@ -66,11 +64,11 @@ describe('axe.utils.isHidden', () => {
       '<div id="target" style="visibility: visible;">Hi</div>' +
       '</div>';
 
-    let el = document.getElementById('target');
+    const el = document.getElementById('target');
     expect(axe.utils.isHidden(el)).toBe(false);
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'not hidden: should work when the element is inside shadow DOM',
     () => {
       let tree, node;
@@ -84,7 +82,7 @@ describe('axe.utils.isHidden', () => {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'hidden: should work when the element is inside shadow DOM',
     () => {
       let tree, node;
@@ -98,25 +96,25 @@ describe('axe.utils.isHidden', () => {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'should work with hidden slotted elements',
     () => {
       function createContentSlotted() {
-        let group = document.createElement('div');
+        const group = document.createElement('div');
         group.innerHTML =
           '<div id="target" style="display:none;">Stuff<slot></slot></div>';
         return group;
       }
       function makeShadowTree(node) {
-        let root = node.attachShadow({ mode: 'open' });
-        let div = document.createElement('div');
+        const root = node.attachShadow({ mode: 'open' });
+        const div = document.createElement('div');
         root.appendChild(div);
         div.appendChild(createContentSlotted());
       }
       fixture.innerHTML = '<div><p><a>hello</a></p></div>';
       makeShadowTree(fixture.firstChild);
-      let tree = axe.utils.getFlattenedTree(fixture.firstChild);
-      let el = axe.utils.querySelectorAll(tree, 'a')[0];
+      const tree = axe.utils.getFlattenedTree(fixture.firstChild);
+      const el = axe.utils.querySelectorAll(tree, 'a')[0];
       expect(axe.utils.isHidden(el.actualNode)).toBe(true);
     }
   );

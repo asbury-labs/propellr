@@ -1,9 +1,9 @@
-var execSync = require('child_process').execSync;
+const execSync = require('child_process').execSync;
 
 /*eslint
 camelcase: ["error", {"properties": "never"}]
 */
-module.exports = function (grunt) {
+module.exports = function  exports(grunt) {
   'use strict';
 
   grunt.loadNpmTasks('grunt-babel');
@@ -14,19 +14,19 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-bytesize');
   grunt.loadTasks('build/tasks');
 
-  var langs;
+  let langs;
   if (grunt.option('lang')) {
-    langs = (grunt.option('lang') || '').split(/[,;]/g).map(function (lang) {
+    langs = (grunt.option('lang') || '').split(/[,;]/g).map(function  langs(lang) {
       lang = lang.trim();
       return lang !== 'en' ? '.' + lang : '';
     });
   } else if (grunt.option('all-lang')) {
-    var localeFiles = require('fs').readdirSync('./locales');
+    const localeFiles = require('fs').readdirSync('./locales');
     langs = localeFiles
-      .filter(function (file) {
+      .filter(function  langs(file) {
         return !file.startsWith('_') && file.endsWith('.json');
       })
-      .map(function (file) {
+      .map(function  langs(file) {
         return '.' + file.replace('.json', '');
       });
     langs.unshift(''); // Add default
@@ -35,7 +35,7 @@ module.exports = function (grunt) {
   }
 
   // run tests only for affected files instead of all tests
-  grunt.event.on('watch', function (action, filepath) {
+  grunt.event.on('watch', function  exports(action, filepath) {
     grunt.config.set('watch.file', filepath);
   });
 
@@ -79,7 +79,7 @@ module.exports = function (grunt) {
           process: true
         },
         coreFiles: ['tmp/core/index.js', 'tmp/core/**/*.js'],
-        files: langs.map(function (lang, i) {
+        files: langs.map(function  files(lang, i) {
           return {
             src: [
               'lib/intro.stub',
@@ -146,7 +146,7 @@ module.exports = function (grunt) {
         options: {
           tags: grunt.option('tags')
         },
-        files: langs.map(function (lang) {
+        files: langs.map(function  files(lang) {
           return {
             src: [''],
             dest: {
@@ -194,7 +194,7 @@ module.exports = function (grunt) {
     },
     uglify: {
       beautify: {
-        files: langs.map(function (lang, i) {
+        files: langs.map(function  files(lang, i) {
           return {
             src: ['<%= concat.engine.files[' + i + '].dest %>'],
             dest: '<%= concat.engine.files[' + i + '].dest %>'
@@ -216,7 +216,7 @@ module.exports = function (grunt) {
         }
       },
       minify: {
-        files: langs.map(function (lang, i) {
+        files: langs.map(function  files(lang, i) {
           return {
             src: ['<%= concat.engine.files[' + i + '].dest %>'],
             dest: './axe' + lang + '.min.js'
@@ -259,14 +259,14 @@ module.exports = function (grunt) {
     },
     bytesize: {
       all: {
-        src: langs.map(function (lang) {
+        src: langs.map(function  src(lang) {
           return ['./axe' + lang + '.js', './axe' + lang + '.min.js'];
         })
       }
     }
   });
 
-  grunt.registerTask('prettier', '', function () {
+  grunt.registerTask('prettier', '', function  exports() {
     const results = execSync('npm run postbuild');
     grunt.log.writeln(results);
   });

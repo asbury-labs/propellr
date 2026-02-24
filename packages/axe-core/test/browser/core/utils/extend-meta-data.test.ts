@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 declare const axe: any;
 describe('axe.utils.extend', () => {
   it('should merge properties', () => {
-    let src = {
+    const src = {
       cats: 'fail',
       dogs: 'fail'
     };
@@ -18,7 +18,7 @@ describe('axe.utils.extend', () => {
   });
 
   it('should execute any found functions', () => {
-    let src = {
+    const src = {
       cats: 'fail',
       dogs: 'fail'
     };
@@ -34,7 +34,7 @@ describe('axe.utils.extend', () => {
     expect(src.dogs).toBe('woof');
   });
   it('should catch exceptions in functions and default to `null`', () => {
-    let src = {
+    const src = {
       cats: 'fail',
       dogs: 'fail'
     };

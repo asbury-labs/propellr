@@ -10,7 +10,7 @@ describe('axe.log', () => {
     const expected = ['hi', 'hello'];
     let success = false;
 
-    window.console.log = function () {
+    window.console.log = function  log() {
       success = true;
       expect(arguments[0]).toBe(expected[0]);
       expect(arguments[1]).toBe(expected[1]);

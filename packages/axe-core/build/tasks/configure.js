@@ -3,11 +3,11 @@
 const buildRules = require('../configure');
 const format = require('../shared/format');
 
-module.exports = function (grunt) {
+module.exports = function  exports(grunt) {
   grunt.registerMultiTask(
     'configure',
     'Task for configuring rules and checks',
-    function () {
+    function  exports() {
       const done = this.async();
       const options = this.options({
         rules: ['lib/rules/**/*.json'],
@@ -17,7 +17,7 @@ module.exports = function (grunt) {
         tags: ''
       });
 
-      this.files.forEach(function (file) {
+      this.files.forEach(function  exports(file) {
         // locale will always be the 2nd to last part of the
         // filename and in the format of "<name>.<locale>.js"
         const parts = file.dest.auto.split('.');
@@ -25,7 +25,7 @@ module.exports = function (grunt) {
           options.locale = parts[parts.length - 2];
         }
 
-        buildRules(grunt, options, null, function (result) {
+        buildRules(grunt, options, null, function  exports(result) {
           grunt.file.write(file.dest.auto, 'axe._load(' + result.auto + ');');
 
           // Format the content so Prettier doesn't create a diff after running.

@@ -1,10 +1,9 @@
 import { describe, it, afterEach, expect, vi } from 'vitest';
-import { queryFixture, shadowSupport, flatTreeSetup } from '../../../testutils';
+import { queryFixture, flatTreeSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('dom.isVisible', function () {
   const fixture = document.getElementById('fixture');
-  const shadowSupported = shadowSupport.v1;
   const computedStyleStub;
 
   afterEach(function () {
@@ -289,7 +288,7 @@ describe('dom.isVisible', function () {
       expect(actual).toBe(false);
     });
 
-    (shadowSupported ? it : xit)(
+    it(
       'returns false for `AREA` element that is inside shadowDOM',
       function () {
         fixture.innerHTML = '<div id="container"></div>';
@@ -358,7 +357,7 @@ describe('dom.isVisible', function () {
       expect(axe.commons.dom.isVisible(el)).toBe(false);
     });
 
-    (shadowSupported ? it : xit)(
+    it(
       'should correctly handle visible slotted elements',
       function () {
         function createContentSlotted() {
@@ -379,7 +378,7 @@ describe('dom.isVisible', function () {
         expect(axe.commons.dom.isVisible(el.actualNode)).toBe(true);
       }
     );
-    (shadowSupported ? it : xit)(
+    it(
       'should correctly handle hidden slotted elements',
       function () {
         function createContentSlotted() {

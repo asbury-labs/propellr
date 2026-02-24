@@ -45,7 +45,7 @@ if (!_rng) {
   const _rnds = new Array(16);
   _rng = () => {
     for (let i = 0, r: number = 0; i < 16; i++) {
-      if ((i & 0x03) === 0) r = Math.random() * 0x100000000;
+      if ((i & 0x03) === 0) {r = Math.random() * 0x100000000;}
       _rnds[i] = (r >>> ((i & 0x03) << 3)) & 0xff;
     }
 
@@ -56,7 +56,7 @@ if (!_rng) {
 // Buffer class to use — guard for Node.js compatibility
 const BufferClass =
   typeof window !== 'undefined' &&
-  typeof (window as unknown as Record<string, unknown>).Buffer == 'function'
+  typeof (window as unknown as Record<string, unknown>).Buffer === 'function'
     ? (window as unknown as Record<string, typeof Array>).Buffer
     : typeof Buffer !== 'undefined'
       ? Buffer
@@ -94,7 +94,7 @@ function parse(s: string, buf?: number[], offset?: number): number[] {
 
 // **`unparse()` - Convert UUID byte array (ala parse()) into a string**
 function unparse(buf: number[] | Uint8Array, offset?: number): string {
-  let i = offset || 0,
+  const i = offset || 0,
     bth = _byteToHex;
   return (
     bth[buf[i++]!]! +
@@ -161,7 +161,7 @@ function v1(
   offset?: number
 ): string | number[] {
   let i = (buf && offset) || 0;
-  let b = buf || [];
+  const b = buf || [];
 
   options = options || {};
 
@@ -243,9 +243,9 @@ function v4(
   offset?: number
 ): string | number[] {
   // Deprecated - 'format' argument, as supported in v1.2
-  let i = (buf && offset) || 0;
+  const i = (buf && offset) || 0;
 
-  if (typeof options == 'string') {
+  if (typeof options === 'string') {
     buf =
       options == 'binary'
         ? (new BufferClass!(16) as unknown as number[])

@@ -1,8 +1,8 @@
 describe('context test', function () {
   'use strict';
 
-  var config = { runOnly: { type: 'rule', values: ['html-lang-valid'] } };
-  var shadowSupported = axe.testUtils.shadowSupport.v1;
+  const config = { runOnly: { type: 'rule', values: ['html-lang-valid'] } };
+  const shadowSupported = axe.testUtils.shadowSupport.v1;
 
   before(function (done) {
     axe.testUtils.awaitNestedLoad(done);
@@ -163,7 +163,7 @@ describe('context test', function () {
     (shadowSupported ? it : xit)(
       'should find no nodes in Shadow DOM',
       function (done) {
-        var sConfig = { runOnly: { type: 'rule', values: ['color-contrast'] } };
+        const sConfig = { runOnly: { type: 'rule', values: ['color-contrast'] } };
         axe.run(
           { include: [['#shadow-container']], exclude: [['#shadow-host']] },
           sConfig,
@@ -364,7 +364,7 @@ describe('context test', function () {
     });
 
     describe('Shadow DOM', function () {
-      var sConfig = {
+      const sConfig = {
         runOnly: {
           type: 'rule',
           values: ['aria-allowed-attr', 'color-contrast']
@@ -374,8 +374,8 @@ describe('context test', function () {
         axe.run('#shadow-host', sConfig, function (err, results) {
           assert.isNull(err);
           assert.lengthOf(results.violations, 2, 'violations');
-          var allowedAttrsViolations = results.violations.filter(
-            function (violation) {
+          const allowedAttrsViolations = results.violations.filter(
+            function  allowedAttrsViolations(violation) {
               return violation.id === 'aria-allowed-attr';
             }
           );
@@ -388,13 +388,13 @@ describe('context test', function () {
         });
       });
       it('when passed a shadow root, reports issues in the shadow DOM, but not on the host', function (done) {
-        var host = document.querySelector('#shadow-host');
-        var shadowRoot = host.shadowRoot;
+        const host = document.querySelector('#shadow-host');
+        const shadowRoot = host.shadowRoot;
         axe.run(shadowRoot, sConfig, function (err, results) {
           assert.isNull(err);
           assert.lengthOf(results.violations, 1, 'violations');
-          var allowedAttrsViolations = results.violations.filter(
-            function (violation) {
+          const allowedAttrsViolations = results.violations.filter(
+            function  allowedAttrsViolations(violation) {
               return violation.id === 'aria-allowed-attr';
             }
           );

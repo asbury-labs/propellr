@@ -1,9 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  checkSetup,
-  getCheckEvaluate,
-  shadowSupport
-} from '../../../testutils';
+import { checkSetup, getCheckEvaluate } from '../../../testutils';
 
 describe('structured-dlitems', function () {
   const fixture = document.getElementById('fixture')!;
@@ -74,7 +70,7 @@ describe('structured-dlitems', function () {
     );
   });
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should return false in a shadow DOM pass',
     function () {
       const node = document.createElement('div');
@@ -89,7 +85,7 @@ describe('structured-dlitems', function () {
     }
   );
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should return true in a shadow DOM fail',
     function () {
       const node = document.createElement('div');

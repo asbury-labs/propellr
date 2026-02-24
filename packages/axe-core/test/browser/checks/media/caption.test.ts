@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { checkSetup, checks, shadowSupport } from '../../../testutils';
+import { checkSetup, checks } from '../../../testutils';
 
 describe('caption', function () {
   const fixture = document.getElementById('fixture')!;
@@ -29,7 +29,7 @@ describe('caption', function () {
     expect(checks.caption.evaluate.apply(null, checkArgs)).toBe(false);
   });
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should get track from composed tree',
     function () {
       const node = document.createElement('div');

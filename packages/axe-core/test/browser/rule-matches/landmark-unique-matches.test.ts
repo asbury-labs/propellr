@@ -1,11 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { fixtureSetup, shadowSupport } from '../../testutils';
+import { fixtureSetup } from '../../testutils';
 
 declare const axe: any;
 describe('landmark-unique-matches', function () {
   let rule;
   let fixture;
-  const shadowSupportV1 = shadowSupport.v1;
   const sectioningContentElements = ['article', 'aside', 'nav', 'section'];
   const excludedDescendantsForHeadersFooters =
     sectioningContentElements.concat('main');
@@ -168,141 +167,130 @@ describe('landmark-unique-matches', function () {
     });
   });
 
-  if (shadowSupportV1) {
-    it('return true for landmarks contained within shadow dom', function () {
-      const container = document.createElement('div');
-      const shadow = container.attachShadow({ mode: 'open' });
-      shadow.innerHTML = '<footer></footer>';
+  it('return true for landmarks contained within shadow dom', function () {
+    const container = document.createElement('div');
+    const shadow = container.attachShadow({ mode: 'open' });
+    shadow.innerHTML = '<footer></footer>';
 
-      fixtureSetup(container);
-      const vNode = axe.utils.querySelectorAll(axe._tree[0], 'footer')[0];
-      expect(rule.matches(vNode.actualNode, vNode)).toBe(true);
+    fixtureSetup(container);
+    const vNode = axe.utils.querySelectorAll(axe._tree[0], 'footer')[0];
+    expect(rule.matches(vNode.actualNode, vNode)).toBe(true);
+  });
+
+  describe('header/footers should only match when not inside the excluded descendants within shadow dom', function () {
+    let container;
+    let shadow;
+
+    beforeEach(function () {
+      container = document.createElement('div');
+      shadow = container.attachShadow({ mode: 'open' });
     });
 
-    describe('header/footers should only match when not inside the excluded descendants within shadow dom', function () {
-      let container;
-      let shadow;
-
-      beforeEach(function () {
-        container = document.createElement('div');
-        shadow = container.attachShadow({ mode: 'open' });
-      });
-
-      headerFooterElements.forEach(function (elementType) {
-        excludedDescendantsForHeadersFooters.forEach(function (exclusionType) {
-          it(
-            'should not match because ' +
-              elementType +
-              ' is contained inside an ' +
-              exclusionType +
-              '',
-            function () {
-              shadow.innerHTML =
-                '<' +
-                exclusionType +
-                ' aria-label="sample label"><' +
-                elementType +
-                '>an element</' +
-                elementType +
-                '></' +
-                exclusionType +
-                '>';
-
-              fixtureSetup(container);
-              const virtualNode = axe.utils.querySelectorAll(
-                axe._tree[0],
-                elementType
-              )[0];
-              expect(rule.matches(virtualNode.actualNode, virtualNode)).toBe(
-                false
-              );
-            }
-          );
-        });
-
+    headerFooterElements.forEach(function (elementType) {
+      excludedDescendantsForHeadersFooters.forEach(function (exclusionType) {
         it(
-          'should match because ' +
+          'should not match because ' +
             elementType +
-            ' is not contained inside the excluded descendants',
+            ' is contained inside an ' +
+            exclusionType +
+            '',
           function () {
             shadow.innerHTML =
-              '<' + elementType + '>an element</' + elementType + '>';
+              '<' +
+              exclusionType +
+              ' aria-label="sample label"><' +
+              elementType +
+              '>an element</' +
+              elementType +
+              '></' +
+              exclusionType +
+              '>';
+
             fixtureSetup(container);
             const virtualNode = axe.utils.querySelectorAll(
               axe._tree[0],
               elementType
             )[0];
             expect(rule.matches(virtualNode.actualNode, virtualNode)).toBe(
-              true
-            );
-          }
-        );
-      });
-    });
-
-    describe('aside should match inside shadow dom unless it is both within sectioning content and has no accessible name', function () {
-      let container;
-      let shadow;
-
-      beforeEach(function () {
-        container = document.createElement('div');
-        shadow = container.attachShadow({ mode: 'open' });
-      });
-
-      sectioningContentElements.forEach(function (exclusionType) {
-        it(
-          'should not match because aside is scoped to ' +
-            exclusionType +
-            ' and has no label',
-          function () {
-            shadow.innerHTML =
-              '<' +
-              exclusionType +
-              ' aria-label="sample label"><aside data-test>an element</aside></' +
-              exclusionType +
-              '>';
-
-            fixtureSetup(container);
-            const virtualNode = axe.utils.querySelectorAll(
-              axe._tree[0],
-              'aside[data-test]'
-            )[0];
-            expect(rule.matches(virtualNode.actualNode, virtualNode)).toBe(
               false
             );
           }
         );
-
-        it(
-          'should match because aside within ' + exclusionType + ' has a label',
-          function () {
-            shadow.innerHTML =
-              '<' +
-              exclusionType +
-              '><aside aria-label="sample label" data-test>an element</aside></' +
-              exclusionType +
-              '>';
-            fixtureSetup(container);
-            const virtualNode = axe.utils.querySelectorAll(
-              axe._tree[0],
-              'aside[data-test]'
-            )[0];
-            expect(rule.matches(virtualNode.actualNode, virtualNode)).toBe(
-              true
-            );
-          }
-        );
       });
 
-      it('should match because aside is not scoped to a sectioning content element', function () {
-        shadow.innerHTML = '<aside>an element</aside>';
-        fixtureSetup(container);
-        const virtualNode = axe.utils.querySelectorAll(
-          axe._tree[0],
-          'aside'
-        )[0];
-        expect(rule.matches(virtualNode.actualNode, virtualNode)).toBe(true);
-      });
+      it(
+        'should match because ' +
+          elementType +
+          ' is not contained inside the excluded descendants',
+        function () {
+          shadow.innerHTML =
+            '<' + elementType + '>an element</' + elementType + '>';
+          fixtureSetup(container);
+          const virtualNode = axe.utils.querySelectorAll(
+            axe._tree[0],
+            elementType
+          )[0];
+          expect(rule.matches(virtualNode.actualNode, virtualNode)).toBe(true);
+        }
+      );
     });
-  }
+  });
+
+  describe('aside should match inside shadow dom unless it is both within sectioning content and has no accessible name', function () {
+    let container;
+    let shadow;
+
+    beforeEach(function () {
+      container = document.createElement('div');
+      shadow = container.attachShadow({ mode: 'open' });
+    });
+
+    sectioningContentElements.forEach(function (exclusionType) {
+      it(
+        'should not match because aside is scoped to ' +
+          exclusionType +
+          ' and has no label',
+        function () {
+          shadow.innerHTML =
+            '<' +
+            exclusionType +
+            ' aria-label="sample label"><aside data-test>an element</aside></' +
+            exclusionType +
+            '>';
+
+          fixtureSetup(container);
+          const virtualNode = axe.utils.querySelectorAll(
+            axe._tree[0],
+            'aside[data-test]'
+          )[0];
+          expect(rule.matches(virtualNode.actualNode, virtualNode)).toBe(false);
+        }
+      );
+
+      it(
+        'should match because aside within ' + exclusionType + ' has a label',
+        function () {
+          shadow.innerHTML =
+            '<' +
+            exclusionType +
+            '><aside aria-label="sample label" data-test>an element</aside></' +
+            exclusionType +
+            '>';
+          fixtureSetup(container);
+          const virtualNode = axe.utils.querySelectorAll(
+            axe._tree[0],
+            'aside[data-test]'
+          )[0];
+          expect(rule.matches(virtualNode.actualNode, virtualNode)).toBe(true);
+        }
+      );
+    });
+
+    it('should match because aside is not scoped to a sectioning content element', function () {
+      shadow.innerHTML = '<aside>an element</aside>';
+      fixtureSetup(container);
+      const virtualNode = axe.utils.querySelectorAll(axe._tree[0], 'aside')[0];
+      expect(rule.matches(virtualNode.actualNode, virtualNode)).toBe(true);
+    });
+  });
 });

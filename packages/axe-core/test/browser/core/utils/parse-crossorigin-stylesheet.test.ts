@@ -19,17 +19,17 @@ describe('axe.utils.parseCrossOriginStylesheet', () => {
   });
 
   it('returns cross-origin stylesheet', async () => {
-    let importUrl =
+    const importUrl =
       'https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css';
-    let options = {
+    const options = {
       rootNode: document,
       shadowId: undefined,
       convertDataToStylesheet: convertDataToStylesheet,
       rootIndex: 1
     };
-    let priority = [1, 0];
-    let importedUrls = [];
-    let isCrossOriginRequest = true;
+    const priority = [1, 0];
+    const importedUrls = [];
+    const isCrossOriginRequest = true;
 
     const data = await axe.utils.parseCrossOriginStylesheet(
       importUrl,
@@ -55,17 +55,17 @@ describe('axe.utils.parseCrossOriginStylesheet', () => {
   });
 
   it('rejects when given url to fetch is not found', async () => {
-    let importUrl =
+    const importUrl =
       'https://make-up-a-website-that-does-not-exist.com/style.css';
-    let options = {
+    const options = {
       rootNode: document,
       shadowId: undefined,
       convertDataToStylesheet: convertDataToStylesheet,
       rootIndex: 1
     };
-    let priority = [1, 0];
-    let importedUrls = [];
-    let isCrossOriginRequest = true;
+    const priority = [1, 0];
+    const importedUrls = [];
+    const isCrossOriginRequest = true;
     await expect(
       axe.utils.parseCrossOriginStylesheet(
         importUrl,

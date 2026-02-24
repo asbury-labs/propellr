@@ -21,7 +21,7 @@ describe('axe.teardown', () => {
   });
 
   it('should reset memozied functions', () => {
-    let orgFn = axe._memoizedFns[0];
+    const orgFn = axe._memoizedFns[0];
     let called = false;
     axe._memoizedFns[0] = {
       clear: () => {
@@ -34,7 +34,7 @@ describe('axe.teardown', () => {
   });
 
   it('should reset the cache', () => {
-    let orgFn = axe._cache.clear;
+    const orgFn = axe._cache.clear;
     let called = false;
     axe._cache.clear = () => {
       called = true;

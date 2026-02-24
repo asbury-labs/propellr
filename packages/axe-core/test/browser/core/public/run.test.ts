@@ -3,9 +3,9 @@ import { captureError } from '../../../testutils';
 
 declare const axe: any;
 describe('axe.run', () => {
-  let fixture = document.getElementById('fixture');
+  const fixture = document.getElementById('fixture');
   const noop = () => {};
-  let origRunRules = axe._runRules;
+  const origRunRules = axe._runRules;
 
   beforeEach(() => {
     axe._load({
@@ -39,7 +39,7 @@ describe('axe.run', () => {
     return new Promise<void>((done, reject) => {
       // Safe: test-only DOM fixture
       fixture.innerHTML = '<div id="t1"></div>';
-      let options = {
+      const options = {
         runOnly: {
           type: 'rule',
           values: ['test']
@@ -76,7 +76,7 @@ describe('axe.run', () => {
 
   it('does not mutate the options object', () => {
     return new Promise<void>((done, reject) => {
-      let options = {};
+      const options = {};
       axe.run(options, () => {
         expect(options).toEqual({});
         done();
@@ -275,7 +275,7 @@ describe('axe.run', () => {
           rej('I surrender!');
         };
 
-        let p = axe.run({ reporter: 'raw' });
+        const p = axe.run({ reporter: 'raw' });
         p.then(noop).catch(err => {
           expect(err).toBe('I surrender!');
           done();
@@ -292,7 +292,7 @@ describe('axe.run', () => {
           resolve('World party', noop);
         };
 
-        let p = axe.run({ reporter: 'raw' });
+        const p = axe.run({ reporter: 'raw' });
         p.then(result => {
           expect(result).toBe('World party');
           done();
@@ -502,8 +502,8 @@ describe('axe.run', () => {
 });
 
 describe('axe.run iframes', () => {
-  let fixture = document.getElementById('fixture');
-  let origRunRules = axe._runRules;
+  const fixture = document.getElementById('fixture');
+  const origRunRules = axe._runRules;
 
   beforeEach(() => {
     // Safe: test-only DOM fixture
@@ -535,14 +535,14 @@ describe('axe.run iframes', () => {
 
   it('includes iframes by default', () => {
     return new Promise<void>((done, reject) => {
-      let frame = document.createElement('iframe');
+      const frame = document.createElement('iframe');
       frame.addEventListener('load', () => {
         axe.run(
           '#fixture',
           {},
           captureError((err, result) => {
             expect(result.violations.length).toBe(1);
-            let violation = result.violations[0];
+            const violation = result.violations[0];
             expect(violation.nodes.length).toBe(2);
             expect(
               violation.nodes.some(node => {
@@ -566,14 +566,14 @@ describe('axe.run iframes', () => {
 
   it('excludes iframes if iframes is false', () => {
     return new Promise<void>((done, reject) => {
-      let frame = document.createElement('iframe');
+      const frame = document.createElement('iframe');
       frame.addEventListener('load', () => {
         axe.run(
           '#fixture',
           { iframes: false },
           captureError((err, result) => {
             expect(result.violations.length).toBe(1);
-            let violation = result.violations[0];
+            const violation = result.violations[0];
             expect(violation.nodes.length).toBe(1);
             expect(violation.nodes[0].target.length).toBe(1);
             expect(violation.nodes[0].target[0]).toBe('#target');
@@ -589,7 +589,7 @@ describe('axe.run iframes', () => {
 
   it('ignores unexpected messages from non-axe iframes', () => {
     return new Promise<void>((done, reject) => {
-      let frame = document.createElement('iframe');
+      const frame = document.createElement('iframe');
       frame.addEventListener('load', () => {
         axe.run(
           '#fixture',
@@ -609,7 +609,7 @@ describe('axe.run iframes', () => {
 
   it('ignores unexpected messages from axe iframes', () => {
     return new Promise<void>((done, reject) => {
-      let frame = document.createElement('iframe');
+      const frame = document.createElement('iframe');
 
       frame.addEventListener('load', () => {
         axe.run(

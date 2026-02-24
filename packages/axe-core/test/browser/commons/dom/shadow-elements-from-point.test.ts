@@ -1,16 +1,15 @@
 import { describe, it, afterEach, expect } from 'vitest';
-import { shadowSupport, flatTreeSetup } from '../../../testutils';
+import { flatTreeSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('dom.shadowElementsFromPoint', function () {
   const fixture = document.getElementById('fixture');
-  const shadowSupported = shadowSupport.v1;
 
   afterEach(function () {
     document.getElementById('fixture').innerHTML = '';
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'should return an array from inside and outside of shadow dom',
     function () {
       fixture.innerHTML =

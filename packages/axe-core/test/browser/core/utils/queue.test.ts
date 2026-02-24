@@ -4,13 +4,13 @@ declare const axe: any;
 describe('axe.utils.queue', () => {
   describe('defer', () => {
     it('should be a function', () => {
-      let q = axe.utils.queue();
+      const q = axe.utils.queue();
       expect(typeof q.defer).toBe('function');
     });
 
     it('should push onto the "axe.utils.queue"', () => {
       return new Promise<void>(done => {
-        let q = axe.utils.queue();
+        const q = axe.utils.queue();
 
         q.defer(resolve => {
           setTimeout(() => {
@@ -52,13 +52,13 @@ describe('axe.utils.queue', () => {
     });
 
     it('is chainable', () => {
-      let q = axe.utils.queue();
+      const q = axe.utils.queue();
       expect(q).toBe(q.defer(() => {}));
     });
 
     it('throws if then was already called', () => {
       expect(() => {
-        let q = axe.utils.queue();
+        const q = axe.utils.queue();
         q.defer(resolve => {
           resolve();
         });
@@ -94,12 +94,12 @@ describe('axe.utils.queue', () => {
 
   describe('then', () => {
     it('should be a function', () => {
-      let q = axe.utils.queue();
+      const q = axe.utils.queue();
       expect(typeof q.then).toBe('function');
     });
 
     it('should execute immediately if axe.utils.queue is complete', () => {
-      let q = axe.utils.queue();
+      const q = axe.utils.queue();
       let result = false;
 
       q.then(() => {
@@ -110,13 +110,13 @@ describe('axe.utils.queue', () => {
     });
 
     it('is chainable', () => {
-      let q = axe.utils.queue();
+      const q = axe.utils.queue();
       expect(q).toBe(q.then(() => {}));
     });
 
     it('throws when called more than once', () => {
       expect(() => {
-        let q = axe.utils.queue();
+        const q = axe.utils.queue();
         q.defer(() => {});
         q.then(() => {});
         q.then(() => {});
@@ -126,13 +126,13 @@ describe('axe.utils.queue', () => {
 
   describe('abort', () => {
     it('should be a function', () => {
-      let q = axe.utils.queue();
+      const q = axe.utils.queue();
       expect(typeof q.abort).toBe('function');
     });
 
     it('stops `then` from being called', () => {
       return new Promise<void>(done => {
-        let q = axe.utils.queue();
+        const q = axe.utils.queue();
 
         q.defer(resolve => {
           setTimeout(() => {
@@ -156,7 +156,7 @@ describe('axe.utils.queue', () => {
 
     it('sends a message to `catch`', () => {
       return new Promise<void>(done => {
-        let q = axe.utils.queue();
+        const q = axe.utils.queue();
         q.defer(() => {});
 
         q.then(() => {});
@@ -173,7 +173,7 @@ describe('axe.utils.queue', () => {
   describe('catch', () => {
     it('is called when defer throws an error', () => {
       return new Promise<void>(done => {
-        let q = axe.utils.queue();
+        const q = axe.utils.queue();
         q.defer(() => {
           throw 'error! 1';
         });
@@ -187,7 +187,7 @@ describe('axe.utils.queue', () => {
 
     it('can catch error synchronously', () => {
       return new Promise<void>(done => {
-        let q = axe.utils.queue();
+        const q = axe.utils.queue();
         let sync = true;
         q.defer(() => {
           throw 'error! 2';
@@ -205,7 +205,7 @@ describe('axe.utils.queue', () => {
     it('is called when the reject method is called', () => {
       return new Promise<void>(done => {
         /*eslint no-unused-vars: 0*/
-        let q = axe.utils.queue();
+        const q = axe.utils.queue();
         let errorsCaught = 0;
 
         q.defer((resolve, reject) => {
@@ -224,7 +224,7 @@ describe('axe.utils.queue', () => {
 
     it('will not run `then` if an error is thrown', () => {
       return new Promise<void>(done => {
-        let q = axe.utils.queue();
+        const q = axe.utils.queue();
         q.defer(() => {
           throw 'error! 3';
         });
@@ -241,7 +241,7 @@ describe('axe.utils.queue', () => {
 
     it('does not continue other tasks if an error occurs', () => {
       return new Promise<void>(done => {
-        let q = axe.utils.queue();
+        const q = axe.utils.queue();
         let aborted;
         q.defer(() => {
           throw 'error! 3';
@@ -264,13 +264,13 @@ describe('axe.utils.queue', () => {
     });
 
     it('is chainable', () => {
-      let q = axe.utils.queue();
+      const q = axe.utils.queue();
       expect(q).toBe(q.catch(() => {}));
     });
 
     it('throws when called more than once', () => {
       expect(() => {
-        let q = axe.utils.queue();
+        const q = axe.utils.queue();
         q.defer(() => {});
         q.catch(() => {});
         q.catch(() => {});

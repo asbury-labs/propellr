@@ -1,11 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  checkSetup,
-  fixtureSetup,
-  getCheckEvaluate,
-  MockCheckContext,
-  shadowSupport
-} from '../../../testutils';
+import { checkSetup, fixtureSetup, getCheckEvaluate, MockCheckContext } from '../../../testutils';
 
 describe('listitem', function () {
   const checkContext = MockCheckContext();
@@ -82,7 +76,7 @@ describe('listitem', function () {
     expect(result).toBe(true);
   });
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should return true in a shadow DOM pass',
     function () {
       const node = document.createElement('div');
@@ -101,7 +95,7 @@ describe('listitem', function () {
     }
   );
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should return false in a shadow DOM fail',
     function () {
       const node = document.createElement('div');

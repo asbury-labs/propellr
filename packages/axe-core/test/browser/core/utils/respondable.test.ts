@@ -82,7 +82,7 @@ describe('axe.utils.respondable', () => {
   });
 
   it('should use the post function when making a frame post', () => {
-    let post = vi.fn();
+    const post = vi.fn();
     respondable.updateMessenger({
       open: noop,
       post: post
@@ -93,7 +93,7 @@ describe('axe.utils.respondable', () => {
   });
 
   it('should pass the post function the correct parameters', () => {
-    let post = vi.fn();
+    const post = vi.fn();
     const callback = vi.fn();
 
     respondable.updateMessenger({

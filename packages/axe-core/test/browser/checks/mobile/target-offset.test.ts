@@ -135,7 +135,7 @@ describe('target-offset tests', () => {
     expect(checkContext._data.minOffset).toBe(24);
     expect(checkContext._data.closestOffset).toBeCloseTo(8, 0.2);
 
-    const relatedIds = checkContext._relatedNodes.map(function (node) {
+    const relatedIds = checkContext._relatedNodes.map(function  relatedIds(node) {
       return '#' + node.id;
     });
     expect(relatedIds).toEqual(['#left', '#right']);
@@ -184,7 +184,7 @@ describe('target-offset tests', () => {
       expect(checkContext._data.minOffset).toBe(24);
       expect(checkContext._data.closestOffset).toBeCloseTo(8, 0.2);
 
-      const relatedIds = checkContext._relatedNodes.map(function (node) {
+      const relatedIds = checkContext._relatedNodes.map(function  relatedIds(node) {
         return '#' + node.id;
       });
       expect(relatedIds).toEqual(['#left', '#right']);
@@ -207,7 +207,7 @@ describe('target-offset tests', () => {
       expect(checkContext._data.minOffset).toBe(24);
       expect(checkContext._data.closestOffset).toBeCloseTo(8, 0.2);
 
-      const relatedIds = checkContext._relatedNodes.map(function (node) {
+      const relatedIds = checkContext._relatedNodes.map(function  relatedIds(node) {
         return '#' + node.id;
       });
       expect(relatedIds).toEqual(['#left', '#right']);

@@ -1,5 +1,5 @@
 // angular skip links start with /#
-const angularSkipLinkRegex = /^\/\#/;
+const angularSkipLinkRegex = /^\/#/;
 
 // angular router link uses #! or #/
 const angularRouterLinkRegex = /^#[!/]/;

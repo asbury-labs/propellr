@@ -1,14 +1,8 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  fixtureSetup,
-  getCheckEvaluate,
-  MockCheckContext,
-  shadowSupport
-} from '../../../testutils';
+import { fixtureSetup, getCheckEvaluate, MockCheckContext } from '../../../testutils';
 
 describe('multiple-label', function () {
   const fixture = document.getElementById('fixture')!;
-  const shadowSupported = shadowSupport.v1;
   const checkContext = MockCheckContext();
 
   afterEach(function () {
@@ -259,7 +253,7 @@ describe('multiple-label', function () {
     ).toBeUndefined();
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'should consider labels in the same document/shadow tree',
     function () {
       fixture.innerHTML = '<div id="target"></div>';
@@ -278,7 +272,7 @@ describe('multiple-label', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'should return false for valid multiple labels in the same document/shadow tree',
     function () {
       fixture.innerHTML = '<div id="target"></div>';
@@ -299,7 +293,7 @@ describe('multiple-label', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'should return undefined for invalid multiple labels in the same document/shadow tree',
     function () {
       fixture.innerHTML = '<div id="target"></div>';

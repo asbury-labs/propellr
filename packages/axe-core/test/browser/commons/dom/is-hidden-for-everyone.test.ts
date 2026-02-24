@@ -1,10 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { shadowSupport, queryFixture, flatTreeSetup } from '../../../testutils';
+import { queryFixture, flatTreeSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('dom.isHiddenForEveryone', () => {
   const fixture = document.getElementById('fixture');
-  const shadowSupported = shadowSupport.v1;
   const isHiddenForEveryone = axe.commons.dom.isHiddenForEveryone;
   const contentVisibilitySupported = CSS.supports('content-visibility: hidden');
 
@@ -329,7 +328,7 @@ describe('dom.isHiddenForEveryone', () => {
     });
   });
 
-  (shadowSupported ? it : it.skip)(
+  it(
     'should return true if `display:none` inside shadowDOM',
     () => {
       fixture.innerHTML = '<div></div>';
@@ -341,7 +340,7 @@ describe('dom.isHiddenForEveryone', () => {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'should return true as parent shadowDOM host is set to `visibility:hidden`',
     () => {
       fixture.innerHTML = '<div></div>';
@@ -353,7 +352,7 @@ describe('dom.isHiddenForEveryone', () => {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'should return false as parent shadowDOM host  set to `visibility:hidden` is overriden',
     () => {
       fixture.innerHTML = '<div></div>';

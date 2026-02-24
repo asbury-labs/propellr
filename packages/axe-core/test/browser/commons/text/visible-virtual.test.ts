@@ -1,10 +1,8 @@
 import { describe, it, afterEach, expect } from 'vitest';
-import { shadowSupport } from '../../../testutils';
 
 declare const axe: any;
 describe('text.visible', function () {
   const fixture = document.getElementById('fixture');
-  const shadowSupported = shadowSupport.v1;
   const visibleVirtual = axe.commons.text.visibleVirtual;
 
   afterEach(function () {
@@ -79,7 +77,7 @@ describe('text.visible', function () {
       expect(visibleVirtual(tree[0])).toBe('Hello');
     });
 
-    (shadowSupported ? it : xit)(
+    it(
       'should correctly handle slotted elements',
       function () {
         function createContentSlotted() {

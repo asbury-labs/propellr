@@ -140,8 +140,8 @@ describe('helpers.processAggregate', () => {
       }).passes[0].result
     ).toBeDefined();
 
-    let resultObject = helpers.processAggregate(results, {});
-    let ruleResult = resultObject.passes.find(r => {
+    const resultObject = helpers.processAggregate(results, {});
+    const ruleResult = resultObject.passes.find(r => {
       return r.id === 'passed-rule';
     });
     expect(ruleResult.nodes[0].result).toBeUndefined();
@@ -154,8 +154,8 @@ describe('helpers.processAggregate', () => {
       }).passes[0].node
     ).toBeDefined();
 
-    let resultObject = helpers.processAggregate(results, {});
-    let ruleResult = resultObject.passes.find(r => {
+    const resultObject = helpers.processAggregate(results, {});
+    const ruleResult = resultObject.passes.find(r => {
       return r.id === 'passed-rule';
     });
     expect(ruleResult.nodes[0].node).toBeUndefined();
@@ -242,7 +242,7 @@ describe('helpers.processAggregate', () => {
 
         describe("when node's, or relatedNode's, `fromFrame` equals false", () => {
           it('should add an `element` property to the subResult nodes or relatedNodes', () => {
-            let resultObject = helpers.processAggregate(results, options);
+            const resultObject = helpers.processAggregate(results, options);
             expect(resultObject.passes[0].nodes[0].element).toBeDefined();
             expect(
               resultObject.passes[0].nodes[0].any[0].relatedNodes[0].element
@@ -252,7 +252,7 @@ describe('helpers.processAggregate', () => {
 
         describe("when node's, or relatedNode's, `fromFrame` equals true", () => {
           it('should NOT add an `element` property to the subResult nodes or relatedNodes', () => {
-            let resultObject = helpers.processAggregate(results, options);
+            const resultObject = helpers.processAggregate(results, options);
             expect(resultObject.violations[0].nodes[0].element).toBeUndefined();
             expect(
               resultObject.violations[0].nodes[0].any[0].relatedNodes[0].element
@@ -267,7 +267,7 @@ describe('helpers.processAggregate', () => {
         });
 
         it('should NOT add an `element` property to the subResult nodes or relatedNodes', () => {
-          let resultObject = helpers.processAggregate(results, options);
+          const resultObject = helpers.processAggregate(results, options);
           expect(resultObject.passes[0].nodes[0].element).toBeUndefined();
           expect(resultObject.violations[0].nodes[0].element).toBeUndefined();
           expect(
@@ -281,7 +281,7 @@ describe('helpers.processAggregate', () => {
 
       describe('when not set at all', () => {
         it('should NOT add an `element` property to the subResult nodes or relatedNodes', () => {
-          let resultObject = helpers.processAggregate(results, {});
+          const resultObject = helpers.processAggregate(results, {});
           expect(resultObject.passes[0].nodes[0].element).toBeUndefined();
           expect(resultObject.violations[0].nodes[0].element).toBeUndefined();
           expect(
@@ -302,7 +302,7 @@ describe('helpers.processAggregate', () => {
 
         describe("when node's, or relatedNode's, `fromFrame` equals true", () => {
           it('should add a `target` property to the subResult nodes or relatedNodes', () => {
-            let resultObject = helpers.processAggregate(results, options);
+            const resultObject = helpers.processAggregate(results, options);
             expect(resultObject.violations[0].nodes[0].target).toBeDefined();
             expect(
               resultObject.violations[0].nodes[0].any[0].relatedNodes[0].target
@@ -312,7 +312,7 @@ describe('helpers.processAggregate', () => {
 
         describe("when node's, or relatedNode's, `fromFrame` equals false", () => {
           it('should NOT add a `target` property to the subResult nodes or relatedNodes', () => {
-            let resultObject = helpers.processAggregate(results, options);
+            const resultObject = helpers.processAggregate(results, options);
             expect(resultObject.passes[0].nodes[0].target).toBeUndefined();
             expect(
               resultObject.passes[0].nodes[0].any[0].relatedNodes[0].target
@@ -340,7 +340,7 @@ describe('helpers.processAggregate', () => {
         });
 
         it('should add a `target` property to the subResult nodes or relatedNodes', () => {
-          let resultObject = helpers.processAggregate(results, options);
+          const resultObject = helpers.processAggregate(results, options);
           expect(resultObject.passes[0].nodes[0].target).toBeDefined();
           expect(
             resultObject.passes[0].nodes[0].any[0].relatedNodes[0].target
@@ -350,7 +350,7 @@ describe('helpers.processAggregate', () => {
 
       describe('when not set at all', () => {
         it('should add a `target` property to the subResult nodes or relatedNodes', () => {
-          let resultObject = helpers.processAggregate(results, {});
+          const resultObject = helpers.processAggregate(results, {});
           expect(resultObject.passes[0].nodes[0].target).toBeDefined();
           expect(
             resultObject.passes[0].nodes[0].any[0].relatedNodes[0].target
@@ -362,7 +362,7 @@ describe('helpers.processAggregate', () => {
     describe('`ancestry` option', () => {
       describe('when set to true', () => {
         it('should add an `ancestry` property to the subResult nodes or relatedNodes', () => {
-          let resultObject = helpers.processAggregate(results, {
+          const resultObject = helpers.processAggregate(results, {
             ancestry: true
           });
           expect(resultObject.passes[0].nodes[0].ancestry).toBeDefined();
@@ -374,7 +374,7 @@ describe('helpers.processAggregate', () => {
 
       describe('when set to false', () => {
         it('should NOT add an `ancestry` property to the subResult nodes or relatedNodes', () => {
-          let resultObject = helpers.processAggregate(results, {
+          const resultObject = helpers.processAggregate(results, {
             ancestry: false
           });
           expect(resultObject.passes[0].nodes[0].ancestry).toBeUndefined();
@@ -401,7 +401,7 @@ describe('helpers.processAggregate', () => {
 
       describe('when not set at all', () => {
         it('should NOT add an `ancestry` property to the subResult nodes or relatedNodes', () => {
-          let resultObject = helpers.processAggregate(results, {});
+          const resultObject = helpers.processAggregate(results, {});
           expect(resultObject.passes[0].nodes[0].ancestry).toBeUndefined();
           expect(
             resultObject.passes[0].nodes[0].any[0].relatedNodes[0].ancestry
@@ -417,7 +417,7 @@ describe('helpers.processAggregate', () => {
         });
 
         it('should add an `xpath` property to the subResult nodes or relatedNodes', () => {
-          let resultObject = helpers.processAggregate(results, options);
+          const resultObject = helpers.processAggregate(results, options);
           expect(resultObject.passes[0].nodes[0].xpath).toBeDefined();
           expect(
             resultObject.passes[0].nodes[0].any[0].relatedNodes[0].xpath
@@ -431,7 +431,7 @@ describe('helpers.processAggregate', () => {
         });
 
         it('should NOT add an `xpath` property to the subResult nodes or relatedNodes', () => {
-          let resultObject = helpers.processAggregate(results, options);
+          const resultObject = helpers.processAggregate(results, options);
           expect(resultObject.passes[0].nodes[0].xpath).toBeUndefined();
           expect(
             resultObject.passes[0].nodes[0].any[0].relatedNodes[0].xpath
@@ -441,7 +441,7 @@ describe('helpers.processAggregate', () => {
 
       describe('when not set at all', () => {
         it('should NOT add an `xpath` property to the subResult nodes or relatedNodes', () => {
-          let resultObject = helpers.processAggregate(results, {});
+          const resultObject = helpers.processAggregate(results, {});
           expect(resultObject.passes[0].nodes[0].xpath).toBeUndefined();
           expect(
             resultObject.passes[0].nodes[0].any[0].relatedNodes[0].xpath

@@ -39,12 +39,12 @@ describe('axe.utils.aggregateNodeResults', () => {
   });
 
   it('Should be `inapplicable` when no results are given', () => {
-    let ruleResult = axe.utils.aggregateNodeResults([]);
+    const ruleResult = axe.utils.aggregateNodeResults([]);
     expect(ruleResult.result).toBe(INAPPLICABLE);
   });
 
   it('should assign FAIL to ruleResult over PASS', () => {
-    let ruleResult = axe.utils.aggregateNodeResults(
+    const ruleResult = axe.utils.aggregateNodeResults(
       createTestResults({ all: false }, { all: true }, { all: true })
     );
     expect(ruleResult.result).toBe(FAIL);
@@ -53,7 +53,7 @@ describe('axe.utils.aggregateNodeResults', () => {
   });
 
   it('should assign FAIL to ruleResult over CANTTELL', () => {
-    let ruleResult = axe.utils.aggregateNodeResults(
+    const ruleResult = axe.utils.aggregateNodeResults(
       createTestResults({ all: false }, { all: 0 }, { all: true })
     );
     expect(ruleResult.result).toBe(FAIL);
@@ -63,7 +63,7 @@ describe('axe.utils.aggregateNodeResults', () => {
   });
 
   it('should assign PASS to ruleResult if there are only passing checks', () => {
-    let ruleResult = axe.utils.aggregateNodeResults(
+    const ruleResult = axe.utils.aggregateNodeResults(
       createTestResults({ all: true }, { all: true }, { all: true })
     );
     expect(ruleResult.result).toBe(PASS);
@@ -72,7 +72,7 @@ describe('axe.utils.aggregateNodeResults', () => {
   });
 
   it('should assign FAIL if there are no passing anys checks', () => {
-    let ruleResult = axe.utils.aggregateNodeResults(
+    const ruleResult = axe.utils.aggregateNodeResults(
       createTestResults({ any: false }, { any: false }, { any: false })
     );
     expect(ruleResult.result).toBe(FAIL);
@@ -81,7 +81,7 @@ describe('axe.utils.aggregateNodeResults', () => {
   });
 
   it('should assign CANTTELL over PASS', () => {
-    let ruleResult = axe.utils.aggregateNodeResults(
+    const ruleResult = axe.utils.aggregateNodeResults(
       createTestResults({ all: true }, { all: 0 }, { all: 0 })
     );
     expect(ruleResult.result).toBe(CANTTELL);
@@ -90,7 +90,7 @@ describe('axe.utils.aggregateNodeResults', () => {
   });
 
   it('should provide impact on incomplete', () => {
-    let ruleResult = axe.utils.aggregateNodeResults(
+    const ruleResult = axe.utils.aggregateNodeResults(
       createTestResults({
         none: { result: undefined, impact: 'serious' }
       })
@@ -100,7 +100,7 @@ describe('axe.utils.aggregateNodeResults', () => {
 
   it('should raise the highest "raisedMetadata" on failing checks', () => {
     /*eslint indent:0 */
-    let ruleResult = axe.utils.aggregateNodeResults(
+    const ruleResult = axe.utils.aggregateNodeResults(
       createTestResults(
         {
           none: { result: true, impact: 'moderate' },

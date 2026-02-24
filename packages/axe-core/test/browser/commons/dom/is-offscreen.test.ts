@@ -1,5 +1,4 @@
 import { describe, it, afterEach, expect } from 'vitest';
-import { shadowSupport } from '../../../testutils';
 
 declare const axe: any;
 describe('dom.isOffscreen', function () {
@@ -136,7 +135,7 @@ describe('dom.isOffscreen', function () {
     expect(axe.commons.dom.isOffscreen()).toBeUndefined();
   });
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should detect on screen shadow nodes',
     function () {
       fixture.innerHTML = '<div></div>';
@@ -150,7 +149,7 @@ describe('dom.isOffscreen', function () {
     }
   );
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should detect off screen shadow nodes',
     function () {
       fixture.innerHTML = '<div></div>';

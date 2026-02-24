@@ -1,5 +1,5 @@
 import { describe, it, afterEach, expect } from 'vitest';
-import { shadowSupport, fixtureSetup } from '../../../testutils';
+import { fixtureSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('dom.isInTextBlock', function () {
@@ -168,7 +168,7 @@ describe('dom.isInTextBlock', function () {
     expect(axe.commons.dom.isInTextBlock(link)).toBe(false);
   });
 
-  (shadowSupport.v1 ? it : xit)('can reach outside a shadow tree', function () {
+  it('can reach outside a shadow tree', function () {
     const div = document.createElement('div');
     div.innerHTML = 'Some paragraph with text <span></span> ';
     const shadow = div.querySelector('span').attachShadow({ mode: 'open' });
@@ -179,7 +179,7 @@ describe('dom.isInTextBlock', function () {
     expect(axe.commons.dom.isInTextBlock(link)).toBe(true);
   });
 
-  (shadowSupport.v1 ? it : xit)('can reach into a shadow tree', function () {
+  it('can reach into a shadow tree', function () {
     const div = document.createElement('div');
     div.innerHTML = '<a href="" id="link">link</a>';
     const shadow = div.attachShadow({ mode: 'open' });
@@ -190,7 +190,7 @@ describe('dom.isInTextBlock', function () {
     expect(axe.commons.dom.isInTextBlock(link)).toBe(true);
   });
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'treats shadow DOM slots as siblings',
     function () {
       const div = document.createElement('div');

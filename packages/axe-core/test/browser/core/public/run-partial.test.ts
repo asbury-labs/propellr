@@ -17,7 +17,7 @@ describe('axe.runPartial', () => {
       axe
         .runPartial(document, { runOnly: 'image-alt' })
         .then(partialResult => {
-          let result = partialResult.results[0];
+          const result = partialResult.results[0];
           // 0, because <img> was added after the tree was constructed
           expect(result.nodes).toHaveLength(0);
           done();
@@ -55,7 +55,7 @@ describe('axe.runPartial', () => {
 
   it('does not mutate the options object', () => {
     return new Promise<void>((done, reject) => {
-      let options = {};
+      const options = {};
       axe
         .runPartial(options)
         .then(() => {
@@ -83,14 +83,14 @@ describe('axe.runPartial', () => {
     });
 
     it('returns a result with all the valid properties', () => {
-      let result = partialResult.results[0];
+      const result = partialResult.results[0];
       expect(partialResult.results).toHaveLength(1);
       expect(Object.keys(result)).toEqual(
         expect.arrayContaining(['id', 'result', 'pageLevel', 'impact', 'nodes'])
       );
       expect(result.id).toBe('image-alt');
 
-      let checkResult = result.nodes[0];
+      const checkResult = result.nodes[0];
       expect(result.nodes).toHaveLength(1);
       expect(Object.keys(checkResult)).toEqual(
         expect.arrayContaining(['any', 'all', 'none', 'node'])
@@ -99,7 +99,7 @@ describe('axe.runPartial', () => {
     });
 
     it('returns check results with a serialized node', () => {
-      let checkResult = partialResult.results[0].nodes[0];
+      const checkResult = partialResult.results[0].nodes[0];
       expect(partialResult.results[0].nodes).toHaveLength(1);
       expect(Object.keys(checkResult)).toEqual(
         expect.arrayContaining(['any', 'all', 'none', 'node'])
@@ -168,7 +168,7 @@ describe('axe.runPartial', () => {
   describe('environmentData', () => {
     it('includes environment data for the initiator', () => {
       return new Promise<void>((done, reject) => {
-        let context = {
+        const context = {
           include: [['#fixture']]
         };
         axe
@@ -186,7 +186,7 @@ describe('axe.runPartial', () => {
 
     it('is undefined for frames', () => {
       return new Promise<void>((done, reject) => {
-        let context = {
+        const context = {
           include: [['#fixture']],
           initiator: false
         };

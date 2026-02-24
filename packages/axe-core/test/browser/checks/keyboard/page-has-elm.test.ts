@@ -1,18 +1,10 @@
 import { describe, it, expect, afterEach, afterAll } from 'vitest';
-import {
-  checkSetup,
-  checks,
-  getCheckEvaluate,
-  MockCheckContext,
-  shadowCheckSetup,
-  shadowSupport
-} from '../../../testutils';
+import { checkSetup, checks, getCheckEvaluate, MockCheckContext, shadowCheckSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('page-has-*', function () {
   const fixture = document.getElementById('fixture')!;
   const checkContext = new MockCheckContext();
-  const shadowSupported = shadowSupport.v1;
 
   afterEach(function () {
     fixture.innerHTML = '';
@@ -158,7 +150,7 @@ describe('page-has-*', function () {
       expect(mainIsFound).toBe(true);
     });
 
-    (shadowSupported ? it : xit)(
+    it(
       'should return true if main is inside of shadow dom',
       function () {
         const params = shadowCheckSetup(
@@ -211,7 +203,7 @@ describe('page-has-*', function () {
       expect(h1IsFound).toBe(true);
     });
 
-    (shadowSupported ? it : xit)(
+    it(
       'should return true if h1 is inside of shadow dom',
       function () {
         const params = shadowCheckSetup(

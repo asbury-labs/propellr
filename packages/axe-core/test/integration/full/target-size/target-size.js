@@ -1,6 +1,6 @@
 describe('target-size test', function () {
   'use strict';
-  var results;
+  let results;
 
   before(function (done) {
     axe.testUtils.awaitNestedLoad(function () {
@@ -10,7 +10,7 @@ describe('target-size test', function () {
         link.setAttribute('tabindex', '0');
       });
 
-      var options = {
+      const options = {
         runOnly: ['target-size'],
         elementRef: true
       };
@@ -36,8 +36,8 @@ describe('target-size test', function () {
   });
 
   it('finds all passing nodes', function () {
-    var passResults = results.passes[0] ? results.passes[0].nodes : [];
-    var passedElms = document.querySelectorAll(
+    const passResults = results.passes[0] ? results.passes[0].nodes : [];
+    const passedElms = document.querySelectorAll(
       'section:not([hidden]) div:not([hidden]) .passed'
     );
     passResults.forEach(function (result) {
@@ -47,8 +47,8 @@ describe('target-size test', function () {
   });
 
   it('finds all failed nodes', function () {
-    var failResults = results.violations[0] ? results.violations[0].nodes : [];
-    var failedElms = document.querySelectorAll(
+    const failResults = results.violations[0] ? results.violations[0].nodes : [];
+    const failedElms = document.querySelectorAll(
       'section:not([hidden]) div:not([hidden])  .failed'
     );
     failResults.forEach(function (result) {

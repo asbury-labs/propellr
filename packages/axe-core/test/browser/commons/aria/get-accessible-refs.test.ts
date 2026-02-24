@@ -1,11 +1,9 @@
 import { describe, it, beforeAll, afterEach, expect } from 'vitest';
-import { shadowSupport } from '../../../testutils';
 
 declare const axe: any;
 describe('aria.getAccessibleRefs', function () {
   const fixture = document.getElementById('fixture');
   const getAccessibleRefs = axe.commons.aria.getAccessibleRefs;
-  const shadowSupportV1 = shadowSupport.v1;
 
   function setLookup(attrs) {
     axe.configure({
@@ -109,7 +107,7 @@ describe('aria.getAccessibleRefs', function () {
     }
   });
 
-  (shadowSupportV1 ? it : xit)('works inside shadow DOM', function () {
+  it('works inside shadow DOM', function () {
     setLookup({ 'aria-bar': { type: 'idref' } });
     fixture.innerHTML = '<div id="foo"></div>';
 
@@ -123,7 +121,7 @@ describe('aria.getAccessibleRefs', function () {
     expect(getAccessibleRefs(node)).toEqual([ref]);
   });
 
-  (shadowSupportV1 ? it : xit)(
+  it(
     'returns empty array for IDREFs inside shadow DOM',
     function () {
       setLookup({ 'aria-foo': { type: 'idrefs' } });
@@ -139,7 +137,7 @@ describe('aria.getAccessibleRefs', function () {
     }
   );
 
-  (shadowSupportV1 ? it : xit)(
+  it(
     'returns empty array for IDREFs outside shadow DOM',
     function () {
       setLookup({ 'aria-bar': { type: 'idref' } });
@@ -156,7 +154,7 @@ describe('aria.getAccessibleRefs', function () {
     }
   );
 
-  (shadowSupportV1 ? it : xit)('separates IDREFs by roots', function () {
+  it('separates IDREFs by roots', function () {
     setLookup({ 'aria-bar': { type: 'idref' } });
     fixture.innerHTML =
       '<div id="foo"></div><div id="outside" aria-bar="foo"></div><div id="shadow"></div>';

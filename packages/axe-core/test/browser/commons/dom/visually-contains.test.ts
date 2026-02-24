@@ -1,11 +1,9 @@
 import { describe, it, afterEach, expect } from 'vitest';
-import { queryFixture, shadowSupport, flatTreeSetup } from '../../../testutils';
+import { queryFixture, flatTreeSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('dom.visuallyContains', function () {
   const fixture = document.getElementById('fixture');
-
-  const shadowSupported = shadowSupport.v1;
 
   afterEach(function () {
     document.getElementById('fixture').innerHTML = '';
@@ -167,7 +165,7 @@ describe('dom.visuallyContains', function () {
     expect(result).toBe(true);
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'should return true when element is visually contained across shadow boundary',
     function () {
       fixture.innerHTML =
@@ -183,7 +181,7 @@ describe('dom.visuallyContains', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'should return true when element is contained by scroll region across shadow boundary',
     function () {
       fixture.innerHTML =
@@ -202,7 +200,7 @@ describe('dom.visuallyContains', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'should return false when element is not visually contained across shadow boundary',
     function () {
       fixture.innerHTML =
@@ -218,7 +216,7 @@ describe('dom.visuallyContains', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'should return false when element is absolutely positioned off of background across shadow boundary',
     function () {
       fixture.innerHTML =
@@ -234,7 +232,7 @@ describe('dom.visuallyContains', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'should return false when element is partially positioned off of background across shadow boundary',
     function () {
       fixture.innerHTML =

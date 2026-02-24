@@ -28,7 +28,7 @@ describe('axe.utils.finalizeRuleResult', () => {
       rules: [{ id: 'foo', impact: 'critical' }]
     };
 
-    let output = axe.utils.finalizeRuleResult({
+    const output = axe.utils.finalizeRuleResult({
       id: 'foo',
       nodes: [
         {
@@ -54,7 +54,7 @@ describe('axe.utils.finalizeRuleResult', () => {
       rules: [{ id: 'foo', impact: 'critical' }]
     };
 
-    let output = axe.utils.finalizeRuleResult({
+    const output = axe.utils.finalizeRuleResult({
       id: 'foo',
       nodes: [
         {

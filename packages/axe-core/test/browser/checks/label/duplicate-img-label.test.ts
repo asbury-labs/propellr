@@ -1,10 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  checkSetup,
-  flatTreeSetup,
-  getCheckEvaluate,
-  shadowSupport
-} from '../../../testutils';
+import { checkSetup, flatTreeSetup, getCheckEvaluate } from '../../../testutils';
 
 declare const axe: any;
 describe('duplicate-img-label', function () {
@@ -138,7 +133,7 @@ describe('duplicate-img-label', function () {
     ).toBe(false);
   });
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should return true if the img is part of a shadow tree',
     function () {
       const button = document.createElement('div');
@@ -159,7 +154,7 @@ describe('duplicate-img-label', function () {
     }
   );
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should return true if the img is a slotted element',
     function () {
       const button = document.createElement('div');
@@ -181,7 +176,7 @@ describe('duplicate-img-label', function () {
     }
   );
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should return false if the shadow img has a different text',
     function () {
       const button = document.createElement('div');

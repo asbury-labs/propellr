@@ -122,8 +122,8 @@ describe('axe.utils.getXpath', () => {
 
   it('should work on namespaced elements', () => {
     fixture.innerHTML = '<hx:include>Hello</hx:include>';
-    let node = fixture.firstChild;
-    let sel = axe.utils.getXpath(node);
+    const node = fixture.firstChild;
+    const sel = axe.utils.getXpath(node);
 
     expect(sel).toBe("//div[@id='fixture']/hx:include");
     // couldn't figure out how to use document.evaluate to select an element with namespace

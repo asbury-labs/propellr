@@ -1,11 +1,8 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { shadowSupport } from '../../../testutils';
 
 declare const axe: any;
-const shadowSupported = shadowSupport.v1;
-const testSuite = shadowSupported ? describe : describe.skip;
 
-testSuite('utils.shadowSelect', () => {
+describe('utils.shadowSelect', () => {
   const shadowSelect = axe.utils.shadowSelect;
   const fixture = document.querySelector('#fixture');
 
@@ -33,14 +30,14 @@ testSuite('utils.shadowSelect', () => {
 
     it('returns the first matching element in the document', () => {
       fixture.innerHTML = '<b class="hello"></b><i class="hello"></i>';
-      let node = shadowSelect('.hello');
+      const node = shadowSelect('.hello');
       expect(node.nodeName.toLowerCase()).toBe('b');
     });
   });
 
   describe('given an array of string', () => {
     function appendShadowTree(parentNode, nodeName) {
-      let node = document.createElement(nodeName);
+      const node = document.createElement(nodeName);
       parentNode.appendChild(node);
       return node.attachShadow({ mode: 'open' });
     }
@@ -50,28 +47,28 @@ testSuite('utils.shadowSelect', () => {
     });
 
     it('returns null if the node does not exist in the shadow tree', () => {
-      let shadowRoot = appendShadowTree(fixture, 'div');
+      const shadowRoot = appendShadowTree(fixture, 'div');
       shadowRoot.innerHTML = '<b class="hello"></b>';
       expect(shadowSelect(['#fixture > div', '.goodbye'])).toBeNull();
     });
 
     it('returns null if an intermediate node is not a shadow root', () => {
-      let shadowRoot = appendShadowTree(fixture, 'article');
+      const shadowRoot = appendShadowTree(fixture, 'article');
       shadowRoot.innerHTML = '<section><p class="hello"></p></section>';
       expect(shadowSelect(['#fixture > article', 'section', 'p'])).toBeNull();
     });
 
     it('returns from Document with a length of 1', () => {
       fixture.innerHTML = '<b class="hello"></b><i class="hello"></i>';
-      let node = shadowSelect(['.hello']);
+      const node = shadowSelect(['.hello']);
       expect(node.nodeName.toLowerCase()).toBe('b');
     });
 
     it('returns from a shadow tree with length 2', () => {
-      let shadowRoot = appendShadowTree(fixture, 'div');
+      const shadowRoot = appendShadowTree(fixture, 'div');
       shadowRoot.innerHTML = '<b class="hello"></b><i class="hello"></i>';
 
-      let node = shadowSelect(['#fixture > div', '.hello']);
+      const node = shadowSelect(['#fixture > div', '.hello']);
       expect(node.nodeName.toLowerCase()).toBe('b');
     });
 
@@ -83,7 +80,7 @@ testSuite('utils.shadowSelect', () => {
       });
       root.innerHTML = '<b class="hello"></b><i class="hello"></i>';
 
-      let node = shadowSelect([
+      const node = shadowSelect([
         '#fixture > article',
         'section',
         'div',

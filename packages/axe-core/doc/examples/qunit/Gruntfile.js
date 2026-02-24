@@ -1,4 +1,4 @@
-module.exports = function (grunt) {
+module.exports = function  exports(grunt) {
   'use strict';
 
   grunt.loadNpmTasks('grunt-contrib-qunit');

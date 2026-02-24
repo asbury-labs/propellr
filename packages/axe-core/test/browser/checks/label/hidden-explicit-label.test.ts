@@ -1,12 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  checkSetup,
-  checks,
-  getCheckEvaluate,
-  MockCheckContext,
-  shadowCheckSetup,
-  shadowSupport
-} from '../../../testutils';
+import { checkSetup, checks, getCheckEvaluate, MockCheckContext, shadowCheckSetup } from '../../../testutils';
 
 describe('hidden-explicit-label', function () {
   const checkContext = MockCheckContext();
@@ -39,7 +32,7 @@ describe('hidden-explicit-label', function () {
     expect(check.evaluate.apply(check, args)).toBe(true);
   });
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should return true if content is inside of shadow DOM',
     function () {
       const params = shadowCheckSetup(
@@ -51,7 +44,7 @@ describe('hidden-explicit-label', function () {
     }
   );
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should return false if part of the pairing is inside of shadow DOM',
     function () {
       const params = shadowCheckSetup(

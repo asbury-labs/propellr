@@ -28,7 +28,7 @@ describe('axe.finishRun', () => {
 
   it('does not mutate the options object', () => {
     return new Promise<void>((done, reject) => {
-      let options = {};
+      const options = {};
       axe
         .runPartial(options)
         .then(result => {
@@ -291,7 +291,7 @@ describe('axe.finishRun', () => {
         const iframe = doc.createElement('iframe');
         parent.appendChild(iframe);
         const frameDoc = iframe.contentDocument;
-        frameDoc.write(html + '<script src="/axe.js"><\/script>');
+        frameDoc.write(html + '<script src="/axe.js"></script>');
         frameDoc.close();
         frameDoc.querySelector('script').onload = () => {
           resolve(iframe.contentWindow);
@@ -310,7 +310,7 @@ describe('axe.finishRun', () => {
           })
           .then(axe.finishRun)
           .then(results => {
-            let nodes = results.violations[0].nodes;
+            const nodes = results.violations[0].nodes;
             expect(nodes[0].target).toEqual(['iframe', 'h1']);
             done();
           })
@@ -320,7 +320,7 @@ describe('axe.finishRun', () => {
 
     it('handles nodes in nested iframes', () => {
       return new Promise<void>((done, reject) => {
-        let windows = [window];
+        const windows = [window];
         // Safe: test-only static HTML for DOM fixture
         fixture.innerHTML = '<h1></h1>';
         createIframe('<h2></h2>')
@@ -330,14 +330,14 @@ describe('axe.finishRun', () => {
           })
           .then(nestedWin => {
             windows.push(nestedWin);
-            let promisedResults = windows.map(win => {
+            const promisedResults = windows.map(win => {
               return win.axe.runPartial({ runOnly: 'empty-heading' });
             });
             return Promise.all(promisedResults);
           })
           .then(axe.finishRun)
           .then(results => {
-            let nodes = results.violations[0].nodes;
+            const nodes = results.violations[0].nodes;
             expect(nodes[0].target).toEqual(['h1']);
             expect(nodes[1].target).toEqual(['iframe', 'h2']);
             expect(nodes[2].target).toEqual(['iframe', 'iframe', 'h3']);
@@ -349,7 +349,7 @@ describe('axe.finishRun', () => {
 
     it('should handle null results and set target correctly', () => {
       return new Promise<void>((done, reject) => {
-        let windows = [window];
+        const windows = [window];
         // Safe: test-only static HTML for DOM fixture
         fixture.innerHTML = '<h1></h1>';
         createIframe('<h2></h2>')
@@ -359,7 +359,7 @@ describe('axe.finishRun', () => {
           })
           .then(nestedWin => {
             windows.push(nestedWin);
-            let promisedResults = windows.map(win => {
+            const promisedResults = windows.map(win => {
               return win.axe.runPartial({ runOnly: 'empty-heading' });
             });
             return Promise.all(promisedResults);
@@ -370,7 +370,7 @@ describe('axe.finishRun', () => {
           })
           .then(axe.finishRun)
           .then(results => {
-            let nodes = results.violations[0].nodes;
+            const nodes = results.violations[0].nodes;
             expect(nodes[0].target).toEqual(['h1']);
             expect(nodes[1].target).toEqual(['iframe:nth-child(3)', 'h3']);
             done();
@@ -391,7 +391,7 @@ describe('axe.finishRun', () => {
             return axe.finishRun([partialResult], { runOnly: 'duplicate-id' });
           })
           .then(result => {
-            let nodes = result.violations[0].nodes;
+            const nodes = result.violations[0].nodes;
             const relatedNodes = nodes[0].any[0].relatedNodes;
 
             expect(nodes).toHaveLength(1);

@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 declare const axe: any;
 describe('axe.utils.getAllChecks', () => {
   it('should concatenate all 3 check collections', () => {
-    let r = {
+    const r = {
       any: ['any:foo', 'any:bar'],
       all: ['all:foo', 'all:bar'],
       none: ['none:foo', 'none:bar']
@@ -19,7 +19,7 @@ describe('axe.utils.getAllChecks', () => {
   });
 
   it('should safely ignore missing collections - all', () => {
-    let r = {
+    const r = {
       any: ['any:foo', 'any:bar'],
       none: ['none:foo', 'none:bar']
     };
@@ -32,7 +32,7 @@ describe('axe.utils.getAllChecks', () => {
   });
 
   it('should safely ignore missing collections - any', () => {
-    let r = {
+    const r = {
       all: ['all:foo', 'all:bar'],
       none: ['none:foo', 'none:bar']
     };
@@ -45,7 +45,7 @@ describe('axe.utils.getAllChecks', () => {
   });
 
   it('should safely ignore missing collections - none', () => {
-    let r = {
+    const r = {
       any: ['any:foo', 'any:bar'],
       all: ['all:foo', 'all:bar']
     };

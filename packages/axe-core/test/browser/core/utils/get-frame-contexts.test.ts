@@ -1,14 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { shadowSupport } from '../../../testutils';
 
 declare const axe: any;
 describe('utils.getFrameContexts', () => {
   const getFrameContexts = axe.utils.getFrameContexts;
-  const shadowSupported = shadowSupport.v1;
   const fixture = document.querySelector('#fixture');
 
   it('returns an empty array if the page has no frames', () => {
-    let frameContext = getFrameContexts();
+    const frameContext = getFrameContexts();
     expect(Array.isArray(frameContext)).toBe(true);
     expect(frameContext).toHaveLength(0);
   });
@@ -17,7 +15,7 @@ describe('utils.getFrameContexts', () => {
     fixture.innerHTML =
       '<iframe></iframe>' + '<iframe></iframe>' + '<iframe></iframe>';
 
-    let selectors = getFrameContexts().map(frameData => {
+    const selectors = getFrameContexts().map(frameData => {
       return frameData.frameSelector;
     });
     expect(selectors).toHaveLength(3);
@@ -30,7 +28,7 @@ describe('utils.getFrameContexts', () => {
     fixture.innerHTML =
       '<iframe></iframe>' + '<iframe></iframe>' + '<iframe></iframe>';
 
-    let contexts = getFrameContexts().map(frameData => {
+    const contexts = getFrameContexts().map(frameData => {
       return frameData.frameContext;
     });
 
@@ -46,7 +44,7 @@ describe('utils.getFrameContexts', () => {
       '<iframe tabindex="0"></iframe>' +
       '<iframe tabindex="-1"></iframe>';
 
-    let contexts = getFrameContexts().map(frameData => {
+    const contexts = getFrameContexts().map(frameData => {
       return frameData.frameContext;
     });
     expect(contexts).toHaveLength(3);
@@ -85,14 +83,14 @@ describe('utils.getFrameContexts', () => {
         '<iframe id="f1"></iframe>' +
         '<iframe id="f2"></iframe>' +
         '<iframe id="f3"></iframe>';
-      let context = {
+      const context = {
         include: [
           ['#f1', 'header'],
           ['#f2', 'main']
         ],
         exclude: [['#f3', 'footer']]
       };
-      let contexts = getFrameContexts(context).map(frameData => {
+      const contexts = getFrameContexts(context).map(frameData => {
         return frameData.frameContext;
       });
 
@@ -107,10 +105,10 @@ describe('utils.getFrameContexts', () => {
 
     it('excludes non-frame contexts', () => {
       fixture.innerHTML = '<iframe id="f1"></iframe>';
-      let context = {
+      const context = {
         include: [['#header'], ['a'], ['#f1', 'header']]
       };
-      let contexts = getFrameContexts(context).map(frameData => {
+      const contexts = getFrameContexts(context).map(frameData => {
         return frameData.frameContext;
       });
 
@@ -122,14 +120,14 @@ describe('utils.getFrameContexts', () => {
     it('mixes contexts if the frame is selected twice', () => {
       fixture.innerHTML =
         '<iframe id="f1"></iframe>' + '<iframe id="f2"></iframe>';
-      let context = {
+      const context = {
         include: [
           ['#f1', 'header'],
           ['#f2', 'footer']
         ],
         exclude: [['iframe', 'main']]
       };
-      let contexts = getFrameContexts(context).map(frameData => {
+      const contexts = getFrameContexts(context).map(frameData => {
         return frameData.frameContext;
       });
       expect(contexts).toHaveLength(2);
@@ -141,7 +139,7 @@ describe('utils.getFrameContexts', () => {
 
     it('combines include/exclude arrays of frames selected twice', () => {
       fixture.innerHTML = '<iframe></iframe>';
-      let context = {
+      const context = {
         include: [
           ['iframe', 'header'],
           ['iframe', 'main']
@@ -151,7 +149,7 @@ describe('utils.getFrameContexts', () => {
           ['iframe', 'footer']
         ]
       };
-      let contexts = getFrameContexts(context).map(frameData => {
+      const contexts = getFrameContexts(context).map(frameData => {
         return frameData.frameContext;
       });
 
@@ -165,10 +163,10 @@ describe('utils.getFrameContexts', () => {
         '<iframe id="f1"></iframe>' +
         '<iframe id="f2"></iframe>' +
         '<iframe id="f3"></iframe>';
-      let context = {
+      const context = {
         exclude: [[['#f2']]]
       };
-      let selectors = getFrameContexts(context).map(frameData => {
+      const selectors = getFrameContexts(context).map(frameData => {
         return frameData.frameSelector;
       });
       expect(selectors).toHaveLength(2);
@@ -178,7 +176,7 @@ describe('utils.getFrameContexts', () => {
 
     it('skips frames excluded by a parent', () => {
       fixture.innerHTML = '<iframe></iframe>';
-      let frameContexts = getFrameContexts({
+      const frameContexts = getFrameContexts({
         exclude: [['#fixture']]
       });
       expect(frameContexts).toHaveLength(0);
@@ -235,14 +233,14 @@ describe('utils.getFrameContexts', () => {
     it('works with nested frames', () => {
       fixture.innerHTML =
         '<iframe id="f1"></iframe>' + '<iframe id="f2"></iframe>';
-      let context = {
+      const context = {
         include: [
           ['#f1', '#f3', 'header'],
           ['#f2', '#f4', '#f5', 'footer']
         ],
         exclude: [['#f2', '#f6', '#f7', '#f7', 'main']]
       };
-      let contexts = getFrameContexts(context).map(frameData => {
+      const contexts = getFrameContexts(context).map(frameData => {
         return frameData.frameContext;
       });
 
@@ -253,14 +251,14 @@ describe('utils.getFrameContexts', () => {
       expect(contexts[1].exclude).toEqual([['#f6', '#f7', '#f7', 'main']]);
     });
 
-    (shadowSupported ? it : xit)('works on iframes in shadow dom', () => {
+    it('works on iframes in shadow dom', () => {
       fixture.innerHTML = '<div id="shadow"></div>';
       const div = fixture.querySelector('div');
       const shadowRoot = div.attachShadow({ mode: 'open' });
       shadowRoot.innerHTML =
         '<main><iframe id="f1" width="100" height="100"></iframe></main>';
 
-      let frameContext = getFrameContexts();
+      const frameContext = getFrameContexts();
 
       expect(frameContext).toHaveLength(1);
       expect(frameContext[0].frameSelector).toHaveLength(2);
@@ -273,13 +271,13 @@ describe('utils.getFrameContexts', () => {
   describe('options.iframes', () => {
     it('returns a non-empty array with `iframes: true`', () => {
       fixture.innerHTML = '<iframe></iframe>';
-      let contexts = getFrameContexts({}, { iframes: true });
+      const contexts = getFrameContexts({}, { iframes: true });
       expect(contexts).toHaveLength(1);
     });
 
     it('returns an empty array with `iframes: false`', () => {
       fixture.innerHTML = '<iframe></iframe>';
-      let contexts = getFrameContexts({}, { iframes: false });
+      const contexts = getFrameContexts({}, { iframes: false });
       expect(contexts).toHaveLength(0);
     });
   });

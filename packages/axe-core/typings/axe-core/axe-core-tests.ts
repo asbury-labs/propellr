@@ -1,8 +1,8 @@
 import * as axe from '../../axe';
 
-var context: any = document;
-var $fixture = [document];
-var options: axe.RunOptions = {
+const context: any = document;
+const $fixture = [document];
+const options: axe.RunOptions = {
   iframes: false,
   selectors: false,
   elementRef: false
@@ -112,7 +112,7 @@ axe.run(
 );
 
 export async function frameContextTypes() {
-  let { frameContext, frameSelector } = axe.utils.getFrameContexts()[0];
+  const { frameContext, frameSelector } = axe.utils.getFrameContexts()[0];
   await axe.run(frameContext);
   await axe.runPartial(frameContext, {});
   axe.utils.shadowSelect(frameSelector);
@@ -151,11 +151,11 @@ export async function customReporters() {
 axe.run(context, options, (error: Error, results: axe.AxeResults) => {
   console.log(error || results.passes.length);
 });
-var tagConfigRunOnly: axe.RunOnly = {
+const tagConfigRunOnly: axe.RunOnly = {
   type: 'tag',
   values: ['wcag2a']
 };
-var tagConfig = {
+const tagConfig = {
   runOnly: tagConfigRunOnly
 };
 axe.run(context, tagConfig, (error: Error, results: axe.AxeResults) => {
@@ -192,7 +192,7 @@ axe.run(
   }
 );
 
-var someRulesConfig = {
+const someRulesConfig = {
   rules: {
     'color-contrast': { enabled: false },
     'heading-order': { enabled: true }
@@ -232,7 +232,7 @@ axe.run(context, options, (error: Error, results: axe.AxeResults) => {
 });
 
 // axe.configure
-var spec: axe.Spec = {
+const spec: axe.Spec = {
   branding: {
     brand: 'foo',
     application: 'bar'
@@ -312,8 +312,8 @@ var spec: axe.Spec = {
 };
 axe.configure(spec);
 
-var source = axe.source;
-var version = axe.version;
+const source = axe.source;
+const version = axe.version;
 
 axe.reset();
 
@@ -424,7 +424,7 @@ axe.setup(document.createElement('div'));
 axe.teardown();
 
 // Plugins
-var pluginSrc: axe.AxePlugin = {
+const pluginSrc: axe.AxePlugin = {
   id: 'doStuff',
   run: (data: any, callback: Function) => {
     callback();
@@ -445,17 +445,17 @@ axe.cleanup();
 const dqElement = new axe.utils.DqElement(document.body);
 const element = axe.utils.shadowSelect(dqElement.selector[0]);
 const uuid = axe.utils.uuid() as string;
-let unknownContext: unknown = JSON.parse('{ foo: "bar" }');
+const unknownContext: unknown = JSON.parse('{ foo: "bar" }');
 if (axe.utils.isLabelledShadowDomSelector(unknownContext)) {
-  let context: axe.LabelledShadowDomSelector = unknownContext;
+  const context: axe.LabelledShadowDomSelector = unknownContext;
 } else if (axe.utils.isLabelledFramesSelector(unknownContext)) {
-  let context: axe.LabelledFramesSelector = unknownContext;
+  const context: axe.LabelledFramesSelector = unknownContext;
 } else if (axe.utils.isContextObject(unknownContext)) {
-  let context: axe.ContextObject = unknownContext;
+  const context: axe.ContextObject = unknownContext;
 } else if (axe.utils.isContextProp(unknownContext)) {
-  let context: axe.ContextProp = unknownContext;
+  const context: axe.ContextProp = unknownContext;
 } else if (axe.utils.isContextSpec(unknownContext)) {
-  let context: axe.ContextSpec = unknownContext;
+  const context: axe.ContextSpec = unknownContext;
 }
 axe.utils.nodeSerializer.update({
   toSpec(dqElm: axe.DqElement) {

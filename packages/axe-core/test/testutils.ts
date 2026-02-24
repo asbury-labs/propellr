@@ -75,28 +75,6 @@ export function MockCheckContext(): any {
 }
 
 /**
- * Provide an API for determining Shadow DOM v0 and v1 support in tests.
- */
-export const shadowSupport = (() => {
-  if (typeof document === 'undefined') {
-    return { v0: false, v1: false, undefined: true };
-  }
-  const v0 =
-    document.body &&
-    typeof (document.body as any).createShadowRoot === 'function';
-  const v1 = document.body && typeof document.body.attachShadow === 'function';
-
-  return {
-    v0: v0 === true,
-    v1: v1 === true,
-    undefined:
-      document.body &&
-      typeof document.body.attachShadow === 'undefined' &&
-      typeof (document.body as any).createShadowRoot === 'undefined'
-  };
-})();
-
-/**
  * Return the fixture element
  */
 export function getFixture(): HTMLElement {
@@ -342,12 +320,12 @@ export function addStyleSheet(
       if (data.mediaPrint) {
         link.media = 'print';
       }
-      link.onload = function () {
-        setTimeout(function () {
+      link.onload = function onload() {
+        setTimeout(function onload() {
           resolve();
         });
       };
-      link.onerror = function () {
+      link.onerror = function onerror() {
         reject();
       };
       doc.head.appendChild(link);

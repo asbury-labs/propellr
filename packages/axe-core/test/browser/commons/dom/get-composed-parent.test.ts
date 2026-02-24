@@ -1,12 +1,9 @@
 import { describe, it, afterEach, expect } from 'vitest';
-import { shadowSupport } from '../../../testutils';
 
 declare const axe: any;
-/* global xit */
 describe('dom.getComposedParent', function () {
   const getComposedParent = axe.commons.dom.getComposedParent;
   const fixture = document.getElementById('fixture');
-  const shadowSupported = shadowSupport.v1;
 
   afterEach(function () {
     fixture.innerHTML = '';
@@ -24,7 +21,7 @@ describe('dom.getComposedParent', function () {
     expect(getComposedParent(document.documentElement)).toBeNull();
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'skip the slot node for slotted content',
     function () {
       fixture.innerHTML = '<div id="shadow"><div id="target"></div></div>';
@@ -40,7 +37,7 @@ describe('dom.getComposedParent', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'understands explicitly slotted nodes',
     function () {
       fixture.innerHTML =
@@ -60,7 +57,7 @@ describe('dom.getComposedParent', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'returns elements within a shadow tree',
     function () {
       fixture.innerHTML = '<div id="shadow"> content </div>';
@@ -76,7 +73,7 @@ describe('dom.getComposedParent', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'returns the host when it reaches the shadow root',
     function () {
       fixture.innerHTML = '<div id="parent"> content </div>';

@@ -14,13 +14,13 @@ describe('axe.utils.getStyleSheetFactory', () => {
   });
 
   it('returns a function when passed argument of dynamicDocument', () => {
-    let actual = axe.utils.getStyleSheetFactory(dynamicDoc);
+    const actual = axe.utils.getStyleSheetFactory(dynamicDoc);
     expect(typeof actual).toBe('function');
   });
 
   it('returns a CSSOM stylesheet, when invoked with data (text)', () => {
     const stylesheetFactory = axe.utils.getStyleSheetFactory(dynamicDoc);
-    let actual = stylesheetFactory({
+    const actual = stylesheetFactory({
       data: '.someStyle{background-color:red;}',
       root: document,
       priority: [1, 0]

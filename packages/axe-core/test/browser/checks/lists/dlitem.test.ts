@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { checkSetup, checks, shadowSupport } from '../../../testutils';
+import { checkSetup, checks } from '../../../testutils';
 
 describe('dlitem', function () {
   const fixture = document.getElementById('fixture')!;
@@ -120,7 +120,7 @@ describe('dlitem', function () {
     });
   });
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should return true in a shadow DOM pass',
     function () {
       const node = document.createElement('div');
@@ -133,7 +133,7 @@ describe('dlitem', function () {
     }
   );
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should return false in a shadow DOM fail',
     function () {
       const node = document.createElement('div');
@@ -146,7 +146,7 @@ describe('dlitem', function () {
     }
   );
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should return true when the item is grouped in dl > div in a shadow DOM',
     function () {
       const node = document.createElement('div');

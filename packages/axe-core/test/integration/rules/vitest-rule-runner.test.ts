@@ -49,7 +49,7 @@ declare const axe: any;
 function waitForFrames(context: HTMLElement): Promise<void> {
   return new Promise(resolve => {
     const frames = context.querySelectorAll('iframe');
-    if (!frames.length) return resolve();
+    if (!frames.length) {return resolve();}
 
     let loaded = 0;
     const total = frames.length;
@@ -109,7 +109,7 @@ for (const { testDef, html } of testCases) {
   const testName = testDef.description || `${ruleId} test`;
 
   const rule = axe.utils.getRule(ruleId);
-  if (!rule) continue;
+  if (!rule) {continue;}
 
   // Skip rules that are deprecated AND disabled
   const deprecated = rule.tags.indexOf('deprecated') !== -1;
@@ -163,7 +163,7 @@ for (const { testDef, html } of testCases) {
         test: RuleTestDef,
         collection: 'passes' | 'violations' | 'incomplete'
       ) {
-        if (!test[collection]) return;
+        if (!test[collection]) {return;}
 
         describe(collection, () => {
           let nodes: any[] | undefined;

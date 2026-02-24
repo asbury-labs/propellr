@@ -95,7 +95,7 @@ describe('axe.runVirtualRule', () => {
   describe('context', () => {
     const { Context } = axe._thisWillBeDeletedDoNotUse.base;
     it('passes context with vNode included to rule.runSync', () => {
-      let node = new axe.SerialVirtualNode({ nodeName: 'div' });
+      const node = new axe.SerialVirtualNode({ nodeName: 'div' });
       axe._audit.rules = [
         {
           id: 'aria-roles',
@@ -121,7 +121,7 @@ describe('axe.runVirtualRule', () => {
         .map(([key]) => key)
         .sort();
 
-      let node = new axe.SerialVirtualNode({ nodeName: 'div' });
+      const node = new axe.SerialVirtualNode({ nodeName: 'div' });
       axe._audit.rules = [
         {
           id: 'aria-roles',
@@ -169,7 +169,7 @@ describe('axe.runVirtualRule', () => {
       {
         id: 'aria-roles',
         runSync: context => {
-          let node = context.include[0];
+          const node = context.include[0];
           expect(node).toBeInstanceOf(axe.AbstractVirtualNode);
           expect(node.props.foo).toBe('bar');
           expect(node.attr('bar')).toBe('baz');

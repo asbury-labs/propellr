@@ -212,7 +212,7 @@ describe('Configure Options', () => {
               values: ['div#target']
             }
           },
-          captureError(function (error, results) {
+          captureError(function  onload(error, results) {
             assert.isNull(error);
             assert.deepEqual(results.passes[0].nodes[0].target, [
               'iframe',

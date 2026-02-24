@@ -9,7 +9,7 @@ describe('axe.utils.matchAncestry', () => {
   });
 
   it('should match when ancestry is the same and one level', () => {
-    let result = axe.utils.matchAncestry(
+    const result = axe.utils.matchAncestry(
       ['html > body > div:nth-child(1)'],
       ['html > body > div:nth-child(1)']
     );
@@ -17,7 +17,7 @@ describe('axe.utils.matchAncestry', () => {
   });
 
   it('should not match when ancestry is different and one level', () => {
-    let result = axe.utils.matchAncestry(
+    const result = axe.utils.matchAncestry(
       ['html > body > div:nth-child(3)'],
       ['html > body > div:nth-child(1)']
     );
@@ -25,7 +25,7 @@ describe('axe.utils.matchAncestry', () => {
   });
 
   it('should not match when ancestries have different numbers of elements', () => {
-    let result = axe.utils.matchAncestry(
+    const result = axe.utils.matchAncestry(
       ['iframe', 'html > body > div:nth-child(1)'],
       ['html > body > div:nth-child(1)']
     );
@@ -33,7 +33,7 @@ describe('axe.utils.matchAncestry', () => {
   });
 
   it('should not match when first level is different and second level is the same', () => {
-    let result = axe.utils.matchAncestry(
+    const result = axe.utils.matchAncestry(
       ['iframe', 'html > body > div:nth-child(1)'],
       ['otherIframe', 'html > body > div:nth-child(1)']
     );
@@ -41,7 +41,7 @@ describe('axe.utils.matchAncestry', () => {
   });
 
   it('should not match when second level is different and first level is the same', () => {
-    let result = axe.utils.matchAncestry(
+    const result = axe.utils.matchAncestry(
       ['iframe', 'html > body > div:nth-child(1)'],
       ['iframe', 'html > body > div:nth-child(2)']
     );
@@ -49,7 +49,7 @@ describe('axe.utils.matchAncestry', () => {
   });
 
   it('should match when all levels are the same', () => {
-    let result = axe.utils.matchAncestry(
+    const result = axe.utils.matchAncestry(
       ['iframe', 'iframe2', 'html > body > div:nth-child(1)'],
       ['iframe', 'iframe2', 'html > body > div:nth-child(1)']
     );

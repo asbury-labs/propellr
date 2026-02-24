@@ -117,7 +117,7 @@ const axeExport: Record<string, any> = {
 // Copy all properties to the global `axe` object so that modules that
 // reference `axe.utils`, `axe._memoizedFns`, etc. at runtime see the
 // populated object.  The `var axe = {};` is injected by axeGlobalPlugin.
-declare var axe: Record<string, any>;
+declare let axe: Record<string, any>;
 if (typeof axe !== 'undefined') {
   Object.assign(axe, axeExport);
 }

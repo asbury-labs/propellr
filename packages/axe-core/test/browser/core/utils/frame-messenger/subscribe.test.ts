@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { captureError, shadowSupport } from '../../../../testutils';
+import { captureError } from '../../../../testutils';
 
 declare const axe: any;
 function afterMessage(win, callback) {
@@ -33,7 +33,6 @@ describe('frame-messenger', () => {
     frameSubscribe,
     axeLog;
   const postMessage = window.postMessage;
-  const shadowSupported = shadowSupport.v1;
 
   beforeEach(() => {
     return new Promise<void>((resolve, reject) => {
@@ -82,7 +81,7 @@ describe('frame-messenger', () => {
       });
     });
 
-    (shadowSupported ? it : xit)('works with frames in shadow DOM', () => {
+    it('works with frames in shadow DOM', () => {
       return new Promise<void>((done, reject) => {
         // Safe: test-only static HTML for DOM fixture
         fixture.innerHTML = '<div id="shadow-root"></div>';
@@ -292,7 +291,7 @@ describe('frame-messenger', () => {
         axe.configure({
           allowedOrigins: ['http://customOrigin.com']
         });
-        let spy = vi.fn();
+        const spy = vi.fn();
 
         frameSubscribe('greeting', spy);
         respondable(frameWin, 'greeting', 'hello');
@@ -309,7 +308,7 @@ describe('frame-messenger', () => {
         axe.configure({
           allowedOrigins: ['<unsafe_all_origins>']
         });
-        let spy = vi.fn();
+        const spy = vi.fn();
 
         frameSubscribe('greeting', spy);
         respondable(frameWin, 'greeting', 'hello');

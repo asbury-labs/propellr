@@ -1,10 +1,9 @@
 import { describe, it, afterEach, expect } from 'vitest';
-import { shadowSupport, queryFixture } from '../../../testutils';
+import { queryFixture } from '../../../testutils';
 
 declare const axe: any;
 describe('dom.isHiddenWithCSS', function () {
   const fixture = document.getElementById('fixture');
-  const shadowSupported = shadowSupport.v1;
   const isHiddenWithCSS = axe.commons.dom.isHiddenWithCSS;
   const origComputedStyle = window.getComputedStyle;
 
@@ -178,7 +177,7 @@ describe('dom.isHiddenWithCSS', function () {
     expect(actual).toBe(false);
   });
 
-  (shadowSupported ? it : it.skip)(
+  it(
     'should return true if `display:none` inside shadowDOM',
     function () {
       fixture.innerHTML = '<div></div>';
@@ -235,7 +234,7 @@ describe('dom.isHiddenWithCSS', function () {
     expect(actual).toBe(true);
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'should return true as parent shadowDOM host is set to `visibility:hidden`',
     function () {
       fixture.innerHTML = '<div></div>';
@@ -247,7 +246,7 @@ describe('dom.isHiddenWithCSS', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'should return false as parent shadowDOM host  set to `visibility:hidden` is overriden',
     function () {
       fixture.innerHTML = '<div></div>';

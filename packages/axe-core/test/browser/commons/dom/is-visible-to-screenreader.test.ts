@@ -1,10 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { queryFixture, shadowSupport, flatTreeSetup } from '../../../testutils';
+import { queryFixture, flatTreeSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('dom.isVisibleToScreenReaders', function () {
   const fixture = document.querySelector('#fixture');
-  const shadowSupported = shadowSupport.v1;
   const isVisibleToScreenReaders = axe.commons.dom.isVisibleToScreenReaders;
 
   function createContentHidden() {
@@ -111,7 +110,7 @@ describe('dom.isVisibleToScreenReaders', function () {
     expect(actual).toBe(false);
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'returns false for `AREA` element that is inside shadowDOM',
     function () {
       fixture.innerHTML = '<div id="container"></div>';
@@ -162,7 +161,7 @@ describe('dom.isVisibleToScreenReaders', function () {
     expect(actual).toBe(true);
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'not hidden: should work when the element is inside shadow DOM',
     function () {
       const tree, node;
@@ -176,7 +175,7 @@ describe('dom.isVisibleToScreenReaders', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'hidden: should work when the element is inside shadow DOM',
     function () {
       const tree, node;
@@ -190,7 +189,7 @@ describe('dom.isVisibleToScreenReaders', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'should work with hidden slotted elements',
     function () {
       function createContentSlotted() {

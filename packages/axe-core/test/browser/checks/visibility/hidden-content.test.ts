@@ -1,17 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  checkSetup,
-  flatTreeSetup,
-  getCheckEvaluate,
-  MockCheckContext,
-  shadowSupport
-} from '../../../testutils';
+import { checkSetup, flatTreeSetup, getCheckEvaluate, MockCheckContext } from '../../../testutils';
 
 declare const axe: any;
-/* global xit */
 describe('hidden content', function () {
   const fixture = document.getElementById('fixture')!;
-  const shadowSupported = shadowSupport.v1;
   const checkContext = MockCheckContext();
 
   afterEach(function () {
@@ -65,7 +57,7 @@ describe('hidden content', function () {
     ).toBe(true);
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'works on elements in a shadow DOM',
     function () {
       fixture.innerHTML =

@@ -2,20 +2,20 @@
 /*eslint max-len: off */
 'use strict';
 
-var clone = require('clone');
-var doT = require('@deque/dot');
-var templates = require('./templates');
-var buildManual = require('./build-manual');
-var { encode } = require('html-entities');
-var packageJSON = require('../package.json');
-var doTRegex = /\{\{.+?\}\}/g;
+const clone = require('clone');
+const doT = require('@deque/dot');
+const templates = require('./templates');
+const buildManual = require('./build-manual');
+const { encode } = require('html-entities');
+const packageJSON = require('../package.json');
+const doTRegex = /\{\{.+?\}\}/g;
 
-var axeVersion = packageJSON.version.substring(
+const axeVersion = packageJSON.version.substring(
   0,
   packageJSON.version.lastIndexOf('.')
 );
 
-var descriptionTableHeader =
+const descriptionTableHeader =
   '| Rule ID | Description | Impact | Tags | Issue Type | [ACT Rules](https://www.w3.org/WAI/standards-guidelines/act/rules/) |\n| :------- | :------- | :------- | :------- | :------- | :------- |\n';
 
 // prevent striping newline characters from strings (e.g. failure
@@ -23,7 +23,7 @@ var descriptionTableHeader =
 doT.templateSettings.strip = false;
 
 function getLocale(grunt, options) {
-  var localeFile;
+  let localeFile;
   if (options.locale) {
     localeFile = './locales/' + options.locale + '.json';
   }
@@ -34,19 +34,19 @@ function getLocale(grunt, options) {
 }
 
 function makeHeaderLink(title) {
-  return title.replace(/ /g, '-').replace(/[\.&]/g, '').toLowerCase();
+  return title.replace(/ /g, '-').replace(/[.&]/g, '').toLowerCase();
 }
 
 function buildRules(grunt, options, commons, callback) {
-  var axeImpact = Object.freeze(['minor', 'moderate', 'serious', 'critical']); // TODO: require('../axe') does not work if grunt configure is moved after uglify, npm test breaks with undefined. Complicated grunt concurrency issue.
-  var locale = getLocale(grunt, options);
+  const axeImpact = Object.freeze(['minor', 'moderate', 'serious', 'critical']); // TODO: require('../axe') does not work if grunt configure is moved after uglify, npm test breaks with undefined. Complicated grunt concurrency issue.
+  const locale = getLocale(grunt, options);
   options.getFiles = false;
   buildManual(grunt, options, commons, function (build) {
-    var metadata = {
+    const metadata = {
       rules: {},
       checks: {}
     };
-    var descriptions = {
+    const descriptions = {
       wcag20: {
         title: 'WCAG 2.0 Level A & AA Rules',
         rules: []
@@ -87,7 +87,7 @@ function buildRules(grunt, options, commons, callback) {
       }
     };
 
-    var TOC = Object.keys(descriptions)
+    const TOC = Object.keys(descriptions)
       .map(key => {
         return `- [${descriptions[key].title}](#${makeHeaderLink(
           descriptions[key].title
@@ -95,9 +95,9 @@ function buildRules(grunt, options, commons, callback) {
       })
       .join('\n');
 
-    var tags = options.tags ? options.tags.split(/\s*,\s*/) : [];
-    var rules = build.rules;
-    var checks = build.checks;
+    const tags = options.tags ? options.tags.split(/\s*,\s*/) : [];
+    const rules = build.rules;
+    const checks = build.checks;
 
     // Translate checks before parsing them so that translations
     // get applied to the metadata object
@@ -112,12 +112,12 @@ function buildRules(grunt, options, commons, callback) {
     parseChecks(checks);
 
     function parseMetaData(source, propType) {
-      var data = source.metadata;
-      var id = source.id || source.type;
+      let data = source.metadata;
+      const id = source.id || source.type;
       if (id && locale && locale[propType] && propType !== 'checks') {
         data = locale[propType][id] || data;
       }
-      var result = clone(data) || {};
+      const result = clone(data) || {};
 
       if (result.messages) {
         Object.keys(result.messages).forEach(function (key) {
@@ -141,7 +141,7 @@ function buildRules(grunt, options, commons, callback) {
     }
 
     function createFailureSummaryObject(summaries) {
-      var result = {};
+      const result = {};
       summaries.forEach(function (summary) {
         if (summary.type) {
           result[summary.type] = parseMetaData(summary, 'failureSummaries');
@@ -151,7 +151,7 @@ function buildRules(grunt, options, commons, callback) {
     }
 
     function getIncompleteMsg(summaries) {
-      var summary = summaries.find(function (element) {
+      const summary = summaries.find(function (element) {
         return typeof element.incompleteFallbackMessage === 'string';
       });
       return summary ? summary.incompleteFallbackMessage : '';
@@ -201,9 +201,9 @@ function buildRules(grunt, options, commons, callback) {
 
     function parseChecks(collection) {
       return collection.map(function (check) {
-        var c = {};
-        var id = typeof check === 'string' ? check : check.id;
-        var definition = clone(findCheck(checks, id));
+        const c = {};
+        const id = typeof check === 'string' ? check : check.id;
+        const definition = clone(findCheck(checks, id));
         if (!definition) {
           grunt.log.error('check ' + id + ' not found');
         }
@@ -220,8 +220,8 @@ function buildRules(grunt, options, commons, callback) {
 
     function traverseChecks(checkCollection, predicate, startValue) {
       return checkCollection.reduce(function (out, check) {
-        var id = typeof check === 'string' ? check : check.id;
-        var definition = clone(findCheck(checks, id));
+        const id = typeof check === 'string' ? check : check.id;
+        const definition = clone(findCheck(checks, id));
         if (!definition) {
           grunt.log.error('check ' + id + ' not found');
         }
@@ -245,14 +245,14 @@ function buildRules(grunt, options, commons, callback) {
 
       function getImpactScores(definition, out) {
         if (definition && definition.metadata && definition.metadata.impact) {
-          var impactScore = axeImpact.indexOf(definition.metadata.impact);
+          const impactScore = axeImpact.indexOf(definition.metadata.impact);
           out.push(impactScore);
         }
         return out;
       }
 
       function getScore(checkCollection, onlyHighestScore) {
-        var scores = traverseChecks(checkCollection, getImpactScores, []);
+        const scores = traverseChecks(checkCollection, getImpactScores, []);
         if (scores && scores.length) {
           return onlyHighestScore
             ? [Math.max.apply(null, scores)]
@@ -262,13 +262,13 @@ function buildRules(grunt, options, commons, callback) {
         }
       }
 
-      var highestImpactForRuleTypeAny = getScore(rule.any, true);
-      var allUniqueImpactsForRuleTypeAll = getScore(rule.all, false);
-      var allUniqueImpactsForRuleTypeNone = getScore(rule.none, false);
-      var cumulativeImpacts = highestImpactForRuleTypeAny
+      const highestImpactForRuleTypeAny = getScore(rule.any, true);
+      const allUniqueImpactsForRuleTypeAll = getScore(rule.all, false);
+      const allUniqueImpactsForRuleTypeNone = getScore(rule.none, false);
+      const cumulativeImpacts = highestImpactForRuleTypeAny
         .concat(allUniqueImpactsForRuleTypeAll)
         .concat(allUniqueImpactsForRuleTypeNone);
-      var cumulativeScores = getUniqueArr(cumulativeImpacts).sort(); //order lowest to highest
+      const cumulativeScores = getUniqueArr(cumulativeImpacts).sort(); //order lowest to highest
 
       return cumulativeScores.reduce(function (out, cV) {
         return out.length
@@ -316,8 +316,8 @@ function buildRules(grunt, options, commons, callback) {
     }
 
     function createActLinksForRule(rule) {
-      var actIds = rule.actIds || [];
-      var actLinks = [];
+      const actIds = rule.actIds || [];
+      const actLinks = [];
       actIds.forEach(id =>
         actLinks.push(`[${id}](https://act-rules.github.io/rules/${id})`)
       );
@@ -325,9 +325,9 @@ function buildRules(grunt, options, commons, callback) {
     }
 
     rules.map(function (rule) {
-      var impact = parseImpactForRule(rule);
-      var canFail = parseFailureForRule(rule);
-      var canIncomplete = parseIncompleteForRule(rule);
+      const impact = parseImpactForRule(rule);
+      const canFail = parseFailureForRule(rule);
+      const canIncomplete = parseIncompleteForRule(rule);
 
       rule.any = parseChecks(rule.any);
       rule.all = parseChecks(rule.all);
@@ -336,7 +336,7 @@ function buildRules(grunt, options, commons, callback) {
         metadata.rules[rule.id] = parseMetaData(rule, 'rules'); // Translate rules
       }
 
-      var result;
+      let result;
       if (rule.tags.includes('deprecated')) {
         result = descriptions.deprecated.rules;
       } else if (rule.tags.includes('experimental')) {
@@ -353,7 +353,7 @@ function buildRules(grunt, options, commons, callback) {
         result = descriptions.wcag22.rules;
       }
 
-      var issueType = [];
+      const issueType = [];
       if (canFail) {
         issueType.push('failure');
       }
@@ -361,7 +361,7 @@ function buildRules(grunt, options, commons, callback) {
         issueType.push('needs&nbsp;review');
       }
 
-      var actLinks = createActLinksForRule(rule);
+      const actLinks = createActLinksForRule(rule);
 
       result.push([
         `[${rule.id}](https://dequeuniversity.com/rules/axe/${axeVersion}/${rule.id}?application=RuleDescription)`,
@@ -372,14 +372,14 @@ function buildRules(grunt, options, commons, callback) {
         actLinks
       ]);
       if (tags.length) {
-        rule.enabled = !!rule.tags.filter(function (t) {
+        rule.enabled = !!rule.tags.filter(function  enabled(t) {
           return tags.indexOf(t) !== -1;
         }).length;
       }
       return rule;
     });
 
-    var ruleTables = Object.keys(descriptions)
+    const ruleTables = Object.keys(descriptions)
       .map(key => {
         var description = descriptions[key];
 
@@ -400,7 +400,7 @@ ${
       })
       .join('\n\n');
 
-    var descriptions = `
+    const descriptions = `
 <!--- This file is automatically generated using build/configure.js --->
 
 # Rule Descriptions

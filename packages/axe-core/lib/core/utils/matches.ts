@@ -96,7 +96,7 @@ function matchExpression(
 }
 
 const escapeRegExp = (() => {
-  const from = /(?=[\-\[\]{}()*+?.\\\^$|,#\s])/g;
+  const from = /(?=[-[\]{}()*+?.\\^$|,#\s])/g;
   const to = '\\';
   return (string: string): string => {
     return string.replace(from, to);
@@ -233,7 +233,7 @@ function convertExpressions(
 export function convertSelector(
   selector: string
 ): Array<Array<Record<string, unknown>>> {
-  let expressions = cssParser.parse(selector) as unknown as Record<
+  const expressions = cssParser.parse(selector) as unknown as Record<
     string,
     unknown
   >;

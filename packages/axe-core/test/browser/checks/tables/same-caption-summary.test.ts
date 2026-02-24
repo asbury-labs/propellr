@@ -1,11 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  checkSetup,
-  getCheckEvaluate,
-  MockCheckContext,
-  shadowCheckSetup,
-  shadowSupport
-} from '../../../testutils';
+import { checkSetup, getCheckEvaluate, MockCheckContext, shadowCheckSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('same-caption-summary', function () {
@@ -74,7 +68,7 @@ describe('same-caption-summary', function () {
     ).toBe(true);
   });
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should match slotted caption elements',
     function () {
       const params = shadowCheckSetup(

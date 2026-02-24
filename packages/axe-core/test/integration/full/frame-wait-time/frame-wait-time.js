@@ -9,8 +9,8 @@ describe('frame-wait-time optin', function () {
 
 describe.skip('frame-wait-time option', function () {
   'use strict';
-  var spy;
-  var respondable = axe.utils.respondable;
+  let spy;
+  const respondable = axe.utils.respondable;
 
   before(function (done) {
     // Fix Function#name on browsers that do not support it (IE):
@@ -18,7 +18,7 @@ describe.skip('frame-wait-time option', function () {
     if (!function f() {}.name) {
       Object.defineProperty(Function.prototype, 'name', {
         get: function () {
-          var name = (this.toString().match(/^function\s*([^\s(]+)/) || [])[1];
+          const name = (this.toString().match(/^function\s*([^\s(]+)/) || [])[1];
           // For better performance only parse once, and then cache the
           // result through a new accessor for repeated access.
           Object.defineProperty(this, 'name', { value: name });
@@ -34,8 +34,8 @@ describe.skip('frame-wait-time option', function () {
 
   beforeEach(function () {
     // prevent test from running axe inside the iframe multiple times
-    axe.utils.respondable = function (a, b, c, d, callback) {
-      setTimeout(function () {
+    axe.utils.respondable = function  respondable(a, b, c, d, callback) {
+      setTimeout(function  respondable() {
         callback();
       }, 50);
     };
@@ -48,10 +48,10 @@ describe.skip('frame-wait-time option', function () {
   });
 
   function getTimeoutCall() {
-    var calls = spy.getCalls();
-    var timeoutCall;
-    for (var i = 0; i < calls.length; i++) {
-      var fn = calls[i].args[0];
+    const calls = spy.getCalls();
+    let timeoutCall;
+    for (let i = 0; i < calls.length; i++) {
+      const fn = calls[i].args[0];
       if (fn.name === 'collectResultFramesTimeout') {
         timeoutCall = calls[i];
         break;
@@ -63,7 +63,7 @@ describe.skip('frame-wait-time option', function () {
 
   describe('when set', function () {
     it('should modify the default frame timeout', function (done) {
-      var opts = {
+      const opts = {
         frameWaitTime: 1,
         runOnly: {
           type: 'rule',
@@ -71,7 +71,7 @@ describe.skip('frame-wait-time option', function () {
         }
       };
       axe.run('#frame', opts, function () {
-        var timeoutCall = getTimeoutCall();
+        const timeoutCall = getTimeoutCall();
         assert.exists(timeoutCall, 'FrameTimeout not called');
         assert.equal(timeoutCall.args[1], 1);
         done();
@@ -82,7 +82,7 @@ describe.skip('frame-wait-time option', function () {
   describe('when not set', function () {
     it('should use the default frame timeout', function (done) {
       axe.run('#frame', function () {
-        var timeoutCall = getTimeoutCall();
+        const timeoutCall = getTimeoutCall();
         assert.exists(timeoutCall, 'FrameTimeout not called');
         assert.equal(timeoutCall.args[1], 60000);
         done();

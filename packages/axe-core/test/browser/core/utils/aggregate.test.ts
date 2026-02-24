@@ -22,12 +22,12 @@ describe('aggregate', () => {
   });
 
   it('picks the value with the highest index in the map, from the list of values', () => {
-    let result = axe.utils.aggregate(map, ['knight', 'master', 'youngling']);
+    const result = axe.utils.aggregate(map, ['knight', 'master', 'youngling']);
     expect(result).toBe('master');
   });
 
   it('considers the initial value in addition to the other values', () => {
-    let result = axe.utils.aggregate(
+    const result = axe.utils.aggregate(
       map,
       ['knight', 'master', 'youngling'],
       'grand master'
@@ -36,7 +36,7 @@ describe('aggregate', () => {
   });
 
   it('ignores values not on the map', () => {
-    let result = axe.utils.aggregate(
+    const result = axe.utils.aggregate(
       map,
       ['bounty hunter', 'sith lord'],
       'youngling'

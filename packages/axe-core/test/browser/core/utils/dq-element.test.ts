@@ -115,15 +115,15 @@ describe('DqElement', () => {
     });
 
     it('should truncate a large element with long custom tag name', () => {
-      let longCustomElementTagName = new Array(300).join('b');
-      let customElement = `<${longCustomElementTagName} id="target">A</${longCustomElementTagName}>`;
+      const longCustomElementTagName = new Array(300).join('b');
+      const customElement = `<${longCustomElementTagName} id="target">A</${longCustomElementTagName}>`;
       const vNode = queryFixture(customElement);
       const result = new DqElement(vNode);
       expect(result.source).toBe(`${customElement.substring(0, 300)} ...>`);
     });
 
     it('should not truncate attributes if children are long but attribute itself is within limits', () => {
-      let el = document.createElement('div');
+      const el = document.createElement('div');
       let attributeValue = '';
       let innerHtml = '';
       for (let i = 0; i < 50; i++) {

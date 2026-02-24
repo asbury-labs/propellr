@@ -4,11 +4,11 @@
 const { roles, aria: props } = require('aria-query');
 const format = require('../shared/format');
 
-module.exports = function (grunt) {
+module.exports = function  exports(grunt) {
   grunt.registerMultiTask(
     'aria-supported',
     'Task for generating a diff of supported aria roles and properties.',
-    function () {
+    function  exports() {
       /**
        * NOTE:
        * `axe` has to be dynamically required at this stage,

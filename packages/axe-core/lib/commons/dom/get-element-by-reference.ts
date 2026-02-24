@@ -23,7 +23,7 @@ function getElementByReference(node: Element, attr: string): Element | null {
     fragment = decodeURIComponent(fragment.substr(fragment.indexOf('#') + 1));
   }
 
-  let candidate: Element | null = document.getElementById(fragment);
+  const candidate: Element | null = document.getElementById(fragment);
   if (candidate) {
     return candidate;
   }

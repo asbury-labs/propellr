@@ -44,7 +44,7 @@ describe('axe._cache', () => {
   describe('get', () => {
     it('should get an item from the cache', () => {
       axe._cache.set('foo', 'bar');
-      let value = axe._cache.get('foo');
+      const value = axe._cache.get('foo');
       expect(value).toBe('bar');
     });
 
@@ -112,14 +112,14 @@ describe('axe._cache', () => {
       });
 
       it('should not evaluate creator if key already exists', () => {
-        let spy = vi.fn();
+        const spy = vi.fn();
         axe._cache.set('foo', 'bar');
         axe._cache.get('foo', spy);
         expect(spy).not.toHaveBeenCalled();
       });
 
       it('should evaluate creator once', () => {
-        let spy = vi.fn(() => {
+        const spy = vi.fn(() => {
           return true;
         });
         axe._cache.get('foo', spy);
@@ -158,7 +158,7 @@ describe('axe._cache', () => {
     it('should clear the cache', () => {
       axe._cache.set('foo', 'bar');
       axe._cache.clear();
-      let value = axe._cache.get('foo');
+      const value = axe._cache.get('foo');
       expect(value).toBeUndefined();
     });
   });

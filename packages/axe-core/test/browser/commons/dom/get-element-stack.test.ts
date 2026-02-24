@@ -1,11 +1,10 @@
 import { describe, it, afterEach, expect } from 'vitest';
-import { shadowSupport, flatTreeSetup } from '../../../testutils';
+import { flatTreeSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('dom.getElementStack', () => {
   const fixture = document.getElementById('fixture');
   const getElementStack = axe.commons.dom.getElementStack;
-  const shadowSupported = shadowSupport.v1;
 
   function mapToIDs(stack) {
     return stack
@@ -556,7 +555,7 @@ describe('dom.getElementStack', () => {
       expect(stack).toEqual(['target', '1', 'fixture']);
     });
 
-    (shadowSupported ? it : xit)(
+    it(
       'should sort shadow dom elements correctly',
       () => {
         fixture.innerHTML = '<div id="container"></div>';
@@ -571,7 +570,7 @@ describe('dom.getElementStack', () => {
       }
     );
 
-    (shadowSupported ? it : xit)(
+    it(
       'should sort nested shadow dom elements correctly',
       () => {
         fixture.innerHTML = '<div id="container"></div>';
@@ -596,7 +595,7 @@ describe('dom.getElementStack', () => {
       }
     );
 
-    (shadowSupported ? it : xit)(
+    it(
       'should sort positioned shadow elements correctly',
       () => {
         fixture.innerHTML = '<div id="container"></div>';
@@ -622,7 +621,7 @@ describe('dom.getElementStack', () => {
       }
     );
 
-    (shadowSupported ? it : xit)(
+    it(
       'should sort shadow elements with different trees correctly',
       () => {
         fixture.innerHTML =
@@ -648,7 +647,7 @@ describe('dom.getElementStack', () => {
       }
     );
 
-    (shadowSupported ? it : xit)('should sort <slot> elements', () => {
+    it('should sort <slot> elements', () => {
       fixture.innerHTML =
         '<div id="container" style="height: 100px;"><p id="target">Slotted text</p></div>';
       const container = fixture.querySelector('#container');

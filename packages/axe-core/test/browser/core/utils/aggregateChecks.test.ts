@@ -44,7 +44,7 @@ describe('axe.utils.aggregateChecks', () => {
   it('sets result  to cantTell when result is not a boolean', () => {
     const values = [undefined, null, 0, 'true', {}, NaN];
     values.forEach(value => {
-      let checkResult = axe.utils.aggregateChecks(
+      const checkResult = axe.utils.aggregateChecks(
         createTestCheckResults({
           any: [{ result: value }]
         })
@@ -80,7 +80,7 @@ describe('axe.utils.aggregateChecks', () => {
 
   describe('none', () => {
     it('gives result FAIL when any is true', () => {
-      let checkResult = axe.utils.aggregateChecks(
+      const checkResult = axe.utils.aggregateChecks(
         createTestCheckResults({
           none: [false, true, undefined]
         })
@@ -90,7 +90,7 @@ describe('axe.utils.aggregateChecks', () => {
     });
 
     it('gives result CANTTELL when none is true and any is not a boolean', () => {
-      let checkResult = axe.utils.aggregateChecks(
+      const checkResult = axe.utils.aggregateChecks(
         createTestCheckResults({
           none: [undefined, false]
         })
@@ -99,7 +99,7 @@ describe('axe.utils.aggregateChecks', () => {
     });
 
     it('gives result PASS when all are FALSE', () => {
-      let checkResult = axe.utils.aggregateChecks(
+      const checkResult = axe.utils.aggregateChecks(
         createTestCheckResults({
           none: [false, false]
         })
@@ -110,7 +110,7 @@ describe('axe.utils.aggregateChecks', () => {
 
   describe('any', () => {
     it('gives result PASS when any is true', () => {
-      let checkResult = axe.utils.aggregateChecks(
+      const checkResult = axe.utils.aggregateChecks(
         createTestCheckResults({
           any: [undefined, true]
         })
@@ -119,7 +119,7 @@ describe('axe.utils.aggregateChecks', () => {
     });
 
     it('gives result CANTTELL when none is true and any is not a bool', () => {
-      let checkResult = axe.utils.aggregateChecks(
+      const checkResult = axe.utils.aggregateChecks(
         createTestCheckResults({
           any: [undefined, false]
         })
@@ -128,7 +128,7 @@ describe('axe.utils.aggregateChecks', () => {
     });
 
     it('gives result FAIL when all are false', () => {
-      let checkResult = axe.utils.aggregateChecks(
+      const checkResult = axe.utils.aggregateChecks(
         createTestCheckResults({
           any: [false, false]
         })
@@ -139,7 +139,7 @@ describe('axe.utils.aggregateChecks', () => {
 
   describe('all', () => {
     it('gives result FAIL when any is false', () => {
-      let checkResult = axe.utils.aggregateChecks(
+      const checkResult = axe.utils.aggregateChecks(
         createTestCheckResults({
           all: [false, true, undefined]
         })
@@ -149,7 +149,7 @@ describe('axe.utils.aggregateChecks', () => {
     });
 
     it('gives result CANTTELL when none is false and any is not a boolean', () => {
-      let checkResult = axe.utils.aggregateChecks(
+      const checkResult = axe.utils.aggregateChecks(
         createTestCheckResults({
           all: [undefined, true]
         })
@@ -158,7 +158,7 @@ describe('axe.utils.aggregateChecks', () => {
     });
 
     it('gives result PASS when all are true', () => {
-      let checkResult = axe.utils.aggregateChecks(
+      const checkResult = axe.utils.aggregateChecks(
         createTestCheckResults({
           all: [true, true]
         })
@@ -169,7 +169,7 @@ describe('axe.utils.aggregateChecks', () => {
 
   describe('combined', () => {
     it('gives result PASS when all are PASS', () => {
-      let checkResult = axe.utils.aggregateChecks(
+      const checkResult = axe.utils.aggregateChecks(
         createTestCheckResults({
           any: true,
           all: true,
@@ -181,7 +181,7 @@ describe('axe.utils.aggregateChecks', () => {
     });
 
     it('gives result CANTTELL when none is FAIL and any is CANTTELL', () => {
-      let checkResult = axe.utils.aggregateChecks(
+      const checkResult = axe.utils.aggregateChecks(
         createTestCheckResults({
           any: 0,
           all: true,
@@ -192,7 +192,7 @@ describe('axe.utils.aggregateChecks', () => {
     });
 
     it('gives result FAIL when any are FAIL', () => {
-      let checkResult = axe.utils.aggregateChecks(
+      const checkResult = axe.utils.aggregateChecks(
         createTestCheckResults({
           any: 0,
           all: false,
@@ -203,7 +203,7 @@ describe('axe.utils.aggregateChecks', () => {
     });
 
     it('ignores fail checks on any, if at least one passed', () => {
-      let checkResult = axe.utils.aggregateChecks(
+      const checkResult = axe.utils.aggregateChecks(
         createTestCheckResults({
           any: [false, undefined, true], // cantTell
           none: [true, false] // fail
@@ -215,7 +215,7 @@ describe('axe.utils.aggregateChecks', () => {
     });
 
     it('includes cantTell checks from any if there are no fails', () => {
-      let checkResult = axe.utils.aggregateChecks(
+      const checkResult = axe.utils.aggregateChecks(
         createTestCheckResults({
           any: [undefined, undefined, false], // cantTell
           none: [undefined, false] // cantTell

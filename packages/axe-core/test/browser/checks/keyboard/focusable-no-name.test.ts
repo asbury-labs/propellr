@@ -1,11 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-  checkSetup,
-  getCheckEvaluate,
-  MockCheckContext,
-  shadowCheckSetup,
-  shadowSupport
-} from '../../../testutils';
+import { checkSetup, getCheckEvaluate, MockCheckContext, shadowCheckSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('focusable-no-name', function () {
@@ -56,7 +50,7 @@ describe('focusable-no-name', function () {
     ).toBe(false);
   });
 
-  (shadowSupport.v1 ? it : xit)(
+  it(
     'should pass if the content is passed in with shadow DOM',
     function () {
       const params = shadowCheckSetup(

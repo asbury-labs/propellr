@@ -13,7 +13,7 @@ describe('axe.utils.areStylesSet', () => {
     fixture.innerHTML =
       '<div id="target" style="display:none;">Display None</div>';
 
-    let el = document.getElementById('target');
+    const el = document.getElementById('target');
     expect(
       axe.utils.areStylesSet(
         el,
@@ -27,7 +27,7 @@ describe('axe.utils.areStylesSet', () => {
     fixture.innerHTML =
       '<div style="display:none;"><div id="target">Display None</div></div>';
 
-    let el = document.getElementById('target');
+    const el = document.getElementById('target');
     expect(
       axe.utils.areStylesSet(
         el,
@@ -41,7 +41,7 @@ describe('axe.utils.areStylesSet', () => {
     fixture.innerHTML =
       '<div style="visibility:hidden;"><div id="target">Display None</div></div>';
 
-    let el = document.getElementById('target');
+    const el = document.getElementById('target');
     expect(
       axe.utils.areStylesSet(
         el,
@@ -55,7 +55,7 @@ describe('axe.utils.areStylesSet', () => {
     fixture.innerHTML =
       '<div id="target" style="visibility:hidden;">Display None</div>';
 
-    let el = document.getElementById('target');
+    const el = document.getElementById('target');
     expect(
       axe.utils.areStylesSet(
         el,
@@ -69,7 +69,7 @@ describe('axe.utils.areStylesSet', () => {
     fixture.innerHTML =
       '<div id="target" style="visibility:hidden;">Display None</div>';
 
-    let el = document.getElementById('target');
+    const el = document.getElementById('target');
     expect(
       axe.utils.areStylesSet(
         el,
@@ -92,7 +92,7 @@ describe('axe.utils.areStylesSet', () => {
     fixture.innerHTML =
       '<div style="visibility:hidden;"><div id="target">Display None</div></div>';
 
-    let el = document.getElementById('target');
+    const el = document.getElementById('target');
     expect(
       axe.utils.areStylesSet(
         el,
@@ -115,7 +115,7 @@ describe('axe.utils.areStylesSet', () => {
     fixture.innerHTML =
       '<div style="display:none;"><div id="target">Display None</div></div>';
 
-    let el = document.getElementById('target');
+    const el = document.getElementById('target');
     expect(
       axe.utils.areStylesSet(
         el,
@@ -138,7 +138,7 @@ describe('axe.utils.areStylesSet', () => {
     fixture.innerHTML =
       '<div style=""><div id="target">Display None</div></div>';
 
-    let el = document.getElementById('target');
+    const el = document.getElementById('target');
     expect(
       axe.utils.areStylesSet(
         el,

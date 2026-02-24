@@ -1,5 +1,5 @@
 import { describe, it, afterEach, expect } from 'vitest';
-import { fixtureSetup, shadowSupport } from '../../../testutils';
+import { fixtureSetup } from '../../../testutils';
 
 declare const axe: any;
 describe('forms.isDisabled', function () {
@@ -57,7 +57,7 @@ describe('forms.isDisabled', function () {
       expect(isDisabled(node)).toBe(true);
     });
 
-    (shadowSupport.v1 ? it : xit)(
+    it(
       'returns true for an ancestor in the flat tree that can be disabled',
       function () {
         fixture.innerHTML = '<fieldset disabled><section></section</fieldset>';

@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 declare const axe: any;
 describe('axe.utils.findBy', () => {
   it('should find the first matching object', () => {
-    let array = [
+    const array = [
       {
         id: 'monkeys',
         foo: 'bar'
@@ -21,7 +21,7 @@ describe('axe.utils.findBy', () => {
   });
 
   it('should return undefined with no match', () => {
-    let array = [
+    const array = [
       {
         id: 'monkeys',
         foo: 'bar'

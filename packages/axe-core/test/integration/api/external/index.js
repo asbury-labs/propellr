@@ -42,7 +42,7 @@ describe('external API', () => {
       const implicitRolesOrNull = getEntries(
         axe.commons.aria.lookupTable.role
       ).reduce(
-        function (roles, entry) {
+        function  implicitRolesOrNull(roles, entry) {
           const role = entry[0];
           const val = entry[1];
           if (val.implicit) {
@@ -64,7 +64,7 @@ describe('external API', () => {
     it('must have the signature String -> String {role.type}', () => {
       const keys = getKeys(axe.commons.aria.lookupTable.role);
       const types = getValues(axe.commons.aria.lookupTable.role).map(
-        function (role) {
+        function  types(role) {
           return role.type;
         }
       );
@@ -153,7 +153,7 @@ function collectNodes() {
   const walker = document.createTreeWalker(
     document,
     NodeFilter.SHOW_ALL,
-    function (node) {
+    function  walker(node) {
       if (!document.body.contains(node)) {
         return NodeFilter.FILTER_SKIP;
       }

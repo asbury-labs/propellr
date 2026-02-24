@@ -43,7 +43,7 @@ if (['develop', 'master'].includes(currentBranch)) {
 // e.g. if we are currently on version 3.4.5 and need to do a minor release we pull commits starting from 3.4.0
 const [major, minor] = version.split('.').map(Number);
 
-let targetVersion = releaseType === 'patch' ? version : `${major}.${minor}.0`;
+const targetVersion = releaseType === 'patch' ? version : `${major}.${minor}.0`;
 
 // get all commits from a branch
 function getCommits(branch) {
@@ -71,7 +71,7 @@ function getCommits(branch) {
         mergeCorrespondence: ['id', 'source'],
 
         // allow comma in scope
-        headerPattern: /^(\w*)(?:\(([\w\$\.\-\*, ]*)\))?\: (.*)$/
+        headerPattern: /^(\w*)(?:\(([\w$.\-*, ]*)\))?: (.*)$/
       });
 
     const isBreakingChange = notes.some(

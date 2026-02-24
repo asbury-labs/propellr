@@ -10,7 +10,7 @@ describe('axe._load', () => {
   });
 
   it('should push rules on the Audit', () => {
-    let mockAudit = {
+    const mockAudit = {
       rules: [{ id: 'monkeys' }, { id: 'bananas' }]
     };
 
@@ -33,7 +33,7 @@ describe('axe._load', () => {
     it('should add a respondable subscriber for axe.ping', () => {
       return new Promise<void>((done, reject) => {
         const winParent = window.parent;
-        let mockAudit = {
+        const mockAudit = {
           rules: [{ id: 'monkeys' }, { id: 'bananas' }]
         };
 
@@ -61,11 +61,11 @@ describe('axe._load', () => {
       // todo: see issue - https://github.com/dequelabs/axe-core/issues/2168
       it.skip('should call `runRules` and default context to empty object', () => {
         return new Promise<void>((done, reject) => {
-          let mockAudit = {
+          const mockAudit = {
             rules: []
           };
-          let origSub = window.utils.respondable.subscribe;
-          let orig = window.runRules;
+          const origSub = window.utils.respondable.subscribe;
+          const orig = window.runRules;
           window.runRules = (context, options, callback) => {
             expect(context).toEqual({});
             expect(typeof callback).toBe('function');
@@ -92,8 +92,8 @@ describe('axe._load', () => {
       // todo: see issue - https://github.com/dequelabs/axe-core/issues/2168
       it.skip('should pass data.context to `runRules`', () => {
         return new Promise<void>((done, reject) => {
-          let origSub = window.utils.respondable.subscribe;
-          let orig = window.runRules;
+          const origSub = window.utils.respondable.subscribe;
+          const orig = window.runRules;
           window.runRules = (context, options, callback) => {
             expect(context).toEqual({ include: ['monkeys'] });
             expect(typeof callback).toBe('function');
@@ -121,8 +121,8 @@ describe('axe._load', () => {
       // todo: see issue - https://github.com/dequelabs/axe-core/issues/2168
       it.skip('should default include to current document if none are found', () => {
         return new Promise<void>((done, reject) => {
-          let origSub = axe.utils.respondable.subscribe;
-          let orig = window.runRules;
+          const origSub = axe.utils.respondable.subscribe;
+          const orig = window.runRules;
           const expected = { include: [document] };
           window.runRules = context => {
             expect(context).toEqual(expected);
@@ -149,11 +149,11 @@ describe('axe._load', () => {
       // todo: see issue - https://github.com/dequelabs/axe-core/issues/2168
       it.skip('should call `cleanup`', () => {
         return new Promise<void>((done, reject) => {
-          let mockAudit = {
+          const mockAudit = {
             rules: []
           };
-          let origSub = window.utils.respondable.subscribe;
-          let orig = window.cleanup;
+          const origSub = window.utils.respondable.subscribe;
+          const orig = window.cleanup;
           window.cleanup = callback => {
             expect(typeof callback).toBe('function');
             done();

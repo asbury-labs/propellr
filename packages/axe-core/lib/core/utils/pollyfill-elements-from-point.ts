@@ -4,16 +4,16 @@ export function pollyfillElementsFromPoint(): (
   y: number
 ) => Element[] {
   if (document.elementsFromPoint)
-    return document.elementsFromPoint.bind(document) as (
+    {return document.elementsFromPoint.bind(document) as (
       x: number,
       y: number
-    ) => Element[];
+    ) => Element[];}
   if ((document as unknown as Record<string, unknown>).msElementsFromPoint)
-    return (
+    {return (
       document as unknown as Record<string, (x: number, y: number) => Element[]>
-    ).msElementsFromPoint!.bind(document);
+    ).msElementsFromPoint!.bind(document);}
 
-  const usePointer = (function () {
+  const usePointer = (function  usePointer() {
     const element = document.createElement('x');
     element.style.cssText = 'pointer-events:auto';
     return element.style.pointerEvents === 'auto';

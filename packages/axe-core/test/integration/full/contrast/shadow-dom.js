@@ -1,12 +1,12 @@
 describe('color-contrast shadow dom test', function () {
   'use strict';
 
-  var shadowSupported = axe.testUtils.shadowSupport.v1;
+  const shadowSupported = axe.testUtils.shadowSupport.v1;
 
   before(function () {
-    var fixture = document.querySelector('#fixture');
+    const fixture = document.querySelector('#fixture');
     if (shadowSupported) {
-      var shadow = fixture.attachShadow({ mode: 'open' });
+      const shadow = fixture.attachShadow({ mode: 'open' });
       shadow.innerHTML =
         '<button style="background-color:red;color:white;">Go!</button>' +
         '<span style="color:#ccc;">Text</span>' +

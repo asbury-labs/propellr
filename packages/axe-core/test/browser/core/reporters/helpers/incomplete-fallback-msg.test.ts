@@ -6,7 +6,7 @@ const helpers = axe._thisWillBeDeletedDoNotUse.helpers;
 
 describe('helpers.incompleteFallbackMessage', () => {
   it('returns a non-empty string by default', () => {
-    let summary = helpers.incompleteFallbackMessage();
+    const summary = helpers.incompleteFallbackMessage();
     expect(typeof summary).toBe('string');
     expect(summary).not.toBe('');
   });
@@ -19,7 +19,7 @@ describe('helpers.incompleteFallbackMessage', () => {
         incompleteFallbackMessage: 'Dogs are the best'
       }
     });
-    let summary = helpers.incompleteFallbackMessage();
+    const summary = helpers.incompleteFallbackMessage();
     expect(summary).toBe('Dogs are the best');
   });
 
@@ -34,7 +34,7 @@ describe('helpers.incompleteFallbackMessage', () => {
       }
     });
 
-    let summary = helpers.incompleteFallbackMessage();
+    const summary = helpers.incompleteFallbackMessage();
     expect(summary).toBe('Dogs are the best');
   });
 

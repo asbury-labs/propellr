@@ -1,11 +1,11 @@
 // this file is purposefully written without mocha and in es5 syntax in order
 // to be compatible with node 4+
 
-var axe = require('../../');
-var assert = require('assert');
-var spawn = require('child_process').spawn;
-var fs = require('fs');
-var path = require('path');
+const axe = require('../../');
+const assert = require('assert');
+const spawn = require('child_process').spawn;
+const fs = require('fs');
+const path = require('path');
 
 initJsdom(function (err, window) {
   assert.equal(err, null);
@@ -33,7 +33,7 @@ initJsdom(function (err, window) {
  */
 function initJsdom(callback) {
   try {
-    var nodeToDeps = {
+    const nodeToDeps = {
       4: ['jsdom@9.12.0', 'sax@1.4.1'], // last jsdom version that supported this node version
       6: ['jsdom@11.12.0', 'sax@1.4.1'],
       8: ['jsdom@15.2.1'],
@@ -44,17 +44,17 @@ function initJsdom(callback) {
       18: ['jsdom@26.1.0']
     };
 
-    var majorNodeVersion = process.versions.node.split('.')[0];
+    const majorNodeVersion = process.versions.node.split('.')[0];
     console.log('node version detected as: v' + majorNodeVersion);
 
-    var deps = nodeToDeps[majorNodeVersion] || ['jsdom@latest'];
-    var nodeInstallArgs = ['install', '--no-save'];
-    for (var dep of deps) {
+    const deps = nodeToDeps[majorNodeVersion] || ['jsdom@latest'];
+    const nodeInstallArgs = ['install', '--no-save'];
+    for (const dep of deps) {
       console.log('installing ' + dep);
       nodeInstallArgs.push(dep);
     }
 
-    var child = spawn('npm', nodeInstallArgs, { cwd: __dirname });
+    const child = spawn('npm', nodeInstallArgs, { cwd: __dirname });
     child.stdout.setEncoding('utf8');
     child.stderr.setEncoding('utf8');
     child.stdout.on('data', function (data) {
@@ -65,8 +65,8 @@ function initJsdom(callback) {
     });
     child.on('close', function () {
       console.log('installed');
-      var jsdom = require('jsdom');
-      var domStr = fs.readFileSync(
+      const jsdom = require('jsdom');
+      const domStr = fs.readFileSync(
         path.join('test', 'integration', 'full', 'all-rules', 'all-rules.html'),
         'utf8'
       );
@@ -83,7 +83,7 @@ function initJsdom(callback) {
       }
       // jsdom 11+
       else {
-        var dom = new jsdom.JSDOM(domStr);
+        const dom = new jsdom.JSDOM(domStr);
         callback(null, dom.window);
       }
     });

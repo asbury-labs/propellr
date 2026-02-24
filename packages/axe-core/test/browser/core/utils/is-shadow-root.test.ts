@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { shadowSupport } from '../../../testutils';
 
 declare const axe: any;
 const fixture = document.getElementById('fixture');
@@ -41,45 +40,43 @@ describe('axe.utils.isShadowRoot', () => {
     expect(isShadowRoot({ nodeName: 'STRONG', shadowRoot: {} })).toBe(false);
   });
 
-  if (shadowSupport.v1) {
-    describe('shadow DOM v1', () => {
-      afterEach(() => {
-        fixture.innerHTML = '';
-      });
-      beforeEach(() => {
-        function createStoryGroup(className, slotName) {
-          const group = document.createElement('div');
-          group.className = className;
-          // Empty string in slot name attribute or absence thereof work the same, so no need for special handling.
-          group.innerHTML =
-            '<ul><slot name="' +
-            slotName +
-            '">fallback content<li>one</li></slot></ul>';
-          return group;
-        }
-
-        function makeShadowTree(storyList) {
-          const root = storyList.attachShadow({ mode: 'open' });
-          root.appendChild(createStyle());
-          root.appendChild(createStoryGroup('breaking', 'breaking'));
-          root.appendChild(createStoryGroup('other', ''));
-        }
-        let str =
-          '<div class="stories"><li>1</li>' +
-          '<li>2</li><li class="breaking" slot="breaking">3</li>' +
-          '<li>4</li><li>5</li><li class="breaking" slot="breaking">6</li></div>';
-        str +=
-          '<div class="stories"><li>1</li>' +
-          '<li>2</li><li class="breaking" slot="breaking">3</li>' +
-          '<li>4</li><li>5</li><li class="breaking" slot="breaking">6</li></div>';
-        str += '<div class="stories"></div>';
-        fixture.innerHTML = str;
-
-        fixture.querySelectorAll('.stories').forEach(makeShadowTree);
-      });
-      it('should support shadow DOM v1', () => {
-        expect(fixture.firstChild.shadowRoot).toBeDefined();
-      });
+  describe('shadow DOM v1', () => {
+    afterEach(() => {
+      fixture.innerHTML = '';
     });
-  }
+    beforeEach(() => {
+      function createStoryGroup(className, slotName) {
+        const group = document.createElement('div');
+        group.className = className;
+        // Empty string in slot name attribute or absence thereof work the same, so no need for special handling.
+        group.innerHTML =
+          '<ul><slot name="' +
+          slotName +
+          '">fallback content<li>one</li></slot></ul>';
+        return group;
+      }
+
+      function makeShadowTree(storyList) {
+        const root = storyList.attachShadow({ mode: 'open' });
+        root.appendChild(createStyle());
+        root.appendChild(createStoryGroup('breaking', 'breaking'));
+        root.appendChild(createStoryGroup('other', ''));
+      }
+      let str =
+        '<div class="stories"><li>1</li>' +
+        '<li>2</li><li class="breaking" slot="breaking">3</li>' +
+        '<li>4</li><li>5</li><li class="breaking" slot="breaking">6</li></div>';
+      str +=
+        '<div class="stories"><li>1</li>' +
+        '<li>2</li><li class="breaking" slot="breaking">3</li>' +
+        '<li>4</li><li>5</li><li class="breaking" slot="breaking">6</li></div>';
+      str += '<div class="stories"></div>';
+      fixture.innerHTML = str;
+
+      fixture.querySelectorAll('.stories').forEach(makeShadowTree);
+    });
+    it('should support shadow DOM v1', () => {
+      expect(fixture.firstChild.shadowRoot).toBeDefined();
+    });
+  });
 });

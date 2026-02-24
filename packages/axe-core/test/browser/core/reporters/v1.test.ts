@@ -146,7 +146,7 @@ describe('reporters - v1', () => {
           none: {
             failureMessage: function anonymous(it) {
               let out = 'Fix any of the following: \n';
-              let arr1 = it;
+              const arr1 = it;
               if (arr1) {
                 let value,
                   i1 = -1,
@@ -167,7 +167,7 @@ describe('reporters - v1', () => {
           any: {
             failureMessage: function anonymous(it) {
               let out = 'Fix all of the following: \n';
-              let arr1 = it;
+              const arr1 = it;
               if (arr1) {
                 let value,
                   i1 = -1,

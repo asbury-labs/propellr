@@ -37,7 +37,7 @@ function collectFiles(dir) {
  * Returns { args: string, end: number } where end is the index of the closing ')'.
  */
 function extractBalanced(s, start) {
-  if (s[start] !== '(') return null;
+  if (s[start] !== '(') {return null;}
   let depth = 0;
   let inSingleQuote = false;
   let inDoubleQuote = false;
@@ -55,15 +55,15 @@ function extractBalanced(s, start) {
       continue;
     }
     if (inSingleQuote) {
-      if (ch === "'") inSingleQuote = false;
+      if (ch === "'") {inSingleQuote = false;}
       continue;
     }
     if (inDoubleQuote) {
-      if (ch === '"') inDoubleQuote = false;
+      if (ch === '"') {inDoubleQuote = false;}
       continue;
     }
     if (inTemplate) {
-      if (ch === '`') inTemplate = false;
+      if (ch === '`') {inTemplate = false;}
       continue;
     }
     if (ch === "'") {
@@ -78,7 +78,7 @@ function extractBalanced(s, start) {
       inTemplate = true;
       continue;
     }
-    if (ch === '(') depth++;
+    if (ch === '(') {depth++;}
     if (ch === ')') {
       depth--;
       if (depth === 0) {
@@ -117,17 +117,17 @@ function splitArgs(argsStr) {
     }
     if (inSingleQuote) {
       current += ch;
-      if (ch === "'") inSingleQuote = false;
+      if (ch === "'") {inSingleQuote = false;}
       continue;
     }
     if (inDoubleQuote) {
       current += ch;
-      if (ch === '"') inDoubleQuote = false;
+      if (ch === '"') {inDoubleQuote = false;}
       continue;
     }
     if (inTemplate) {
       current += ch;
-      if (ch === '`') inTemplate = false;
+      if (ch === '`') {inTemplate = false;}
       continue;
     }
     if (ch === "'") {
@@ -145,12 +145,12 @@ function splitArgs(argsStr) {
       current += ch;
       continue;
     }
-    if (ch === '(' || ch === '<') depth++;
-    if (ch === ')' || ch === '>') depth--;
-    if (ch === '{') braceDepth++;
-    if (ch === '}') braceDepth--;
-    if (ch === '[') bracketDepth++;
-    if (ch === ']') bracketDepth--;
+    if (ch === '(' || ch === '<') {depth++;}
+    if (ch === ')' || ch === '>') {depth--;}
+    if (ch === '{') {braceDepth++;}
+    if (ch === '}') {braceDepth--;}
+    if (ch === '[') {bracketDepth++;}
+    if (ch === ']') {bracketDepth--;}
 
     if (ch === ',' && depth === 0 && braceDepth === 0 && bracketDepth === 0) {
       result.push(current.trim());
@@ -586,14 +586,14 @@ function migrateFile(content) {
 
   // Determine which imports are needed
   const needs = new Set();
-  if (/\bdescribe\s*[.(]/.test(s)) needs.add('describe');
-  if (/\bit\s*[.(]/.test(s)) needs.add('it');
-  if (/\bexpect\s*\(/.test(s)) needs.add('expect');
-  if (/\bbeforeEach\s*\(/.test(s)) needs.add('beforeEach');
-  if (/\bafterEach\s*\(/.test(s)) needs.add('afterEach');
-  if (/\bbeforeAll\s*\(/.test(s)) needs.add('beforeAll');
-  if (/\bafterAll\s*\(/.test(s)) needs.add('afterAll');
-  if (/\bvi\./.test(s)) needs.add('vi');
+  if (/\bdescribe\s*[.(]/.test(s)) {needs.add('describe');}
+  if (/\bit\s*[.(]/.test(s)) {needs.add('it');}
+  if (/\bexpect\s*\(/.test(s)) {needs.add('expect');}
+  if (/\bbeforeEach\s*\(/.test(s)) {needs.add('beforeEach');}
+  if (/\bafterEach\s*\(/.test(s)) {needs.add('afterEach');}
+  if (/\bbeforeAll\s*\(/.test(s)) {needs.add('beforeAll');}
+  if (/\bafterAll\s*\(/.test(s)) {needs.add('afterAll');}
+  if (/\bvi\./.test(s)) {needs.add('vi');}
 
   const imports = Array.from(needs);
   const importLine = `import { ${imports.join(', ')} } from 'vitest';\n\n`;

@@ -1,12 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { shadowSupport, flatTreeSetup } from '../../../testutils';
+import { flatTreeSetup } from '../../../testutils';
 
 declare const axe: any;
-/* global xit */
 describe('dom.hasContentVirtual', function () {
   const hasContentVirtual = axe.commons.dom.hasContentVirtual;
   const fixture = document.getElementById('fixture');
-  const shadowSupported = shadowSupport.v1;
   const tree;
 
   it('returns false if there is no content', function () {
@@ -98,7 +96,7 @@ describe('dom.hasContentVirtual', function () {
     ).toBe(false);
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'looks at content of shadow dom elements',
     function () {
       fixture.innerHTML = '<div id="target"></div>';
@@ -114,7 +112,7 @@ describe('dom.hasContentVirtual', function () {
     }
   );
 
-  (shadowSupported ? it : xit)(
+  it(
     'looks at the slots in a shadow tree',
     function () {
       fixture.innerHTML = '<div id="shadow">some text</div>';

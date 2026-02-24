@@ -1,5 +1,5 @@
 import { describe, it, beforeEach, afterEach, expect } from 'vitest';
-import { shadowSupport, queryFixture } from '../../../testutils';
+import { queryFixture } from '../../../testutils';
 
 declare const axe: any;
 describe('aria.validateAttrValue', () => {
@@ -191,21 +191,19 @@ describe('aria.validateAttrValue', () => {
       it('should work in shadow DOM', () => {
         let shadEl;
 
-        if (shadowSupport.v1) {
-          // shadow DOM v1 - note: v0 is compatible with this code, so no need
-          // to specifically test this
-          fixture.innerHTML = '<div></div>';
-          makeShadowTreeVAV(fixture.firstChild);
-          axe.setup(fixture);
-          shadEl = fixture.firstChild.shadowRoot.querySelector('input#myinput');
-          expect(
-            axe.commons.aria.validateAttrValue(shadEl, 'aria-labelledby')
-          ).toBe(true);
-          shadEl = fixture.firstChild.shadowRoot.querySelector('input#invalid');
-          expect(
-            axe.commons.aria.validateAttrValue(shadEl, 'aria-labelledby')
-          ).toBe(false);
-        }
+        // shadow DOM v1 - note: v0 is compatible with this code, so no need
+        // to specifically test this
+        fixture.innerHTML = '<div></div>';
+        makeShadowTreeVAV(fixture.firstChild);
+        axe.setup(fixture);
+        shadEl = fixture.firstChild.shadowRoot.querySelector('input#myinput');
+        expect(
+          axe.commons.aria.validateAttrValue(shadEl, 'aria-labelledby')
+        ).toBe(true);
+        shadEl = fixture.firstChild.shadowRoot.querySelector('input#invalid');
+        expect(
+          axe.commons.aria.validateAttrValue(shadEl, 'aria-labelledby')
+        ).toBe(false);
       });
 
       it('returns false if empty without allowEmpty: true', () => {

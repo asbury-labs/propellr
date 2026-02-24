@@ -74,19 +74,19 @@ function axeGlobalPlugin(): Plugin {
       ].join('\n');
 
       for (const [fileName, chunk] of Object.entries(bundle)) {
-        if (chunk.type !== 'chunk') continue;
+        if (chunk.type !== 'chunk') {continue;}
         if (
           !fileName.endsWith('.js') &&
           !fileName.endsWith('.mjs') &&
           !fileName.endsWith('.cjs')
         )
-          continue;
+          {continue;}
 
         const filePath = join(outDir, fileName);
         const content = readFileSync(filePath, 'utf-8');
 
         // Skip if already injected
-        if (content.includes('var axe = {}')) continue;
+        if (content.includes('var axe = {}')) {continue;}
 
         // Determine where to insert the shim.
         // For all formats, insert after the banner comment if present,
@@ -154,10 +154,10 @@ export default defineConfig(({ mode }) => {
         name: 'axe',
         formats: isMinify ? ['umd'] : ['umd', 'es', 'cjs'],
         fileName: format => {
-          if (isMinify) return 'axe.min.js';
-          if (format === 'umd') return 'axe.js';
-          if (format === 'es') return 'axe.mjs';
-          if (format === 'cjs') return 'axe.cjs';
+          if (isMinify) {return 'axe.min.js';}
+          if (format === 'umd') {return 'axe.js';}
+          if (format === 'es') {return 'axe.mjs';}
+          if (format === 'cjs') {return 'axe.cjs';}
           return `axe.${format}.js`;
         }
       },

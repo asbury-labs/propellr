@@ -4,7 +4,7 @@ declare const axe: any;
 describe('AbstractVirtualNode', () => {
   it('should throw an error when accessing props', () => {
     function fn() {
-      let abstractNode = new axe.AbstractVirtualNode();
+      const abstractNode = new axe.AbstractVirtualNode();
       if (abstractNode.props.nodeType === 1) {
         return;
       }
@@ -15,7 +15,7 @@ describe('AbstractVirtualNode', () => {
 
   it('should throw an error when accessing attrNames', () => {
     function fn() {
-      let abstractNode = new axe.AbstractVirtualNode();
+      const abstractNode = new axe.AbstractVirtualNode();
       return abstractNode.attrNames;
     }
 
@@ -24,7 +24,7 @@ describe('AbstractVirtualNode', () => {
 
   it('should throw an error when accessing hasClass', () => {
     function fn() {
-      let abstractNode = new axe.AbstractVirtualNode();
+      const abstractNode = new axe.AbstractVirtualNode();
       if (abstractNode.hasClass('foo')) {
         return;
       }
@@ -35,7 +35,7 @@ describe('AbstractVirtualNode', () => {
 
   it('should throw an error when accessing attr', () => {
     function fn() {
-      let abstractNode = new axe.AbstractVirtualNode();
+      const abstractNode = new axe.AbstractVirtualNode();
       if (abstractNode.attr('foo') === 'bar') {
         return;
       }
@@ -46,7 +46,7 @@ describe('AbstractVirtualNode', () => {
 
   it('should throw an error when accessing hasAttr', () => {
     function fn() {
-      let abstractNode = new axe.AbstractVirtualNode();
+      const abstractNode = new axe.AbstractVirtualNode();
       if (abstractNode.hasAttr('foo')) {
         return;
       }
@@ -57,7 +57,7 @@ describe('AbstractVirtualNode', () => {
 
   describe('hasClass, when attr is set', () => {
     it('should return true when the element has the class', () => {
-      let vNode = new axe.AbstractVirtualNode();
+      const vNode = new axe.AbstractVirtualNode();
       vNode.attr = () => {
         return 'my-class';
       };
@@ -66,7 +66,7 @@ describe('AbstractVirtualNode', () => {
     });
 
     it('should return true when the element contains more than one class', () => {
-      let vNode = new axe.AbstractVirtualNode();
+      const vNode = new axe.AbstractVirtualNode();
       vNode.attr = () => {
         return 'my-class a11y-focus visually-hidden';
       };
@@ -77,7 +77,7 @@ describe('AbstractVirtualNode', () => {
     });
 
     it('should return false when the element does not contain the class', () => {
-      let vNode = new axe.AbstractVirtualNode();
+      const vNode = new axe.AbstractVirtualNode();
       vNode.attr = () => {
         return undefined;
       };
@@ -86,7 +86,7 @@ describe('AbstractVirtualNode', () => {
     });
 
     it('should return false when the element contains only part of the class', () => {
-      let vNode = new axe.AbstractVirtualNode();
+      const vNode = new axe.AbstractVirtualNode();
       vNode.attr = () => {
         return 'my-class';
       };
@@ -94,7 +94,7 @@ describe('AbstractVirtualNode', () => {
     });
 
     it('should return false if className is not of type string', () => {
-      let vNode = new axe.AbstractVirtualNode();
+      const vNode = new axe.AbstractVirtualNode();
       vNode.attr = () => {
         return null;
       };
@@ -103,7 +103,7 @@ describe('AbstractVirtualNode', () => {
     });
 
     it('should return true for whitespace characters', () => {
-      let vNode = new axe.AbstractVirtualNode();
+      const vNode = new axe.AbstractVirtualNode();
       vNode.attr = () => {
         return 'my-class\ta11y-focus\rvisually-hidden\ngrid\fcontainer';
       };

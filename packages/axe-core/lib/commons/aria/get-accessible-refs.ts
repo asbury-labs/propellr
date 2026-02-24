@@ -71,7 +71,7 @@ function getAccessibleRefs(node: any): Element[] {
 
     const refAttrs = Object.keys(standards.ariaAttrs).filter(attr => {
       const attrInfo = standards.ariaAttrs[attr];
-      if (!attrInfo) return false;
+      if (!attrInfo) {return false;}
       return idRefsRegex.test(attrInfo.type);
     });
     cacheIdRefs(root, idRefs, refAttrs);

@@ -3,11 +3,11 @@ import { fixtureSetup } from '../../testutils';
 
 declare const axe: any;
 describe('is-visible-matches', function () {
-  let isVisibleMatches =
+  const isVisibleMatches =
     axe._thisWillBeDeletedDoNotUse.base.metadataFunctionMap[
       'is-visible-matches'
     ];
-  let fixture = document.getElementById('fixture');
+  const fixture = document.getElementById('fixture');
 
   it('returns true for visible elements', function () {
     fixtureSetup('<p id="target">Hello world</p>');

@@ -1,15 +1,15 @@
 /* global chai */
-var messages = [];
+const messages = [];
 window.addEventListener('message', function (msg) {
   messages.push(msg.data);
 });
 
 describe('isolated-env test', function () {
   'use strict';
-  var fixture = document.querySelector('#fixture');
-  var origPartialResults;
-  var partialResults;
-  var win;
+  const fixture = document.querySelector('#fixture');
+  let origPartialResults;
+  let partialResults;
+  let win;
 
   // just a nicer assertion error rather than just doing
   // done(err)
@@ -18,7 +18,7 @@ describe('isolated-env test', function () {
       return done(err);
     }
 
-    var error = new chai.AssertionError(
+    const error = new chai.AssertionError(
       "expected [Function] to not throw an error but '" +
         err.toString() +
         "' was thrown"
@@ -39,22 +39,22 @@ describe('isolated-env test', function () {
   }
 
   before(function (done) {
-    var nestedLoadPromise = new Promise(function (resolve, reject) {
+    const nestedLoadPromise = new Promise(function  nestedLoadPromise(resolve, reject) {
       axe.testUtils.awaitNestedLoad(resolve, reject);
     });
 
-    var isloadedPromise = new Promise(function (resolve, reject) {
+    const isloadedPromise = new Promise(function  isloadedPromise(resolve, reject) {
       if (messages.includes('axe-loaded')) {
         resolve();
       } else {
-        window.addEventListener('message', function (msg) {
+        window.addEventListener('message', function  isloadedPromise(msg) {
           if (msg.data === 'axe-loaded') {
             resolve();
           }
         });
       }
 
-      setTimeout(function () {
+      setTimeout(function  isloadedPromise() {
         reject(new Error('axe-loaded message not called'));
       }, 5000);
     });
@@ -62,10 +62,10 @@ describe('isolated-env test', function () {
     Promise.all([nestedLoadPromise, isloadedPromise])
       .then(function () {
         win = fixture.querySelector('#isolated-frame').contentWindow;
-        var focusableFrame = fixture.querySelector('#focusable-iframe');
+        const focusableFrame = fixture.querySelector('#focusable-iframe');
 
         // trigger frame-focusable-content rule
-        var iframePromise = focusableFrame.contentWindow.axe.runPartial({
+        const iframePromise = focusableFrame.contentWindow.axe.runPartial({
           include: [],
           exclude: [],
           initiator: false,
@@ -127,7 +127,7 @@ describe('isolated-env test', function () {
   });
 
   describe('reporters', function () {
-    var reporters = axe._thisWillBeDeletedDoNotUse.public.reporters;
+    const reporters = axe._thisWillBeDeletedDoNotUse.public.reporters;
     Object.keys(reporters).forEach(function (reporterName) {
       it(
         reporterName +

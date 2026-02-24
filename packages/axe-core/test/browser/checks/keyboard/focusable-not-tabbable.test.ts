@@ -1,18 +1,10 @@
 import { describe, it, expect, afterEach, beforeAll } from 'vitest';
-import {
-  checkSetup,
-  checks,
-  fixtureSetup,
-  flatTreeSetup,
-  MockCheckContext,
-  shadowSupport
-} from '../../../testutils';
+import { checkSetup, checks, fixtureSetup, flatTreeSetup, MockCheckContext } from '../../../testutils';
 
 declare const axe: any;
 describe('focusable-not-tabbable', function () {
   let check;
   const fixture = document.getElementById('fixture')!;
-  const shadowSupported = shadowSupport.v1;
   const checkContext = MockCheckContext();
 
   beforeAll(function () {
@@ -97,7 +89,7 @@ describe('focusable-not-tabbable', function () {
     expect(actual).toBe(true);
   });
 
-  (shadowSupported ? it : xit)(
+  it(
     'returns false when focusable text in shadowDOM',
     function () {
       // Note:
