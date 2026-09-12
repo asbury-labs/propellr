@@ -3,7 +3,9 @@
 **Implementation update:** Phases 1 and 2 implement contracts, request admission,
 local IPC sessions, Playwright ownership and one trusted dialog playbook. See
 [foundation evidence](foundation-validation.md) and [local host evidence](local-host-validation.md).
-Browser analysis and reporting remain unimplemented. The proposal below is retained
+Phase 3 adds a bounded browser-native three-rule slice, full-scan fallback and
+portable exact-target reporting. See [slice evidence](browser-slice-validation.md);
+unsupported branches and full catalog parity remain explicit limits. The proposal below is retained
 at its capture state; current protocol details live in [local host protocol](local-host-protocol.md).
 
 September 11, 2026; revised at 19:38 UTC. **Stateful sessions, playbooks and

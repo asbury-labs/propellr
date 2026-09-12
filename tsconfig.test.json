@@ -6,6 +6,11 @@
     "test/host/**/*.ts",
     "test/playbooks/**/*.ts",
     "test/support/**/*.ts",
+    "test/parity/**/*.ts",
+    "test/reporting/**/*.ts",
+    "bench/**/*.ts",
+    "tools/**/*.ts",
+    "vite.config.ts",
     "vitest.config.ts"
   ]
 }

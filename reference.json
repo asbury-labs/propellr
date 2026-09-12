@@ -5,9 +5,10 @@
     "tag": "v4.13.0",
     "commit": "1cc54b900413660610180d631feb73c9e74f4dc9",
     "tarball": "https://registry.npmjs.org/axe-core/-/axe-core-4.13.0.tgz",
+    "bundleSha256": "c24f097bd2f451d4f933e8bc7d8d539f8672a2ebcb5cc9f9f3eec8ca9470a0c1",
     "integrity": "sha512-UzGt8zg7Ny8djbYMhxl2zuEevVa7r2gJjYY5Lwr1xM7+XU2nd6CkIWFTVcCIbAP63vSz71NaVyyuSk9lHKcy0A=="
   },
   "secondaryCommit": "4d306cbb7c456849c6f964444a6a7174d2be502a",
-  "artifactVerified": false,
-  "note": "Pins retained from approved reference. No artifact downloaded or parity test executed in phase 1."
+  "artifactVerified": true,
+  "note": "Published tarball SHA-512 and extracted axe.min.js SHA-256 verified in external cache for phase 3. Source remains independently pinned; no reproducible-build claim."
 }

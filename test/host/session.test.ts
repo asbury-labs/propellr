@@ -9,7 +9,7 @@ import { sessionIdSchema } from "../../src/validation.js";
 import { meta, playbookInput, terminal, unwrap, withHost } from "../support/host.js";
 
 describe("local session host over real Unix IPC", () => {
-  test("owned resources, reconnect, request deduplication/conflicts, and no scan success", async () => {
+  test("owned resources, reconnect, request deduplication/conflicts, and explicit default catalog gaps", async () => {
     await withHost(async ({ client, server, reconnect }) => {
       expect((await lstat(dirname(server.path))).mode & 0o777).toBe(0o700);
       expect((await lstat(server.path)).mode & 0o777).toBe(0o600);
@@ -43,9 +43,15 @@ describe("local session host over real Unix IPC", () => {
       );
       expect(await terminal(next, scan)).toMatchObject({
         kind: "scan",
-        state: "failed",
-        diagnostics: [{ code: "scan-unavailable" }],
-        completedScans: [],
+        state: "completed",
+        result: {
+          coverage: { state: "partial" },
+          execution: {
+            requested: "incremental",
+            actual: "full",
+            fallback: { code: "full-scan-fallback" },
+          },
+        },
       });
       const inspection = { ...meta(), sessionId: session.id, operationId: scan.id };
       unwrap(await next.inspect(inspection));
@@ -234,6 +240,18 @@ describe("local session host over real Unix IPC", () => {
           client.close();
           const next = await reconnect(client.lease);
           await page.locator("#dialog").waitFor({ state: "visible" });
+          const observer = await reconnect(client.lease);
+          const events = unwrap(await observer.subscribe({ ...meta(), sessionId: session.id }));
+          for await (const delivery of events) {
+            if (
+              delivery.type === "event" &&
+              delivery.event.type === "checkpoint" &&
+              delivery.event.checkpoint.id === "opened"
+            ) {
+              expect(delivery.event.checkpoint.state).toBe("reached");
+              break;
+            }
+          }
           const cancelling = unwrap(
             await next.cancel({ ...meta(), sessionId: session.id, operationId: operation.id }),
           );
@@ -244,7 +262,15 @@ describe("local session host over real Unix IPC", () => {
           await page.evaluate("document.querySelector('#close').disabled = false");
           expect(await terminal(next, operation)).toMatchObject({
             state: "cancelled",
-            completedScans: [],
+            completedScans: [
+              expect.objectContaining({
+                origin: {
+                  kind: "playbook",
+                  playbook: { id: "dialog-open-close", version: "1" },
+                  checkpointId: "opened",
+                },
+              }),
+            ],
             cleanup: "complete",
             sideEffects: "confirmed",
           });

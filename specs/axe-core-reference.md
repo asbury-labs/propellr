@@ -2,7 +2,10 @@
 
 **Implementation update:** Greenfield phase 1 now exists; see
 [foundation evidence](foundation-validation.md). Canonical source/artifact remain
-untouched. PR reassessment and other implementation-status prose below describe
+untouched. Phase 3 obtained the published artifact independently in an external
+cache and verified its tarball/bundle hashes; `reference.json` records both. See
+[slice evidence](browser-slice-validation.md) for executed comparisons.
+PR reassessment and other implementation-status prose below describe
 the preparation checkout at capture time, not the new root project.
 
 Propellr is the new project. Canonical axe-core is a separate comparison source,

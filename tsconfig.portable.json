@@ -4,6 +4,8 @@
   "include": [
     "src/contracts.ts",
     "src/validation.ts",
+    "src/analysis.ts",
+    "src/reporting/**/*.ts",
     "test/types/contracts.typecheck.ts",
     "test/types/portable.typecheck.ts"
   ]

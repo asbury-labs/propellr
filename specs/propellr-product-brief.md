@@ -2,7 +2,9 @@
 
 **Implementation update:** Phases 1 and 2 now exist in this greenfield worktree.
 See [foundation evidence](foundation-validation.md) and
-[local host evidence](local-host-validation.md). Browser scans remain unavailable.
+[local host evidence](local-host-validation.md). Phase 3 adds a limited three-rule
+browser/reporting proof; see [slice evidence](browser-slice-validation.md). Full
+catalog parity and broader product goals remain incomplete.
 Remaining text records the agreed
 planning direction at capture time, not current implementation status.
 

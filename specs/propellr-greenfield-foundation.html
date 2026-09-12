@@ -350,7 +350,8 @@
             <dd>
               2026-09-11T20:27:25Z; 2026-09-12T13:35:14Z; 2026-09-12T14:06:24Z;
               2026-09-12T14:13:33Z; 2026-09-12T14:23:45Z; 2026-09-12T15:40:45Z;
-              2026-09-12T16:17:57Z; 2026-09-12T16:34:01Z; 2026-09-12T16:58:06Z
+              2026-09-12T16:17:57Z; 2026-09-12T16:34:01Z; 2026-09-12T16:58:06Z;
+              2026-09-12T19:06:00Z; 2026-09-12T19:50:23Z
             </dd>
             <dt>commits</dt>
             <dd>
@@ -361,20 +362,25 @@
               519f0c0bb04d38edfc68597b07dec56fae1b0a86 (phase 2 branch base; implementation
               uncommitted); df9f63b50ffe099bc2a5baee96ade5b49c01ae89 (phase 2 PR #11 initial head);
               ae38766ad7bcd5e2b46bcead32a7d2a4a513d8d7 (first review repairs, Ubuntu CI passed);
-              8403876dcffcc8e7c81282cc15f69a790d109b8d (second review repairs, Ubuntu CI passed)
+              8403876dcffcc8e7c81282cc15f69a790d109b8d (second review repairs, Ubuntu CI passed);
+              3dca4a5ee5f0dc60f90d3d486a1ef6147136c6b3 (phase 3 branch base; implementation
+              uncommitted)
             </dd>
             <dt>agent name</dt>
             <dd>
               pi / gpt-6-astra; pi / gpt-6-astra; pi / gpt-6-astra (single agent); pi / gpt-6-astra
               (phase 2, single agent); pi / gpt-6-astra (PR #11, single agent); pi / gpt-6-astra (PR
-              #11 second review, single agent); pi / gpt-6-astra (PR #11 third review, single agent)
+              #11 second review, single agent); pi / gpt-6-astra (PR #11 third review, single
+              agent); pi / gpt-6-astra (phase 3, single agent); pi / gpt-6-astra (phase 3 PR
+              delivery)
             </dd>
             <dt>session id</dt>
             <dd>
               01a09168-fae8-701c-91a3-cf1504ae78a9; 01a09168-fae8-701c-91a3-cf1504ae78a9;
               01a095e0-cd7f-701c-91a3-cf37ea4a0cb5; 01a0962e-071f-7681-98bc-26b90fd97297;
               01a0962e-071f-7681-98bc-26b90fd97297; 01a0962e-071f-7681-98bc-26b90fd97297;
-              01a0962e-071f-7681-98bc-26b90fd97297
+              01a0962e-071f-7681-98bc-26b90fd97297; 01a096d5-6e32-7314-97d0-6eac44caafef;
+              01a09729-ccfa-7314-97d0-6eaf5da86e04
             </dd>
             <dt>back refs</dt>
             <dd>
@@ -392,7 +398,9 @@
               <a href="https://github.com/asbury-labs/propellr/pull/10">PR #10</a>;
               <a href="local-host-validation.md">Phase 2 evidence</a>;
               <a href="local-host-protocol.md">Local host protocol</a>;
-              <a href="https://github.com/asbury-labs/propellr/pull/11">PR #11</a>
+              <a href="https://github.com/asbury-labs/propellr/pull/11">PR #11</a>;
+              <a href="browser-slice-validation.md">Phase 3 evidence</a>;
+              <a href="slice-protocol.md">Phase 3 protocol</a>
             </dd>
           </dl>
         </details>
@@ -414,8 +422,9 @@
           in
           <a href="local-host-validation.md">Phase 2 evidence</a>; latest CI/review status is
           tracked on PR #11. Dependency-declaration exceptions and single-user host limits remain
-          explicit. Browser analysis, rule fidelity, production isolation and performance remain
-          unverified.
+          explicit. Phase 3 now validates only its named browser/reporting slice; see
+          <a href="browser-slice-validation.md">current evidence and limitations</a>. Full catalog
+          parity, production isolation and broad performance claims remain unverified.
         </p>
       </section>
       <section id="solution">
@@ -425,7 +434,8 @@
           2026. Phase 1 installed these exact pins in the new worktree on September 12, without
           global upgrades. Declared engine/peer ranges fit Node 26 and matching Vitest/provider 5.
           Phase 1 verifies native tool execution and the Node test configuration. Phase 2 executes
-          host Playwright interactions; a browser-analysis entry/provider project remains deferred.
+          host Playwright interactions; Phase 3 now builds a Vite browser entry and executes real
+          browser-provider tests with unchanged pins.
         </p>
         <div class="table-scroll">
           <table>
@@ -571,8 +581,9 @@
       <section id="phases">
         <h2>Implementation slices</h2>
         <p>
-          Phases 1 and 2 executed and validated. Stop here for review. Phase 3 remains unexecuted;
-          its parity/reporting/benchmark script names remain deliverables, not existing commands.
+          Phases 1 through 3 executed and validated. Phase 3 is only a bounded technical slice, with
+          explicit unsupported coverage. Tony authorized Phase 3 PR delivery, monitoring until clean
+          and merge. Further implementation phases and publishing remain unauthorized.
         </p>
         <div class="phase">
           <h3><code class="status">[x]</code>1. Clean foundation and validated contracts</h3>
@@ -714,7 +725,7 @@
           </div>
         </div>
         <div class="phase">
-          <h3><code class="status">[]</code>3. Small cross-browser parity and reporting proof</h3>
+          <h3><code class="status">[x]</code>3. Small cross-browser parity and reporting proof</h3>
           <p>
             A technical slice toward complete axe-core coverage, not a three-rule replacement
             product. Finish with evidence review rather than automatically expanding the platform.
@@ -722,7 +733,7 @@
           <h4>3.1 Deliverables</h4>
           <ul class="checklist">
             <li>
-              <code class="status">[]</code>Implement
+              <code class="status">[x]</code>Implement
               <code>button-name</code> (naming/relationships),
               <code>target-size</code> (layout/geometry) and
               <code>landmark-one-main</code> (document-level main presence). Their definitions exist
@@ -731,39 +742,39 @@
               duplicate-main detection.
             </li>
             <li>
-              <code class="status">[]</code>Reuse selected proven logic with attribution; do not
+              <code class="status">[x]</code>Reuse selected proven logic with attribution; do not
               load canonical axe-core as the Propellr implementation or port its runtime shell.
               Independently review positive, negative, boundary and incomplete expectations. Account
               for unimplemented branches and rules; default full-catalog requests cannot silently
               become three-rule scans.
             </li>
             <li>
-              <code class="status">[]</code>Cover ordinary DOM, naming relationships, geometry
+              <code class="status">[x]</code>Cover ordinary DOM, naming relationships, geometry
               boundaries, document scope, open shadow roots, same-origin frames and an explicitly
               denied frame. Run the selected slice in Chromium, Firefox and WebKit. Report
               unavailable scope rather than fake complete results.
             </li>
             <li>
-              <code class="status">[]</code>Use an independently obtained, integrity-pinned
+              <code class="status">[x]</code>Use an independently obtained, integrity-pinned
               published axe-core 4.13.0 browser artifact in an external reference cache. Never add
               axe-core or its tooling to Propellr dependencies. Keep source provenance pinned too.
               Run both engines in separate equivalent contexts, retaining raw outputs and mismatch
               classifications.
             </li>
             <li>
-              <code class="status">[]</code>Connect playbook checkpoints to scans. Start realtime
+              <code class="status">[x]</code>Connect playbook checkpoints to scans. Start realtime
               requests with an explicit full-scan fallback; invalidate changed documents/epochs. Do
               not claim an incremental speedup before an incremental algorithm exists.
             </li>
             <li>
-              <code class="status">[]</code>Emit raw occurrences and conservative issue groups with
+              <code class="status">[x]</code>Emit raw occurrences and conservative issue groups with
               explicit current-scan counts. Prove repeated-scan continuity, no merging of unrelated
               targets, and no false resolution after a partial/narrower scan. Apply a small declared
               gate policy with incomplete status visible. General cross-site matching, databases and
               vendor adapters stay outside this slice.
             </li>
             <li>
-              <code class="status">[]</code>Collect reproducible exploratory timings and memory
+              <code class="status">[x]</code>Collect reproducible exploratory timings and memory
               observations only for equivalent selected coverage. Include session, browser load,
               scan and reporting costs separately and end to end. Do not publish a headline speedup
               or full-parity claim from this slice.
@@ -772,18 +783,18 @@
           <h4>3.2 Testing Strategy</h4>
           <ul class="checklist">
             <li>
-              <code class="status">[]</code
+              <code class="status">[x]</code
               ><code>pnpm test:playbooks &amp;&amp; pnpm test:parity</code>: real scan checkpoints,
               non-empty selected-rule inventory and comparisons in all three engines, with raw
               findings before grouping
             </li>
             <li>
-              <code class="status">[]</code><code>pnpm test:reporting</code>: group
+              <code class="status">[x]</code><code>pnpm test:reporting</code>: group
               membership/counts, continuity, partial-coverage resolution safety and auditable gate
               decisions
             </li>
             <li>
-              <code class="status">[]</code><code>pnpm bench:slice</code>: recorded exploratory
+              <code class="status">[x]</code><code>pnpm bench:slice</code>: recorded exploratory
               samples for this slice only; sampling rules and environmental conditions fixed before
               collecting measurements
             </li>
@@ -819,14 +830,14 @@
             under pinned Node/PNPM.
           </li>
           <li>
-            <code class="status">[]</code
+            <code class="status">[x]</code
             ><code
               >pnpm test:contracts &amp;&amp; pnpm test:host &amp;&amp; pnpm test:playbooks
               &amp;&amp; pnpm test:parity &amp;&amp; pnpm test:reporting</code
             >: real cases, no empty/no-op suites.
           </li>
           <li>
-            <code class="status">[]</code><code>pnpm bench:slice</code>: retained raw samples and
+            <code class="status">[x]</code><code>pnpm bench:slice</code>: retained raw samples and
             correctness results, not a benchmark-derived release gate yet.
           </li>
           <li>
@@ -845,7 +856,8 @@
         <h2>Evidence and limits</h2>
         <p>
           The canonical rule JSON files were read at v4.13.0; the three IDs and target-size opt-in
-          status are verified. No rules were executed. The published
+          status are verified. No rules were executed during planning; Phase 3 execution is recorded
+          in the current evidence link above. The published
           <a href="https://registry.npmjs.org/axe-core/4.13.0">axe-core 4.13.0 artifact</a> has no
           runtime dependencies; record and verify its tarball integrity from the reference document
           before use. Obtain it outside this workspace without upstream development tooling.
@@ -864,6 +876,43 @@
       </section>
       <section id="amendments">
         <h2>Amendments</h2>
+        <details open>
+          <summary>2026-09-12T19:50:23Z: Phase 3 PR delivery authorized</summary>
+          <p>
+            Tony requested a ready PR, monitoring until CI and reviews are clean, then merge. Scope
+            remains the existing Phase 3 slice. Pinned pnpm validate rerun passed all 141 tests,
+            build, five strict type scopes, lint and required formatting. Retained benchmark
+            evidence remains the original implementation snapshot, not a new benchmark run.
+            Current-head CI and review results will be recorded on the PR before merge. Existing
+            overlapping legacy PRs and worktrees remain untouched; no publishing or production work.
+          </p>
+        </details>
+        <details open>
+          <summary>2026-09-12T19:06:00Z: Phase 3 executed, stop boundary reached</summary>
+          <p>
+            Tony authorized Phase 3 only with one agent. Implemented the three-rule browser slice,
+            independent reference comparisons in Chromium, Firefox and WebKit, real checkpoint
+            scans, full-scan realtime fallback, conservative reporting/history and explicit gate
+            policy. Inventory accounts for 105 baseline rules; 102 remain unimplemented. Generated
+            names, obscured geometry and denied scope remain explicit limitations, not parity
+            passes.
+          </p>
+          <p>
+            Pinned frozen install and full pnpm validate passed in a fresh disposable source copy:
+            build, five strict type scopes, lint, mandatory Oxfmt, 62 contract, 29 host, 11
+            playbook, 23 parity/browser and 16 reporting tests. Exploratory benchmarks passed 360
+            measured samples across four fixtures and three engines, plus 15 long-lived host
+            journeys. Initial 90 small-fixture samples are retained separately. No speedup or
+            full-parity claim.
+          </p>
+          <p>
+            <a href="browser-slice-validation.md">Phase 3 evidence</a> records raw outputs, mismatch
+            dispositions, environment, verification and limitations. Phase 3 [x]; no unresolved [f]
+            task. Work remains uncommitted on feat/browser-parity-slice. Existing worktrees, user
+            edits, canonical source and global tool versions preserved. CI recipe updated but not
+            dispatched. Stop here: no PR, push, review loop, merge or publishing.
+          </p>
+        </details>
         <details open>
           <summary>2026-09-12T16:58:06Z: Third PR #11 review pass</summary>
           <p>

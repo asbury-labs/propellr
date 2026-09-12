@@ -11,6 +11,7 @@ import type {
   Reply,
   Session,
   SessionId,
+  ScanResult,
   VersionRef,
 } from "../contracts.js";
 import { operationIdSchema, sessionIdSchema } from "../validation.js";
@@ -23,13 +24,23 @@ import {
   dialogManifest,
   dialogVersion,
   runDialog,
-  scanUnavailable,
+  scanInterrupted,
 } from "./playbook.js";
 import { BoundedStream } from "./stream.js";
 import { FIXTURE_URL } from "./fixture.js";
+import { selectedRequest } from "../analysis.js";
+import { scanTarget } from "./scan.js";
+import { applyGate, reportScan } from "../reporting/index.js";
 
 export const LOCAL_POLICY = { id: "local-fixture", version: "1" } as const;
 const configuration = { id: "local-host", version: "1" } as const;
+export const LOCAL_GATE = {
+  id: "local-zero-violations",
+  version: "1",
+  maxUniqueViolations: 0,
+  maxViolationOccurrences: 0,
+  exceptions: [],
+} as const;
 const limitsSchema = z.strictObject({
   sessions: z.number().int().min(1).max(8).default(8),
   operations: z.number().int().min(1).max(32).default(32),
@@ -54,6 +65,7 @@ interface RecordState {
   session: Session;
   target: BrowserTarget | undefined;
   readonly operations: Map<OperationId, Operation>;
+  readonly scans: ScanResult[];
   readonly events: Event[];
   readonly streams: Set<BoundedStream<EventDelivery>>;
   sequence: number;
@@ -335,7 +347,16 @@ export class SessionHost {
         },
         pages: [target.pageId],
         documents: [{ pageId: target.pageId, documentId: target.documentId }],
-        capabilities: ["local-ipc", "dialog-open-close@1", "scan-unavailable", "bounded-replay"],
+        capabilities: [
+          "local-ipc",
+          "dialog-open-close@1",
+          "three-rule-slice",
+          "full-scan-fallback",
+          "open-shadow",
+          "same-origin-frames",
+          "closed-roots-unavailable",
+          "bounded-replay",
+        ],
         policy: this.policy,
         configuration,
       };
@@ -343,6 +364,7 @@ export class SessionHost {
         session,
         target,
         operations: new Map(),
+        scans: [],
         events: [],
         streams: new Set(),
         sequence: 0,
@@ -371,7 +393,9 @@ export class SessionHost {
             ...operation,
             state: "lost",
             diagnostics: [reason],
-            completedScans: [],
+            completedScans: (record.active?.checkpoints ?? []).flatMap((checkpoint) =>
+              checkpoint.state === "reached" ? checkpoint.scans : [],
+            ),
             checkpoints: [...(record.active?.checkpoints ?? [])],
             sideEffects: "uncertain",
             cleanup: "incomplete",
@@ -396,6 +420,11 @@ export class SessionHost {
       return denied("session-inactive", "Session has no active browser");
     if (record.active)
       return denied("operation-conflict", "Another operation owns this session's page actions");
+    if (
+      request.command === "scan" &&
+      !this.origins.includes(new URL(record.target.page.url()).origin)
+    )
+      return denied("permission-denied", "Current scan origin is not authorized");
     let inputs: z.infer<typeof dialogInputs> | undefined;
     if (request.command === "runPlaybook") {
       const parsed = dialogInputs.safeParse(request.input.inputs);
@@ -448,21 +477,45 @@ export class SessionHost {
             ...operation,
             state: abort.signal.aborted ? "cancelling" : "running",
           });
-          if (operation.kind === "scan") {
-            this.updateOperation(record, {
-              ...operation,
-              state: abort.signal.aborted ? "cancelled" : "failed",
-              diagnostics: [
-                abort.signal.aborted
-                  ? { code: "cancelled", message: "Scan cancelled before evaluation" }
-                  : scanUnavailable,
-              ],
-              completedScans: [],
-              sideEffects: "none",
-              cleanup: "not-required",
-            });
+          if (operation.kind === "scan" && request.command === "scan") {
+            try {
+              const result = await scanTarget(
+                target,
+                request.input.scan,
+                {
+                  policy: operation.policy,
+                  configuration: operation.configuration,
+                  origin: { kind: "direct" },
+                },
+                abort.signal,
+                documentId,
+              );
+              if (!lost())
+                this.updateOperation(record, {
+                  ...operation,
+                  state: "completed",
+                  result: this.report(record, result),
+                });
+            } catch {
+              if (!lost())
+                this.updateOperation(record, {
+                  ...operation,
+                  state: abort.signal.aborted ? "cancelled" : "failed",
+                  diagnostics: [
+                    {
+                      code: abort.signal.aborted ? "scan-cancelled" : "scan-failed",
+                      message:
+                        "Scan interrupted, document changed or evaluation failed; no current result committed",
+                    },
+                  ],
+                  completedScans: [],
+                  sideEffects: "none",
+                  cleanup: "not-required",
+                });
+            }
             return;
           }
+          if (operation.kind !== "playbook") throw new Error("Operation kind mismatch");
           const execution = await runDialog(
             target,
             inputs!,
@@ -479,6 +532,24 @@ export class SessionHost {
                   checkpoint,
                 });
             },
+            (checkpointId) => {
+              if (
+                !this.permittedActions() ||
+                !this.origins.includes(new URL(target.page.url()).origin)
+              )
+                throw new Error("scan-not-authorized");
+              return scanTarget(
+                target,
+                selectedRequest({ pageId: target.pageId, documentId, path: [] }),
+                {
+                  policy: operation.policy,
+                  configuration: operation.configuration,
+                  origin: { kind: "playbook", playbook: dialogVersion, checkpointId },
+                },
+                abort.signal,
+                documentId,
+              ).then((result) => this.report(record, result));
+            },
           );
           if (lost()) return;
           if (execution.cancelled || execution.failed) {
@@ -486,10 +557,12 @@ export class SessionHost {
               ...operation,
               state: execution.cancelled ? "cancelled" : "failed",
               diagnostics: [
-                execution.result.diagnostics[0] ?? scanUnavailable,
+                execution.result.diagnostics[0] ?? scanInterrupted,
                 ...execution.result.diagnostics.slice(1),
               ],
-              completedScans: [],
+              completedScans: execution.result.checkpoints.flatMap((checkpoint) =>
+                checkpoint.state === "reached" ? checkpoint.scans : [],
+              ),
               checkpoints: execution.result.checkpoints,
               sideEffects: execution.sideEffects,
               cleanup: execution.result.cleanup,
@@ -512,7 +585,9 @@ export class SessionHost {
                     message: "Execution failed; side effects require inspection",
                   },
                 ],
-                completedScans: [],
+                completedScans: checkpoints.flatMap((checkpoint) =>
+                  checkpoint.state === "reached" ? checkpoint.scans : [],
+                ),
                 checkpoints: [...checkpoints],
                 sideEffects: "uncertain",
                 cleanup: "incomplete",
@@ -527,6 +602,18 @@ export class SessionHost {
     record.active = { id: operation.id, abort, done, checkpoints };
     this.updateOperation(record, operation);
     return { ok: true, value: operation };
+  }
+
+  private report(record: RecordState, scan: ScanResult): ScanResult {
+    const report = applyGate(
+      scan,
+      reportScan(scan, record.scans),
+      { ...LOCAL_GATE, exceptions: [] },
+      new Date().toISOString(),
+    );
+    record.scans.push(scan);
+    if (record.scans.length > 8) record.scans.shift();
+    return { ...scan, report };
   }
 
   private subscribe(record: RecordState, after?: string): Reply<AsyncIterable<EventDelivery>> {
@@ -576,6 +663,7 @@ export class SessionHost {
     try {
       await target?.release();
       record.target = undefined;
+      record.scans.length = 0;
       if (target) this.borrowedInUse.delete(target.page);
       record.session = { ...record.session, state: "ended", pages: [], documents: [] };
     } catch {

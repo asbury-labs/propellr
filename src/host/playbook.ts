@@ -1,5 +1,12 @@
 import { z } from "zod";
-import type { Checkpoint, Diagnostic, PlaybookManifest, PlaybookResult } from "../contracts.js";
+import type {
+  Checkpoint,
+  Diagnostic,
+  JsonObject,
+  PlaybookManifest,
+  PlaybookResult,
+  ScanResult,
+} from "../contracts.js";
 import type { BrowserTarget } from "./browser.js";
 import { FIXTURE_URL } from "./fixture.js";
 
@@ -19,9 +26,9 @@ export const dialogManifest: PlaybookManifest = {
     { id: "closed", expectedBehavior: "Dialog hidden; focus returned to opener" },
   ],
 };
-export const scanUnavailable: Diagnostic = {
-  code: "scan-unavailable",
-  message: "Browser analysis is not implemented in phase 2",
+export const scanInterrupted: Diagnostic = {
+  code: "scan-interrupted",
+  message: "Checkpoint observed but scan could not complete",
 };
 
 export interface PlaybookExecution {
@@ -39,6 +46,7 @@ export async function runDialog(
   signal: AbortSignal,
   authorize: () => boolean,
   emit: (checkpoint: Checkpoint) => void,
+  scan: (checkpointId: string) => Promise<ScanResult>,
 ): Promise<PlaybookExecution> {
   const { page } = target;
   const checkpoints: Checkpoint[] = [];
@@ -69,6 +77,19 @@ export async function runDialog(
     checkpoints.push(checkpoint);
     emit(checkpoint);
   };
+  const checkpoint = async (id: string, observed: JsonObject) => {
+    if (signal.aborted) {
+      record({ id, observed, state: "blocked", reason: scanInterrupted });
+      return;
+    }
+    try {
+      const result = await scan(id);
+      record({ id, observed, state: "reached", scans: [result] });
+    } catch {
+      record({ id, observed, state: "blocked", reason: scanInterrupted });
+      throw new Error("checkpoint-scan-failed");
+    }
+  };
   try {
     guard();
     if (
@@ -89,12 +110,7 @@ export async function runDialog(
     // Retain confirmed observations even when cancellation arrived during the browser await.
     if (!current()) throw new Error("stale-observation");
     sideEffects = "confirmed";
-    record({
-      id: "opened",
-      state: "blocked",
-      reason: scanUnavailable,
-      observed: { dialogVisible: true },
-    });
+    await checkpoint("opened", { dialogVisible: true });
     guard();
     sideEffects = "uncertain";
     await closer.click(options);
@@ -103,12 +119,7 @@ export async function runDialog(
     if (!current()) throw new Error("stale-observation");
     if (!focusReturned) throw new Error("focus");
     sideEffects = "confirmed";
-    record({
-      id: "closed",
-      state: "blocked",
-      reason: scanUnavailable,
-      observed: { dialogVisible: false, focusReturned },
-    });
+    await checkpoint("closed", { dialogVisible: false, focusReturned });
   } catch {
     failed = !signal.aborted;
     const reason = {
@@ -141,16 +152,27 @@ export async function runDialog(
   }
   const first = checkpoints[0];
   if (!first) throw new Error("Missing journey checkpoint");
+  const gaps = checkpoints.flatMap((checkpoint) =>
+    checkpoint.state !== "reached"
+      ? [checkpoint.reason]
+      : checkpoint.scans.flatMap((scan) =>
+          scan.coverage.state === "complete" ? [] : scan.coverage.gaps,
+        ),
+  );
+  gaps.push(...diagnostics);
+  const firstGap = gaps[0];
   return {
     cancelled: signal.aborted,
     failed,
     sideEffects,
     result: {
       playbook: dialogVersion,
-      coverage: { state: "partial", gaps: [scanUnavailable, ...diagnostics] },
+      coverage: firstGap
+        ? { state: "partial", gaps: [firstGap, ...gaps.slice(1)] }
+        : { state: "complete" },
       checkpoints: [first, ...checkpoints.slice(1)],
       cleanup,
-      diagnostics: [scanUnavailable, ...diagnostics],
+      diagnostics,
     },
   };
 }
