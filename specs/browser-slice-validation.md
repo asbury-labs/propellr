@@ -331,3 +331,20 @@ The other finding was disproved by source: changedKeys and evidence differences 
 always checked against allowedMismatches, even on unsupported fixtures. Undefined
 allowlists fail those checks. The later unsupported exemption only avoids an additional
 unclassified-mismatch error after explicit allowlist checking; it does not bypass it.
+
+Twelfth review replaces page-global analyzer lookup with lexical bundle injection and
+a host-held handle, released after each scan. Three-engine controls preinstall a fake
+empty analyzer and then replace it with a throwing analyzer; real findings remain intact.
+Mutation-transfer tests still interpose actual DOM changes, and evaluator-error tests now
+throw from an actual DOM method rather than the intentionally ignored analyzer global.
+This closes the namespace trust bug, not all hostile main-world tampering.
+
+Unread-subtree state now stays separate from capped diagnostics, including identity
+limits that could conceal main landmarks. A real 32-identity-gap plus opaque-frame control
+returns incomplete even though no frame diagnostic fits. The suggested benchmark leak
+was disproved: context close and warm.clear are inside the fixture loop, before the next
+fixture can replace either entry. No benchmark code change was needed.
+
+Full pinned validation passed 184 tests: 62 contracts, 34 host, 13 playbook, 57 parity/browser
+and 18 reporting. The 30-fixture/90-comparison corpus remains unchanged. Pinned benchmark
+rerun passed all three engine cases, including the host/session lane.

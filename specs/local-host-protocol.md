@@ -88,7 +88,10 @@ Direct-scan and journey failures retain `scan-document-changed` diagnostics inst
 collapsing navigation into evaluator failure. Page scripts and external
 browser users are not locked out, so this does not claim atomic DOM observation.
 
-Direct scans enforce allowed current origin and one whole current document. Defaults
+Direct scans enforce allowed current origin and one whole current document. Each scan
+uses lexical bundle injection with a host-held handle, never a page-owned analyzer global;
+finish/disposal bounds runtime lifetime. Execution remains in the main world, not a claim
+of hostile-page isolation. Defaults
 resolve 89 stable canonical defaults, not the three-rule slice. Unimplemented rules,
 options and narrower/excluded scopes remain not-evaluated/partial. Incremental
 requests record full-scan fallback. DOM/viewport changes detected during transfer

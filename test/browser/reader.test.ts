@@ -108,6 +108,41 @@ test("oversized target identities and evidence remain explicit gaps", () => {
   }
 });
 
+test("unread scope stays unknown after diagnostic retention fills", async () => {
+  const fixture = document.createElement("div");
+  fixture.innerHTML = Array.from(
+    { length: 32 },
+    (_, index) =>
+      `<div id="${"x".repeat(1025)}-${index}">${index === 0 ? "<main></main>" : ""}</div>`,
+  ).join("");
+  const frame = document.createElement("iframe");
+  frame.setAttribute("sandbox", "");
+  const loaded = new Promise<void>((resolve) =>
+    frame.addEventListener("load", () => resolve(), { once: true }),
+  );
+  frame.srcdoc = "<main></main>";
+  fixture.append(frame);
+  document.body.append(fixture);
+  const analysis = createAnalysis();
+  try {
+    await loaded;
+    expect(frame.contentDocument).toBeNull();
+    const result = analysis.scan({
+      target: { pageId: "page_browser" as PageId, documentId: "browser-doc", path: [] },
+      rules: [{ rule: { id: "landmark-one-main", version: "4.13.0" }, options: {} }],
+    });
+    expect(result.gaps).toHaveLength(32);
+    expect(result.gaps.every((gap) => gap.code === "identity-limit")).toBe(true);
+    expect(result.rules[0]).toMatchObject({
+      state: "evaluated",
+      occurrences: [{ outcome: "incomplete" }],
+    });
+  } finally {
+    analysis.finish();
+    fixture.remove();
+  }
+});
+
 test("large rule selections cannot exceed the evidence budget through fallback metadata", () => {
   const analysis = createAnalysis();
   try {

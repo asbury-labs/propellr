@@ -96,7 +96,7 @@ test("cancelled and evaluator-error scans cannot return a successful empty resul
     }
     await scanTarget(target, request, context, new AbortController().signal);
     await own.page.evaluate(
-      "PropellrBrowser.scan = () => { throw new Error('fixture evaluation error') }",
+      "document.querySelector = () => { throw new Error('fixture evaluation error') }",
     );
     await expect(
       scanTarget(target, request, context, new AbortController().signal),
@@ -107,6 +107,39 @@ test("cancelled and evaluator-error scans cannot return a successful empty resul
     await browser.close();
   }
 });
+
+test.each(["chromium", "firefox", "webkit"] as const)(
+  "%s scan runtime ignores preexisting and replaced page globals",
+  async (engine) => {
+    const browser = await browserTypes[engine].launch();
+    const own = await fixturePage(browser, fixtures[0]!);
+    const target = new BrowserTarget(own.page, "borrowed");
+    try {
+      const request = selectedRequest({
+        pageId: target.pageId,
+        documentId: target.documentId,
+        path: [],
+      });
+      await own.page.evaluate(
+        "globalThis.PropellrBrowser = { scan: () => ({ rules: [], gaps: [] }), finish: () => true }",
+      );
+      const first = await scanTarget(target, request, context, new AbortController().signal);
+      expect(propellrSemantic(first)).toContainEqual(
+        expect.objectContaining({ rule: "button-name", outcome: "violation", target: "#empty" }),
+      );
+      await own.page.evaluate(
+        "globalThis.PropellrBrowser = { scan: () => { throw new Error('page-owned analyzer') }, finish: () => false }",
+      );
+      const second = await scanTarget(target, request, context, new AbortController().signal);
+      expect(second.coverage.state).toBe("complete");
+      expect(propellrSemantic(second)).toEqual(propellrSemantic(first));
+    } finally {
+      await target.release();
+      await own.context.close();
+      await browser.close();
+    }
+  },
+);
 
 test.each(["mutation", "scroll", "new-shadow", "diagnostic-limit"] as const)(
   "actual %s during transfer yields stale coverage",
@@ -120,7 +153,7 @@ test.each(["mutation", "scroll", "new-shadow", "diagnostic-limit"] as const)(
     // Interpose a real mutation between collection and finish, not a fabricated scan result.
     const spy = vi.spyOn(own.page, "evaluate").mockImplementation(async (...args) => {
       const result = await evaluate(...args);
-      if (++calls === 2)
+      if (++calls === 1)
         await evaluate(
           change === "mutation" || change === "diagnostic-limit"
             ? "document.querySelector('#empty').textContent='Now named'"

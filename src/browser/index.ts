@@ -215,6 +215,7 @@ export function createAnalysis(): BrowserAnalysis {
     const facts: Fact[] = [];
     const documents: { target: Target; document: Document }[] = [];
     const gaps: Diagnostic[] = [];
+    let unreadScope = false;
     let shadowModal: Diagnostic | undefined;
     const seen = new Set<Element>();
     const watch = (root: Document | ShadowRoot) => {
@@ -252,6 +253,9 @@ export function createAnalysis(): BrowserAnalysis {
       observers.push(observer);
     };
     const gap = (code: string, message: string, target?: Target) => {
+      // Missing subtrees affect verdicts even when their diagnostic cannot be retained.
+      if (code === "frame-unavailable" || code === "reader-limit" || code === "identity-limit")
+        unreadScope = true;
       if (gaps.length < 32) gaps.push(diagnostic(code, message, target));
     };
     function walk(node: Element, path: Target["path"]): void {
@@ -609,13 +613,7 @@ export function createAnalysis(): BrowserAnalysis {
             occurrence(
               doc,
               rule.id,
-              present
-                ? "pass"
-                : gaps.some(
-                      (item) => item.code === "frame-unavailable" || item.code === "reader-limit",
-                    )
-                  ? "incomplete"
-                  : "violation",
+              present ? "pass" : unreadScope ? "incomplete" : "violation",
               {
                 kind: "main-presence",
                 observed: { present, modal },

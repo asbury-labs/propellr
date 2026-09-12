@@ -104,28 +104,25 @@ export async function scanTarget(
         reason: { code: "scope-unavailable", message: "Requested scope was not evaluated" },
       })),
     };
-  // Runtime is reused in this document, but DOM facts are never cached across scans.
-  const installed = await target.page.evaluate(() => "PropellrBrowser" in globalThis);
-  if (!installed) await target.page.addScriptTag({ content: await bundle() });
+  // Lexical injection returns a host-held handle, never a page-controlled global.
+  // One runtime per scan keeps observer/handle lifetime bounded, including borrowed pages.
+  const source = await bundle();
   guard();
+  const analysis = await target.page.evaluateHandle<BrowserAnalysis>(
+    `(() => {\n${source}\nreturn PropellrBrowser;\n})()`,
+  );
   let finished = false;
   try {
+    guard();
     const input: BrowserScanInput = { target: root, rules: resolvedRules };
     const output = JSON.parse(
       await target.page.evaluate(
-        (json) =>
-          JSON.stringify(
-            (globalThis as unknown as { PropellrBrowser: BrowserAnalysis }).PropellrBrowser.scan(
-              JSON.parse(json) as BrowserScanInput,
-            ),
-          ),
-        JSON.stringify(input),
+        ({ runtime, json }) => JSON.stringify(runtime.scan(JSON.parse(json) as BrowserScanInput)),
+        { runtime: analysis, json: JSON.stringify(input) },
       ),
     ) as BrowserScanOutput;
     guard();
-    const stable = await target.page.evaluate(() =>
-      (globalThis as unknown as { PropellrBrowser: BrowserAnalysis }).PropellrBrowser.finish(),
-    );
+    const stable = await target.page.evaluate((runtime) => runtime.finish(), analysis);
     finished = true;
     guard();
     const first = output.gaps[0];
@@ -147,10 +144,7 @@ export async function scanTarget(
     };
   } finally {
     if (!finished)
-      await target.page
-        .evaluate(() =>
-          (globalThis as unknown as { PropellrBrowser: BrowserAnalysis }).PropellrBrowser.finish(),
-        )
-        .catch(() => {});
+      await target.page.evaluate((runtime) => runtime.finish(), analysis).catch(() => {});
+    await analysis.dispose().catch(() => {});
   }
 }
