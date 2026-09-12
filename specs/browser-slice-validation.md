@@ -292,3 +292,17 @@ now use visual CSS/rect evidence rather than accessibility visibility; rule cand
 keep their accessibility visibility filter. The revised strip control failed in all
 three engines before repair and passed afterward. Full pinned `pnpm validate` passed
 all 177 tests again, and `pnpm bench:slice` passed all three engine cases.
+
+Ninth review moves reference loading before browser launch in parity/benchmark setup.
+An empty external cache made all selected setup cases reject with ENOENT and no
+Playwright launch events; the successful benchmark run emitted those events and
+closed its browsers. Zero-sized focusable widgets now produce incomplete geometry
+rather than disappearing. Shared composed-ancestor checks cover same-document
+transforms, clip paths and actual clipping bounds as well as enclosing frames.
+
+Both proposed dialog changes contradict pinned source: isModalOpen explicitly selects
+`dialog, [role=dialog], [aria-modal=true]`, and has-descendant-after propagates any true
+check across frame results, including dialog exceptions. Updated role-only and new
+child-dialog controls match canonical results in all three engines. No incompatible
+rule-semantic change made. Corpus now has 27 fixtures per engine (81 comparisons).
+Full pinned `pnpm validate` passed all 177 tests; `pnpm bench:slice` passed three cases.

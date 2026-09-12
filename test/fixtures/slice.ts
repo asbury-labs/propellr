@@ -69,9 +69,7 @@ export const fixtures: readonly Fixture[] = [
   {
     id: "role-dialog-main-exception",
     mainPresence: { present: true, modal: true },
-    html: doc(
-      `<div role="dialog" aria-modal="true"><button id="dialog-close">Close</button></div>`,
-    ),
+    html: doc(`<div role="dialog"><button id="dialog-close">Close</button></div>`),
     expected: {},
   },
   {
@@ -115,6 +113,17 @@ export const fixtures: readonly Fixture[] = [
     expected: { "button-name": ["#child / #empty"] },
   },
   {
+    id: "frame-dialog-exception",
+    html: doc(
+      `<iframe id="dialog-frame" src="${frameUrl}" title="Child" style="width:600px;height:500px"></iframe>`,
+    ),
+    frames: {
+      [frameUrl]: doc('<div role="dialog"><button id="frame-dialog-button">Save</button></div>'),
+    },
+    expected: {},
+    mainPresence: { present: true, modal: true },
+  },
+  {
     id: "parent-frame-overlay",
     html: doc(
       `<main style="position:relative"><iframe id="covered-frame" src="${frameUrl}" title="Child"></iframe><span style="position:absolute;left:40px;top:0;width:40px;height:260px;background:black"></span></main>`,
@@ -156,6 +165,36 @@ export const fixtures: readonly Fixture[] = [
     allowedMismatches: ["landmark-one-main:html"],
     unsupported:
       "Missing main cannot be established when denied frame might contain it; reference selected rules can report a top-document violation without inspecting that frame.",
+  },
+  {
+    id: "zero-sized-target",
+    html: doc(
+      '<main><button id="zero-target" style="width:0;height:0;padding:0;border:0;overflow:hidden">Save</button><button id="normal-target">Save</button></main>',
+    ),
+    expected: {},
+    incomplete: { "target-size": ["#zero-target"] },
+    allowedMismatches: ["target-size:#zero-target"],
+    unsupported:
+      "Zero-sized focusable widgets remain evaluated as incomplete, not silently inapplicable.",
+  },
+  {
+    id: "ancestor-transform",
+    html: doc(
+      '<main style="transform:translateX(10px)"><button id="transformed-target">Save</button></main>',
+    ),
+    expected: {},
+    incomplete: { "target-size": ["#transformed-target"] },
+    allowedMismatches: ["target-size:#transformed-target"],
+    unsupported: "Transformed composed ancestry is outside the simple rectangle geometry proof.",
+  },
+  {
+    id: "ancestor-clip-path",
+    html: doc('<main style="clip-path:inset(0)"><button id="clipped-target">Save</button></main>'),
+    expected: {},
+    incomplete: { "target-size": ["#clipped-target"] },
+    allowedMismatches: ["target-size:#clipped-target"],
+    unsupported:
+      "Clip-path ancestry is outside the simple rectangle geometry proof, even for a no-op shape.",
   },
   {
     id: "negative-tabindex",

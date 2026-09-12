@@ -39,8 +39,8 @@ const context = {
 for (const engine of ["chromium", "firefox", "webkit"] as const)
   describe(engine, () => {
     test("non-empty catalog, raw reference comparisons and classified branch limits", async () => {
-      const browser = await browserTypes[engine].launch();
       const bundle = await referenceBundle();
+      const browser = await browserTypes[engine].launch();
       const records: object[] = [];
       const failures: string[] = [];
       try {

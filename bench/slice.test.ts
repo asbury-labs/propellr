@@ -49,10 +49,10 @@ const distribution = (values: readonly number[]) => {
 };
 for (const engine of ["chromium", "firefox", "webkit"] as const)
   test(`${engine} equivalent-work exploratory samples`, async () => {
+    const bundle = await referenceBundle();
     const launchStart = performance.now();
     const browser = await browserTypes[engine].launch();
     const browserLaunchMs = performance.now() - launchStart;
-    const bundle = await referenceBundle();
     const samples: {
       fixture: string;
       lane: string;

@@ -337,9 +337,7 @@ export function createAnalysis(): BrowserAnalysis {
       document,
     });
     walk(document.documentElement, []);
-    const widgets = facts.filter(
-      (fact) => fact.visible && widget(fact.node) && fact.rect.width > 0 && fact.rect.height > 0,
-    );
+    const widgets = facts.filter((fact) => fact.visible && widget(fact.node));
     let count = 0;
     function occurrence(
       fact: Pick<Fact, "target">,
@@ -468,6 +466,33 @@ export function createAnalysis(): BrowserAnalysis {
             })
           );
         };
+        const ancestorUncertainty = new Map<Element, boolean>();
+        const uncertainAncestors = (node: Element): boolean => {
+          const cached = ancestorUncertainty.get(node);
+          if (cached !== undefined) return cached;
+          const ancestor = parent(node);
+          if (!ancestor) return false;
+          const style = ancestor.ownerDocument.defaultView!.getComputedStyle(ancestor);
+          let clipped = false;
+          if (style.overflowX !== "visible" || style.overflowY !== "visible") {
+            const rect = node.getBoundingClientRect();
+            const box = ancestor.getBoundingClientRect();
+            const left = box.left + ancestor.clientLeft;
+            const top = box.top + ancestor.clientTop;
+            clipped =
+              (style.overflowX !== "visible" &&
+                (rect.left < left || rect.right > left + ancestor.clientWidth)) ||
+              (style.overflowY !== "visible" &&
+                (rect.top < top || rect.bottom > top + ancestor.clientHeight));
+          }
+          const uncertain =
+            style.transform !== "none" ||
+            style.clipPath !== "none" ||
+            clipped ||
+            uncertainAncestors(ancestor);
+          ancestorUncertainty.set(node, uncertain);
+          return uncertain;
+        };
         const frameUncertainty = new Map<Document, boolean>();
         const factsByNode = new Map(facts.map((fact) => [fact.node, fact]));
         const uncertainFrame = (doc: Document): boolean => {
@@ -477,21 +502,13 @@ export function createAnalysis(): BrowserAnalysis {
           const cached = frameUncertainty.get(doc);
           if (cached !== undefined) return cached;
           const fact = factsByNode.get(frame);
-          let uncertain = !fact || uncertainRectangle(fact);
-          // Parent clipping/transforms are unsupported; child hit testing alone cannot prove exposure.
-          for (
-            let ancestor: Element | null = frame;
-            ancestor && !uncertain;
-            ancestor = parent(ancestor)
-          ) {
-            const style = ancestor.ownerDocument.defaultView!.getComputedStyle(ancestor);
-            uncertain =
-              style.transform !== "none" ||
-              style.clipPath !== "none" ||
-              (ancestor !== frame &&
-                (style.overflowX !== "visible" || style.overflowY !== "visible"));
-          }
-          uncertain ||= uncertainFrame(frame.ownerDocument);
+          const uncertain =
+            !fact ||
+            uncertainRectangle(fact) ||
+            fact.style.transform !== "none" ||
+            fact.style.clipPath !== "none" ||
+            uncertainAncestors(frame) ||
+            uncertainFrame(frame.ownerDocument);
           frameUncertainty.set(doc, uncertain);
           return uncertain;
         };
@@ -502,6 +519,8 @@ export function createAnalysis(): BrowserAnalysis {
           const peers = widgets.filter(
             (other) =>
               other.node !== node &&
+              other.rect.width > 0 &&
+              other.rect.height > 0 &&
               other.node.ownerDocument === node.ownerDocument &&
               !composedContains(node, other.node) &&
               !composedContains(other.node, node),
@@ -509,12 +528,15 @@ export function createAnalysis(): BrowserAnalysis {
           const overflow =
             node.scrollWidth > node.clientWidth + 1 || node.scrollHeight > node.clientHeight + 1;
           const complex =
+            rect.width <= 0 ||
+            rect.height <= 0 ||
             generatedDocuments.has(node.ownerDocument) ||
             !supportedWidget(node) ||
             style.transform !== "none" ||
             style.display === "inline" ||
             node.getClientRects().length !== 1 ||
             uncertainRectangle(fact) ||
+            uncertainAncestors(node) ||
             uncertainFrame(node.ownerDocument) ||
             overflow ||
             style.clipPath !== "none";
