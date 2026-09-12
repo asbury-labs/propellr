@@ -424,7 +424,7 @@ export function createAnalysis(): BrowserAnalysis {
         const generatedDocuments = new Set<Document>();
         if (widgets.length && count < 96)
           for (const fact of facts) {
-            if (!fact.visible) continue;
+            if (fact.style.display === "none" || fact.style.visibility !== "visible") continue;
             const view = fact.node.ownerDocument.defaultView!;
             if (
               ["::before", "::after"].some((pseudo) => {
@@ -436,10 +436,13 @@ export function createAnalysis(): BrowserAnalysis {
           }
         const uncertainRectangle = ({ node, rect }: Fact) => {
           if (generatedDocuments.has(node.ownerDocument)) return true;
-          // Any unrelated overlapping box is uncertain, including non-widget overlays between samples.
+          // Visual occluders include aria-hidden/inert elements, unlike accessibility candidates.
+          // Any unrelated overlapping box is uncertain, including strips between hit-test samples.
           const overlaps = facts.some(
             (other) =>
-              other.visible &&
+              other.style.visibility === "visible" &&
+              other.rect.width > 0 &&
+              other.rect.height > 0 &&
               other.node.ownerDocument === node.ownerDocument &&
               !composedContains(node, other.node) &&
               !composedContains(other.node, node) &&

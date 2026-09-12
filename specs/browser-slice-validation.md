@@ -285,3 +285,10 @@ Current corpus: 23 fixtures per engine, 69 comparisons. Full pinned `pnpm valida
 passed 177 tests: 62 contracts, 33 host, 13 playbook, 51 parity/browser and 18 reporting.
 Pinned `pnpm bench:slice` also passed all three engine cases after the frame-control
 revision; no new speed claim.
+
+Follow-up source review reproduced false complete geometry when the strip overlay
+was marked aria-hidden. Such elements still paint. Occlusion and generated-box checks
+now use visual CSS/rect evidence rather than accessibility visibility; rule candidates
+keep their accessibility visibility filter. The revised strip control failed in all
+three engines before repair and passed afterward. Full pinned `pnpm validate` passed
+all 177 tests again, and `pnpm bench:slice` passed all three engine cases.

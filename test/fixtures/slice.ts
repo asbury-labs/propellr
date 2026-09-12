@@ -192,7 +192,7 @@ export const fixtures: readonly Fixture[] = [
   {
     id: "overlay-strip",
     html: doc(
-      `<main style="position:relative"><button id="strip-target" style="margin:0">Save</button><span style="position:absolute;left:20px;top:0;width:4px;height:32px;background:black"></span></main>`,
+      `<main style="position:relative"><button id="strip-target" style="margin:0">Save</button><span aria-hidden="true" style="position:absolute;left:20px;top:0;width:4px;height:32px;background:black"></span></main>`,
     ),
     expected: {},
     incomplete: { "target-size": ["#strip-target"] },
