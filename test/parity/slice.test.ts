@@ -98,11 +98,18 @@ for (const engine of ["chromium", "firefox", "webkit"] as const)
                 impact: "serious",
               });
             }
-            if (fixture.id === "shadow-rooted-modal") {
+            if (fixture.id === "shadow-rooted-modal" || fixture.id === "role-token-list") {
               expect(own.rules.every((entry) => entry.state === "not-evaluated")).toBe(true);
               expect(own.coverage).toMatchObject({
                 state: "partial",
-                gaps: [{ code: "shadow-modal-unavailable" }],
+                gaps: [
+                  {
+                    code:
+                      fixture.id === "role-token-list"
+                        ? "role-tokens-unavailable"
+                        : "shadow-modal-unavailable",
+                  },
+                ],
               });
             }
             if (fixture.id === "modal-main-exception") {
@@ -155,7 +162,7 @@ for (const engine of ["chromium", "firefox", "webkit"] as const)
             };
             records.push(entry);
             if (mismatch && !fixture.unsupported)
-              failures.push(`${fixture.id}: raw occurrence mismatch`);
+              failures.push(`${fixture.id}: unclassified semantic/evidence mismatch`);
             if (!fixture.unsupported && own.coverage.state !== "complete")
               failures.push(`${fixture.id}: unexpected coverage ${JSON.stringify(own.coverage)}`);
             for (const rule of sliceRules) {
@@ -276,9 +283,15 @@ for (const engine of ["chromium", "firefox", "webkit"] as const)
           context,
           new AbortController().signal,
         );
-        expect(defaults.resolvedRules.length).toBeGreaterThan(3);
+        expect(
+          [...defaults.resolvedRules].sort((a, b) => a.rule.id.localeCompare(b.rule.id)),
+        ).toEqual(
+          catalog.rules
+            .filter((rule) => rule.defaultEnabled && !rule.experimental)
+            .map((rule) => ({ rule: { id: rule.id, version: catalog.version }, options: {} }))
+            .sort((a, b) => a.rule.id.localeCompare(b.rule.id)),
+        );
         expect(defaults.coverage.state).toBe("partial");
-        expect(defaults.resolvedRules.some(({ rule }) => rule.id === "target-size")).toBe(false);
         const unsupported = await scanTarget(
           target,
           {

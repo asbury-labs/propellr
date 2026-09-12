@@ -86,6 +86,20 @@ export const fixtures: readonly Fixture[] = [
     expected: {},
   },
   {
+    id: "role-token-list",
+    html: doc(
+      '<main><div id="fallback-role" role="button menuitem" tabindex="0" style="width:80px;height:32px">Save</div><div id="padded-role" role=" button " tabindex="0" style="width:80px;height:32px">Save</div></main>',
+    ),
+    expected: {},
+    allowedMismatches: [
+      "target-size:#fallback-role",
+      "target-size:#padded-role",
+      "landmark-one-main:html",
+    ],
+    unsupported:
+      "Whitespace and fallback role-token resolution is not implemented; selected rules are explicitly not evaluated.",
+  },
+  {
     id: "shadow",
     html: doc(
       `<main><div id="host"></div></main><script>const a=document.querySelector('#host').attachShadow({mode:'open'});a.innerHTML='<div id="nested"></div>';a.querySelector('#nested').attachShadow({mode:'open'}).innerHTML='<style>button{display:block;width:80px;height:32px;margin:20px}</style><span id="label">Save</span><button id="named" aria-labelledby="label"></button><button id="empty"></button>';</script>`,
@@ -146,6 +160,25 @@ export const fixtures: readonly Fixture[] = [
     allowedMismatches: ["target-size:#clipped-frame / #frame-target"],
     unsupported:
       "Clipping ancestry prevents proof of full child target exposure; geometry remains incomplete.",
+  },
+  {
+    id: "shadow-target-spacing",
+    html: doc(
+      `<main><div id="spacing-host"></div></main><script>document.querySelector('#spacing-host').attachShadow({mode:'open'}).innerHTML='<style>div{display:flex;gap:2px}button{display:block;width:20px;height:20px;border:0;padding:0;font-size:8px}</style><div><button id="small-a">A</button><button id="small-b">B</button></div>';</script>`,
+    ),
+    expected: { "target-size": ["#spacing-host / #small-a", "#spacing-host / #small-b"] },
+  },
+  {
+    id: "frame-target-spacing",
+    html: doc(
+      `<iframe id="spacing-frame" src="${frameUrl}" title="Child" style="width:600px;height:500px"></iframe>`,
+    ),
+    frames: {
+      [frameUrl]: doc(
+        '<main><div class="pair"><button class="small" id="small-a">A</button><button class="small" id="small-b">B</button></div></main>',
+      ),
+    },
+    expected: { "target-size": ["#spacing-frame / #small-a", "#spacing-frame / #small-b"] },
   },
   {
     id: "denied-frame",

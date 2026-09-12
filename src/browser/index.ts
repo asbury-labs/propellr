@@ -370,8 +370,20 @@ export function createAnalysis(): BrowserAnalysis {
       }
       return { ...base, outcome };
     }
+    const ambiguousRole = facts.find(
+      (fact) => fact.visible && /\s/.test(fact.node.getAttribute("role") ?? ""),
+    );
+    const roleTokens = ambiguousRole
+      ? diagnostic(
+          "role-tokens-unavailable",
+          "Whitespace/fallback role-token resolution is outside this slice",
+          ambiguousRole.target,
+        )
+      : undefined;
+    if (roleTokens) gap(roleTokens.code, roleTokens.message, roleTokens.target);
+    const unavailableScope = shadowModal ?? roleTokens;
     const rules: RuleResult[] = input.rules.map(({ rule, options }) => {
-      if (shadowModal) return { rule, state: "not-evaluated", reason: shadowModal };
+      if (unavailableScope) return { rule, state: "not-evaluated", reason: unavailableScope };
       if (
         !["button-name", "target-size", "landmark-one-main"].includes(rule.id) ||
         Object.keys(options).length
@@ -567,7 +579,9 @@ export function createAnalysis(): BrowserAnalysis {
                   closestOffset: nearest,
                   neighbors: peers
                     .filter((other) => offsetDiameter(rect, other.rect) + 0.05 < 24)
-                    .map((other) => other.target.path.map((step) => step.selector).join(" / ")),
+                    .map((other) =>
+                      other.target.path.map(({ kind, selector }) => ({ kind, selector })),
+                    ),
                 },
                 expected: { minSize: 24, minOffset: 24 },
                 explanation: "Single unobscured rectangle size or spacing exception; CSS pixels",

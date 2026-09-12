@@ -125,6 +125,8 @@ Reader bounds: 2,000 elements, 32 boundary steps,
 32 diagnostic entries; budget exhaustion stays partial. Native modals rooted inside
 shadow DOM return explicit not-evaluated/partial results, not guessed visibility.
 Generated pseudo-element boxes make target-size incomplete for their document.
+Whitespace/fallback role-token lists return not-evaluated/partial results; full ARIA
+role resolution is not implemented.
 
 Playbook checkpoints retain actual scans, including after later failure/cancellation.
 Reached journey and complete selected coverage do not imply clean accessibility:

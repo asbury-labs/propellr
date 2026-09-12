@@ -306,3 +306,16 @@ check across frame results, including dialog exceptions. Updated role-only and n
 child-dialog controls match canonical results in all three engines. No incompatible
 rule-semantic change made. Corpus now has 27 fixtures per engine (81 comparisons).
 Full pinned `pnpm validate` passed all 177 tests; `pnpm bench:slice` passed three cases.
+
+Tenth review's ancestor concern was already fixed. Default resolution now asserts the
+entire rule/version/options set, backed by reference activation checks, instead of a
+loose count. Geometry neighbors retain typed frame/shadow/element paths, including
+empty-neighbor comparisons. New shadow/frame small-target controls failed the former
+comparator: canonical related paths were already fully scoped, so its prefixing was
+wrong. Typed comparison now passes without flattening or invented prefixes.
+
+Whitespace/fallback role-token lists are explicitly not-evaluated with partial coverage,
+not silently omitted widgets. Full ARIA fallback parsing and case reinterpretation are
+not added to this slice. New role-token controls verify the limitation. Current corpus
+has 30 fixtures per engine (90 comparisons); all 177 validation tests and three benchmark
+cases passed under pinned tools.

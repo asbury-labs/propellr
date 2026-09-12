@@ -11,6 +11,12 @@ import type { Fixture } from "../fixtures/slice.js";
 import { fixtureUrl } from "../fixtures/slice.js";
 import type { JsonObject, ScanResult, Target } from "../../src/contracts.js";
 
+const targetPathSchema = z.array(
+  z.strictObject({
+    kind: z.enum(["frame", "shadow", "element"]),
+    selector: z.string(),
+  }),
+);
 const checkSchema = z.looseObject({
   id: z.string(),
   data: z.json().nullable(),
@@ -240,17 +246,16 @@ export function evidenceDifferences(own: BrowserScanOutput | ScanResult, axe: Ax
           for (const field of ["minSize", "minOffset"])
             if (typeof data[field] === "number" && data[field] !== expected?.[field])
               differences.push(`${key}:${field}`);
-          if (check.id === "target-offset" && check.relatedNodes?.length) {
-            const related = check.relatedNodes.map((node) => node.target.flat().join(" / ")).sort();
-            // Reference related selectors are local to that frame; prefix inherited scope.
-            const prefix = target.includes(" / ")
-              ? target.slice(0, target.lastIndexOf(" / ") + 3)
-              : "";
-            const peers = related.map((value) => `${prefix}${value}`);
-            if (
-              JSON.stringify(peers) !==
-              JSON.stringify([...((observed?.["neighbors"] as readonly string[]) ?? [])].sort())
-            )
+          if (check.id === "target-offset") {
+            const related = (check.relatedNodes ?? [])
+              .map((node) => JSON.stringify(axeTargetPath(node.target)))
+              .sort();
+            const peers = z
+              .array(targetPathSchema)
+              .parse(observed?.["neighbors"])
+              .map((path) => JSON.stringify(normalizePath(path)))
+              .sort();
+            if (JSON.stringify(related) !== JSON.stringify(peers))
               differences.push(`${key}:neighbors`);
           }
         }
