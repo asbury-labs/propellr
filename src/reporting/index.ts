@@ -98,6 +98,7 @@ export function reportScan(scan: ScanResult, history: readonly ScanResult[] = []
     if (new Set(ids).size !== ids.length) throw new Error("Duplicate occurrence IDs");
   }
   const groups = new Map<string, IssueGroup>();
+  const lastObserved = new Map<string, ScanResult>();
   const active = new Set<string>();
   for (let index = 0; index < scans.length; index++) {
     const current = scans[index]!;
@@ -118,17 +119,23 @@ export function reportScan(scan: ScanResult, history: readonly ScanResult[] = []
         groupingBasis:
           "Exact rule version and scoped target within the same document generation; no shared-cause inference",
         lifecycle: prior
-          ? comparable
+          ? comparable && compatible(lastObserved.get(key)!, current)
             ? active.has(key)
               ? "existing"
               : "recurring"
             : "not-compared"
           : "new",
       });
+      lastObserved.set(key, current);
     }
+    // Adjacent scans may agree with each other but omit an older issue's scope/configuration.
     for (const [key, group] of groups)
       if (!currentKeys.has(key))
-        groups.set(key, { ...group, lifecycle: comparable ? "resolved" : "not-compared" });
+        groups.set(key, {
+          ...group,
+          lifecycle:
+            comparable && compatible(lastObserved.get(key)!, current) ? "resolved" : "not-compared",
+        });
     if (comparable || !previous) {
       active.clear();
       for (const key of currentKeys) active.add(key);

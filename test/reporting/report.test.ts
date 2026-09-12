@@ -171,6 +171,11 @@ describe("conservative exact-target reporting", () => {
     const result = reportScan(b, [a]);
     expect(result.comparison.state).toBe("not-comparable");
     expect(result.groups.some((group) => group.lifecycle === "resolved")).toBe(false);
+    const c = { ...b, id: "c" as ScanId };
+    const later = reportScan(c, [a, b]);
+    expect(
+      later.groups.find((group) => group.id === reportScan(a).groups[0]!.id)?.lifecycle,
+    ).not.toBe("resolved");
   });
 
   test("gate thresholds, owner/expiry exceptions and incomplete status never rewrite raw verdicts", () => {

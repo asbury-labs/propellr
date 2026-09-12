@@ -144,3 +144,11 @@ permits staging, commit, push, review repairs and merge, but not publishing.
 September 12, 2026: pinned `pnpm validate` rerun passed all 141 tests, build, five
 strict type scopes, lint and mandatory formatting. Archive gzip integrity and diff
 whitespace checks passed. No new benchmark or manual visual pass claimed.
+
+Initial GitHub CI rejected job-level `runner.temp` before any jobs ran. Reference
+cache setup now uses `$RUNNER_TEMP` in a runner step. Reporting review reproduced
+six false resolutions after two later scans changed scope/configuration. Resolution
+now also requires compatibility with each issue's last observed scan. Extended
+reporting cases failed before the repair and passed afterward; full pinned
+`pnpm validate` passed all 141 tests again. Latest-head Linux CI/review status is
+tracked on PR #12.
