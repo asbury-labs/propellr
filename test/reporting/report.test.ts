@@ -191,6 +191,15 @@ describe("conservative exact-target reporting", () => {
     ).not.toBe("resolved");
   });
 
+  test("later compatible scans cannot resolve members from an incompatible configuration", () => {
+    const a = scan("a", [violation]);
+    const configuration = { id: "changed", version: "2" };
+    const b = scan("b", [violation], { configuration });
+    const c = scan("c", [], { configuration });
+    expect(reportScan(c, [a, b]).groups[0]?.lifecycle).toBe("not-compared");
+    expect(reportScan(c, [b]).groups[0]?.lifecycle).toBe("resolved");
+  });
+
   test("gate thresholds, owner/expiry exceptions and incomplete status never rewrite raw verdicts", () => {
     const raw = scan("a", [violation, violation]);
     const before = JSON.stringify(raw);

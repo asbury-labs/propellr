@@ -97,6 +97,9 @@ export function reportScan(scan: ScanResult, history: readonly ScanResult[] = []
     const ids = occurrences(entry).map(({ occurrence }) => occurrence.id);
     if (new Set(ids).size !== ids.length) throw new Error("Duplicate occurrence IDs");
   }
+  const scansById = new Map(scans.map((entry) => [entry.id, entry]));
+  const membersCompatible = (group: IssueGroup, current: ScanResult) =>
+    group.members.every((member) => compatible(scansById.get(member.scanId)!, current));
   const groups = new Map<string, IssueGroup>();
   const lastObserved = new Map<string, ScanResult>();
   const active = new Set<string>();
@@ -122,7 +125,7 @@ export function reportScan(scan: ScanResult, history: readonly ScanResult[] = []
           lastObserved.get(key)?.id === current.id
             ? prior!.lifecycle
             : prior
-              ? comparable && compatible(lastObserved.get(key)!, current)
+              ? comparable && membersCompatible(prior, current)
                 ? active.has(key)
                   ? "existing"
                   : "recurring"
@@ -136,8 +139,7 @@ export function reportScan(scan: ScanResult, history: readonly ScanResult[] = []
       if (!currentKeys.has(key))
         groups.set(key, {
           ...group,
-          lifecycle:
-            comparable && compatible(lastObserved.get(key)!, current) ? "resolved" : "not-compared",
+          lifecycle: comparable && membersCompatible(group, current) ? "resolved" : "not-compared",
         });
     active.clear();
     for (const key of currentKeys) active.add(key);

@@ -172,3 +172,13 @@ corpus has 16 fixtures per engine (48 comparisons). Original archive/manifest re
 Focused host, parity/browser and reporting cases passed. Full pinned `pnpm validate`
 then passed 147 tests: 62 contracts, 31 host, 11 playbook, 26 parity/browser and
 17 reporting, plus build, five strict type scopes, lint and mandatory formatting.
+
+Second review reproduced stale checkpoint emission after a completed scan's child
+frame navigated, and false group resolution when the same target reappeared under
+a different configuration. Checkpoint recording now rechecks current document and
+permissions without discarding completed evidence merely for later cancellation.
+Group lifecycle comparison requires compatibility with every retained member's raw
+scan, not only the newest member. Both reproductions failed before repair and passed
+afterward; a later-cancellation control also passed. Full pinned `pnpm validate`
+passed 150 tests: 62 contracts, 31 host, 13 playbook, 26 parity/browser and 18 reporting.
+Latest-head CI and review remain tracked on PR #12.

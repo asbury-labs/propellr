@@ -64,6 +64,57 @@ test.each(["visible", "hidden"] as const)(
   },
 );
 
+test.each(["navigation", "cancellation"] as const)(
+  "%s after a completed scan is checked before checkpoint emission",
+  async (change) => {
+    const target = await launchTarget("chromium");
+    const abort = new AbortController();
+    try {
+      await target.page.evaluate(
+        "new Promise(resolve => { const frame = document.createElement('iframe'); frame.onload = resolve; document.querySelector('#dialog').append(frame); })",
+      );
+      const documentId = target.documentId;
+      const execution = await runDialog(
+        target,
+        { timeoutMs: 1000 },
+        documentId,
+        abort.signal,
+        () => true,
+        () => {},
+        async (checkpointId) => {
+          const result = await scanTarget(
+            target,
+            selectedRequest({ pageId: target.pageId, documentId, path: [] }),
+            {
+              policy: LOCAL_POLICY,
+              configuration: { id: "test", version: "1" },
+              origin: {
+                kind: "playbook",
+                playbook: { id: "dialog-open-close", version: "1" },
+                checkpointId,
+              },
+            },
+            abort.signal,
+          );
+          if (change === "navigation") await target.page.frames()[1]!.goto("about:blank#changed");
+          else abort.abort();
+          return result;
+        },
+      );
+      expect(execution.result.checkpoints[0]).toMatchObject({
+        id: "opened",
+        state: change === "navigation" ? "blocked" : "reached",
+      });
+      if (change === "navigation") {
+        expect(target.documentId).not.toBe(documentId);
+        expect(execution.failed).toBe(true);
+      } else expect(execution.cancelled).toBe(true);
+    } finally {
+      await target.release();
+    }
+  },
+);
+
 for (const engine of ["chromium", "firefox", "webkit"] as const) {
   describe(engine, () => {
     test("actual dialog checkpoint scans, input record and event correlation", async () => {

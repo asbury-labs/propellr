@@ -84,6 +84,7 @@ export async function runDialog(
     }
     try {
       const result = await scan(id);
+      if (!current()) throw new Error("stale-checkpoint");
       record({ id, observed, state: "reached", scans: [result] });
     } catch {
       record({ id, observed, state: "blocked", reason: scanInterrupted });
