@@ -504,11 +504,13 @@ export class SessionHost {
             } catch (error) {
               const code = abort.signal.aborted
                 ? "scan-cancelled"
-                : error instanceof Error &&
-                    (error.message === "scan-result-limit" ||
-                      error.message === "scan-document-changed")
-                  ? error.message
-                  : "scan-failed";
+                : target.documentId !== documentId
+                  ? "scan-document-changed"
+                  : error instanceof Error &&
+                      (error.message === "scan-result-limit" ||
+                        error.message === "scan-document-changed")
+                    ? error.message
+                    : "scan-failed";
               if (!lost())
                 this.updateOperation(record, {
                   ...operation,

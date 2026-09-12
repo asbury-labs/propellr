@@ -360,3 +360,17 @@ checkpoints, no completed scan, successful cleanup and a later direct scan with 
 history baseline. Partial but stable coverage remains distinct from stale coverage.
 Pinned validation passed 185 tests (35 host, other suite counts unchanged), covering
 32 fixtures per engine / 96 comparisons. All three benchmark engine cases passed again.
+
+Fourteenth review's four navigation findings share one rejection path: browser awaits
+can reject before their following guard. scanTarget now rechecks cancellation/document
+generation on rejection across bundle loading, injection, scan and finish; only created
+handles are cleaned up. Direct operation mapping also gives known document changes
+priority over generic evaluator errors. Three real destroyed-context tests cover the
+injection, collection and finish boundaries.
+
+Generic tabindex was another canonical-candidate false positive. widget-not-inline-matches
+requires widget role type as well as focusability; an unroled div with tabindex remains
+inapplicable for target-size. A new three-engine control verifies that behavior. No rule
+broadening made. Pinned validation passed 188 tests (60 parity/browser); corpus now has
+33 fixtures per engine / 99 comparisons. Browser/comparator code is unchanged since the
+preceding benchmark run; no new timing claim.

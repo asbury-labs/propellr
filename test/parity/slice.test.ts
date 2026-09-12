@@ -98,6 +98,12 @@ for (const engine of ["chromium", "firefox", "webkit"] as const)
                 impact: "serious",
               });
             }
+            if (fixture.id === "generic-tabindex") {
+              expect(own.rules.find((entry) => entry.rule.id === "target-size")?.state).toBe(
+                "inapplicable",
+              );
+              expect(axe.inapplicable.some((entry) => entry.id === "target-size")).toBe(true);
+            }
             if (fixture.id === "shadow-rooted-modal" || fixture.id === "role-token-list") {
               expect(own.rules.every((entry) => entry.state === "not-evaluated")).toBe(true);
               expect(own.coverage).toMatchObject({

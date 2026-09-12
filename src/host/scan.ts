@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
+import type { JSHandle } from "playwright";
 import type { BrowserAnalysis, BrowserScanInput, BrowserScanOutput } from "../analysis.js";
 import { engineVersion } from "../analysis.js";
 import type {
@@ -106,13 +107,14 @@ export async function scanTarget(
     };
   // Lexical injection returns a host-held handle, never a page-controlled global.
   // One runtime per scan keeps observer/handle lifetime bounded, including borrowed pages.
-  const source = await bundle();
-  guard();
-  const analysis = await target.page.evaluateHandle<BrowserAnalysis>(
-    `(() => {\n${source}\nreturn PropellrBrowser;\n})()`,
-  );
+  let analysis: JSHandle<BrowserAnalysis> | undefined;
   let finished = false;
   try {
+    const source = await bundle();
+    guard();
+    analysis = await target.page.evaluateHandle<BrowserAnalysis>(
+      `(() => {\n${source}\nreturn PropellrBrowser;\n})()`,
+    );
     guard();
     const input: BrowserScanInput = { target: root, rules: resolvedRules };
     const output = JSON.parse(
@@ -142,9 +144,15 @@ export async function scanTarget(
           ? { state: "partial", gaps: [first, ...output.gaps.slice(1)] }
           : { state: "complete" },
     };
+  } catch (error) {
+    // Context destruction can reject any browser await before its following guard runs.
+    guard();
+    throw error;
   } finally {
-    if (!finished)
-      await target.page.evaluate((runtime) => runtime.finish(), analysis).catch(() => {});
-    await analysis.dispose().catch(() => {});
+    if (analysis) {
+      if (!finished)
+        await target.page.evaluate((runtime) => runtime.finish(), analysis).catch(() => {});
+      await analysis.dispose().catch(() => {});
+    }
   }
 }

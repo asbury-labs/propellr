@@ -67,6 +67,62 @@ test.each(["chromium", "firefox", "webkit"] as const)(
   },
 );
 
+test.each(["injection", "scan", "finish"] as const)(
+  "%s context rejection after navigation preserves document-change classification",
+  async (stage) => {
+    const browser = await browserTypes.chromium.launch();
+    const own = await fixturePage(browser, fixtures[0]!);
+    const target = new BrowserTarget(own.page, "borrowed");
+    const documentId = target.documentId;
+    let rejected = false;
+    const evaluateHandle = own.page.evaluateHandle.bind(own.page);
+    const evaluate = own.page.evaluate.bind(own.page);
+    const injection = vi.spyOn(own.page, "evaluateHandle").mockImplementation(async (...args) => {
+      const handle = await evaluateHandle(...args);
+      if (stage !== "injection") return handle;
+      try {
+        await own.page.goto("about:blank");
+        await handle
+          .evaluate(() => true)
+          .catch((error) => {
+            rejected = true;
+            throw error;
+          });
+        return handle;
+      } finally {
+        await handle.dispose().catch(() => {});
+      }
+    });
+    let calls = 0;
+    const evaluation = vi.spyOn(own.page, "evaluate").mockImplementation(async (...args) => {
+      if (++calls === (stage === "scan" ? 1 : stage === "finish" ? 2 : -1))
+        await own.page.goto("about:blank");
+      return evaluate(...args).catch((error) => {
+        rejected = true;
+        throw error;
+      });
+    });
+    try {
+      await expect(
+        scanTarget(
+          target,
+          selectedRequest({ pageId: target.pageId, documentId, path: [] }),
+          context,
+          new AbortController().signal,
+        ),
+      ).rejects.toThrow("scan-document-changed");
+      expect(rejected).toBe(true);
+      expect(target.documentId).not.toBe(documentId);
+    } finally {
+      injection.mockRestore();
+      evaluation.mockRestore();
+      await target.release();
+      await own.context.close();
+      await browser.close();
+    }
+  },
+);
+
 test("cancelled and evaluator-error scans cannot return a successful empty result", async () => {
   const browser = await browserTypes.chromium.launch();
   const own = await fixturePage(

@@ -86,6 +86,11 @@ export const fixtures: readonly Fixture[] = [
     expected: {},
   },
   {
+    id: "generic-tabindex",
+    html: doc('<main><div id="generic-focus" tabindex="0">Save</div></main>'),
+    expected: {},
+  },
+  {
     id: "role-token-list",
     html: doc(
       '<main><div id="fallback-role" role="button menuitem" tabindex="0" style="width:80px;height:32px">Save</div><div id="padded-role" role=" button " tabindex="0" style="width:80px;height:32px">Save</div></main>',
