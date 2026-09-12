@@ -19,7 +19,7 @@ export const fixtures: readonly Fixture[] = [
   {
     id: "naming",
     html: doc(
-      `<main><button id="empty"></button><button id="text">Save</button><button id="aria" aria-label="Save"></button><span id="label" hidden>Hidden name</span><button id="ref" aria-labelledby="label"></button><button id="missing" aria-labelledby="absent"></button><button id="title" title="Save"></button><label for="labelled">Save</label><button id="labelled"></button><label>Wrap<button id="wrapped"></button></label><button id="hidden" hidden></button><button id="disabled" disabled>Save</button><button id="redundant-role" role="button">Save</button></main>`,
+      `<main><button id="empty"></button><button id="text">Save</button><button id="aria" aria-label="Save"></button><span id="label" hidden>Hidden name</span><button id="ref" aria-labelledby="label"></button><button id="missing" aria-labelledby="absent"></button><button id="title" title="Save"></button><label for="labelled">Save</label><button id="labelled"></button><label>Wrap<button id="wrapped"></button></label><button id="hidden" hidden></button><button id="disabled" disabled>Save</button><button id="redundant-role" role="button">Save</button><button id="descendant-label"><span aria-label="Save"></span></button></main>`,
     ),
     expected: { "button-name": ["#empty", "#missing"] },
   },
@@ -103,7 +103,9 @@ export const fixtures: readonly Fixture[] = [
   },
   {
     id: "frames",
-    html: doc(`<iframe id="child" src="${frameUrl}" title="Child"></iframe>`),
+    html: doc(
+      `<iframe id="child" src="${frameUrl}" title="Child" style="width:600px;height:500px"></iframe>`,
+    ),
     frames: {
       [frameUrl]: doc(
         `<main><button id="empty"></button><iframe id="nested" src="http://slice.invalid/nested" title="Nested"></iframe></main>`,
@@ -111,6 +113,30 @@ export const fixtures: readonly Fixture[] = [
       "http://slice.invalid/nested": doc(`<button id="nested-name">Save</button>`),
     },
     expected: { "button-name": ["#child / #empty"] },
+  },
+  {
+    id: "parent-frame-overlay",
+    html: doc(
+      `<main style="position:relative"><iframe id="covered-frame" src="${frameUrl}" title="Child"></iframe><span style="position:absolute;left:40px;top:0;width:40px;height:260px;background:black"></span></main>`,
+    ),
+    frames: { [frameUrl]: doc('<main><button id="frame-target">Save</button></main>') },
+    expected: {},
+    incomplete: { "target-size": ["#covered-frame / #frame-target"] },
+    allowedMismatches: ["target-size:#covered-frame / #frame-target"],
+    unsupported:
+      "Parent-document overlay makes the enclosing frame rectangle uncertain; child hit tests cannot establish exposure.",
+  },
+  {
+    id: "parent-frame-clip",
+    html: doc(
+      `<main style="overflow:hidden;width:50px;height:100px"><iframe id="clipped-frame" src="${frameUrl}" title="Child"></iframe></main>`,
+    ),
+    frames: { [frameUrl]: doc('<main><button id="frame-target">Save</button></main>') },
+    expected: {},
+    incomplete: { "target-size": ["#clipped-frame / #frame-target"] },
+    allowedMismatches: ["target-size:#clipped-frame / #frame-target"],
+    unsupported:
+      "Clipping ancestry prevents proof of full child target exposure; geometry remains incomplete.",
   },
   {
     id: "denied-frame",

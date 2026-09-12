@@ -84,26 +84,31 @@ describe("local session host over real Unix IPC", () => {
     });
   });
 
-  test.each(["scan", "playbook"] as const)(
-    "%s cancellation after collection cannot commit its scan",
+  test.each(["scan", "playbook", "playbook-url-change"] as const)(
+    "%s interruption after collection cannot commit its scan",
     async (kind) => {
       await withHost(async ({ client, server, open }) => {
         const session = await open();
         const scanTarget = scans.scanTarget;
-        // Keep real browser evaluation; interpose cancellation at the host commit boundary.
+        // Keep real browser evaluation; interpose interruption at the host commit boundary.
         const spy = vi.spyOn(scans, "scanTarget").mockImplementationOnce(async (...args) => {
           const result = await scanTarget(...args);
           if (!("kind" in operation)) throw new Error("Expected operation");
-          expect(
-            unwrap(
-              await server.host.execute(
-                JSON.stringify({
-                  command: "cancel",
-                  input: { ...meta(), sessionId: session.id, operationId: operation.id },
-                }),
+          if (kind === "playbook-url-change") {
+            const before = args[0].documentId;
+            await args[0].page.evaluate("history.pushState({}, '', '#changed')");
+            expect(args[0].documentId).not.toBe(before);
+          } else
+            expect(
+              unwrap(
+                await server.host.execute(
+                  JSON.stringify({
+                    command: "cancel",
+                    input: { ...meta(), sessionId: session.id, operationId: operation.id },
+                  }),
+                ),
               ),
-            ),
-          ).toMatchObject({ disposition: "requested", operation: { state: "cancelling" } });
+            ).toMatchObject({ disposition: "requested", operation: { state: "cancelling" } });
           return result;
         });
         const operation = unwrap(
@@ -125,7 +130,7 @@ describe("local session host over real Unix IPC", () => {
         try {
           if (!("kind" in operation)) throw new Error("Expected operation");
           expect(await terminal(client, operation)).toMatchObject({
-            state: "cancelled",
+            state: kind === "playbook-url-change" ? "failed" : "cancelled",
             completedScans: [],
           });
           expect(spy).toHaveBeenCalledOnce();

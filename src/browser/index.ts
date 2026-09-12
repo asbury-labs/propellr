@@ -434,17 +434,8 @@ export function createAnalysis(): BrowserAnalysis {
             )
               generatedDocuments.add(fact.node.ownerDocument);
           }
-        for (const fact of widgets) {
-          // At most 96 target rows against the bounded facts, never all W² target pairs.
-          if (!available()) break;
-          const { node, rect, style } = fact;
-          const peers = widgets.filter(
-            (other) =>
-              other.node !== node &&
-              other.node.ownerDocument === node.ownerDocument &&
-              !composedContains(node, other.node) &&
-              !composedContains(other.node, node),
-          );
+        const uncertainRectangle = ({ node, rect }: Fact) => {
+          if (generatedDocuments.has(node.ownerDocument)) return true;
           // Any unrelated overlapping box is uncertain, including non-widget overlays between samples.
           const overlaps = facts.some(
             (other) =>
@@ -464,12 +455,54 @@ export function createAnalysis(): BrowserAnalysis {
           ];
           const root = node.getRootNode() as Document | ShadowRoot;
           const viewport = node.ownerDocument.defaultView!;
-          const obscured = points.some(([x, y]) => {
-            if (x! < 0 || y! < 0 || x! >= viewport.innerWidth || y! >= viewport.innerHeight)
-              return true;
-            const hit = root.elementFromPoint(x!, y!);
-            return hit !== null && hit !== node && !node.contains(hit);
-          });
+          return (
+            overlaps ||
+            points.some(([x, y]) => {
+              if (x! < 0 || y! < 0 || x! >= viewport.innerWidth || y! >= viewport.innerHeight)
+                return true;
+              const hit = root.elementFromPoint(x!, y!);
+              return hit !== null && hit !== node && !node.contains(hit);
+            })
+          );
+        };
+        const frameUncertainty = new Map<Document, boolean>();
+        const factsByNode = new Map(facts.map((fact) => [fact.node, fact]));
+        const uncertainFrame = (doc: Document): boolean => {
+          if (doc === document) return false; // Do not inspect ancestry outside the scan root.
+          const frame = doc.defaultView?.frameElement;
+          if (!frame) return false;
+          const cached = frameUncertainty.get(doc);
+          if (cached !== undefined) return cached;
+          const fact = factsByNode.get(frame);
+          let uncertain = !fact || uncertainRectangle(fact);
+          // Parent clipping/transforms are unsupported; child hit testing alone cannot prove exposure.
+          for (
+            let ancestor: Element | null = frame;
+            ancestor && !uncertain;
+            ancestor = parent(ancestor)
+          ) {
+            const style = ancestor.ownerDocument.defaultView!.getComputedStyle(ancestor);
+            uncertain =
+              style.transform !== "none" ||
+              style.clipPath !== "none" ||
+              (ancestor !== frame &&
+                (style.overflowX !== "visible" || style.overflowY !== "visible"));
+          }
+          uncertain ||= uncertainFrame(frame.ownerDocument);
+          frameUncertainty.set(doc, uncertain);
+          return uncertain;
+        };
+        for (const fact of widgets) {
+          // At most 96 target rows against bounded facts; enclosing-frame proofs are memoized.
+          if (!available()) break;
+          const { node, rect, style } = fact;
+          const peers = widgets.filter(
+            (other) =>
+              other.node !== node &&
+              other.node.ownerDocument === node.ownerDocument &&
+              !composedContains(node, other.node) &&
+              !composedContains(other.node, node),
+          );
           const overflow =
             node.scrollWidth > node.clientWidth + 1 || node.scrollHeight > node.clientHeight + 1;
           const complex =
@@ -478,8 +511,8 @@ export function createAnalysis(): BrowserAnalysis {
             style.transform !== "none" ||
             style.display === "inline" ||
             node.getClientRects().length !== 1 ||
-            overlaps ||
-            obscured ||
+            uncertainRectangle(fact) ||
+            uncertainFrame(node.ownerDocument) ||
             overflow ||
             style.clipPath !== "none";
           const nearest = Math.min(24, ...peers.map((other) => offsetDiameter(rect, other.rect)));

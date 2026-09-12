@@ -266,3 +266,22 @@ dialog. Direct reference observation plus a three-engine fixture verifies that b
 
 Corpus: 21 fixtures per engine, 63 comparisons. Full pinned `pnpm validate` passed 176
 tests: 62 contracts, 32 host, 13 playbook, 51 parity/browser and 18 reporting.
+
+Eighth review adds memoized enclosing-frame geometry checks. Parent overlays,
+generated boxes, clipping or transformed ancestry make descendant target geometry
+incomplete. Checks stop at the authorized scan root, not an embedding test runner's
+outer document. New parent-overlay/clip controls retain exact unsupported mismatches.
+The supported nested-frame control now fully fits its parent viewport; both engines
+use the same revised fixture. Old archived timings are not evidence for repaired code.
+
+Three findings were disproved: canonical button-name passes descendant aria-label
+content; real typed-path comparisons already retain frame/element boundaries without
+an extra html step; and real history.pushState invalidates BrowserTarget's document
+generation before the existing pre-report commit guard. A new real host interruption
+case rejects that completed-but-uncommitted checkpoint scan. Host policy remains fixed;
+no new transactional layer was added for an unobserved mutable-policy path.
+
+Current corpus: 23 fixtures per engine, 69 comparisons. Full pinned `pnpm validate`
+passed 177 tests: 62 contracts, 33 host, 13 playbook, 51 parity/browser and 18 reporting.
+Pinned `pnpm bench:slice` also passed all three engine cases after the frame-control
+revision; no new speed claim.
