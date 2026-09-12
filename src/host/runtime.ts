@@ -468,8 +468,8 @@ export class SessionHost {
     const target = record.target;
     const documentId = target.documentId;
     const guardScanCommit = () => {
-      if (abort.signal.aborted || target.documentId !== documentId)
-        throw new Error("scan-interrupted-before-commit");
+      if (abort.signal.aborted) throw new Error("scan-cancelled");
+      if (target.documentId !== documentId) throw new Error("scan-document-changed");
     };
     const checkpoints: Checkpoint[] = [];
     const lost = () => record.operations.get(operation.id)?.state === "lost";
@@ -502,19 +502,24 @@ export class SessionHost {
                   result: this.report(record, result),
                 });
             } catch (error) {
+              const code = abort.signal.aborted
+                ? "scan-cancelled"
+                : error instanceof Error &&
+                    (error.message === "scan-result-limit" ||
+                      error.message === "scan-document-changed")
+                  ? error.message
+                  : "scan-failed";
               if (!lost())
                 this.updateOperation(record, {
                   ...operation,
                   state: abort.signal.aborted ? "cancelled" : "failed",
                   diagnostics: [
                     {
-                      code: abort.signal.aborted
-                        ? "scan-cancelled"
-                        : error instanceof Error && error.message === "scan-result-limit"
-                          ? "scan-result-limit"
-                          : "scan-failed",
+                      code,
                       message:
-                        "Scan interrupted, document changed, evaluation failed or result budget exceeded; no current result committed",
+                        code === "scan-document-changed"
+                          ? "Document generation changed; no current result committed"
+                          : "Scan interrupted, evaluation failed or result budget exceeded; no current result committed",
                     },
                   ],
                   completedScans: [],

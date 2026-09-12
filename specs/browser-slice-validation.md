@@ -319,3 +319,15 @@ not silently omitted widgets. Full ARIA fallback parsing and case reinterpretati
 not added to this slice. New role-token controls verify the limitation. Current corpus
 has 30 fixtures per engine (90 comparisons); all 177 validation tests and three benchmark
 cases passed under pinned tools.
+
+Eleventh review preserves scan-document-changed diagnostics through direct-scan and
+journey failure reporting, including the final commit guard. Real history.pushState
+interruption cases reproduced the generic-code problem and now assert the dedicated
+code with no completed scans. Full pinned validation passed 178 tests (34 host tests);
+the 30-fixture/90-comparison corpus is unchanged. Browser/comparator code has not
+changed since the preceding successful three-engine benchmark run.
+
+The other finding was disproved by source: changedKeys and evidence differences are
+always checked against allowedMismatches, even on unsupported fixtures. Undefined
+allowlists fail those checks. The later unsupported exemption only avoids an additional
+unclassified-mismatch error after explicit allowlist checking; it does not bypass it.

@@ -124,7 +124,11 @@ export async function runDialog(
   } catch {
     failed = !signal.aborted;
     const reason = {
-      code: signal.aborted ? "cancellation-requested" : "journey-blocked",
+      code: signal.aborted
+        ? "cancellation-requested"
+        : target.documentId !== documentId
+          ? "scan-document-changed"
+          : "journey-blocked",
       message: signal.aborted
         ? "Journey interrupted by cancellation"
         : "Prerequisite, authorization, document or interaction check failed",

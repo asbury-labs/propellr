@@ -84,7 +84,7 @@ describe("local session host over real Unix IPC", () => {
     });
   });
 
-  test.each(["scan", "playbook", "playbook-url-change"] as const)(
+  test.each(["scan", "playbook", "scan-url-change", "playbook-url-change"] as const)(
     "%s interruption after collection cannot commit its scan",
     async (kind) => {
       await withHost(async ({ client, server, open }) => {
@@ -94,7 +94,7 @@ describe("local session host over real Unix IPC", () => {
         const spy = vi.spyOn(scans, "scanTarget").mockImplementationOnce(async (...args) => {
           const result = await scanTarget(...args);
           if (!("kind" in operation)) throw new Error("Expected operation");
-          if (kind === "playbook-url-change") {
+          if (kind.endsWith("url-change")) {
             const before = args[0].documentId;
             await args[0].page.evaluate("history.pushState({}, '', '#changed')");
             expect(args[0].documentId).not.toBe(before);
@@ -114,7 +114,7 @@ describe("local session host over real Unix IPC", () => {
         const operation = unwrap(
           await server.host.execute(
             JSON.stringify(
-              kind === "scan"
+              kind === "scan" || kind === "scan-url-change"
                 ? {
                     command: "scan",
                     input: {
@@ -130,7 +130,14 @@ describe("local session host over real Unix IPC", () => {
         try {
           if (!("kind" in operation)) throw new Error("Expected operation");
           expect(await terminal(client, operation)).toMatchObject({
-            state: kind === "playbook-url-change" ? "failed" : "cancelled",
+            state: kind.endsWith("url-change") ? "failed" : "cancelled",
+            ...(kind.endsWith("url-change")
+              ? {
+                  diagnostics: expect.arrayContaining([
+                    expect.objectContaining({ code: "scan-document-changed" }),
+                  ]),
+                }
+              : {}),
             completedScans: [],
           });
           expect(spy).toHaveBeenCalledOnce();
