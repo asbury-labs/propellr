@@ -161,7 +161,7 @@ export function propellrSemantic(output: BrowserScanOutput | ScanResult): Semant
             target: node.target.path
               .map((step) => step.selector.replace(/^html:nth-of-type\(1\)$/, "html"))
               .join(" / "),
-            impact: node.outcome === "pass" ? null : node.impact,
+            impact: node.impact,
           }))
         : [],
     ),
@@ -181,7 +181,7 @@ export function axeSemantic(output: AxeResult): SemanticOccurrence[] {
           rule: rule.id,
           outcome,
           target: node.target.flat().join(" / "),
-          impact: outcome === "pass" ? null : node.impact,
+          impact: node.impact,
         })),
       ),
     ),

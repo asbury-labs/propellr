@@ -118,7 +118,9 @@ changes its aggregated document ID. Collection is synchronous; mutation observer
 cover transfer until result confirmation. Cancellation or navigation cannot commit
 a current result; detected DOM/viewport changes return stale coverage. No reusable
 incremental facts, CSSOM/animation-wide atomicity, closed-root inspection or
-cross-origin injection is claimed. Reader bounds: 2,000 elements, 32 boundary steps,
+cross-origin injection is claimed. Complete selected coverage refers to observable DOM
+under these capabilities, not certification of undetectable closed-root contents.
+Reader bounds: 2,000 elements, 32 boundary steps,
 96 total occurrences, 1,024 characters per target path, 128 KiB raw evidence and
 32 diagnostic entries; budget exhaustion stays partial.
 

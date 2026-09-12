@@ -182,3 +182,17 @@ scan, not only the newest member. Both reproductions failed before repair and pa
 afterward; a later-cancellation control also passed. Full pinned `pnpm validate`
 passed 150 tests: 62 contracts, 31 host, 13 playbook, 26 parity/browser and 18 reporting.
 Latest-head CI and review remain tracked on PR #12.
+
+Third review repairs make pass impact null and compare raw impact without semantic
+masking, bound the oversized-rule fallback itself, and support redundant native
+`role="button"` naming. A 1,024-rule case verifies fallback remains within 128 KiB
+in all three engines. Existing ARIA-control fixture now also proves unfocusable
+role widgets are inapplicable to canonical target-size, whose matcher explicitly
+requires focusability. Full pinned `pnpm validate` passed 153 tests: 62 contracts,
+31 host, 13 playbook, 29 parity/browser and 18 reporting.
+
+Closed-root inspection remains outside the approved observable-DOM slice, as declared
+before implementation. A late attachShadow hook cannot discover pre-existing closed
+roots on borrowed pages. No such hook, page-start instrumentation or closed-root
+inspection claim was added. README clarifies that complete selected coverage applies
+under declared capabilities, not to undetectable closed-root contents.

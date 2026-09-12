@@ -18,7 +18,7 @@ export const fixtures: readonly Fixture[] = [
   {
     id: "naming",
     html: doc(
-      `<main><button id="empty"></button><button id="text">Save</button><button id="aria" aria-label="Save"></button><span id="label" hidden>Hidden name</span><button id="ref" aria-labelledby="label"></button><button id="missing" aria-labelledby="absent"></button><button id="title" title="Save"></button><label for="labelled">Save</label><button id="labelled"></button><label>Wrap<button id="wrapped"></button></label><button id="hidden" hidden></button><button id="disabled" disabled>Save</button></main>`,
+      `<main><button id="empty"></button><button id="text">Save</button><button id="aria" aria-label="Save"></button><span id="label" hidden>Hidden name</span><button id="ref" aria-labelledby="label"></button><button id="missing" aria-labelledby="absent"></button><button id="title" title="Save"></button><label for="labelled">Save</label><button id="labelled"></button><label>Wrap<button id="wrapped"></button></label><button id="hidden" hidden></button><button id="disabled" disabled>Save</button><button id="redundant-role" role="button">Save</button></main>`,
     ),
     expected: { "button-name": ["#empty", "#missing"] },
   },
@@ -53,7 +53,7 @@ export const fixtures: readonly Fixture[] = [
   {
     id: "aria-command-not-native-button",
     html: doc(
-      `<main><div id="role-button" role="button" tabindex="0" style="width:80px;height:32px"></div></main>`,
+      `<main><div id="role-button" role="button" tabindex="0" style="width:80px;height:32px"></div><div id="unfocusable-role-button" role="button" style="width:80px;height:32px"></div></main>`,
     ),
     expected: {},
   },

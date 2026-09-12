@@ -309,11 +309,13 @@ export function createAnalysis(): BrowserAnalysis {
         id: `${rule}:${++count}` as OccurrenceId,
         target: fact.target,
         impact:
-          rule === "button-name"
-            ? ("critical" as const)
-            : rule === "target-size"
-              ? ("serious" as const)
-              : ("moderate" as const),
+          outcome === "pass"
+            ? null
+            : rule === "button-name"
+              ? ("critical" as const)
+              : rule === "target-size"
+                ? ("serious" as const)
+                : ("moderate" as const),
         evidence: [evidence],
       };
       if (outcome === "incomplete") {
@@ -354,7 +356,8 @@ export function createAnalysis(): BrowserAnalysis {
           (fact) => fact.visible && fact.node.localName === "button",
         )) {
           const named = name(fact.node);
-          const unsupported = named.unsupported || fact.node.hasAttribute("role");
+          const role = fact.node.getAttribute("role");
+          const unsupported = named.unsupported || (role !== null && role !== "button");
           add(() =>
             occurrence(
               fact,
@@ -499,10 +502,14 @@ export function createAnalysis(): BrowserAnalysis {
         "evidence-limit",
         "Results exceed 128 KiB retention budget; no usable evaluation retained",
       );
-      return {
+      const fallback: BrowserScanOutput = {
         rules: input.rules.map(({ rule }) => ({ rule, state: "not-evaluated", reason })),
         gaps: [reason, ...gaps.slice(0, 31)],
       };
+      // Even not-evaluated metadata can exceed the budget for a large explicit selection.
+      return new TextEncoder().encode(JSON.stringify(fallback)).byteLength <= 131_072
+        ? fallback
+        : { rules: [], gaps: [reason] };
     }
     return { rules, gaps };
   }

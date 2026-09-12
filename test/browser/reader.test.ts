@@ -76,6 +76,29 @@ test("oversized target identities and evidence remain explicit gaps", () => {
   }
 });
 
+test("large rule selections cannot exceed the evidence budget through fallback metadata", () => {
+  const analysis = createAnalysis();
+  try {
+    const result = analysis.scan({
+      target: { pageId: "page_browser" as PageId, documentId: "browser-doc", path: [] },
+      rules: [
+        { rule: { id: "unknown-first", version: "unknown" }, options: {} },
+        ...Array.from({ length: 1023 }, (_, index) => ({
+          rule: { id: `unknown-${index}`, version: "unknown" },
+          options: {},
+        })),
+      ],
+    });
+    expect(result.gaps[0]?.code).toBe("evidence-limit");
+    expect(result.rules).toEqual([]);
+    expect(new TextEncoder().encode(JSON.stringify(result)).byteLength).toBeLessThanOrEqual(
+      131_072,
+    );
+  } finally {
+    analysis.finish();
+  }
+});
+
 test("frame geometry uses the child viewport, not the outer viewport", async () => {
   const frame = document.createElement("iframe");
   frame.id = "viewport-frame";
