@@ -467,6 +467,10 @@ export class SessionHost {
     const abort = new AbortController();
     const target = record.target;
     const documentId = target.documentId;
+    const guardScanCommit = () => {
+      if (abort.signal.aborted || target.documentId !== documentId)
+        throw new Error("scan-interrupted-before-commit");
+    };
     const checkpoints: Checkpoint[] = [];
     const lost = () => record.operations.get(operation.id)?.state === "lost";
     const done = new Promise<void>((resolve) => {
@@ -490,6 +494,7 @@ export class SessionHost {
                 abort.signal,
                 documentId,
               );
+              guardScanCommit();
               if (!lost())
                 this.updateOperation(record, {
                   ...operation,
@@ -548,7 +553,10 @@ export class SessionHost {
                 },
                 abort.signal,
                 documentId,
-              ).then((result) => this.report(record, result));
+              ).then((result) => {
+                guardScanCommit();
+                return this.report(record, result);
+              });
             },
           );
           if (lost()) return;

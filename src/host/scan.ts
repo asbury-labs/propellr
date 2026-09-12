@@ -70,6 +70,11 @@ export async function scanTarget(
             },
           },
   };
+  const guard = () => {
+    if (signal.aborted) throw new Error("scan-cancelled");
+    if (target.documentId !== expectedDocument) throw new Error("scan-document-changed");
+  };
+  guard();
   const root = request.scope.include[0];
   const whole =
     request.scope.include.length === 1 &&
@@ -93,11 +98,6 @@ export async function scanTarget(
         reason: { code: "scope-unavailable", message: "Requested scope was not evaluated" },
       })),
     };
-  const guard = () => {
-    if (signal.aborted) throw new Error("scan-cancelled");
-    if (target.documentId !== expectedDocument) throw new Error("scan-document-changed");
-  };
-  guard();
   // Runtime is reused in this document, but DOM facts are never cached across scans.
   const installed = await target.page.evaluate(() => "PropellrBrowser" in globalThis);
   if (!installed) await target.page.addScriptTag({ content: await bundle() });

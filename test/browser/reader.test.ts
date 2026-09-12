@@ -76,6 +76,43 @@ test("oversized target identities and evidence remain explicit gaps", () => {
   }
 });
 
+test("frame geometry uses the child viewport, not the outer viewport", async () => {
+  const frame = document.createElement("iframe");
+  frame.id = "viewport-frame";
+  frame.style.cssText = "width:100px;height:100px";
+  const loaded = new Promise<void>((resolve) =>
+    frame.addEventListener("load", () => resolve(), { once: true }),
+  );
+  frame.srcdoc =
+    '<button id="clipped" style="position:absolute;top:150px;left:0;width:80px;height:32px">Save</button>';
+  document.body.append(frame);
+  await loaded;
+  const analysis = createAnalysis();
+  try {
+    const result = analysis.scan({
+      target: { pageId: "page_browser" as PageId, documentId: "browser-doc", path: [] },
+      rules: [{ rule: { id: "target-size", version: "4.13.0" }, options: {} }],
+    });
+    expect(result.rules[0]).toMatchObject({
+      state: "evaluated",
+      occurrences: expect.arrayContaining([
+        expect.objectContaining({
+          outcome: "incomplete",
+          target: expect.objectContaining({
+            path: [
+              { kind: "frame", selector: "#viewport-frame" },
+              { kind: "element", selector: "#clipped" },
+            ],
+          }),
+        }),
+      ]),
+    });
+  } finally {
+    analysis.finish();
+    frame.remove();
+  }
+});
+
 test("transfer mutation invalidates snapshot; next epoch rebuilds root-local facts", () => {
   const fixture = document.createElement("div");
   fixture.id = "reader-fixture";

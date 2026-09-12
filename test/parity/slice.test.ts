@@ -56,6 +56,27 @@ for (const engine of ["chromium", "firefox", "webkit"] as const)
             });
             const own = await scanTarget(target, request, context, new AbortController().signal);
             const axe = await runReference(canonical.page);
+            if (fixture.id === "aria-command-not-native-button") {
+              expect(own.rules.find((entry) => entry.rule.id === "button-name")?.state).toBe(
+                "inapplicable",
+              );
+              expect(axe.inapplicable.some((entry) => entry.id === "button-name")).toBe(true);
+              expect(
+                axeSemantic(await runReference(canonical.page, ["aria-command-name"])),
+              ).toContainEqual({
+                rule: "aria-command-name",
+                outcome: "violation",
+                target: "#role-button",
+                impact: "serious",
+              });
+            }
+            if (fixture.id === "modal-main-exception") {
+              expect(
+                own.rules.find((entry) => entry.rule.id === "landmark-one-main"),
+              ).toMatchObject({
+                state: "inapplicable",
+              });
+            }
             const actual = propellrSemantic(own);
             const expected = axeSemantic(axe);
             const changedKeys = [

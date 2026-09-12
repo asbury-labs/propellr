@@ -194,7 +194,7 @@ export function evidenceDifferences(own: BrowserScanOutput | ScanResult, axe: Ax
     if (rule.state !== "evaluated") continue;
     for (const node of rule.occurrences) {
       const target = node.target.path
-        .map((step) => step.selector.replace(/^html:nth-of-type\\(1\\)$/, "html"))
+        .map((step) => step.selector.replace(/^html:nth-of-type\(1\)$/, "html"))
         .join(" / ");
       const key = `${rule.rule.id}:${target}`;
       const reference = [...axe.passes, ...axe.violations, ...axe.incomplete]
@@ -229,6 +229,17 @@ export function evidenceDifferences(own: BrowserScanOutput | ScanResult, axe: Ax
               differences.push(`${key}:neighbors`);
           }
         }
+      }
+      if (rule.rule.id === "button-name") {
+        const passed = axe.passes.some(
+          (entry) => entry.id === rule.rule.id && entry.nodes.includes(reference),
+        );
+        const failed = axe.violations.some(
+          (entry) => entry.id === rule.rule.id && entry.nodes.includes(reference),
+        );
+        if (node.outcome === "incomplete" || (!passed && !failed))
+          differences.push(`${key}:name-evidence-unvalidated`);
+        else if (observed?.["hasName"] !== passed) differences.push(`${key}:hasName`);
       }
       if (rule.rule.id === "button-name" && node.outcome === "pass") {
         const source = observed?.["source"];

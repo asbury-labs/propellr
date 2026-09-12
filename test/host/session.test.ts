@@ -1,10 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { lstat } from "node:fs/promises";
 import { dirname } from "node:path";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { chromium } from "playwright";
 import { DIALOG_HTML, FIXTURE_URL } from "../../src/host/fixture.js";
 import { LOCAL_POLICY } from "../../src/host/runtime.js";
+import { selectedRequest } from "../../src/analysis.js";
+import * as scans from "../../src/host/scan.js";
 import { sessionIdSchema } from "../../src/validation.js";
 import { meta, playbookInput, terminal, unwrap, withHost } from "../support/host.js";
 
@@ -81,6 +83,58 @@ describe("local session host over real Unix IPC", () => {
       expect(await next.runPlaybook(playbookInput(session))).toMatchObject({ ok: false });
     });
   });
+
+  test.each(["scan", "playbook"] as const)(
+    "%s cancellation after collection cannot commit its scan",
+    async (kind) => {
+      await withHost(async ({ client, server, open }) => {
+        const session = await open();
+        const scanTarget = scans.scanTarget;
+        // Keep real browser evaluation; interpose cancellation at the host commit boundary.
+        const spy = vi.spyOn(scans, "scanTarget").mockImplementationOnce(async (...args) => {
+          const result = await scanTarget(...args);
+          if (!("kind" in operation)) throw new Error("Expected operation");
+          expect(
+            unwrap(
+              await server.host.execute(
+                JSON.stringify({
+                  command: "cancel",
+                  input: { ...meta(), sessionId: session.id, operationId: operation.id },
+                }),
+              ),
+            ),
+          ).toMatchObject({ disposition: "requested", operation: { state: "cancelling" } });
+          return result;
+        });
+        const operation = unwrap(
+          await server.host.execute(
+            JSON.stringify(
+              kind === "scan"
+                ? {
+                    command: "scan",
+                    input: {
+                      ...meta(),
+                      sessionId: session.id,
+                      scan: selectedRequest({ ...session.documents[0]!, path: [] }),
+                    },
+                  }
+                : { command: "runPlaybook", input: playbookInput(session) },
+            ),
+          ),
+        );
+        try {
+          if (!("kind" in operation)) throw new Error("Expected operation");
+          expect(await terminal(client, operation)).toMatchObject({
+            state: "cancelled",
+            completedScans: [],
+          });
+          expect(spy).toHaveBeenCalledOnce();
+        } finally {
+          spy.mockRestore();
+        }
+      });
+    },
+  );
 
   test("lease loss and bounded replay fail closed, including after reconnect", async () => {
     await withHost(

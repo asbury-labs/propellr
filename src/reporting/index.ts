@@ -118,13 +118,16 @@ export function reportScan(scan: ScanResult, history: readonly ScanResult[] = []
         identityVersion,
         groupingBasis:
           "Exact rule version and scoped target within the same document generation; no shared-cause inference",
-        lifecycle: prior
-          ? comparable && compatible(lastObserved.get(key)!, current)
-            ? active.has(key)
-              ? "existing"
-              : "recurring"
-            : "not-compared"
-          : "new",
+        lifecycle:
+          lastObserved.get(key)?.id === current.id
+            ? prior!.lifecycle
+            : prior
+              ? comparable && compatible(lastObserved.get(key)!, current)
+                ? active.has(key)
+                  ? "existing"
+                  : "recurring"
+                : "not-compared"
+              : "new",
       });
       lastObserved.set(key, current);
     }
@@ -136,10 +139,8 @@ export function reportScan(scan: ScanResult, history: readonly ScanResult[] = []
           lifecycle:
             comparable && compatible(lastObserved.get(key)!, current) ? "resolved" : "not-compared",
         });
-    if (comparable || !previous) {
-      active.clear();
-      for (const key of currentKeys) active.add(key);
-    } else for (const key of currentKeys) active.add(key);
+    active.clear();
+    for (const key of currentKeys) active.add(key);
   }
   const raw = occurrences(scan);
   const keys = (outcome: Occurrence["outcome"]) =>

@@ -79,7 +79,18 @@ test("cancelled and evaluator-error scans cannot return a successful empty resul
     });
     const abort = new AbortController();
     abort.abort();
-    await expect(scanTarget(target, request, context, abort.signal)).rejects.toThrow("cancelled");
+    const narrow = {
+      ...request,
+      scope: { ...request.scope, exclude: [request.scope.include[0]] },
+    };
+    for (const selection of [request, narrow]) {
+      await expect(scanTarget(target, selection, context, abort.signal)).rejects.toThrow(
+        "cancelled",
+      );
+      await expect(
+        scanTarget(target, selection, context, new AbortController().signal, "old-document"),
+      ).rejects.toThrow("document-changed");
+    }
     await scanTarget(target, request, context, new AbortController().signal);
     await own.page.evaluate(
       "PropellrBrowser.scan = () => { throw new Error('fixture evaluation error') }",

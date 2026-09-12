@@ -394,8 +394,10 @@ export function createAnalysis(): BrowserAnalysis {
             [(rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2],
           ];
           const root = node.getRootNode() as Document | ShadowRoot;
+          const viewport = node.ownerDocument.defaultView!;
           const obscured = points.some(([x, y]) => {
-            if (x! < 0 || y! < 0 || x! >= innerWidth || y! >= innerHeight) return true;
+            if (x! < 0 || y! < 0 || x! >= viewport.innerWidth || y! >= viewport.innerHeight)
+              return true;
             const hit = root.elementFromPoint(x!, y!);
             return hit !== null && hit !== node && !node.contains(hit);
           });
@@ -458,7 +460,7 @@ export function createAnalysis(): BrowserAnalysis {
             fact.node.matches("dialog, [role=dialog], [aria-modal=true]"),
         );
         const present = mains.length > 0 || modal;
-        for (const doc of documents)
+        for (const doc of documents.filter((entry) => visible(entry.document.documentElement)))
           add(() =>
             occurrence(
               doc,

@@ -37,6 +37,27 @@ export const fixtures: readonly Fixture[] = [
   { id: "two-mains", html: doc(`<main id="one"></main><main id="two"></main>`), expected: {} },
   { id: "inapplicable", html: doc(`<main></main>`), expected: {} },
   {
+    id: "modal-main-exception",
+    html: doc(
+      `<dialog id="modal"><button id="modal-close">Close</button></dialog><button id="outside"></button><script>document.querySelector('#modal').showModal()</script>`,
+    ),
+    expected: {},
+  },
+  {
+    id: "role-dialog-main-exception",
+    html: doc(
+      `<div role="dialog" aria-modal="true"><button id="dialog-close">Close</button></div>`,
+    ),
+    expected: {},
+  },
+  {
+    id: "aria-command-not-native-button",
+    html: doc(
+      `<main><div id="role-button" role="button" tabindex="0" style="width:80px;height:32px"></div></main>`,
+    ),
+    expected: {},
+  },
+  {
     id: "shadow",
     html: doc(
       `<main><div id="host"></div></main><script>const a=document.querySelector('#host').attachShadow({mode:'open'});a.innerHTML='<div id="nested"></div>';a.querySelector('#nested').attachShadow({mode:'open'}).innerHTML='<style>button{display:block;width:80px;height:32px;margin:20px}</style><span id="label">Save</span><button id="named" aria-labelledby="label"></button><button id="empty"></button>';</script>`,

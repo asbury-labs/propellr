@@ -106,7 +106,7 @@ describe("conservative exact-target reporting", () => {
       uniqueViolationIssues: 4,
       uniqueIncompleteIssues: 0,
     });
-    expect(report.groups.find((group) => group.members.length === 2)).toBeDefined();
+    expect(report.groups.find((group) => group.members.length === 2)?.lifecycle).toBe("new");
     const next = reportScan(second, [first]);
     expect(next.counts.violationOccurrences).toBe(1);
     expect(next.groups.find((group) => group.lifecycle === "existing")?.members).toHaveLength(3);
@@ -126,6 +126,19 @@ describe("conservative exact-target reporting", () => {
       lifecycle: "recurring",
       members: [{ scanId: "a" }, { scanId: "b" }, { scanId: "d" }],
     });
+  });
+
+  test("duplicates retain one lifecycle and recurrence follows the immediately prior scan", () => {
+    const a = scan("a", [violation]);
+    const partial = scan("partial", [], {
+      coverage: { state: "partial", gaps: [{ code: "gap", message: "Unavailable scope" }] },
+    });
+    const clean = scan("clean", []);
+    const recurring = scan("recurring", [violation, violation]);
+    expect(reportScan(recurring, [a, partial, clean]).groups[0]?.lifecycle).toBe("recurring");
+    expect(
+      reportScan(scan("new", [violation, violation]), [scan("empty", [])]).groups[0]?.lifecycle,
+    ).toBe("new");
   });
 
   test.each([

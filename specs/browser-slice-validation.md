@@ -152,3 +152,23 @@ now also requires compatibility with each issue's last observed scan. Extended
 reporting cases failed before the repair and passed afterward; full pinned
 `pnpm validate` passed all 141 tests again. Latest-head Linux CI/review status is
 tracked on PR #12.
+
+First review repairs add abort/document guards before unsupported-scope returns and
+at both direct/checkpoint scan commits. Real browser tests interpose cancellation
+after collection and verify no scan commits. Frame geometry uses each document's
+viewport. Duplicate occurrences preserve their group's lifecycle; recurrence uses
+the immediately prior scan without resolving incompatible older history.
+
+New native-modal and ARIA-dialog controls exposed a real modal applicability defect:
+a native modal makes the document root inaccessible, so main-presence is inapplicable,
+not a fabricated pass. Repaired and cross-browser comparisons passed. An ARIA-button
+control confirms canonical `button-name` is native-only; `aria-command-name` owns
+ARIA command naming. No rule-selector expansion made for that false-positive finding.
+
+Evidence selector normalization repaired; naming pass/failure booleans are compared,
+while incomplete naming evidence is explicitly classified as unvalidated. Expanded
+corpus has 16 fixtures per engine (48 comparisons). Original archive/manifest retain
+13-fixture pre-review results and must not be treated as evidence for repaired code.
+Focused host, parity/browser and reporting cases passed. Full pinned `pnpm validate`
+then passed 147 tests: 62 contracts, 31 host, 11 playbook, 26 parity/browser and
+17 reporting, plus build, five strict type scopes, lint and mandatory formatting.
