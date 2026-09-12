@@ -329,7 +329,7 @@ export function createAnalysis(): BrowserAnalysis {
         watch(node.shadowRoot);
         const next = [...path, { kind: "shadow" as const, selector: selector(node) }];
         for (const child of node.shadowRoot.children) walk(child, next);
-      } else if (node.localName === "slot" && (node as HTMLSlotElement).assignedElements().length) {
+      } else if (node.localName === "slot" && (node as HTMLSlotElement).assignedNodes().length) {
         // Assigned nodes retain their light-DOM identity; composed visibility uses assignedSlot.
         for (const child of (node as HTMLSlotElement).assignedElements({ flatten: true }))
           walk(child, path.slice(0, -1));

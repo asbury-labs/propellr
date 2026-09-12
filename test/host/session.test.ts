@@ -84,6 +84,57 @@ describe("local session host over real Unix IPC", () => {
     });
   });
 
+  test("stale checkpoint scans stay blocked and never become report history", async () => {
+    await withHost(async ({ client, open }) => {
+      const session = await open();
+      const scanTarget = scans.scanTarget;
+      const spy = vi.spyOn(scans, "scanTarget").mockImplementationOnce(async (...args) => {
+        const evaluate = args[0].page.evaluate.bind(args[0].page);
+        let calls = 0;
+        const transfer = vi.spyOn(args[0].page, "evaluate").mockImplementation(async (...input) => {
+          const result = await evaluate(...input);
+          if (++calls === 1)
+            await evaluate(
+              "document.querySelector('#close').textContent = 'Changed during transfer'",
+            );
+          return result;
+        });
+        try {
+          const result = await scanTarget(...args);
+          expect(result.coverage.state).toBe("stale");
+          return result;
+        } finally {
+          transfer.mockRestore();
+        }
+      });
+      try {
+        const operation = unwrap(await client.runPlaybook(playbookInput(session)));
+        expect(await terminal(client, operation)).toMatchObject({
+          state: "failed",
+          completedScans: [],
+          cleanup: "complete",
+          checkpoints: [
+            { id: "opened", state: "blocked", reason: { code: "scan-stale" } },
+            { id: "closed", state: "skipped" },
+          ],
+        });
+        const next = unwrap(
+          await client.scan({
+            ...meta(),
+            sessionId: session.id,
+            scan: selectedRequest({ ...session.documents![0]!, path: [] }),
+          }),
+        );
+        expect(await terminal(client, next)).toMatchObject({
+          state: "completed",
+          result: { report: { comparison: { state: "not-compared" } } },
+        });
+      } finally {
+        spy.mockRestore();
+      }
+    });
+  });
+
   test.each(["scan", "playbook", "scan-url-change", "playbook-url-change"] as const)(
     "%s interruption after collection cannot commit its scan",
     async (kind) => {

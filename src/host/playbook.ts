@@ -82,12 +82,17 @@ export async function runDialog(
       record({ id, observed, state: "blocked", reason: scanInterrupted });
       return;
     }
+    let reason = scanInterrupted;
     try {
       const result = await scan(id);
       if (!current()) throw new Error("stale-checkpoint");
+      if (result.coverage.state === "stale") {
+        reason = result.coverage.gaps[0];
+        throw new Error("stale-checkpoint-scan");
+      }
       record({ id, observed, state: "reached", scans: [result] });
     } catch {
-      record({ id, observed, state: "blocked", reason: scanInterrupted });
+      record({ id, observed, state: "blocked", reason });
       throw new Error("checkpoint-scan-failed");
     }
   };

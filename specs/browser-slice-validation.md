@@ -348,3 +348,15 @@ fixture can replace either entry. No benchmark code change was needed.
 Full pinned validation passed 184 tests: 62 contracts, 34 host, 13 playbook, 57 parity/browser
 and 18 reporting. The 30-fixture/90-comparison corpus remains unchanged. Pinned benchmark
 rerun passed all three engine cases, including the host/session lane.
+
+Thirteenth review distinguishes any direct slot assignment (including text) from
+rendered fallback. The unflattened assignedNodes check decides whether fallback is
+suppressed; assigned elements still retain light-DOM identities. Text-only and real
+fallback controls both match canonical results in three engines.
+
+Stale checkpoint scans now block progression and remain outside report history, with
+the stale reason preserved. A real transfer-time DOM mutation verifies blocked/skipped
+checkpoints, no completed scan, successful cleanup and a later direct scan with no stale
+history baseline. Partial but stable coverage remains distinct from stale coverage.
+Pinned validation passed 185 tests (35 host, other suite counts unchanged), covering
+32 fixtures per engine / 96 comparisons. All three benchmark engine cases passed again.

@@ -114,6 +114,21 @@ export const fixtures: readonly Fixture[] = [
     expected: { "button-name": ["#slot-empty"] },
   },
   {
+    id: "slot-text-assignment",
+    html: doc(
+      `<div id="slot-host">Assigned text</div><script>document.querySelector('#slot-host').attachShadow({mode:'open'}).innerHTML='<slot><main><button id="fallback-button"></button></main></slot>';</script>`,
+    ),
+    expected: { "landmark-one-main": ["html"] },
+    mainPresence: { present: false, modal: false },
+  },
+  {
+    id: "slot-fallback",
+    html: doc(
+      `<div id="slot-host"></div><script>document.querySelector('#slot-host').attachShadow({mode:'open'}).innerHTML='<style>button{width:80px;height:32px;display:block}</style><slot><main><button id="fallback-button"></button></main></slot>';</script>`,
+    ),
+    expected: { "button-name": ["#slot-host / #fallback-button"] },
+  },
+  {
     id: "frames",
     html: doc(
       `<iframe id="child" src="${frameUrl}" title="Child" style="width:600px;height:500px"></iframe>`,

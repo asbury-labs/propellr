@@ -564,7 +564,8 @@ export class SessionHost {
                 documentId,
               ).then((result) => {
                 guardScanCommit();
-                return this.report(record, result);
+                // The journey blocks stale checkpoints; don't retain them as report history.
+                return result.coverage.state === "stale" ? result : this.report(record, result);
               });
             },
           );

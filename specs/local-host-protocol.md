@@ -79,8 +79,9 @@ origin: exact fixture origin. Prerequisite: exact fixture URL, one marked fixtur
 visible opener, closed dialog. Checkpoints `opened` and `closed` observe actual
 visibility; closed additionally checks returned focus. Each checkpoint records
 observation and an actual explicit three-rule scan in phase 3. A reached checkpoint
-may contain violations or partial coverage. If its scan is interrupted, observation
-remains blocked; failed setup skips checkpoints with explicit reasons. Completed
+may contain violations or partial coverage. Interrupted or stale scans block the
+checkpoint; stale scans are not retained as report history. Failed setup skips
+checkpoints with explicit reasons. Completed
 checkpoint scans survive later cancellation, browser loss and cleanup failure. Cleanup closes an open dialog if still authorized; failure
 is explicit and cancellation preserves checkpoints. Navigation invalidates document
 IDs, including any child-frame navigation; a changed document cannot commit an old checkpoint.
