@@ -23,7 +23,7 @@ test("occurrence budget stays partial and does not invent later-rule inapplicabi
   const fixture = document.createElement("main");
   fixture.innerHTML = Array.from(
     { length: 110 },
-    (_, index) => `<button id="budget-${index}">Save</button>`,
+    (_, index) => `<button id="budget-${index}" disabled>Save</button>`,
   ).join("");
   document.body.append(fixture);
   const analysis = createAnalysis();
@@ -33,6 +33,7 @@ test("occurrence budget stays partial and does not invent later-rule inapplicabi
       rules: [
         { rule: { id: "button-name", version: "4.13.0" }, options: {} },
         { rule: { id: "landmark-one-main", version: "4.13.0" }, options: {} },
+        { rule: { id: "target-size", version: "4.13.0" }, options: {} },
       ],
     });
     expect(result.gaps.some((gap) => gap.code === "occurrence-limit")).toBe(true);
@@ -41,6 +42,8 @@ test("occurrence budget stays partial and does not invent later-rule inapplicabi
       reason: { code: "occurrence-limit" },
     });
     expect(result.rules[0]?.state === "evaluated" && result.rules[0].occurrences.length).toBe(96);
+    // No focusable widgets exist: applicability is still evaluated, not limited by output retention.
+    expect(result.rules[2]?.state).toBe("inapplicable");
   } finally {
     analysis.finish();
     fixture.remove();
@@ -135,6 +138,52 @@ test("frame geometry uses the child viewport, not the outer viewport", async () 
     frame.remove();
   }
 });
+
+test("id-less siblings directly under a shadow root keep distinct target identities", () => {
+  const host = document.createElement("div");
+  host.id = "ordinal-host";
+  document.body.append(host);
+  host.attachShadow({ mode: "open" }).innerHTML = "<button></button><button></button>";
+  const analysis = createAnalysis();
+  try {
+    const result = analysis.scan({
+      target: { pageId: "page_browser" as PageId, documentId: "browser-doc", path: [] },
+      rules: [{ rule: { id: "button-name", version: "4.13.0" }, options: {} }],
+    });
+    const rule = result.rules[0];
+    if (rule?.state !== "evaluated") throw new Error("Expected button evaluation");
+    const paths = rule.occurrences
+      .filter((node) => node.target.path[0]?.selector === "#ordinal-host")
+      .map((node) => node.target.path.at(-1)?.selector);
+    expect(paths).toEqual(["button:nth-of-type(1)", "button:nth-of-type(2)"]);
+  } finally {
+    analysis.finish();
+    host.remove();
+  }
+});
+
+test.each(["scroll", "new-shadow"] as const)(
+  "%s changes during transfer invalidate the snapshot",
+  (change) => {
+    const fixture = document.createElement("div");
+    fixture.style.cssText = "overflow:auto;height:50px;width:100px";
+    fixture.innerHTML = '<div style="height:200px"></div>';
+    document.body.append(fixture);
+    const analysis = createAnalysis();
+    try {
+      analysis.scan({
+        target: { pageId: "page_browser" as PageId, documentId: "browser-doc", path: [] },
+        rules: [{ rule: { id: "button-name", version: "4.13.0" }, options: {} }],
+      });
+      if (change === "scroll") fixture.scrollTop = 50;
+      else fixture.attachShadow({ mode: "open" }).innerHTML = "<button></button>";
+      expect(analysis.finish()).toBe(false);
+    } finally {
+      analysis.finish();
+      fixture.remove();
+    }
+  },
+);
 
 test("transfer mutation invalidates snapshot; next epoch rebuilds root-local facts", () => {
   const fixture = document.createElement("div");

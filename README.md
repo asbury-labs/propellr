@@ -133,6 +133,9 @@ history cannot inflate them or resolve issues after incomplete/narrower scans.
 The declared `local-zero-violations@1` gate allows zero unwaived unique/occurrence
 violations. Missing coverage/evidence is indeterminate. Portable `reportScan` and
 `applyGate` accept caller-owned history and schema-validated owner/expiry exceptions.
+Portable reporting checks result consistency; callers remain responsible for truthful
+coverage. The browser slice's whole-document-only execution limit is not a restriction
+on other producers of portable `ScanResult` values.
 
 ## Boundaries and limits
 

@@ -31,6 +31,11 @@ function parent(node: Element): Element | null {
   const root = node.getRootNode();
   return root.nodeType === Node.DOCUMENT_FRAGMENT_NODE ? (root as ShadowRoot).host : null;
 }
+function composedContains(ancestor: Element, node: Element): boolean {
+  for (let current: Element | null = node; current; current = parent(current))
+    if (current === ancestor) return true;
+  return false;
+}
 function selector(node: Element): string {
   const root = node.getRootNode();
   if (
@@ -43,8 +48,8 @@ function selector(node: Element): string {
   let current: Element | null = node;
   while (current) {
     const name = current.localName;
-    const siblings: Element[] = current.parentElement
-      ? [...current.parentElement.children].filter((element) => element.localName === name)
+    const siblings: Element[] = current.parentNode
+      ? [...current.parentNode.children].filter((element) => element.localName === name)
       : [current];
     pieces.unshift(`${name}:nth-of-type(${siblings.indexOf(current) + 1})`);
     current = current.parentElement;
@@ -66,7 +71,7 @@ function visible(node: Element): boolean {
   const frame = node.ownerDocument.defaultView?.frameElement;
   if (frame && !visible(frame)) return false;
   const modal = node.ownerDocument.querySelector("dialog:modal");
-  if (modal && !modal.contains(node)) return false;
+  if (modal && !composedContains(modal, node)) return false;
   return true;
 }
 function children(node: Element): readonly Node[] {
@@ -189,29 +194,49 @@ function supportedWidget(node: Element): boolean {
   );
 }
 
-// One synchronous read/evaluation turn. Observers cover transfer until finish(); no facts retained.
+// Synchronous collection; transfer guards are released by finish(), never reused across scans.
 export function createAnalysis(): BrowserAnalysis {
   let observers: MutationObserver[] = [];
+  let stableChecks: (() => boolean)[] = [];
   let changed = false;
-  let dimensions = "";
   const finish = () => {
     const stable =
       !changed &&
       !observers.some((observer) => observer.takeRecords().length > 0) &&
-      dimensions === `${innerWidth}:${innerHeight}:${devicePixelRatio}`;
+      stableChecks.every((check) => check());
     for (const observer of observers) observer.disconnect();
     observers = [];
+    stableChecks = [];
     return stable;
   };
   function scan(input: BrowserScanInput): BrowserScanOutput {
     finish();
     changed = false;
-    dimensions = `${innerWidth}:${innerHeight}:${devicePixelRatio}`;
     const facts: Fact[] = [];
     const documents: { target: Target; document: Document }[] = [];
     const gaps: Diagnostic[] = [];
     const seen = new Set<Element>();
     const watch = (root: Document | ShadowRoot) => {
+      if (root.nodeType === Node.DOCUMENT_NODE) {
+        const view = (root as Document).defaultView!;
+        const viewportState = () => {
+          const visual = view.visualViewport;
+          return [
+            view.innerWidth,
+            view.innerHeight,
+            view.devicePixelRatio,
+            view.scrollX,
+            view.scrollY,
+            visual?.width,
+            visual?.height,
+            visual?.offsetLeft,
+            visual?.offsetTop,
+            visual?.scale,
+          ].join(":");
+        };
+        const initial = viewportState();
+        stableChecks.push(() => viewportState() === initial);
+      }
       const observer = new MutationObserver(() => {
         changed = true;
       });
@@ -245,6 +270,13 @@ export function createAnalysis(): BrowserAnalysis {
         ...input.target,
         path: [...path, { kind: "element" as const, selector: nodeSelector }],
       };
+      const { scrollLeft, scrollTop, shadowRoot } = node;
+      stableChecks.push(
+        () =>
+          node.scrollLeft === scrollLeft &&
+          node.scrollTop === scrollTop &&
+          node.shadowRoot === shadowRoot,
+      );
       const style = node.ownerDocument.defaultView!.getComputedStyle(node);
       facts.push({
         node,
@@ -381,11 +413,16 @@ export function createAnalysis(): BrowserAnalysis {
             (other) =>
               other.node !== node &&
               other.node.ownerDocument === node.ownerDocument &&
-              !node.contains(other.node) &&
-              !other.node.contains(node),
+              !composedContains(node, other.node) &&
+              !composedContains(other.node, node),
           );
-          const overlaps = peers.some(
+          // Any unrelated overlapping box is uncertain, including non-widget overlays between samples.
+          const overlaps = facts.some(
             (other) =>
+              other.visible &&
+              other.node.ownerDocument === node.ownerDocument &&
+              !composedContains(node, other.node) &&
+              !composedContains(other.node, node) &&
               rect.left < other.rect.right &&
               rect.right > other.rect.left &&
               rect.top < other.rect.bottom &&

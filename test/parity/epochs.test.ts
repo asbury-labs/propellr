@@ -105,30 +105,41 @@ test("cancelled and evaluator-error scans cannot return a successful empty resul
   }
 });
 
-test("actual DOM mutation during transfer yields stale coverage", async () => {
-  const browser = await browserTypes.chromium.launch();
-  const own = await fixturePage(browser, fixtures[0]!);
-  const target = new BrowserTarget(own.page, "borrowed");
-  const evaluate = own.page.evaluate.bind(own.page);
-  let calls = 0;
-  // Interpose a real mutation between collection and finish, not a fabricated scan result.
-  const spy = vi.spyOn(own.page, "evaluate").mockImplementation(async (...args) => {
-    const result = await evaluate(...args);
-    if (++calls === 2) await evaluate("document.querySelector('#empty').textContent='Now named'");
-    return result;
-  });
-  try {
-    const result = await scanTarget(
-      target,
-      selectedRequest({ pageId: target.pageId, documentId: target.documentId, path: [] }),
-      context,
-      new AbortController().signal,
-    );
-    expect(result.coverage).toMatchObject({ state: "stale", gaps: [{ code: "scan-stale" }] });
-  } finally {
-    spy.mockRestore();
-    await target.release();
-    await own.context.close();
-    await browser.close();
-  }
-});
+test.each(["mutation", "scroll", "new-shadow"] as const)(
+  "actual %s during transfer yields stale coverage",
+  async (change) => {
+    const browser = await browserTypes.chromium.launch();
+    const own = await fixturePage(browser, fixtures[0]!);
+    const target = new BrowserTarget(own.page, "borrowed");
+    if (change === "scroll") await own.page.evaluate("document.body.style.minHeight='2000px'");
+    const evaluate = own.page.evaluate.bind(own.page);
+    let calls = 0;
+    // Interpose a real mutation between collection and finish, not a fabricated scan result.
+    const spy = vi.spyOn(own.page, "evaluate").mockImplementation(async (...args) => {
+      const result = await evaluate(...args);
+      if (++calls === 2)
+        await evaluate(
+          change === "mutation"
+            ? "document.querySelector('#empty').textContent='Now named'"
+            : change === "scroll"
+              ? "scrollTo(0, 200)"
+              : "document.querySelector('main').attachShadow({mode:'open'}).innerHTML='<button></button>'",
+        );
+      return result;
+    });
+    try {
+      const result = await scanTarget(
+        target,
+        selectedRequest({ pageId: target.pageId, documentId: target.documentId, path: [] }),
+        context,
+        new AbortController().signal,
+      );
+      expect(result.coverage).toMatchObject({ state: "stale", gaps: [{ code: "scan-stale" }] });
+    } finally {
+      spy.mockRestore();
+      await target.release();
+      await own.context.close();
+      await browser.close();
+    }
+  },
+);

@@ -44,6 +44,13 @@ export const fixtures: readonly Fixture[] = [
     expected: {},
   },
   {
+    id: "modal-shadow",
+    html: doc(
+      `<dialog id="modal"><div id="modal-host"></div></dialog><script>document.querySelector('#modal-host').attachShadow({mode:'open'}).innerHTML='<style>button{display:block;width:80px;height:32px;margin:16px}</style><button id="shadow-empty"></button><button id="shadow-named">Save</button>';document.querySelector('#modal').showModal()</script>`,
+    ),
+    expected: { "button-name": ["#modal-host / #shadow-empty"] },
+  },
+  {
     id: "role-dialog-main-exception",
     html: doc(
       `<div role="dialog" aria-modal="true"><button id="dialog-close">Close</button></div>`,
@@ -120,6 +127,17 @@ export const fixtures: readonly Fixture[] = [
     expected: {},
     unsupported:
       "CSS-generated naming not implemented: explicit incomplete instead of reference pass.",
+  },
+  {
+    id: "overlay-strip",
+    html: doc(
+      `<main style="position:relative"><button id="strip-target" style="margin:0">Save</button><span style="position:absolute;left:20px;top:0;width:4px;height:32px;background:black"></span></main>`,
+    ),
+    expected: {},
+    incomplete: { "target-size": ["#strip-target"] },
+    allowedMismatches: ["target-size:#strip-target"],
+    unsupported:
+      "An unrelated overlapping box between hit-test samples makes geometry uncertain; no fully unobscured rectangle is claimed.",
   },
   {
     id: "overlap",

@@ -196,3 +196,21 @@ before implementation. A late attachShadow hook cannot discover pre-existing clo
 roots on borrowed pages. No such hook, page-start instrumentation or closed-root
 inspection claim was added. README clarifies that complete selected coverage applies
 under declared capabilities, not to undetectable closed-root contents.
+
+Fourth review repairs preserve id-less shadow-sibling ordinals, use composed modal
+containment, and classify any unrelated overlapping element box as uncertain geometry,
+including narrow non-widget overlays missed by point sampling. Transfer guards now
+check document/visual viewport state, element scroll offsets and newly attached open
+roots; bounded guards release references at finish. Actual scroll/open-root transfer
+cases return stale coverage. Modal-shadow and overlay-strip controls expand the corpus
+to 18 fixtures per engine (54 comparisons). Full pinned `pnpm validate` passed 164
+tests: 62 contracts, 31 host, 13 playbook, 40 parity/browser and 18 reporting.
+
+The occurrence budget limits retained occurrences, not candidate applicability checks.
+An exhausted scan remains partial; a later rule with no candidates is still genuinely
+inapplicable. The disabled-button budget control verifies that distinction. Portable
+reporting is producer-independent, not another browser evaluator: caller-supplied
+coverage must be truthful, while scope/configuration compatibility and raw membership
+are checked. Browser-only whole-document limits are not imposed on other producers.
+Counts above are per executed revision, not conflicting claims for one revision;
+GitHub's PR description identifies the latest verified head and run.
