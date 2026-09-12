@@ -38,7 +38,8 @@ packages with lifecycle scripts disabled; no pin/lockfile changes. Fresh copy:
       mutation states, frame navigation, cancellation/evaluator errors, transfer
       staleness and identity/occurrence/evidence budgets.
 - [x] `pnpm bench:slice`: three browser cases, four fixtures, five measured pairs
-      per cold/warm/changed-full-fallback lane: **360 measured samples**, all correctness
+      per cold/warm/changed-full lane (originally mislabeled `changed-full-fallback`; see
+      review correction below): **360 measured samples**, all correctness
       checks passed. Also 15 long-lived host journeys, 30 checkpoint scans and 15
       reconnect/idle observations. Initial 90 geometry-only samples retained separately.
 - [x] Reference integrity re-verification and plan validation with pre-edit snapshot.
@@ -244,3 +245,24 @@ reference/unsupported mismatches are retained; no parity claimed for this branch
 
 Expanded corpus: 19 fixtures per engine, 57 comparisons. Full pinned `pnpm validate`
 passed 170 tests: 62 contracts, 32 host, 13 playbook, 45 parity/browser and 18 reporting.
+
+Seventh review corrected a measurement claim: archived `changed-full-fallback` samples
+ran direct browser full scans after mutation; their incremental metadata was constructed,
+not observed through the host. They do not measure host fallback. Current runner uses
+`changed-full` with full/full metadata. Archive bytes remain unchanged; manifest and
+protocol carry this correction. Actual request-fallback correctness remains separately
+verified through scanTarget. Pinned `pnpm bench:slice` rerun passed three engine cases,
+360 measured samples with no failures; all 60 Propellr changed-lane samples record
+full/full execution. Working outputs are in `artifacts/bench/`, not the original archive.
+No new speedup claim.
+
+Document/open-root focus changes now invalidate transfer, and generated pseudo-element
+boxes make geometry in their document incomplete. A generated strip control includes
+empty-string CSS content. Catalog checks compare all 105 defaultEnabled/experimental
+flags to the pinned reference runtime. The suggested non-modal dialog restriction was
+rejected: canonical passForModal/isModalOpen also accepts a visible non-modal native
+dialog. Direct reference observation plus a three-engine fixture verifies that behavior;
+`observed.modal` denotes the canonical exception predicate, not native :modal state.
+
+Corpus: 21 fixtures per engine, 63 comparisons. Full pinned `pnpm validate` passed 176
+tests: 62 contracts, 32 host, 13 playbook, 51 parity/browser and 18 reporting.

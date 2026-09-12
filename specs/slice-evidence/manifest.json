@@ -3,6 +3,10 @@
   "branch": "feat/browser-parity-slice",
   "baseCommit": "3dca4a5ee5f0dc60f90d3d486a1ef6147136c6b3",
   "state": "uncommitted, phase 3 only",
+  "reviewCorrections": {
+    "recordedDuring": "PR #12 review, 2026-09-12",
+    "benchmarkLane": "Archived changed-full-fallback samples measured direct browser full scans after mutation. Incremental execution metadata was constructed, not observed; these samples do not measure the host fallback path. Current runner uses changed-full and full/full execution metadata. Archived bytes and checksums remain unchanged."
+  },
   "agent": "pi / gpt-6-astra",
   "session": "01a096d5-6e32-7314-97d0-6eac44caafef",
   "sourceTreeSha256": "f832579fbef5dc2fd1a5ab363849583786ac53fd938bf0608cc6c777abe59918",

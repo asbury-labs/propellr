@@ -75,6 +75,12 @@ export const fixtures: readonly Fixture[] = [
     expected: {},
   },
   {
+    id: "non-modal-dialog-exception",
+    html: doc('<dialog open><button id="non-modal-close">Close</button></dialog>'),
+    expected: {},
+    mainPresence: { present: true, modal: true },
+  },
+  {
     id: "aria-command-not-native-button",
     html: doc(
       `<main><div id="role-button" role="button" tabindex="0" style="width:80px;height:32px"></div><div id="unfocusable-role-button" role="button" style="width:80px;height:32px"></div><div id="editable" contenteditable="true" style="width:20px;height:20px">A</div></main>`,
@@ -137,14 +143,25 @@ export const fixtures: readonly Fixture[] = [
   },
   {
     id: "generated-name",
-    incomplete: { "button-name": ["#generated"] },
-    allowedMismatches: ["button-name:#generated"],
+    incomplete: { "button-name": ["#generated"], "target-size": ["#generated"] },
+    allowedMismatches: ["button-name:#generated", "target-size:#generated"],
     html: doc(
       `<style>#generated::before{content:'Save'}</style><main><button id="generated"></button></main>`,
     ),
     expected: {},
     unsupported:
-      "CSS-generated naming not implemented: explicit incomplete instead of reference pass.",
+      "CSS-generated naming and pseudo-element geometry not implemented: explicit incomplete instead of reference pass.",
+  },
+  {
+    id: "pseudo-overlay-strip",
+    html: doc(
+      '<style>#pseudo-container::before{content:"";position:absolute;left:20px;top:0;width:4px;height:32px;background:black}</style><main id="pseudo-container" style="position:relative"><button id="pseudo-target" style="margin:0">Save</button></main>',
+    ),
+    expected: {},
+    incomplete: { "target-size": ["#pseudo-target"] },
+    allowedMismatches: ["target-size:#pseudo-target"],
+    unsupported:
+      "Generated boxes have no independently measurable DOM rectangles; geometry in their document is incomplete.",
   },
   {
     id: "overlay-strip",

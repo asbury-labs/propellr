@@ -124,6 +124,7 @@ Reader bounds: 2,000 elements, 32 boundary steps,
 96 total occurrences, 1,024 characters per target path, 128 KiB raw evidence and
 32 diagnostic entries; budget exhaustion stays partial. Native modals rooted inside
 shadow DOM return explicit not-evaluated/partial results, not guessed visibility.
+Generated pseudo-element boxes make target-size incomplete for their document.
 
 Playbook checkpoints retain actual scans, including after later failure/cancellation.
 Reached journey and complete selected coverage do not imply clean accessibility:

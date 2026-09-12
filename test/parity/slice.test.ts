@@ -17,6 +17,7 @@ import {
   propellrSemantic,
   referenceBundle,
   referenceInventory,
+  referenceActivation,
   runReference,
 } from "../support/parity.js";
 
@@ -51,6 +52,21 @@ for (const engine of ["chromium", "firefox", "webkit"] as const)
             await injectReference(canonical.page, bundle);
             const inventory = await referenceInventory(canonical.page);
             expect([...inventory].sort()).toEqual(catalog.rules.map((rule) => rule.id).sort());
+            if (fixture.id === "naming") {
+              expect(
+                (await referenceActivation(canonical.page)).sort((a, b) =>
+                  a.id.localeCompare(b.id),
+                ),
+              ).toEqual(
+                catalog.rules
+                  .map(({ id, defaultEnabled, experimental }) => ({
+                    id,
+                    defaultEnabled,
+                    experimental,
+                  }))
+                  .sort((a, b) => a.id.localeCompare(b.id)),
+              );
+            }
             expect(
               catalog.rules
                 .filter((rule) => rule.implementation === "selected-partial")

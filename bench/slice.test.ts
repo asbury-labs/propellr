@@ -29,7 +29,7 @@ const rules = resolveRules(request);
 const protocol = {
   warmupPairs: 1,
   measuredPairsPerLane: 5,
-  lanes: ["cold", "warm", "changed-full-fallback"],
+  lanes: ["cold", "warm", "changed-full"],
   order: "alternate by trial",
   exclusions: "none",
   idleMs: 100,
@@ -122,14 +122,13 @@ for (const engine of ["chromium", "firefox", "webkit"] as const)
               }
               const injectionMs = cold ? performance.now() - injectionStart : 0;
               const mutationStart = performance.now();
-              if (lane === "changed-full-fallback")
+              if (lane === "changed-full")
                 await loaded.page.evaluate(
                   benchmarkFixture.id === "geometry"
                     ? `document.querySelector('#close-a').style.width='${trial % 2 ? 20 : 24}px';document.querySelector('#close-a').style.height='${trial % 2 ? 20 : 24}px'`
                     : `document.documentElement.setAttribute('data-benchmark-mutation', '${trial}')`,
                 );
-              const mutationMs =
-                lane === "changed-full-fallback" ? performance.now() - mutationStart : 0;
+              const mutationMs = lane === "changed-full" ? performance.now() - mutationStart : 0;
               let raw: unknown;
               let reportMs: number | null = null;
               let gateMs: number | null = null;
@@ -149,17 +148,7 @@ for (const engine of ["chromium", "firefox", "webkit"] as const)
                     configuration: { id: "three-rule-default-options", version: "1" },
                     scope: request.scope,
                     resolvedRules: rules,
-                    execution:
-                      lane === "changed-full-fallback"
-                        ? {
-                            requested: "incremental",
-                            actual: "full",
-                            fallback: {
-                              code: "full-scan-fallback",
-                              message: "No incremental algorithm",
-                            },
-                          }
-                        : { requested: "full", actual: "full" },
+                    execution: { requested: "full", actual: "full" },
                     coverage: firstGap
                       ? { state: "partial", gaps: [firstGap, ...ownRaw.gaps.slice(1)] }
                       : { state: "complete" },
@@ -228,7 +217,7 @@ for (const engine of ["chromium", "firefox", "webkit"] as const)
             const correctnessStart = performance.now();
             const controlsMatch =
               ownRaw !== undefined &&
-              (lane === "changed-full-fallback" ||
+              (lane === "changed-full" ||
                 ["button-name", "target-size", "landmark-one-main"].every(
                   (rule) =>
                     JSON.stringify(

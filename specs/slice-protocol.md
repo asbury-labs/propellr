@@ -56,7 +56,7 @@ load event plus fonts ready. Both implementations use separate equivalent
 contexts in the same browser process and explicit three-rule selection.
 
 Per browser: 1 unmeasured warmup pair, then 5 measured pairs per cold, warm and
-changed-state full-fallback lane. Alternate implementation order by trial. Cold
+changed-state browser full-scan lane. Alternate implementation order by trial. Cold
 uses new contexts; warm and changed-state reuse contexts equally. No early stop,
 no outlier exclusions; failures retained and disqualify that lane. Serial trials,
 no concurrent test workload. Browser launch/session, fixture load, injection,
@@ -87,3 +87,13 @@ unrelated document attribute mutation. Actual DOM/style/frame/shadow counts and
 fixture hashes are recorded. Unsupported/denied scopes are correctness cases,
 not equivalent-work timing lanes. This remains a synthetic exploratory corpus,
 not representative customer-site performance or a long-duration memory study.
+
+### PR review correction: changed-state benchmark naming
+
+Original runner labeled direct browser scans `changed-full-fallback` and constructed
+incremental-request metadata without exercising the host request path. Those retained
+samples are only changed-state browser full scans, not measured realtime fallback.
+Current runner uses `changed-full` and full/full execution metadata. Original archive
+bytes/checksums remain unchanged, with the correction recorded in its manifest.
+Actual incremental-request/full-fallback correctness is tested separately through
+`scanTarget`; no host-fallback timing claim is made by the browser benchmark lane.

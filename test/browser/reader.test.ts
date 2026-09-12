@@ -214,6 +214,31 @@ test.each(["scroll", "new-shadow"] as const)(
   },
 );
 
+test.each(["document", "shadow"] as const)(
+  "%s focus changes invalidate transfer geometry",
+  (mode) => {
+    const host = document.createElement("div");
+    document.body.append(host);
+    const root = mode === "shadow" ? host.attachShadow({ mode: "open" }) : host;
+    root.innerHTML =
+      "<style>button:focus{width:40px}</style><button>One</button><button>Two</button>";
+    const buttons = root.querySelectorAll("button");
+    buttons[0]!.focus({ preventScroll: true });
+    const analysis = createAnalysis();
+    try {
+      analysis.scan({
+        target: { pageId: "page_browser" as PageId, documentId: "browser-doc", path: [] },
+        rules: [{ rule: { id: "target-size", version: "4.13.0" }, options: {} }],
+      });
+      buttons[1]!.focus({ preventScroll: true });
+      expect(analysis.finish()).toBe(false);
+    } finally {
+      analysis.finish();
+      host.remove();
+    }
+  },
+);
+
 test("transfer mutation invalidates snapshot; next epoch rebuilds root-local facts", () => {
   const fixture = document.createElement("div");
   fixture.id = "reader-fixture";

@@ -41,6 +41,13 @@ export type AxeResult = z.infer<typeof axeSchema>;
 interface ReferenceRuntime {
   run(context: string, options: object): Promise<unknown>;
   getRules(): readonly { ruleId: string }[];
+  readonly _audit: {
+    readonly rules: readonly {
+      readonly id: string;
+      readonly enabled: boolean;
+      readonly tags: readonly string[];
+    }[];
+  };
 }
 export const hash = (input: string | Buffer) => createHash("sha256").update(input).digest("hex");
 export async function referenceBundle(): Promise<string> {
@@ -284,6 +291,17 @@ export function evidenceDifferences(own: BrowserScanOutput | ScanResult, axe: Ax
     }
   }
   return differences;
+}
+
+// Test-only metadata inspection of the integrity-pinned reference version, not a product dependency.
+export async function referenceActivation(page: Page) {
+  return page.evaluate(() =>
+    (globalThis as unknown as { axe: ReferenceRuntime }).axe._audit.rules.map((rule) => ({
+      id: rule.id,
+      defaultEnabled: rule.enabled,
+      experimental: rule.tags.includes("experimental"),
+    })),
+  );
 }
 
 export async function referenceInventory(page: Page): Promise<readonly string[]> {

@@ -218,6 +218,8 @@ export function createAnalysis(): BrowserAnalysis {
     let shadowModal: Diagnostic | undefined;
     const seen = new Set<Element>();
     const watch = (root: Document | ShadowRoot) => {
+      const focused = root.activeElement;
+      stableChecks.push(() => root.activeElement === focused);
       if (root.nodeType === Node.DOCUMENT_NODE) {
         const view = (root as Document).defaultView!;
         const viewportState = () => {
@@ -418,7 +420,20 @@ export function createAnalysis(): BrowserAnalysis {
             ),
           );
         }
-      if (rule.id === "target-size")
+      if (rule.id === "target-size") {
+        const generatedDocuments = new Set<Document>();
+        if (widgets.length && count < 96)
+          for (const fact of facts) {
+            if (!fact.visible) continue;
+            const view = fact.node.ownerDocument.defaultView!;
+            if (
+              ["::before", "::after"].some((pseudo) => {
+                const content = view.getComputedStyle(fact.node, pseudo).content;
+                return content && content !== "none" && content !== "normal";
+              })
+            )
+              generatedDocuments.add(fact.node.ownerDocument);
+          }
         for (const fact of widgets) {
           // At most 96 target rows against the bounded facts, never all W² target pairs.
           if (!available()) break;
@@ -458,6 +473,7 @@ export function createAnalysis(): BrowserAnalysis {
           const overflow =
             node.scrollWidth > node.clientWidth + 1 || node.scrollHeight > node.clientHeight + 1;
           const complex =
+            generatedDocuments.has(node.ownerDocument) ||
             !supportedWidget(node) ||
             style.transform !== "none" ||
             style.display === "inline" ||
@@ -502,10 +518,12 @@ export function createAnalysis(): BrowserAnalysis {
             ),
           );
         }
+      }
       if (rule.id === "landmark-one-main") {
         const mains = facts.filter(
           (fact) => fact.visible && fact.node.matches("main:not([role]), [role='main']"),
         );
+        // Canonical passForModal uses its dialog heuristic, not only native :modal state.
         const modal = facts.some(
           (fact) =>
             fact.visible &&
@@ -531,7 +549,7 @@ export function createAnalysis(): BrowserAnalysis {
                 observed: { present, modal },
                 expected: { present: true },
                 explanation:
-                  "Presence aggregated across accessible documents; multiple mains do not fail this rule",
+                  "Main presence or canonical dialog exception across accessible documents; multiple mains do not fail this rule",
               },
               "Unavailable scope could contain a main landmark",
             ),
