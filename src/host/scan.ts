@@ -138,7 +138,7 @@ export async function scanTarget(
             state: "stale",
             gaps: [
               { code: "scan-stale", message: "DOM or viewport changed during scan transfer" },
-              ...output.gaps,
+              ...output.gaps.slice(0, 31),
             ],
           }
         : first

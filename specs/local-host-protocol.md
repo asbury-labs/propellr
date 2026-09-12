@@ -98,10 +98,17 @@ bounded local continuity; document/config/rule/policy differences or missing cov
 prevent false resolution. Host gate `local-zero-violations@1` has zero unwaived
 unique and occurrence thresholds, with incomplete scans indeterminate. Group counts
 refer only to current scan. Report history is released at end; retained operation
-results remain available under operation limits. Reader bounds: 2,000 elements,
+results remain available under operation limits. Each serialized reported scan is
+capped at 192 KiB, leaving room for two checkpoints duplicated in a failed operation
+and framing within the 1 MiB reply limit. Oversized historical groups are omitted
+with `report-history-limit` and no lifecycle comparison. Current raw findings/counts
+remain intact; a still-oversized current-only result fails before commit instead of
+breaking IPC. Reader bounds: 2,000 elements,
 32 boundary steps, 96 occurrences, 1,024 characters per target path, 128 KiB raw
 evidence and 32 gap diagnostics per scan. Budget exhaustion
-is partial. No text names, page HTML or screenshots are captured; scoped selectors
+is partial. Native modals rooted inside shadow DOM make selected rules not-evaluated
+with `shadow-modal-unavailable`; this cross-root visibility branch is not implemented.
+No text names, page HTML or screenshots are captured; scoped selectors
 and numeric evidence can still contain page identifiers. Controlled fixtures only.
 
 Audit retains only command, decision code, session/operation IDs and timestamp,

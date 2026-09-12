@@ -10,6 +10,7 @@ export interface Fixture {
   readonly html: string;
   readonly frames?: Readonly<Record<string, string>>;
   readonly expected: Readonly<Record<string, readonly string[]>>;
+  readonly mainPresence?: { readonly present: boolean; readonly modal: boolean };
   readonly unsupported?: string;
   readonly incomplete?: Readonly<Record<string, readonly string[]>>;
   readonly allowedMismatches?: readonly string[];
@@ -31,6 +32,7 @@ export const fixtures: readonly Fixture[] = [
   },
   {
     id: "missing-main",
+    mainPresence: { present: false, modal: false },
     html: doc(`<button id="named">Save</button>`),
     expected: { "landmark-one-main": ["html"] },
   },
@@ -51,7 +53,22 @@ export const fixtures: readonly Fixture[] = [
     expected: { "button-name": ["#modal-host / #shadow-empty"] },
   },
   {
+    id: "shadow-rooted-modal",
+    html: doc(
+      `<main><div id="shadow-modal-host"></div></main><script>const root=document.querySelector('#shadow-modal-host').attachShadow({mode:'open'});root.innerHTML='<dialog id="dialog"><button id="inside" style="width:80px;height:32px"></button></dialog>';root.querySelector('dialog').showModal()</script>`,
+    ),
+    expected: {},
+    allowedMismatches: [
+      "button-name:#shadow-modal-host / #inside",
+      "target-size:#shadow-modal-host / #inside",
+      "landmark-one-main:html",
+    ],
+    unsupported:
+      "Native modal rooted inside shadow DOM has unsupported document-level visibility semantics; selected rules are not evaluated.",
+  },
+  {
     id: "role-dialog-main-exception",
+    mainPresence: { present: true, modal: true },
     html: doc(
       `<div role="dialog" aria-modal="true"><button id="dialog-close">Close</button></div>`,
     ),
@@ -60,7 +77,7 @@ export const fixtures: readonly Fixture[] = [
   {
     id: "aria-command-not-native-button",
     html: doc(
-      `<main><div id="role-button" role="button" tabindex="0" style="width:80px;height:32px"></div><div id="unfocusable-role-button" role="button" style="width:80px;height:32px"></div></main>`,
+      `<main><div id="role-button" role="button" tabindex="0" style="width:80px;height:32px"></div><div id="unfocusable-role-button" role="button" style="width:80px;height:32px"></div><div id="editable" contenteditable="true" style="width:20px;height:20px">A</div></main>`,
     ),
     expected: {},
   },
@@ -99,6 +116,7 @@ export const fixtures: readonly Fixture[] = [
   },
   {
     id: "denied-no-main",
+    mainPresence: { present: false, modal: false },
     html: doc(`<iframe id="denied" src="${deniedUrl}" title="Denied"></iframe>`),
     frames: { [deniedUrl]: doc(`<main></main>`) },
     expected: {},

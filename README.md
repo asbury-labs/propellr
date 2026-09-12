@@ -122,12 +122,16 @@ cross-origin injection is claimed. Complete selected coverage refers to observab
 under these capabilities, not certification of undetectable closed-root contents.
 Reader bounds: 2,000 elements, 32 boundary steps,
 96 total occurrences, 1,024 characters per target path, 128 KiB raw evidence and
-32 diagnostic entries; budget exhaustion stays partial.
+32 diagnostic entries; budget exhaustion stays partial. Native modals rooted inside
+shadow DOM return explicit not-evaluated/partial results, not guessed visibility.
 
 Playbook checkpoints retain actual scans, including after later failure/cancellation.
 Reached journey and complete selected coverage do not imply clean accessibility:
 closed fixture has no main landmark, so its raw main-presence violation remains.
 Host reports use exact rule-version/document/path identity and eight prior raw scans.
+Reported scans are capped at 192 KiB so fixed two-checkpoint results fit IPC replies.
+Oversized history is omitted with an explicit `report-history-limit` comparison;
+if the current-only result still exceeds that cap, the operation fails before commit.
 No cross-navigation/build/component matching is inferred. Counts are current-scan;
 history cannot inflate them or resolve issues after incomplete/narrower scans.
 The declared `local-zero-violations@1` gate allows zero unwaived unique/occurrence

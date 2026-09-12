@@ -108,7 +108,7 @@ test("cancelled and evaluator-error scans cannot return a successful empty resul
   }
 });
 
-test.each(["mutation", "scroll", "new-shadow"] as const)(
+test.each(["mutation", "scroll", "new-shadow", "diagnostic-limit"] as const)(
   "actual %s during transfer yields stale coverage",
   async (change) => {
     const browser = await browserTypes.chromium.launch();
@@ -122,7 +122,7 @@ test.each(["mutation", "scroll", "new-shadow"] as const)(
       const result = await evaluate(...args);
       if (++calls === 2)
         await evaluate(
-          change === "mutation"
+          change === "mutation" || change === "diagnostic-limit"
             ? "document.querySelector('#empty').textContent='Now named'"
             : change === "scroll"
               ? "scrollTo(0, 200)"
@@ -131,13 +131,36 @@ test.each(["mutation", "scroll", "new-shadow"] as const)(
       return result;
     });
     try {
+      const request = selectedRequest({
+        pageId: target.pageId,
+        documentId: target.documentId,
+        path: [],
+      });
       const result = await scanTarget(
         target,
-        selectedRequest({ pageId: target.pageId, documentId: target.documentId, path: [] }),
+        change === "diagnostic-limit"
+          ? {
+              ...request,
+              rules: {
+                kind: "explicit",
+                rules: [
+                  { id: "unknown-first", options: {} },
+                  ...Array.from({ length: 39 }, (_, index) => ({
+                    id: `unknown-${index}`,
+                    options: {},
+                  })),
+                ],
+              },
+            }
+          : request,
         context,
         new AbortController().signal,
       );
-      expect(result.coverage).toMatchObject({ state: "stale", gaps: [{ code: "scan-stale" }] });
+      expect(result.coverage.state).toBe("stale");
+      if (result.coverage.state === "stale") {
+        expect(result.coverage.gaps[0]?.code).toBe("scan-stale");
+        expect(result.coverage.gaps).toHaveLength(change === "diagnostic-limit" ? 32 : 1);
+      }
     } finally {
       spy.mockRestore();
       await target.release();

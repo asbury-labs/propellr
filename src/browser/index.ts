@@ -215,6 +215,7 @@ export function createAnalysis(): BrowserAnalysis {
     const facts: Fact[] = [];
     const documents: { target: Target; document: Document }[] = [];
     const gaps: Diagnostic[] = [];
+    let shadowModal: Diagnostic | undefined;
     const seen = new Set<Element>();
     const watch = (root: Document | ShadowRoot) => {
       if (root.nodeType === Node.DOCUMENT_NODE) {
@@ -311,6 +312,14 @@ export function createAnalysis(): BrowserAnalysis {
         }
       }
       if (node.shadowRoot) {
+        if (node.shadowRoot.querySelector("dialog:modal")) {
+          shadowModal = diagnostic(
+            "shadow-modal-unavailable",
+            "Modal dialog rooted inside shadow DOM is outside this slice",
+            target,
+          );
+          gap(shadowModal.code, shadowModal.message, target);
+        }
         watch(node.shadowRoot);
         const next = [...path, { kind: "shadow" as const, selector: selector(node) }];
         for (const child of node.shadowRoot.children) walk(child, next);
@@ -362,6 +371,7 @@ export function createAnalysis(): BrowserAnalysis {
       return { ...base, outcome };
     }
     const rules: RuleResult[] = input.rules.map(({ rule, options }) => {
+      if (shadowModal) return { rule, state: "not-evaluated", reason: shadowModal };
       if (
         !["button-name", "target-size", "landmark-one-main"].includes(rule.id) ||
         Object.keys(options).length

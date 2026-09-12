@@ -501,16 +501,20 @@ export class SessionHost {
                   state: "completed",
                   result: this.report(record, result),
                 });
-            } catch {
+            } catch (error) {
               if (!lost())
                 this.updateOperation(record, {
                   ...operation,
                   state: abort.signal.aborted ? "cancelled" : "failed",
                   diagnostics: [
                     {
-                      code: abort.signal.aborted ? "scan-cancelled" : "scan-failed",
+                      code: abort.signal.aborted
+                        ? "scan-cancelled"
+                        : error instanceof Error && error.message === "scan-result-limit"
+                          ? "scan-result-limit"
+                          : "scan-failed",
                       message:
-                        "Scan interrupted, document changed or evaluation failed; no current result committed",
+                        "Scan interrupted, document changed, evaluation failed or result budget exceeded; no current result committed",
                     },
                   ],
                   completedScans: [],
@@ -613,15 +617,33 @@ export class SessionHost {
   }
 
   private report(record: RecordState, scan: ScanResult): ScanResult {
-    const report = applyGate(
-      scan,
-      reportScan(scan, record.scans),
-      { ...LOCAL_GATE, exceptions: [] },
-      new Date().toISOString(),
-    );
+    const gate = (report: NonNullable<ScanResult["report"]>) =>
+      applyGate(scan, report, { ...LOCAL_GATE, exceptions: [] }, new Date().toISOString());
+    let result = { ...scan, report: gate(reportScan(scan, record.scans)) };
+    // Failed playbooks can embed each of two scans twice. Reserve room for all framing/metadata.
+    const fits = () => Buffer.byteLength(JSON.stringify(result), "utf8") <= 192 * 1024;
+    if (!fits()) {
+      const current = reportScan(scan);
+      result = {
+        ...scan,
+        report: gate({
+          ...current,
+          groups: current.groups.map((group) => ({ ...group, lifecycle: "not-compared" })),
+          comparison: {
+            state: "not-comparable",
+            reason: {
+              code: "report-history-limit",
+              message:
+                "Historical groups omitted to fit the result budget; no lifecycle comparison claimed",
+            },
+          },
+        }),
+      };
+    }
+    if (!fits()) throw new Error("scan-result-limit");
     record.scans.push(scan);
     if (record.scans.length > 8) record.scans.shift();
-    return { ...scan, report };
+    return result;
   }
 
   private subscribe(record: RecordState, after?: string): Reply<AsyncIterable<EventDelivery>> {

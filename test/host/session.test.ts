@@ -136,6 +136,71 @@ describe("local session host over real Unix IPC", () => {
     },
   );
 
+  test("large retained reports stay within IPC limits without breaking the connection", async () => {
+    const browser = await chromium.launch();
+    try {
+      const page = await browser.newPage();
+      await page.route(FIXTURE_URL, (route) =>
+        route.fulfill({ contentType: "text/html", body: DIALOG_HTML }),
+      );
+      await page.goto(FIXTURE_URL);
+      await withHost(
+        async ({ client }) => {
+          const session = unwrap(
+            await client.open({
+              ...meta(),
+              policy: LOCAL_POLICY,
+              target: { kind: "attached", targetId: "fixture" },
+            }),
+          );
+          const run = async (prefix: string, count: number, length: number) => {
+            const html = `<main>${Array.from({ length: count }, (_, index) => `<button id="${prefix}-${index}-${"x".repeat(length)}"></button>`).join("")}</main>`;
+            await page.evaluate(`document.body.innerHTML = ${JSON.stringify(html)}`);
+            return terminal(
+              client,
+              unwrap(
+                await client.scan({
+                  ...meta(),
+                  sessionId: session.id,
+                  scan: {
+                    ...selectedRequest({ ...session.documents[0]!, path: [] }),
+                    rules: { kind: "explicit", rules: [{ id: "button-name", options: {} }] },
+                  },
+                }),
+              ),
+            );
+          };
+          let omitted = false;
+          for (let index = 0; index < 4; index++) {
+            const result = await run(`epoch-${index}`, 72, 500);
+            if (result.kind !== "scan" || result.state !== "completed")
+              throw new Error("Expected bounded scan result");
+            expect(Buffer.byteLength(JSON.stringify(result.result))).toBeLessThanOrEqual(
+              192 * 1024,
+            );
+            expect(result.result.report?.counts.violationOccurrences).toBe(72);
+            const comparison = result.result.report?.comparison;
+            omitted ||=
+              comparison?.state === "not-comparable" &&
+              comparison.reason.code === "report-history-limit";
+          }
+          expect(omitted).toBe(true);
+          expect(await run("oversized-current", 85, 850)).toMatchObject({
+            state: "failed",
+            diagnostics: [{ code: "scan-result-limit" }],
+            completedScans: [],
+          });
+          expect(
+            unwrap(await client.inspect({ ...meta(), sessionId: session.id })).session.state,
+          ).toBe("active");
+        },
+        { borrowed: new Map([["fixture", page]]) },
+      );
+    } finally {
+      await browser.close();
+    }
+  });
+
   test("lease loss and bounded replay fail closed, including after reconnect", async () => {
     await withHost(
       async ({ client, reconnect }) => {

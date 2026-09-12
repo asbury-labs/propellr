@@ -8,6 +8,7 @@ import reference from "../../reference.json" with { type: "json" };
 import { fixtures, dynamicHtml } from "../fixtures/slice.js";
 import {
   axeSemantic,
+  axeTargetPath,
   evidenceDifferences,
   environment,
   fixturePage,
@@ -18,6 +19,16 @@ import {
   referenceInventory,
   runReference,
 } from "../support/parity.js";
+
+test("reference target grouping preserves shadow versus frame boundaries", () => {
+  expect(axeTargetPath(["#host", ["#a", "#b"]])).toEqual([
+    { kind: "frame", selector: "#host" },
+    { kind: "shadow", selector: "#a" },
+    { kind: "element", selector: "#b" },
+  ]);
+  expect(axeTargetPath(["#host", ["#a", "#b"]])).not.toEqual(axeTargetPath(["#host", "#a", "#b"]));
+  expect(axeTargetPath([["#host", "#button"]])).not.toEqual(axeTargetPath(["#host", "#button"]));
+});
 
 const context = {
   policy: { id: "test", version: "1" },
@@ -67,7 +78,15 @@ for (const engine of ["chromium", "firefox", "webkit"] as const)
                 rule: "aria-command-name",
                 outcome: "violation",
                 target: "#role-button",
+                path: [{ kind: "element", selector: "#role-button" }],
                 impact: "serious",
+              });
+            }
+            if (fixture.id === "shadow-rooted-modal") {
+              expect(own.rules.every((entry) => entry.state === "not-evaluated")).toBe(true);
+              expect(own.coverage).toMatchObject({
+                state: "partial",
+                gaps: [{ code: "shadow-modal-unavailable" }],
               });
             }
             if (fixture.id === "modal-main-exception") {
@@ -87,6 +106,13 @@ for (const engine of ["chromium", "firefox", "webkit"] as const)
                 JSON.stringify(expected.filter((node) => `${node.rule}:${node.target}` === key)),
             );
             const evidence = evidenceDifferences(own, axe);
+            const main = own.rules.find((entry) => entry.rule.id === "landmark-one-main");
+            if (main?.state === "evaluated")
+              for (const occurrence of main.occurrences)
+                expect(occurrence.evidence[0]).toMatchObject({
+                  observed: fixture.mainPresence ?? { present: true, modal: false },
+                  expected: { present: true },
+                });
             const mismatch = changedKeys.length > 0 || evidence.length > 0;
             for (const key of changedKeys)
               if (!fixture.allowedMismatches?.includes(key))

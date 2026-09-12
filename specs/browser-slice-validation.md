@@ -224,3 +224,23 @@ output is full. A real 120-button case confirms exactly 96 geometry evaluations 
 all engines; applicability still runs for later rules with no candidates. No spatial
 index or speedup claim added. Full pinned `pnpm validate` passed 167 tests: 62 contracts,
 31 host, 13 playbook, 43 parity/browser and 18 reporting.
+
+Sixth review adds a 192 KiB serialized reported-scan cap so duplicated two-checkpoint
+results stay below the 1 MiB IPC limit. Oversized history is explicitly omitted from
+comparison, preserving current raw findings/counts; oversized current-only results
+fail before commit. Real IPC tests exercise growing distinct-target history, fallback,
+current-result failure and continued connection usability. Stale coverage retains
+at most 32 diagnostics, including its stale marker.
+
+Parity now preserves axe's frame/shadow grouping as typed target steps, not only flat
+display labels. Main-presence check ID, present/expected evidence and independent modal
+fixture expectations are checked. Canonical check data exposes no modal boolean, so
+that field is verified from fixtures rather than claimed as a raw reference field.
+Contenteditable-only controls were verified in canonical Chromium and the three-engine
+fixture: without widget semantics they are not target-size candidates; that suggested
+selector expansion was rejected. Native modals rooted in shadow DOM now explicitly
+block selected evaluation pending cross-root visibility support. The exact three
+reference/unsupported mismatches are retained; no parity claimed for this branch.
+
+Expanded corpus: 19 fixtures per engine, 57 comparisons. Full pinned `pnpm validate`
+passed 170 tests: 62 contracts, 32 host, 13 playbook, 45 parity/browser and 18 reporting.

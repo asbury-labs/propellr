@@ -9,7 +9,7 @@ import type { BrowserAnalysis, BrowserScanInput, BrowserScanOutput } from "../..
 import { sliceRules } from "../../src/analysis.js";
 import type { Fixture } from "../fixtures/slice.js";
 import { fixtureUrl } from "../fixtures/slice.js";
-import type { JsonObject, ScanResult } from "../../src/contracts.js";
+import type { JsonObject, ScanResult, Target } from "../../src/contracts.js";
 
 const checkSchema = z.looseObject({
   id: z.string(),
@@ -146,11 +146,26 @@ export interface SemanticOccurrence {
   readonly rule: string;
   readonly outcome: "pass" | "violation" | "incomplete";
   readonly target: string;
+  readonly path: Target["path"];
   readonly impact: string | null;
 }
 const sort = (items: SemanticOccurrence[]) =>
   items.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
-// Fixture ID selectors and html are normalized representation only. Frame/shadow order preserved.
+const normalizeSelector = (selector: string) => selector.replace(/^html:nth-of-type\(1\)$/, "html");
+const normalizePath = (path: Target["path"]) =>
+  path.map((step) => ({ ...step, selector: normalizeSelector(step.selector) }));
+// Each outer axe segment is a frame traversal; arrays encode shadow traversal within that document.
+export function axeTargetPath(target: readonly (string | readonly string[])[]): Target["path"] {
+  return target.flatMap((segment, index) => {
+    const selectors = typeof segment === "string" ? [segment] : segment;
+    return selectors.map((selector, inner): Target["path"][number] => ({
+      kind:
+        inner < selectors.length - 1 ? "shadow" : index < target.length - 1 ? "frame" : "element",
+      selector: normalizeSelector(selector),
+    }));
+  });
+}
+// Display labels serve fixture diagnostics; comparisons also retain the lossless typed path.
 export function propellrSemantic(output: BrowserScanOutput | ScanResult): SemanticOccurrence[] {
   return sort(
     output.rules.flatMap((rule) =>
@@ -158,9 +173,10 @@ export function propellrSemantic(output: BrowserScanOutput | ScanResult): Semant
         ? rule.occurrences.map((node) => ({
             rule: rule.rule.id,
             outcome: node.outcome,
-            target: node.target.path
-              .map((step) => step.selector.replace(/^html:nth-of-type\(1\)$/, "html"))
+            target: normalizePath(node.target.path)
+              .map((step) => step.selector)
               .join(" / "),
+            path: normalizePath(node.target.path),
             impact: node.impact,
           }))
         : [],
@@ -180,7 +196,10 @@ export function axeSemantic(output: AxeResult): SemanticOccurrence[] {
         rule.nodes.map((node) => ({
           rule: rule.id,
           outcome,
-          target: node.target.flat().join(" / "),
+          target: axeTargetPath(node.target)
+            .map((step) => step.selector)
+            .join(" / "),
+          path: axeTargetPath(node.target),
           impact: node.impact,
         })),
       ),
@@ -193,14 +212,13 @@ export function evidenceDifferences(own: BrowserScanOutput | ScanResult, axe: Ax
   for (const rule of own.rules) {
     if (rule.state !== "evaluated") continue;
     for (const node of rule.occurrences) {
-      const target = node.target.path
-        .map((step) => step.selector.replace(/^html:nth-of-type\(1\)$/, "html"))
-        .join(" / ");
+      const path = normalizePath(node.target.path);
+      const target = path.map((step) => step.selector).join(" / ");
       const key = `${rule.rule.id}:${target}`;
       const reference = [...axe.passes, ...axe.violations, ...axe.incomplete]
         .filter((entry) => entry.id === rule.rule.id)
         .flatMap((entry) => entry.nodes)
-        .find((entry) => entry.target.flat().join(" / ") === target);
+        .find((entry) => JSON.stringify(axeTargetPath(entry.target)) === JSON.stringify(path));
       if (!reference) continue; // Occurrence-level mismatch is checked separately.
       const observed = node.evidence[0]?.observed as JsonObject | undefined;
       const expected = node.evidence[0]?.expected as JsonObject | undefined;
@@ -229,6 +247,16 @@ export function evidenceDifferences(own: BrowserScanOutput | ScanResult, axe: Ax
               differences.push(`${key}:neighbors`);
           }
         }
+      }
+      if (rule.rule.id === "landmark-one-main") {
+        const present = axe.passes.some(
+          (entry) => entry.id === rule.rule.id && entry.nodes.includes(reference),
+        );
+        if (observed?.["present"] !== present || expected?.["present"] !== true)
+          differences.push(`${key}:main-presence`);
+        if (!checks.some((check) => check.id === "page-has-main"))
+          differences.push(`${key}:main-check`);
+        // Canonical check data does not expose its modal boolean; fixtures assert that independently.
       }
       if (rule.rule.id === "button-name") {
         const passed = axe.passes.some(
