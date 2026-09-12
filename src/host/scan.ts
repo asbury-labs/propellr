@@ -72,7 +72,13 @@ export async function scanTarget(
   };
   const guard = () => {
     if (signal.aborted) throw new Error("scan-cancelled");
-    if (target.documentId !== expectedDocument) throw new Error("scan-document-changed");
+    if (
+      target.documentId !== expectedDocument ||
+      [...request.scope.include, ...request.scope.exclude].some(
+        (scope) => scope.pageId === target.pageId && scope.documentId !== expectedDocument,
+      )
+    )
+      throw new Error("scan-document-changed");
   };
   guard();
   const root = request.scope.include[0];

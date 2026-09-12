@@ -35,6 +35,9 @@ test.each(["chromium", "firefox", "webkit"] as const)(
       for (const page of [own.page, canonical.page])
         await page.frames()[1]!.goto("http://slice.invalid/nested");
       expect(target.documentId).not.toBe(old.scope.include[0].documentId);
+      await expect(scanTarget(target, old, context, new AbortController().signal)).rejects.toThrow(
+        "document-changed",
+      );
       await expect(
         scanTarget(
           target,

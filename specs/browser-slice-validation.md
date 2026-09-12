@@ -214,3 +214,13 @@ coverage must be truthful, while scope/configuration compatibility and raw membe
 are checked. Browser-only whole-document limits are not imposed on other producers.
 Counts above are per executed revision, not conflicting claims for one revision;
 GitHub's PR description identifies the latest verified head and run.
+
+Fifth review's new-root concern was already fixed by transfer guards. Additional
+repairs reject old request-scope document generations even when scanTarget's expected
+argument defaults to the current target, and stop naming/geometry evaluation when
+the 96-occurrence budget is exhausted. Geometry now evaluates at most 96 target rows
+against at most 2,000 facts instead of continuing through all widget pairs after
+output is full. A real 120-button case confirms exactly 96 geometry evaluations in
+all engines; applicability still runs for later rules with no candidates. No spatial
+index or speedup claim added. Full pinned `pnpm validate` passed 167 tests: 62 contracts,
+31 host, 13 playbook, 43 parity/browser and 18 reporting.

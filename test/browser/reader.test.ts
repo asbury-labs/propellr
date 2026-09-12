@@ -50,6 +50,35 @@ test("occurrence budget stays partial and does not invent later-rule inapplicabi
   }
 });
 
+test("occurrence exhaustion stops geometry work, not just output retention", () => {
+  const fixture = document.createElement("div");
+  let geometryReads = 0;
+  for (let index = 0; index < 120; index++) {
+    const button = document.createElement("button");
+    button.textContent = "A";
+    button.style.cssText = "width:32px;height:32px;display:inline-block";
+    const getRects = button.getClientRects.bind(button);
+    button.getClientRects = () => {
+      geometryReads++;
+      return getRects();
+    };
+    fixture.append(button);
+  }
+  document.body.append(fixture);
+  const analysis = createAnalysis();
+  try {
+    const result = analysis.scan({
+      target: { pageId: "page_browser" as PageId, documentId: "browser-doc", path: [] },
+      rules: [{ rule: { id: "target-size", version: "4.13.0" }, options: {} }],
+    });
+    expect(geometryReads).toBe(96);
+    expect(result.gaps.some((gap) => gap.code === "occurrence-limit")).toBe(true);
+  } finally {
+    analysis.finish();
+    fixture.remove();
+  }
+});
+
 test("oversized target identities and evidence remain explicit gaps", () => {
   const fixture = document.createElement("main");
   const analysis = createAnalysis();

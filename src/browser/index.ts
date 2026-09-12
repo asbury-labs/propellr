@@ -375,18 +375,20 @@ export function createAnalysis(): BrowserAnalysis {
       }
       const occurrences: Occurrence[] = [];
       let limited = false;
+      const available = () => {
+        if (count < 96) return true;
+        limited = true;
+        gap("occurrence-limit", "Scan occurrence budget exceeded");
+        return false;
+      };
       const add = (make: () => Occurrence) => {
-        if (count >= 96) {
-          limited = true;
-          gap("occurrence-limit", "Scan occurrence budget exceeded");
-          return;
-        }
-        occurrences.push(make());
+        if (available()) occurrences.push(make());
       };
       if (rule.id === "button-name")
         for (const fact of facts.filter(
           (fact) => fact.visible && fact.node.localName === "button",
         )) {
+          if (!available()) break;
           const named = name(fact.node);
           const role = fact.node.getAttribute("role");
           const unsupported = named.unsupported || (role !== null && role !== "button");
@@ -408,6 +410,8 @@ export function createAnalysis(): BrowserAnalysis {
         }
       if (rule.id === "target-size")
         for (const fact of widgets) {
+          // At most 96 target rows against the bounded facts, never all W² target pairs.
+          if (!available()) break;
           const { node, rect, style } = fact;
           const peers = widgets.filter(
             (other) =>
