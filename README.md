@@ -39,7 +39,9 @@ verify the bundle hash again and fail if absent or changed. Preparation also fai
 closed on corrupt cached tarballs; inspect and explicitly repair the configured external
 cache before retrying. No silent integrity-error recovery. Cache entries must be regular
 files, package directories cannot be symlinks, and verified files are never rewritten.
-Only missing files are created exclusively from verified archive bytes. This standalone
+Only missing files are created exclusively from verified archive bytes. A concurrent
+exclusive-write winner is accepted only after no-follow reread and exact byte verification;
+partial/conflicting entries still fail closed without retries or repair. This standalone
 macOS/Linux preparation command holds checked directories during writes, rather than
 relying on parent pathnames remaining unchanged. No canonical checkout
 or upstream tooling is needed in CI. Raw generated results: `artifacts/parity/`

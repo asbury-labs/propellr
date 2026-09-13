@@ -26,6 +26,17 @@ async function readCached(path: string): Promise<Buffer | undefined> {
   }
 }
 
+// A concurrent writer may win exclusive creation. Accept only a complete byte-identical entry.
+async function storeCached(path: string, bytes: Buffer): Promise<void> {
+  try {
+    await writeFile(path, bytes, { flag: "wx", mode: 0o600 });
+  } catch (error) {
+    if (!(error instanceof Error) || !("code" in error) || error.code !== "EEXIST") throw error;
+    const cached = await readCached(path);
+    if (!cached?.equals(bytes)) throw new Error("Reference cache entry integrity mismatch");
+  }
+}
+
 const executionDirectory = process.cwd();
 const requestedCache = resolve(
   process.env["PROPELLR_REFERENCE_CACHE"] ??
@@ -100,7 +111,7 @@ const bundle = extracted[0]!;
 const sha256 = createHash("sha256").update(bundle.bytes).digest("hex");
 if (reference.primary.bundleSha256 && sha256 !== reference.primary.bundleSha256)
   throw new Error("Reference bundle hash mismatch");
-if (!cachedTarball) await writeFile(tarball, bytes, { flag: "wx", mode: 0o600 });
+if (!cachedTarball) await storeCached(tarball, bytes);
 try {
   await mkdir("package", { mode: 0o700 });
 } catch (error) {
@@ -114,7 +125,7 @@ for (const entry of extracted.map(({ name, bytes }) => ({ path: name, bytes })))
     throw new Error("Reference cache entry integrity mismatch");
   if (!cached) pending.push(entry);
 }
-for (const entry of pending) await writeFile(entry.path, entry.bytes, { flag: "wx", mode: 0o600 });
+for (const entry of pending) await storeCached(entry.path, entry.bytes);
 for (const [path, expected] of [
   [cache, cacheDirectory],
   [join(cache, "package"), packageDirectory],

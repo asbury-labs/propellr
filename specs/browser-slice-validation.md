@@ -489,3 +489,10 @@ budget and retains one reader-limit gap. Native query/layout costs are not claim
 Full pinned validation passed 198 tests: 62 contracts, 38 host, 13 playbook, 67 parity/browser,
 18 reporting. Corpus remains 35 fixtures per engine / 105 comparisons. All three benchmark
 cases passed again.
+
+Twenty-fourth review accepts an exclusive-write EEXIST winner only after no-follow reread and
+exact byte verification, for tarballs and extracted entries. Deterministic real-file winner
+controls cover matching and conflicting bytes for both paths. Matching complete entries are
+reused; conflicting entries remain untouched and fail integrity checks. No retries, locking
+or automatic corruption repair added; partial/in-progress content still fails closed.
+Full pinned validation passed 198 tests / 105 comparisons; all three benchmark cases passed.

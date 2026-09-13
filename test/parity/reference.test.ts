@@ -151,6 +151,51 @@ syncBuiltinESMExports();`,
         [join(cache, tarballName), bundle].map(async (path) => (await stat(path)).mtimeMs),
       ),
     ).toEqual(before);
+
+    for (const entry of ["tarball", "bundle"] as const) {
+      for (const matching of [true, false]) {
+        const raceCache = join(directory, `exclusive-${entry}-${matching}`);
+        await mkdir(raceCache);
+        if (entry === "bundle") await writeFile(join(raceCache, tarballName), bytes);
+        const marker = join(directory, `exclusive-${entry}-${matching}-fired`);
+        const hook = join(directory, `exclusive-${entry}-${matching}.mjs`);
+        await writeFile(
+          hook,
+          `import fs from 'node:fs';
+import { syncBuiltinESMExports } from 'node:module';
+globalThis.fetch = async (url) => {
+  if (url !== ${JSON.stringify(reference.primary.tarball)}) throw new Error('Unexpected download');
+  return new Response(fs.readFileSync(${JSON.stringify(pinned)}));
+};
+const original = fs.promises.writeFile;
+let fired = false;
+fs.promises.writeFile = async (...args) => {
+  if (!fired) {
+    fired = true;
+    fs.writeFileSync(args[0], ${matching ? "args[1]" : "'conflicting winner'"}, { flag: 'wx' });
+    fs.writeFileSync(${JSON.stringify(marker)}, 'fired');
+  }
+  return original(...args);
+};
+syncBuiltinESMExports();`,
+        );
+        const result = prepare(raceCache, hook);
+        expect(await readFile(marker, "utf8")).toBe("fired");
+        expect(result.status, result.stderr).toBe(matching ? 0 : 1);
+        if (!matching) expect(result.stderr).toContain("Reference cache entry integrity mismatch");
+        const destination = join(
+          raceCache,
+          entry === "tarball" ? tarballName : "package/axe.min.js",
+        );
+        expect(await readFile(destination)).toEqual(
+          matching
+            ? entry === "tarball"
+              ? bytes
+              : await readFile(bundle)
+            : Buffer.from("conflicting winner"),
+        );
+      }
+    }
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
