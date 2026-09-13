@@ -37,7 +37,8 @@ verifies integrity, then extracts the browser bundle/license/metadata without
 installing axe-core. Cache must stay outside this worktree. Parity/benchmark tests
 verify the bundle hash again and fail if absent or changed. Preparation also fails
 closed on corrupt cached tarballs; inspect and explicitly repair the configured external
-cache before retrying. No silent integrity-error recovery. Cache entries must be regular
+cache before retrying. Downloads have a 30-second deadline through response-body consumption.
+No silent integrity-error recovery. Cache entries must be regular
 files, package directories cannot be symlinks, and verified files are never rewritten.
 Only missing files are created exclusively from verified archive bytes. A concurrent
 exclusive-write winner is accepted only after no-follow reread and exact byte verification;

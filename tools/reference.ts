@@ -90,7 +90,7 @@ const tarball = "axe-core-4.13.0.tgz";
 const cachedTarball = await readCached(tarball);
 let bytes = cachedTarball;
 if (!bytes) {
-  const response = await fetch(reference.primary.tarball);
+  const response = await fetch(reference.primary.tarball, { signal: AbortSignal.timeout(30_000) });
   if (!response.ok) throw new Error(`Reference download failed: ${response.status}`);
   bytes = Buffer.from(await response.arrayBuffer());
 }

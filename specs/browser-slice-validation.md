@@ -513,3 +513,9 @@ subtrees, plus the same subtrees with a supported aria-label. Direct cancellatio
 messages are distinct and verified by real IPC controls. Full pinned validation passed
 201 tests: 62 contracts, 38 host, 13 playbook, 70 parity/browser, 18 reporting.
 Corpus: 36 fixtures per engine / 108 comparisons. All three benchmark cases passed.
+
+Twenty-sixth review adds a 30-second reference-download deadline, including body consumption.
+Real loopback servers stall before headers and after a partial body; the CLI aborts, exits
+unsuccessfully and writes no cache artifact in both cases. Test instrumentation verifies the
+configured 30-second deadline and shortens only its timer for these controlled stalls.
+Full pinned validation passed 201 tests / 108 comparisons; all three benchmark cases passed.

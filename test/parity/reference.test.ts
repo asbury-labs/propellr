@@ -196,6 +196,46 @@ syncBuiltinESMExports();`,
         );
       }
     }
+    for (const stage of ["headers", "body"]) {
+      const stalledCache = join(directory, `stalled-${stage}`);
+      await mkdir(stalledCache);
+      const marker = join(directory, `stalled-${stage}-signal`);
+      const received = join(directory, `stalled-${stage}-received`);
+      const hook = join(directory, `stalled-${stage}.mjs`);
+      await writeFile(
+        hook,
+        `import fs from 'node:fs';
+import { createServer } from 'node:http';
+const server = createServer((_request, response) => {
+  fs.writeFileSync(${JSON.stringify(received)}, 'received');
+  ${stage === "body" ? "response.writeHead(200); response.write('unfinished archive');" : ""}
+});
+await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+const address = server.address();
+const timeout = AbortSignal.timeout.bind(AbortSignal);
+AbortSignal.timeout = milliseconds => {
+  if (milliseconds !== 30_000) throw new Error('Unexpected reference deadline');
+  return timeout(200);
+};
+const fetch = globalThis.fetch;
+globalThis.fetch = (url, options) => {
+  if (url !== ${JSON.stringify(reference.primary.tarball)} || !options?.signal) {
+    server.close(); throw new Error('Missing reference deadline');
+  }
+  options.signal.addEventListener('abort', () => {
+    fs.writeFileSync(${JSON.stringify(marker)}, 'aborted');
+    setImmediate(() => { server.closeAllConnections(); server.close(); });
+  }, { once: true });
+  return fetch('http://127.0.0.1:' + address.port, options);
+};`,
+      );
+      const result = prepare(stalledCache, hook);
+      expect(result.status, result.stderr).toBe(1);
+      expect(await readFile(received, "utf8")).toBe("received");
+      expect(await readFile(marker, "utf8")).toBe("aborted");
+      expect(result.stderr).toMatch(/TimeoutError|AbortError/);
+      expect(await readdir(stalledCache)).toEqual([]);
+    }
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
