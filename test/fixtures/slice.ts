@@ -100,14 +100,10 @@ export const fixtures: readonly Fixture[] = [
   {
     id: "case-variant-role",
     html: doc(
-      '<div role="MAIN"><div id="upper-button" role="BUTTON" tabindex="0" style="width:80px;height:32px">Save</div></div>',
+      '<div role="MAIN"><div id="upper-button" role="BUTTON" tabindex="0" style="width:80px;height:32px">Save</div><button id="upper-native" role="BUTTON">Save</button></div>',
     ),
     expected: { "landmark-one-main": ["html"] },
     mainPresence: { present: false, modal: false },
-    incomplete: { "target-size": ["#upper-button"] },
-    allowedMismatches: ["target-size:#upper-button"],
-    unsupported:
-      "Canonical widget role lookup is case-insensitive, unlike its landmark selector; case-variant widget geometry remains unsupported.",
   },
   {
     id: "role-token-list",

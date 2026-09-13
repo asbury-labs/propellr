@@ -190,7 +190,7 @@ function widget(node: Element): boolean {
 function supportedWidget(node: Element): boolean {
   return (
     (node.matches("button, a[href]") && !node.hasAttribute("role")) ||
-    node.getAttribute("role") === "button"
+    node.getAttribute("role")?.toLowerCase() === "button"
   );
 }
 
@@ -417,7 +417,8 @@ export function createAnalysis(): BrowserAnalysis {
           if (!available()) break;
           const named = name(fact.node);
           const role = fact.node.getAttribute("role");
-          const unsupported = named.unsupported || (role !== null && role !== "button");
+          const unsupported =
+            named.unsupported || (role !== null && role.toLowerCase() !== "button");
           add(() =>
             occurrence(
               fact,

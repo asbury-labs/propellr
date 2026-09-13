@@ -22,8 +22,8 @@ test("reference preparation rejects linked cache entries and never rewrites veri
   const worktree = join(directory, "worktree");
   const tool = join(worktree, "tools/reference.ts");
   const tarballName = "axe-core-4.13.0.tgz";
-  const prepare = (cache: string) =>
-    spawnSync(process.execPath, [tool], {
+  const prepare = (cache: string, hook?: string) =>
+    spawnSync(process.execPath, [...(hook ? ["--import", hook] : []), tool], {
       env: { ...process.env, PROPELLR_REFERENCE_CACHE: cache },
       encoding: "utf8",
       timeout: 20_000,
@@ -88,6 +88,47 @@ test("reference preparation rejects linked cache entries and never rewrites veri
     expect((await stat(pinned)).mtimeMs).toBe(originalTime);
     await expect(lstat(absent)).rejects.toMatchObject({ code: "ENOENT" });
     expect(await readdir(targetDirectory)).toEqual(["marker"]);
+
+    await mkdir(join(worktree, "package"));
+    for (const vector of ["root", "package"] as const) {
+      const cache = join(directory, `race-${vector}`);
+      await mkdir(cache);
+      await writeFile(join(cache, tarballName), bytes);
+      const swap = vector === "root" ? cache : join(cache, "package");
+      const held = `${swap}-held`;
+      const marker = join(directory, `race-${vector}-fired`);
+      const hook = join(directory, `race-${vector}.mjs`);
+      // Interpose a real rename/symlink immediately before the first actual output write.
+      await writeFile(
+        hook,
+        `import fs from 'node:fs';
+import { syncBuiltinESMExports } from 'node:module';
+const original = fs.promises.writeFile;
+let fired = false;
+fs.promises.writeFile = async (...args) => {
+  if (!fired) {
+    fired = true;
+    fs.renameSync(${JSON.stringify(swap)}, ${JSON.stringify(held)});
+    fs.symlinkSync(${JSON.stringify(worktree)}, ${JSON.stringify(swap)});
+    fs.writeFileSync(${JSON.stringify(marker)}, 'fired');
+  }
+  return original(...args);
+};
+syncBuiltinESMExports();`,
+      );
+      const result = prepare(cache, hook);
+      expect(await readFile(marker, "utf8")).toBe("fired");
+      expect(result.status, result.stderr).toBe(1);
+      expect(result.stderr).toContain("Reference cache directory changed");
+      const heldBundle = join(held, vector === "root" ? "package/axe.min.js" : "axe.min.js");
+      expect(
+        createHash("sha256")
+          .update(await readFile(heldBundle))
+          .digest("hex"),
+      ).toBe(reference.primary.bundleSha256);
+      await expect(lstat(join(worktree, "axe.min.js"))).rejects.toMatchObject({ code: "ENOENT" });
+      expect(await readdir(join(worktree, "package"))).toEqual([]);
+    }
 
     const cache = join(directory, "regular-cache");
     await mkdir(cache);

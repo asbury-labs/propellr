@@ -85,8 +85,8 @@ checkpoints with explicit reasons. Completed
 checkpoint scans survive later cancellation, browser loss and cleanup failure. Cleanup closes an open dialog if still authorized; failure
 is explicit and cancellation preserves checkpoints. Navigation invalidates document
 IDs, including any child-frame navigation; a changed document cannot commit an old checkpoint.
-Direct-scan and journey failures retain `scan-document-changed` diagnostics instead of
-collapsing navigation into evaluator failure. Page scripts and external
+Direct-scan and journey failures, including blocked checkpoint reasons, retain
+`scan-document-changed` diagnostics instead of collapsing navigation into evaluator failure. Page scripts and external
 browser users are not locked out, so this does not claim atomic DOM observation.
 
 Direct scans enforce allowed current origin and one whole current document. Transfer-stale

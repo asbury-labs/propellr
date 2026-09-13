@@ -425,3 +425,23 @@ geometry incomplete; it does not broaden landmark behavior. A three-engine contr
 both outcomes. Full pinned validation passed 193 tests: 62 contracts, 36 host, 13 playbook,
 64 parity/browser and 18 reporting. Corpus: 35 fixtures per engine / 105 comparisons.
 All three benchmark cases passed again.
+
+Nineteenth review adds held-directory writes to the standalone macOS/Linux cache CLI.
+After entry, device/inode identity and actual location are checked; filesystem writes use
+basenames relative to the process-held directory, not re-resolved parent paths. Missing
+ancestor creation uses the same approach. Final identity checks reject replaced cache aliases.
+Native tar lookup retains the original invocation directory.
+
+Two deterministic races rename and replace cache/package paths with worktree symlinks at
+the first actual output write. Verified bundle bytes reach only the held directory; no
+worktree artifact is created, and preparation reports directory-changed. Fresh nested-cache
+preparation also passed. No directory-handle/openat extension or extra native dependency added.
+
+Supported button-role comparisons now normalize case consistently, including native naming
+and simple widget geometry. The expanded uppercase control is fully equivalent without a
+mismatch allowance; canonical landmark case behavior remains unchanged. Blocked checkpoints
+also preserve document-change reasons, verified by the real IPC navigation case.
+
+The review's count mismatch used an earlier PR description; current claims were already
+aligned. Full pinned validation passed 193 tests / 105 comparisons, and all three benchmark
+cases passed after these changes.

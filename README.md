@@ -39,7 +39,9 @@ verify the bundle hash again and fail if absent or changed. Preparation also fai
 closed on corrupt cached tarballs; inspect and explicitly repair the configured external
 cache before retrying. No silent integrity-error recovery. Cache entries must be regular
 files, package directories cannot be symlinks, and verified files are never rewritten.
-Only missing files are created exclusively from verified archive bytes. No canonical checkout
+Only missing files are created exclusively from verified archive bytes. This standalone
+macOS/Linux preparation command holds checked directories during writes, rather than
+relying on parent pathnames remaining unchanged. No canonical checkout
 or upstream tooling is needed in CI. Raw generated results: `artifacts/parity/`
 and `artifacts/bench/`; these are ignored, not a publishing channel.
 
@@ -130,8 +132,8 @@ Reader bounds: 2,000 elements, 32 boundary steps,
 shadow DOM return explicit not-evaluated/partial results, not guessed visibility.
 Generated pseudo-element boxes make target-size incomplete for their document.
 Whitespace/fallback role-token lists return not-evaluated/partial results; full ARIA
-role resolution is not implemented. Case-variant widget roles remain explicit
-incomplete geometry rather than disappearing from candidate coverage.
+role resolution is not implemented. Supported button-role comparisons are case-insensitive;
+landmark selectors retain canonical case semantics.
 
 Playbook checkpoints retain actual scans, including after later failure/cancellation.
 Reached journey and complete selected coverage do not imply clean accessibility:

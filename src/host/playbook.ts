@@ -91,7 +91,16 @@ export async function runDialog(
         throw new Error("stale-checkpoint-scan");
       }
       record({ id, observed, state: "reached", scans: [result] });
-    } catch {
+    } catch (error) {
+      if (
+        target.documentId !== documentId ||
+        (error instanceof Error && error.message === "scan-document-changed")
+      ) {
+        reason = {
+          code: "scan-document-changed",
+          message: "Document binding changed; checkpoint scan was not committed",
+        };
+      }
       record({ id, observed, state: "blocked", reason });
       throw new Error("checkpoint-scan-failed");
     }

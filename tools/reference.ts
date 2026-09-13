@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { constants } from "node:fs";
 import { lstat, mkdir, open, realpath, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { execFileSync } from "node:child_process";
 import reference from "../reference.json" with { type: "json" };
 
@@ -26,6 +26,7 @@ async function readCached(path: string): Promise<Buffer | undefined> {
   }
 }
 
+const executionDirectory = process.cwd();
 const requestedCache = resolve(
   process.env["PROPELLR_REFERENCE_CACHE"] ??
     join(homedir(), ".cache/propellr-reference/axe-core-4.13.0"),
@@ -36,7 +37,19 @@ const external = (path: string) => {
   if (!isAbsolute(location) && location !== ".." && !location.startsWith(`..${sep}`))
     throw new Error("Reference cache must be outside this project");
 };
-// Check existing ancestors before creating missing directories through a configured alias.
+// This standalone POSIX CLI uses cwd as a held directory reference. Relative writes cannot
+// be redirected by replacing a checked parent pathname after entry.
+async function enterExternalDirectory(path: string) {
+  const expected = await lstat(path, { bigint: true });
+  if (!expected.isDirectory()) throw new Error("Reference cache must be a real directory");
+  process.chdir(path);
+  const held = await lstat(".", { bigint: true });
+  if (held.dev !== expected.dev || held.ino !== expected.ino)
+    throw new Error("Reference cache directory changed");
+  external(await realpath("."));
+  return held;
+}
+// Check and hold existing ancestors before creating missing directories through an alias.
 async function ensureExternalDirectory(path: string): Promise<string> {
   try {
     const actual = await realpath(path);
@@ -47,20 +60,24 @@ async function ensureExternalDirectory(path: string): Promise<string> {
   }
   const parent = dirname(path);
   if (parent === path) throw new Error("Reference cache ancestor is unavailable");
-  await ensureExternalDirectory(parent);
+  await enterExternalDirectory(await ensureExternalDirectory(parent));
+  const name = basename(path);
   try {
-    await mkdir(path, { mode: 0o700 });
+    await mkdir(name, { mode: 0o700 });
   } catch (error) {
     if (!(error instanceof Error) || !("code" in error) || error.code !== "EEXIST") throw error;
   }
-  const actual = await realpath(path);
-  external(actual);
-  return actual;
+  await enterExternalDirectory(name);
+  return realpath(".");
 }
+if (process.platform !== "darwin" && process.platform !== "linux")
+  throw new Error("Reference preparation supports macOS and Linux only");
 external(requestedCache);
 const cache = await ensureExternalDirectory(requestedCache);
-const tarball = join(cache, "axe-core-4.13.0.tgz");
-let bytes = await readCached(tarball);
+const cacheDirectory = await enterExternalDirectory(cache);
+const tarball = "axe-core-4.13.0.tgz";
+const cachedTarball = await readCached(tarball);
+let bytes = cachedTarball;
 if (!bytes) {
   const response = await fetch(reference.primary.tarball);
   if (!response.ok) throw new Error(`Reference download failed: ${response.status}`);
@@ -75,6 +92,7 @@ const extracted = ["axe.min.js", "LICENSE", "package.json"].map((name) => ({
   name,
   bytes: execFileSync("tar", ["-xzOf", "-", `package/${name}`], {
     input: bytes,
+    cwd: executionDirectory,
     maxBuffer: 8 * 1024 * 1024,
   }),
 }));
@@ -82,23 +100,27 @@ const bundle = extracted[0]!;
 const sha256 = createHash("sha256").update(bundle.bytes).digest("hex");
 if (reference.primary.bundleSha256 && sha256 !== reference.primary.bundleSha256)
   throw new Error("Reference bundle hash mismatch");
-const packageDirectory = join(cache, "package");
+if (!cachedTarball) await writeFile(tarball, bytes, { flag: "wx", mode: 0o600 });
 try {
-  await mkdir(packageDirectory, { mode: 0o700 });
+  await mkdir("package", { mode: 0o700 });
 } catch (error) {
   if (!(error instanceof Error) || !("code" in error) || error.code !== "EEXIST") throw error;
 }
-if (!(await lstat(packageDirectory)).isDirectory())
-  throw new Error("Reference package cache must be a real directory");
+const packageDirectory = await enterExternalDirectory("package");
 const pending: { path: string; bytes: Buffer }[] = [];
-for (const entry of [
-  { path: tarball, bytes },
-  ...extracted.map(({ name, bytes }) => ({ path: join(packageDirectory, name), bytes })),
-]) {
+for (const entry of extracted.map(({ name, bytes }) => ({ path: name, bytes }))) {
   const cached = await readCached(entry.path);
   if (cached && !cached.equals(entry.bytes))
     throw new Error("Reference cache entry integrity mismatch");
   if (!cached) pending.push(entry);
 }
 for (const entry of pending) await writeFile(entry.path, entry.bytes, { flag: "wx", mode: 0o600 });
+for (const [path, expected] of [
+  [cache, cacheDirectory],
+  [join(cache, "package"), packageDirectory],
+] as const) {
+  const current = await lstat(path, { bigint: true });
+  if (!current.isDirectory() || current.dev !== expected.dev || current.ino !== expected.ino)
+    throw new Error("Reference cache directory changed");
+}
 console.log(JSON.stringify({ cache, integrity, bundleSha256: sha256 }, null, 2));

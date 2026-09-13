@@ -210,6 +210,17 @@ describe("local session host over real Unix IPC", () => {
                   ]),
                 }
               : {}),
+            ...(kind === "playbook-url-change"
+              ? {
+                  checkpoints: expect.arrayContaining([
+                    expect.objectContaining({
+                      id: "opened",
+                      state: "blocked",
+                      reason: expect.objectContaining({ code: "scan-document-changed" }),
+                    }),
+                  ]),
+                }
+              : {}),
             completedScans: [],
           });
           expect(spy).toHaveBeenCalledOnce();
