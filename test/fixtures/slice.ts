@@ -98,6 +98,14 @@ export const fixtures: readonly Fixture[] = [
     expected: {},
   },
   {
+    id: "image-map-area",
+    html: doc(
+      `<main><img alt="Map" usemap="#map" width="40" height="40" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'/%3E"><map name="map"><area id="area-native" href="#a" alt="A" shape="rect" coords="0,0,10,10"><area id="area-role" href="#b" alt="B" role="button" tabindex="0" shape="rect" coords="12,0,22,10"></map></main>`,
+    ),
+    expected: {},
+    mainPresence: { present: true, modal: false },
+  },
+  {
     id: "case-variant-role",
     html: doc(
       '<div role="MAIN"><div id="upper-button" role="BUTTON" tabindex="0" style="width:80px;height:32px">Save</div><button id="upper-native" role="BUTTON">Save</button></div>',

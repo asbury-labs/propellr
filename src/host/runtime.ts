@@ -525,7 +525,11 @@ export class SessionHost {
                           ? "Document generation changed; no current result committed"
                           : code === "scan-stale"
                             ? "DOM or viewport changed during transfer; no current result committed"
-                            : "Scan interrupted, evaluation failed or result budget exceeded; no current result committed",
+                            : code === "scan-cancelled"
+                              ? "Scan cancelled; no current result committed"
+                              : code === "scan-result-limit"
+                                ? "Scan result exceeds retention budget; no current result committed"
+                                : "Scan failed; no current result committed",
                     },
                   ],
                   completedScans: [],

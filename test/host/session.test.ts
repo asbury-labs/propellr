@@ -274,6 +274,16 @@ describe("local session host over real Unix IPC", () => {
           if (!("kind" in operation)) throw new Error("Expected operation");
           expect(await terminal(client, operation)).toMatchObject({
             state: kind.endsWith("url-change") ? "failed" : "cancelled",
+            ...(kind === "scan"
+              ? {
+                  diagnostics: [
+                    {
+                      code: "scan-cancelled",
+                      message: "Scan cancelled; no current result committed",
+                    },
+                  ],
+                }
+              : {}),
             ...(kind.endsWith("url-change")
               ? {
                   diagnostics: expect.arrayContaining([
@@ -353,7 +363,12 @@ describe("local session host over real Unix IPC", () => {
           expect(omitted).toBe(true);
           expect(await run("oversized-current", 85, 850)).toMatchObject({
             state: "failed",
-            diagnostics: [{ code: "scan-result-limit" }],
+            diagnostics: [
+              {
+                code: "scan-result-limit",
+                message: "Scan result exceeds retention budget; no current result committed",
+              },
+            ],
             completedScans: [],
           });
           await page.goto(FIXTURE_URL);

@@ -137,7 +137,10 @@ Native modals rooted inside shadow DOM return explicit not-evaluated/partial res
 Generated pseudo-element boxes make target-size incomplete for their document.
 Whitespace/fallback role-token lists return not-evaluated/partial results; full ARIA
 role resolution is not implemented. Supported button-role comparisons are case-insensitive;
-landmark selectors retain canonical case semantics.
+landmark selectors retain canonical case semantics. Canonical target-size excludes image-map
+areas. Naming shares 2,000 traversal/string-processing steps and 16,384 input characters per
+scan, with a 64-level descendant-depth limit. Exhaustion is incomplete; supported positive
+naming checks skip later candidates.
 
 Playbook checkpoints retain actual scans, including after later failure/cancellation.
 Reached journey and complete selected coverage do not imply clean accessibility:

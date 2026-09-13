@@ -31,9 +31,11 @@ function parent(node: Element): Element | null {
   const root = node.getRootNode();
   return root.nodeType === Node.DOCUMENT_FRAGMENT_NODE ? (root as ShadowRoot).host : null;
 }
-function composedContains(ancestor: Element, node: Element): boolean {
-  for (let current: Element | null = node; current; current = parent(current))
+function composedContains(ancestor: Element, node: Element, budget?: NamingBudget): boolean {
+  for (let current: Element | null = node; current; current = parent(current)) {
+    if (budget && !takeNameBudget(budget)) return false;
     if (current === ancestor) return true;
+  }
   return false;
 }
 function selector(node: Element): string {
@@ -56,8 +58,9 @@ function selector(node: Element): string {
   }
   return pieces.join(" > ");
 }
-function visible(node: Element): boolean {
+function visible(node: Element, budget?: NamingBudget): boolean {
   for (let current: Element | null = node; current; current = parent(current)) {
+    if (budget && !takeNameBudget(budget)) return false;
     const style = current.ownerDocument.defaultView!.getComputedStyle(current);
     if (
       current.getAttribute("aria-hidden") === "true" ||
@@ -69,94 +72,140 @@ function visible(node: Element): boolean {
       return false;
   }
   const frame = node.ownerDocument.defaultView?.frameElement;
-  if (frame && !visible(frame)) return false;
+  if (frame && !visible(frame, budget)) return false;
   const modal = node.ownerDocument.querySelector("dialog:modal");
-  if (modal && !composedContains(modal, node)) return false;
+  if (modal && !composedContains(modal, node, budget)) return false;
   return true;
 }
-function children(node: Element): readonly Node[] {
+interface NamingBudget {
+  nodes: number;
+  characters: number;
+  exhausted: boolean;
+}
+function takeNameBudget(budget: NamingBudget, characters = 0): boolean {
+  if (budget.exhausted || budget.nodes < 1 || characters > budget.characters) {
+    budget.exhausted = true;
+    return false;
+  }
+  budget.nodes--;
+  budget.characters -= characters;
+  return true;
+}
+function nameString(value: string, budget: NamingBudget): string {
+  return takeNameBudget(budget, value.length) ? compact(value) : "";
+}
+function children(node: Element): Iterable<Node> {
   if (node.localName === "slot") {
     const assigned = (node as HTMLSlotElement).assignedNodes({ flatten: true });
     if (assigned.length) return assigned;
   }
-  return [...(node.shadowRoot ?? node).childNodes];
+  return (node.shadowRoot ?? node).childNodes;
 }
 function text(
   node: Element,
+  budget: NamingBudget,
   includeHidden = false,
   seen = new Set<Element>(),
+  depth = 0,
 ): { value: string; unsupported: boolean } {
   if (seen.has(node)) return { value: "", unsupported: false };
+  if (depth >= 64 || !takeNameBudget(budget)) {
+    budget.exhausted = true;
+    return { value: "", unsupported: true };
+  }
   seen.add(node);
-  if (!includeHidden && !visible(node)) return { value: "", unsupported: false };
+  if (!includeHidden && !visible(node, budget)) return { value: "", unsupported: budget.exhausted };
   let unsupported = node.namespaceURI !== "http://www.w3.org/1999/xhtml";
   for (const pseudo of ["::before", "::after"]) {
     const content = node.ownerDocument.defaultView!.getComputedStyle(node, pseudo).content;
     if (content && !["none", "normal", '""'].includes(content)) unsupported = true;
   }
-  const label = node.getAttribute("aria-label");
-  if (label?.trim()) return { value: compact(label), unsupported };
+  const label = nameString(node.getAttribute("aria-label") ?? "", budget);
+  if (label || budget.exhausted)
+    return { value: label, unsupported: unsupported || budget.exhausted };
   if (node.localName === "img")
-    return { value: compact(node.getAttribute("alt") ?? ""), unsupported };
+    return { value: nameString(node.getAttribute("alt") ?? "", budget), unsupported };
   let value = "";
   for (const child of children(node)) {
-    if (child.nodeType === Node.TEXT_NODE) value += child.textContent ?? "";
-    else if (child.nodeType === Node.ELEMENT_NODE) {
+    if (!takeNameBudget(budget)) break;
+    if (child.nodeType === Node.TEXT_NODE) {
+      const textNode = child as Text;
+      if (!takeNameBudget(budget, textNode.length)) break;
+      value += textNode.substringData(0, textNode.length);
+    } else if (child.nodeType === Node.ELEMENT_NODE) {
       const element = child as Element;
       if (
         element.hasAttribute("aria-labelledby") ||
         ["input", "select", "textarea"].includes(element.localName)
       )
         unsupported = true;
-      const result = text(element, includeHidden, seen);
+      const result = text(element, budget, includeHidden, seen, depth + 1);
       value += result.value;
       unsupported ||= result.unsupported;
     }
+    if (budget.exhausted) break;
   }
-  return { value: compact(value), unsupported };
+  return { value: compact(value), unsupported: unsupported || budget.exhausted };
 }
-function name(node: Element): { value: string; source: string; unsupported: boolean } {
-  const refs = node.getAttribute("aria-labelledby")?.trim().split(/\s+/) ?? [];
-  const root = node.getRootNode() as Document | ShadowRoot;
-  const labels = refs.map((id) => root.getElementById(id)).filter((label) => label !== null);
-  const candidates: { value: string; source: string; unsupported: boolean }[] = [];
-  if (labels.length) {
-    const values = labels.map((label) => text(label, !visible(label)));
-    candidates.push({
-      value: compact(values.map((result) => result.value).join(" ")),
-      source: "aria-labelledby",
-      unsupported: values.some((result) => result.unsupported),
-    });
-  }
-  candidates.push({
-    value: compact(node.getAttribute("aria-label") ?? ""),
-    source: "aria-label",
-    unsupported: false,
-  });
-  if (node.localName === "button") {
-    const values = [...((node as HTMLButtonElement).labels ?? [])].map((label) => text(label));
-    candidates.push({
-      value: compact(values.map((result) => result.value).join(" ")),
-      source: "label",
-      unsupported: values.some((result) => result.unsupported),
-    });
-  }
-  candidates.push(
-    { ...text(node), source: "contents" },
-    { value: compact(node.getAttribute("title") ?? ""), source: "title", unsupported: false },
-  );
-  // button-name is an OR of naming checks, not a complete accessible-name API.
-  return (
-    candidates.find((candidate) => candidate.value && !candidate.unsupported) ??
-    candidates.find((candidate) => candidate.unsupported) ?? {
-      value: "",
-      source: "none",
-      unsupported: false,
+function name(
+  node: Element,
+  budget: NamingBudget,
+): { value: string; source: string; unsupported: boolean } {
+  if (budget.exhausted) return { value: "", source: "none", unsupported: true };
+  function* candidates() {
+    const refs = node.getAttribute("aria-labelledby") ?? "";
+    const root = node.getRootNode() as Document | ShadowRoot;
+    const referenced: ReturnType<typeof text>[] = [];
+    if (takeNameBudget(budget, refs.length)) {
+      for (const id of refs.trim().split(/\s+/)) {
+        if (!id) continue;
+        if (!takeNameBudget(budget)) break;
+        const label = root.getElementById(id);
+        if (label) referenced.push(text(label, budget, !visible(label, budget)));
+        if (budget.exhausted) break;
+      }
     }
-  );
+    if (referenced.length || budget.exhausted)
+      yield {
+        value: compact(referenced.map((result) => result.value).join(" ")),
+        source: "aria-labelledby",
+        unsupported: referenced.some((result) => result.unsupported),
+      };
+    yield {
+      value: nameString(node.getAttribute("aria-label") ?? "", budget),
+      source: "aria-label",
+      unsupported: false,
+    };
+    if (node.localName === "button") {
+      const values: ReturnType<typeof text>[] = [];
+      for (const label of (node as HTMLButtonElement).labels ?? []) {
+        values.push(text(label, budget));
+        if (budget.exhausted) break;
+      }
+      yield {
+        value: compact(values.map((result) => result.value).join(" ")),
+        source: "label",
+        unsupported: values.some((result) => result.unsupported),
+      };
+    }
+    yield { ...text(node, budget), source: "contents" };
+    yield {
+      value: nameString(node.getAttribute("title") ?? "", budget),
+      source: "title",
+      unsupported: false,
+    };
+  }
+  let unsupported: { value: string; source: string; unsupported: boolean } | undefined;
+  // button-name is an OR of naming checks. Stop after a supported positive check.
+  for (const candidate of candidates()) {
+    if (budget.exhausted) return { ...candidate, unsupported: true };
+    if (candidate.value && !candidate.unsupported) return candidate;
+    if (candidate.unsupported) unsupported ??= candidate;
+  }
+  return unsupported ?? { value: "", source: "none", unsupported: false };
 }
 function widget(node: Element): boolean {
-  if (node.matches(":disabled")) return false;
+  if (node.localName === "area" || node.matches(":disabled")) return false;
   const native = node.matches(
     "button, a[href], input:not([type=hidden]), select, textarea, summary",
   );
@@ -402,6 +451,8 @@ export function createAnalysis(): BrowserAnalysis {
       : undefined;
     if (roleTokens) gap(roleTokens.code, roleTokens.message, roleTokens.target);
     const unavailableScope = shadowModal ?? roleTokens;
+    const namingBudget: NamingBudget = { nodes: 2000, characters: 16_384, exhausted: false };
+    let namingLimitReported = false;
     // Shared occurrence budget must not depend on caller selection order.
     const orderedRules = input.rules.toSorted((a, b) => a.rule.id.localeCompare(b.rule.id));
     const rules: RuleResult[] = orderedRules.map(({ rule, options }) => {
@@ -433,7 +484,11 @@ export function createAnalysis(): BrowserAnalysis {
           (fact) => fact.visible && fact.node.localName === "button",
         )) {
           if (!available()) break;
-          const named = name(fact.node);
+          const named = name(fact.node, namingBudget);
+          if (namingBudget.exhausted && !namingLimitReported) {
+            namingLimitReported = true;
+            gap("naming-limit", "Naming node, text or depth budget exceeded", fact.target);
+          }
           const role = fact.node.getAttribute("role");
           const unsupported =
             named.unsupported || (role !== null && role.toLowerCase() !== "button");
@@ -449,7 +504,9 @@ export function createAnalysis(): BrowserAnalysis {
                 explanation:
                   "Discernible text from supported naming checks; name text not retained",
               },
-              "Complex naming or explicit-role branch is unsupported",
+              namingBudget.exhausted
+                ? "Naming traversal budget exceeded"
+                : "Complex naming or explicit-role branch is unsupported",
             ),
           );
         }

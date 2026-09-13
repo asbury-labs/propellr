@@ -496,3 +496,20 @@ controls cover matching and conflicting bytes for both paths. Matching complete 
 reused; conflicting entries remain untouched and fail integrity checks. No retries, locking
 or automatic corruption repair added; partial/in-progress content still fails closed.
 Full pinned validation passed 198 tests / 105 comparisons; all three benchmark cases passed.
+
+Twenty-fifth review's image-map recommendation contradicts pinned widget-not-inline-matches:
+isNotAreaElement explicitly excludes area nodes. An independent bundle probe and three-engine
+fixture confirm inapplicability for native and explicit-role areas; no image-map geometry added.
+
+Naming now shares 2,000 traversal/string-processing steps and 16,384 input characters across
+selected button-name work, with a 64-level descendant-depth cap. Visibility ancestor walks,
+reference lookups, text/comment child iteration and associated labels consume the work budget.
+String lengths are checked before compaction/splitting; ordinary childNodes stay lazy rather
+than being copied wholesale. Exhaustion produces naming-limit plus incomplete occurrences.
+Supported positive checks stop later naming candidates, preserving the OR-of-checks contract.
+
+Three-engine controls cover wide text-node lists, deep elements, long text and comment-heavy
+subtrees, plus the same subtrees with a supported aria-label. Direct cancellation/retention
+messages are distinct and verified by real IPC controls. Full pinned validation passed
+201 tests: 62 contracts, 38 host, 13 playbook, 70 parity/browser, 18 reporting.
+Corpus: 36 fixtures per engine / 108 comparisons. All three benchmark cases passed.

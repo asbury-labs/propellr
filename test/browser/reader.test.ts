@@ -63,6 +63,58 @@ test.each([true, false])(
   },
 );
 
+test("naming bounds subtree work and skips unused checks after a positive label", () => {
+  for (const shape of ["wide", "deep", "long-text", "comments"]) {
+    const button = document.createElement("button");
+    button.id = "naming-budget";
+    if (shape === "wide" || shape === "comments") {
+      for (let index = 0; index < 3000; index++)
+        button.append(
+          shape === "wide" ? document.createTextNode("x") : document.createComment("x"),
+        );
+    } else if (shape === "deep") {
+      let parent: Element = button;
+      for (let index = 0; index < 128; index++) {
+        const child = document.createElement("span");
+        parent.append(child);
+        parent = child;
+      }
+      parent.textContent = "Save";
+    } else button.textContent = "x".repeat(20_000);
+    document.body.append(button);
+    const analysis = createAnalysis();
+    const input = {
+      target: { pageId: "page_browser" as PageId, documentId: "browser-doc", path: [] },
+      rules: [{ rule: { id: "button-name", version: "4.13.0" }, options: {} }],
+    } as const;
+    try {
+      const limited = analysis.scan(input);
+      expect(
+        limited.gaps.some((gap) => gap.code === "naming-limit"),
+        shape,
+      ).toBe(true);
+      expect(limited.rules[0]).toMatchObject({
+        state: "evaluated",
+        occurrences: [{ outcome: "incomplete" }],
+      });
+      analysis.finish();
+      button.setAttribute("aria-label", "Save");
+      const labelled = analysis.scan(input);
+      expect(
+        labelled.gaps.some((gap) => gap.code === "naming-limit"),
+        shape,
+      ).toBe(false);
+      expect(labelled.rules[0]).toMatchObject({
+        state: "evaluated",
+        occurrences: [{ outcome: "pass" }],
+      });
+    } finally {
+      analysis.finish();
+      button.remove();
+    }
+  }
+});
+
 test("reader exhaustion stops sibling iteration and retains one limit gap", () => {
   const fixture = document.createElement("div");
   fixture.id = "traversal-fixture";
