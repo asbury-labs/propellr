@@ -406,3 +406,22 @@ The first full validation attempt hit the external 200-second command timeout du
 combined parity/browser stage. Both projects passed separately, then the full pinned command
 passed all 192 tests on retry; no timeout configuration was changed and cause was not isolated.
 Corpus is now 34 fixtures per engine / 102 comparisons. Benchmark rerun passed all three cases.
+
+Eighteenth review closes cache-write safety holes without automatic corruption repair.
+Existing cache ancestors are resolved before creating directories. File reads use no-follow,
+nonblocking descriptors and require regular files; tar streams approved members from verified
+bytes instead of extracting through cache paths. Existing entries must match and are never
+rewritten; missing files use exclusive creation. Linked package directories are rejected.
+
+A focused real-filesystem test uses a disposable surrogate worktree: linked cache ancestors,
+broken/existing tarball symlinks, package-directory links and bundle-entry links all reject
+without creating or modifying target files. Regular preparation and repeat preparation retain
+file timestamps. Fresh download/preparation into a separate nested temporary cache also passed.
+Canonical checkout and normal external reference cache were not modified.
+
+Canonical widget role lookup accepts uppercase BUTTON, while its landmark selector still
+rejects uppercase MAIN. Candidate lookup now normalizes case but keeps case-variant widget
+geometry incomplete; it does not broaden landmark behavior. A three-engine control verifies
+both outcomes. Full pinned validation passed 193 tests: 62 contracts, 36 host, 13 playbook,
+64 parity/browser and 18 reporting. Corpus: 35 fixtures per engine / 105 comparisons.
+All three benchmark cases passed again.

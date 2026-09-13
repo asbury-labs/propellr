@@ -160,7 +160,7 @@ function widget(node: Element): boolean {
   const native = node.matches(
     "button, a[href], input:not([type=hidden]), select, textarea, summary",
   );
-  const role = node.getAttribute("role");
+  const role = node.getAttribute("role")?.toLowerCase();
   if (!role || native) return native;
   return (
     [

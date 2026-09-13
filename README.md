@@ -37,7 +37,9 @@ verifies integrity, then extracts the browser bundle/license/metadata without
 installing axe-core. Cache must stay outside this worktree. Parity/benchmark tests
 verify the bundle hash again and fail if absent or changed. Preparation also fails
 closed on corrupt cached tarballs; inspect and explicitly repair the configured external
-cache before retrying. No silent integrity-error recovery. No canonical checkout
+cache before retrying. No silent integrity-error recovery. Cache entries must be regular
+files, package directories cannot be symlinks, and verified files are never rewritten.
+Only missing files are created exclusively from verified archive bytes. No canonical checkout
 or upstream tooling is needed in CI. Raw generated results: `artifacts/parity/`
 and `artifacts/bench/`; these are ignored, not a publishing channel.
 
@@ -128,7 +130,8 @@ Reader bounds: 2,000 elements, 32 boundary steps,
 shadow DOM return explicit not-evaluated/partial results, not guessed visibility.
 Generated pseudo-element boxes make target-size incomplete for their document.
 Whitespace/fallback role-token lists return not-evaluated/partial results; full ARIA
-role resolution is not implemented.
+role resolution is not implemented. Case-variant widget roles remain explicit
+incomplete geometry rather than disappearing from candidate coverage.
 
 Playbook checkpoints retain actual scans, including after later failure/cancellation.
 Reached journey and complete selected coverage do not imply clean accessibility:
