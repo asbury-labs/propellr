@@ -17,11 +17,11 @@ export class BrowserCleanupError extends Error {
 export class BrowserTarget {
   readonly pageId = pageIdSchema.parse(`page_${randomUUID()}`);
   documentId = `document-${randomUUID()}`;
-  private readonly navigated = (frame: Frame) => {
-    if (frame === this.page.mainFrame()) {
-      this.documentId = `document-${randomUUID()}`;
-      this.onNavigation();
-    }
+  scanEpoch = 0;
+  private readonly navigated = (_frame: Frame) => {
+    // Any frame navigation invalidates the aggregated document generation.
+    this.documentId = `document-${randomUUID()}`;
+    this.onNavigation();
   };
   private readonly lost = () => this.onLoss();
   onLoss: () => void = () => {};

@@ -1,15 +1,18 @@
 import { randomUUID } from "node:crypto";
 import { lstat } from "node:fs/promises";
 import { dirname } from "node:path";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { chromium } from "playwright";
 import { DIALOG_HTML, FIXTURE_URL } from "../../src/host/fixture.js";
 import { LOCAL_POLICY } from "../../src/host/runtime.js";
+import { selectedRequest } from "../../src/analysis.js";
+import * as scans from "../../src/host/scan.js";
+import * as playbooks from "../../src/host/playbook.js";
 import { sessionIdSchema } from "../../src/validation.js";
 import { meta, playbookInput, terminal, unwrap, withHost } from "../support/host.js";
 
 describe("local session host over real Unix IPC", () => {
-  test("owned resources, reconnect, request deduplication/conflicts, and no scan success", async () => {
+  test("owned resources, reconnect, request deduplication/conflicts, and explicit default catalog gaps", async () => {
     await withHost(async ({ client, server, reconnect }) => {
       expect((await lstat(dirname(server.path))).mode & 0o777).toBe(0o700);
       expect((await lstat(server.path)).mode & 0o777).toBe(0o600);
@@ -43,9 +46,15 @@ describe("local session host over real Unix IPC", () => {
       );
       expect(await terminal(next, scan)).toMatchObject({
         kind: "scan",
-        state: "failed",
-        diagnostics: [{ code: "scan-unavailable" }],
-        completedScans: [],
+        state: "completed",
+        result: {
+          coverage: { state: "partial" },
+          execution: {
+            requested: "incremental",
+            actual: "full",
+            fallback: { code: "full-scan-fallback" },
+          },
+        },
       });
       const inspection = { ...meta(), sessionId: session.id, operationId: scan.id };
       unwrap(await next.inspect(inspection));
@@ -74,6 +83,352 @@ describe("local session host over real Unix IPC", () => {
       expect(unwrap(await next.end({ ...meta(), sessionId: session.id })).state).toBe("ended");
       expect(await next.runPlaybook(playbookInput(session))).toMatchObject({ ok: false });
     });
+  });
+
+  test.each(["cancellation", "child-navigation"] as const)(
+    "%s after journey execution is checked before terminal commit",
+    async (change) => {
+      await withHost(async ({ client, open }) => {
+        const session = await open();
+        const run = playbooks.runDialog;
+        const spy = vi.spyOn(playbooks, "runDialog").mockImplementationOnce(async (...args) => {
+          const execution = await run(...args);
+          expect(execution.cancelled || execution.failed).toBe(false);
+          expect(execution.result.checkpoints.map((checkpoint) => checkpoint.state)).toEqual([
+            "reached",
+            "reached",
+          ]);
+          if (change === "cancellation") {
+            const operation = unwrap(await client.inspect({ ...meta(), sessionId: session.id }))
+              .operations[0];
+            if (!operation) throw new Error("Missing in-flight journey");
+            expect(
+              unwrap(
+                await client.cancel({
+                  ...meta(),
+                  sessionId: session.id,
+                  operationId: operation.id,
+                }),
+              ).disposition,
+            ).toBe("requested");
+          } else {
+            const documentId = args[0].documentId;
+            await args[0].page.evaluate(
+              "new Promise(resolve => { const frame = document.createElement('iframe'); frame.onload = resolve; document.body.append(frame); })",
+            );
+            await args[0].page.frames()[1]!.goto("about:blank#terminal", { timeout: 1000 });
+            expect(args[0].documentId).not.toBe(documentId);
+          }
+          return execution;
+        });
+        try {
+          const result = await terminal(
+            client,
+            unwrap(await client.runPlaybook(playbookInput(session))),
+          );
+          expect(result).toMatchObject({
+            state: change === "cancellation" ? "cancelled" : "failed",
+            diagnostics: [
+              expect.objectContaining({
+                code:
+                  change === "cancellation" ? "cancellation-requested" : "scan-document-changed",
+              }),
+            ],
+            checkpoints: [
+              { id: "opened", state: "reached" },
+              { id: "closed", state: "reached" },
+            ],
+            completedScans: [
+              expect.objectContaining({
+                origin: expect.objectContaining({ checkpointId: "opened" }),
+              }),
+              expect.objectContaining({
+                origin: expect.objectContaining({ checkpointId: "closed" }),
+              }),
+            ],
+          });
+          expect(spy).toHaveBeenCalledOnce();
+        } finally {
+          spy.mockRestore();
+        }
+      });
+    },
+  );
+
+  test.each(["scan", "playbook"] as const)(
+    "%s stale scans fail without becoming report history",
+    async (kind) => {
+      await withHost(async ({ client, open }) => {
+        const session = await open();
+        const scanTarget = scans.scanTarget;
+        const spy = vi.spyOn(scans, "scanTarget").mockImplementationOnce(async (...args) => {
+          const evaluate = args[0].page.evaluate.bind(args[0].page);
+          let calls = 0;
+          const transfer = vi
+            .spyOn(args[0].page, "evaluate")
+            .mockImplementation(async (...input) => {
+              const result = await evaluate(...input);
+              if (++calls === 1)
+                await evaluate(
+                  "document.querySelector('#close').textContent = 'Changed during transfer'",
+                );
+              return result;
+            });
+          try {
+            const result = await scanTarget(...args);
+            expect(result.coverage.state).toBe("stale");
+            return result;
+          } finally {
+            transfer.mockRestore();
+          }
+        });
+        try {
+          const operation =
+            kind === "playbook"
+              ? unwrap(await client.runPlaybook(playbookInput(session)))
+              : unwrap(
+                  await client.scan({
+                    ...meta(),
+                    sessionId: session.id,
+                    scan: selectedRequest({ ...session.documents![0]!, path: [] }),
+                  }),
+                );
+          expect(await terminal(client, operation)).toMatchObject({
+            state: "failed",
+            completedScans: [],
+            diagnostics: [expect.objectContaining({ code: "scan-stale" })],
+            ...(kind === "playbook"
+              ? {
+                  cleanup: "complete",
+                  checkpoints: [
+                    { id: "opened", state: "blocked", reason: { code: "scan-stale" } },
+                    { id: "closed", state: "skipped" },
+                  ],
+                }
+              : {
+                  cleanup: "not-required",
+                }),
+          });
+          const next = unwrap(
+            await client.scan({
+              ...meta(),
+              sessionId: session.id,
+              scan: selectedRequest({ ...session.documents![0]!, path: [] }),
+            }),
+          );
+          expect(await terminal(client, next)).toMatchObject({
+            state: "completed",
+            result: { report: { comparison: { state: "not-compared" } } },
+          });
+        } finally {
+          spy.mockRestore();
+        }
+      });
+    },
+  );
+
+  test.each(["scan", "playbook", "scan-url-change", "playbook-url-change"] as const)(
+    "%s interruption after collection cannot commit its scan",
+    async (kind) => {
+      await withHost(async ({ client, server, open }) => {
+        const session = await open();
+        const scanTarget = scans.scanTarget;
+        // Keep real browser evaluation; interpose interruption at the host commit boundary.
+        const spy = vi.spyOn(scans, "scanTarget").mockImplementationOnce(async (...args) => {
+          const result = await scanTarget(...args);
+          if (!("kind" in operation)) throw new Error("Expected operation");
+          if (kind.endsWith("url-change")) {
+            const before = args[0].documentId;
+            await args[0].page.evaluate("history.pushState({}, '', '#changed')");
+            expect(args[0].documentId).not.toBe(before);
+          } else
+            expect(
+              unwrap(
+                await server.host.execute(
+                  JSON.stringify({
+                    command: "cancel",
+                    input: { ...meta(), sessionId: session.id, operationId: operation.id },
+                  }),
+                ),
+              ),
+            ).toMatchObject({ disposition: "requested", operation: { state: "cancelling" } });
+          return result;
+        });
+        const operation = unwrap(
+          await server.host.execute(
+            JSON.stringify(
+              kind === "scan" || kind === "scan-url-change"
+                ? {
+                    command: "scan",
+                    input: {
+                      ...meta(),
+                      sessionId: session.id,
+                      scan: selectedRequest({ ...session.documents[0]!, path: [] }),
+                    },
+                  }
+                : { command: "runPlaybook", input: playbookInput(session) },
+            ),
+          ),
+        );
+        try {
+          if (!("kind" in operation)) throw new Error("Expected operation");
+          expect(await terminal(client, operation)).toMatchObject({
+            state: kind.endsWith("url-change") ? "failed" : "cancelled",
+            ...(kind === "scan"
+              ? {
+                  diagnostics: [
+                    {
+                      code: "scan-cancelled",
+                      message: "Scan cancelled; no current result committed",
+                    },
+                  ],
+                }
+              : {}),
+            ...(kind.endsWith("url-change")
+              ? {
+                  diagnostics: expect.arrayContaining([
+                    expect.objectContaining({ code: "scan-document-changed" }),
+                  ]),
+                }
+              : {}),
+            ...(kind === "playbook-url-change"
+              ? {
+                  checkpoints: expect.arrayContaining([
+                    expect.objectContaining({
+                      id: "opened",
+                      state: "blocked",
+                      reason: expect.objectContaining({ code: "scan-document-changed" }),
+                    }),
+                  ]),
+                }
+              : {}),
+            completedScans: [],
+          });
+          expect(spy).toHaveBeenCalledOnce();
+        } finally {
+          spy.mockRestore();
+        }
+      });
+    },
+  );
+
+  test("large retained reports stay within IPC limits without breaking the connection", async () => {
+    const browser = await chromium.launch();
+    try {
+      const page = await browser.newPage();
+      await page.route(FIXTURE_URL, (route) =>
+        route.fulfill({ contentType: "text/html", body: DIALOG_HTML }),
+      );
+      await page.goto(FIXTURE_URL);
+      await withHost(
+        async ({ client }) => {
+          const session = unwrap(
+            await client.open({
+              ...meta(),
+              policy: LOCAL_POLICY,
+              target: { kind: "attached", targetId: "fixture" },
+            }),
+          );
+          const run = async (prefix: string, count: number, length: number) => {
+            const html = `<main>${Array.from({ length: count }, (_, index) => `<button id="${prefix}-${index}-${"x".repeat(length)}"></button>`).join("")}</main>`;
+            await page.evaluate(`document.body.innerHTML = ${JSON.stringify(html)}`);
+            return terminal(
+              client,
+              unwrap(
+                await client.scan({
+                  ...meta(),
+                  sessionId: session.id,
+                  scan: {
+                    ...selectedRequest({ ...session.documents[0]!, path: [] }),
+                    rules: { kind: "explicit", rules: [{ id: "button-name", options: {} }] },
+                  },
+                }),
+              ),
+            );
+          };
+          let omitted = false;
+          for (let index = 0; index < 4; index++) {
+            const result = await run(`epoch-${index}`, 72, 500);
+            if (result.kind !== "scan" || result.state !== "completed")
+              throw new Error("Expected bounded scan result");
+            expect(Buffer.byteLength(JSON.stringify(result.result))).toBeLessThanOrEqual(
+              192 * 1024,
+            );
+            expect(result.result.report?.counts.violationOccurrences).toBe(72);
+            const comparison = result.result.report?.comparison;
+            omitted ||=
+              comparison?.state === "not-comparable" &&
+              comparison.reason.code === "report-history-limit";
+          }
+          expect(omitted).toBe(true);
+          expect(await run("oversized-current", 85, 850)).toMatchObject({
+            state: "failed",
+            diagnostics: [
+              {
+                code: "scan-result-limit",
+                message: "Scan result exceeds retention budget; no current result committed",
+              },
+            ],
+            completedScans: [],
+          });
+          await page.goto(FIXTURE_URL);
+          const largeCheckpoint = Array.from(
+            { length: 85 },
+            (_, index) => `<button disabled id="checkpoint-${index}-${"x".repeat(850)}"></button>`,
+          ).join("");
+          await page.evaluate(
+            `document.querySelector('#dialog').insertAdjacentHTML('beforeend', ${JSON.stringify(largeCheckpoint)})`,
+          );
+          const current = unwrap(
+            await client.inspect({ ...meta(), sessionId: session.id }),
+          ).session;
+          const checkpointOperation = await terminal(
+            client,
+            unwrap(await client.runPlaybook(playbookInput(current))),
+          );
+          expect(checkpointOperation).toMatchObject({
+            state: "failed",
+            diagnostics: [{ code: "scan-result-limit" }],
+            completedScans: [],
+            cleanup: "complete",
+            checkpoints: [
+              { id: "opened", state: "blocked", reason: { code: "scan-result-limit" } },
+              { id: "closed", state: "skipped", reason: { code: "scan-result-limit" } },
+            ],
+          });
+          const oversizedSelection = unwrap(
+            await client.scan({
+              ...meta(),
+              sessionId: session.id,
+              scan: {
+                ...selectedRequest({ ...current.documents[0]!, path: [] }),
+                rules: {
+                  kind: "explicit",
+                  rules: [
+                    { id: "unknown-first", options: {} },
+                    ...Array.from({ length: 1023 }, (_, index) => ({
+                      id: `unknown-${index}-${"x".repeat(16)}`,
+                      options: {},
+                    })),
+                  ],
+                },
+              },
+            }),
+          );
+          expect(await terminal(client, oversizedSelection)).toMatchObject({
+            state: "failed",
+            diagnostics: [{ code: "scan-result-limit" }],
+            completedScans: [],
+          });
+          expect(
+            unwrap(await client.inspect({ ...meta(), sessionId: session.id })).session.state,
+          ).toBe("active");
+        },
+        { borrowed: new Map([["fixture", page]]) },
+      );
+    } finally {
+      await browser.close();
+    }
   });
 
   test("lease loss and bounded replay fail closed, including after reconnect", async () => {
@@ -234,6 +589,18 @@ describe("local session host over real Unix IPC", () => {
           client.close();
           const next = await reconnect(client.lease);
           await page.locator("#dialog").waitFor({ state: "visible" });
+          const observer = await reconnect(client.lease);
+          const events = unwrap(await observer.subscribe({ ...meta(), sessionId: session.id }));
+          for await (const delivery of events) {
+            if (
+              delivery.type === "event" &&
+              delivery.event.type === "checkpoint" &&
+              delivery.event.checkpoint.id === "opened"
+            ) {
+              expect(delivery.event.checkpoint.state).toBe("reached");
+              break;
+            }
+          }
           const cancelling = unwrap(
             await next.cancel({ ...meta(), sessionId: session.id, operationId: operation.id }),
           );
@@ -244,7 +611,15 @@ describe("local session host over real Unix IPC", () => {
           await page.evaluate("document.querySelector('#close').disabled = false");
           expect(await terminal(next, operation)).toMatchObject({
             state: "cancelled",
-            completedScans: [],
+            completedScans: [
+              expect.objectContaining({
+                origin: {
+                  kind: "playbook",
+                  playbook: { id: "dialog-open-close", version: "1" },
+                  checkpointId: "opened",
+                },
+              }),
+            ],
             cleanup: "complete",
             sideEffects: "confirmed",
           });

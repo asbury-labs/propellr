@@ -1,10 +1,11 @@
 # Propellr
 
-Private greenfield accessibility engine. Phase 2 adds a single-user local session
-host, typed SDK/CLI and trusted `dialog-open-close@1` playbook. Sessions survive
-client disconnects. **Browser analysis is unavailable:** dialog observations are
-real, but scan checkpoints remain blocked. No accessibility parity or performance
-claim. Phase 3 is not implemented.
+Private greenfield accessibility engine. Single-user local session host, typed
+SDK/CLI and trusted `dialog-open-close@1` playbook. Phase 3 implements an explicitly
+limited `button-name`, `target-size`, `landmark-one-main` slice with real checkpoint
+scans, Chromium/Firefox/WebKit reference comparisons and conservative reporting.
+**Not full axe-core parity.** Unsupported branches and inaccessible frames remain
+partial/incomplete. Realtime requests use full scans, never incremental speed claims.
 
 ## Development
 
@@ -17,15 +18,35 @@ node --version # v26.8.2
 export PLAYWRIGHT_BROWSERS_PATH="$PWD/.tools/browsers"
 npm exec --yes --package=pnpm@12.4.1 -- pnpm install --frozen-lockfile
 npm exec --yes --package=pnpm@12.4.1 -- pnpm exec playwright install chromium firefox webkit
+npm exec --yes --package=pnpm@12.4.1 -- pnpm reference:prepare
 npm exec --yes --package=pnpm@12.4.1 -- pnpm validate
+npm exec --yes --package=pnpm@12.4.1 -- pnpm bench:slice
 ```
 
 On supported CI Linux, provision browsers with `--with-deps`. `validate` runs
 build, strict source/type examples, lint, required Oxfmt, contract tests, real Unix
-IPC tests and browser playbook tests in Chromium/Firefox/WebKit. `test:host` builds
-first because its CLI integration test runs emitted ESM. `format` is `oxfmt .`;
+IPC, playbook, parity, browser-reader and reporting tests in Chromium/Firefox/WebKit.
+Benchmarks run separately, not as a speed gate. `test:host`, `test:playbooks` and
+`test:parity` build first because they execute emitted host/browser code. `format` is `oxfmt .`;
 `format:check` is `oxfmt --check .`. Lifecycle scripts remain disabled by `.npmrc`.
-No dependency pins changed in phase 2.
+No dependency pins changed in phases 2 or 3.
+
+`reference:prepare` downloads only the approved tarball into
+`~/.cache/propellr-reference/axe-core-4.13.0` (override `PROPELLR_REFERENCE_CACHE`),
+verifies integrity, then extracts the browser bundle/license/metadata without
+installing axe-core. Cache must stay outside this worktree. Parity/benchmark tests
+verify the bundle hash again and fail if absent or changed. Preparation also fails
+closed on corrupt cached tarballs; inspect and explicitly repair the configured external
+cache before retrying. Downloads have a 30-second deadline through response-body consumption.
+No silent integrity-error recovery. Cache entries must be regular
+files, package directories cannot be symlinks, and verified files are never rewritten.
+Only missing files are created exclusively from verified archive bytes. A concurrent
+exclusive-write winner is accepted only after no-follow reread and exact byte verification;
+partial/conflicting entries still fail closed without retries or repair. This standalone
+macOS/Linux preparation command holds checked directories during writes, rather than
+relying on parent pathnames remaining unchanged. No canonical checkout
+or upstream tooling is needed in CI. Raw generated results: `artifacts/parity/`
+and `artifacts/bench/`; these are ignored, not a publishing channel.
 
 ## Local use
 
@@ -91,6 +112,53 @@ browser or owner connection. Hosts configure allowed browsers, origins/actions,
 commands and immutable policy at startup. Registered borrowed Pages must already
 show the controlled fixture. No arbitrary website journeys or secret inputs.
 
+## Scan and reporting slice
+
+Use `selectedRequest(documentTarget, "incremental")` from `dist/analysis.js` with
+`client.scan({ ...metadata, sessionId, scan: request })` for explicit three-rule
+selection. `incremental` records `actual: "full"` plus a fallback reason. Explicit
+selection is essential: `rules: { kind: "defaults" }` resolves the 89 canonical
+stable defaults, with unimplemented rules marked not-evaluated and partial coverage.
+`target-size` is opt-in. Nonempty options, unknown rules, subtree/excluded scope
+are not silently evaluated with different semantics.
+
+Host scans cover one authorized current whole document. Every frame navigation
+changes its aggregated document ID. Collection is synchronous; mutation observers
+cover transfer until result confirmation. Cancellation or navigation cannot commit
+a current result; detected DOM/viewport changes return stale coverage. No reusable
+incremental facts, CSSOM/animation-wide atomicity, closed-root inspection or
+cross-origin injection is claimed. Complete selected coverage refers to observable DOM
+under these capabilities, not certification of undetectable closed-root contents.
+Reader bounds: 2,000 attempted element visits, 32 boundary steps,
+96 total occurrences, 1,024 characters per target path, 128 KiB raw evidence and
+32 diagnostic entries; budget exhaustion stays partial. Rules evaluate in stable ID order
+so equivalent selections consume the shared occurrence budget identically. Child iteration stops
+at reader exhaustion; native layout/query cost is not a constant-time guarantee.
+Native modals rooted inside shadow DOM return explicit not-evaluated/partial results, not guessed visibility.
+Generated pseudo-element boxes make target-size incomplete for their document.
+Whitespace/fallback role-token lists return not-evaluated/partial results; full ARIA
+role resolution is not implemented. Supported button-role comparisons are case-insensitive;
+landmark selectors retain canonical case semantics. Canonical target-size excludes image-map
+areas. Naming shares 2,000 traversal/string-processing steps and 16,384 input characters per
+scan, with a 64-level descendant-depth limit. Exhaustion is incomplete; supported positive
+naming checks skip later candidates.
+
+Playbook checkpoints retain actual scans, including after later failure/cancellation.
+Reached journey and complete selected coverage do not imply clean accessibility:
+closed fixture has no main landmark, so its raw main-presence violation remains.
+Host reports use exact rule-version/document/path identity and eight prior raw scans.
+Reported scans are capped at 192 KiB so fixed two-checkpoint results fit IPC replies.
+Oversized history is omitted with an explicit `report-history-limit` comparison;
+if the current-only result still exceeds that cap, the operation fails before commit.
+No cross-navigation/build/component matching is inferred. Counts are current-scan;
+history cannot inflate them or resolve issues after incomplete/narrower scans.
+The declared `local-zero-violations@1` gate allows zero unwaived unique/occurrence
+violations. Missing coverage/evidence is indeterminate. Portable `reportScan` and
+`applyGate` accept caller-owned history and schema-validated owner/expiry exceptions.
+Portable reporting checks result consistency; callers remain responsible for truthful
+coverage. The browser slice's whole-document-only execution limit is not a restriction
+on other producers of portable `ScanResult` values.
+
 ## Boundaries and limits
 
 - `src/contracts.ts`: portable public types; verdicts, coverage, groups and gate
@@ -102,7 +170,11 @@ show the controlled fixture. No arbitrary website journeys or secret inputs.
   the synthetic fixture URL and abort other network requests.
 - `test/host/`, `test/playbooks/`: actual IPC and browser interactions, not a DOM
   emulator. Test fixture source lives in `src/host/fixture.ts` for daemon use too.
-- Browser analysis/Vite builds, parity, reporting and benchmarks wait for phase 3.
+- `src/browser/`: Vite IIFE `dist/browser/propellr.js`, no Node, Playwright or Zod
+  runtime imports. Fresh facts per scan; open shadow roots/slots and accessible
+  same-origin frames; denied frames produce explicit gaps.
+- `src/reporting/`: portable exact-target grouping, caller-supplied history and
+  declared thresholds/exceptions. No fuzzy identity, database or vendor adapters.
 
 Request frames: 65,536 UTF-8 bytes, 32 nested containers including framing.
 Replies: 1 MiB. Tokens: 128 characters; distinct `session_`, `operation_`, `page_`
@@ -134,6 +206,9 @@ Dependency-only `skipLibCheck` exceptions:
   `@vitest/expect`; Vite/Vitest config declarations conflict under
   `exactOptionalPropertyTypes`.
 
+- Browser-test scope: the same Vitest/Vite dependency-only declaration exception
+  as test/tool; browser **source** still gets a separate fully checked DOM-only pass.
+
 Own source and negative type examples remain strict in every scope. These
 exceptions do not suppress project errors or change tool pins.
 
@@ -144,6 +219,8 @@ exceptions do not suppress project errors or change tool pins.
 - [Execution plan](specs/propellr-greenfield-foundation.html)
 - [Phase 1 evidence](specs/foundation-validation.md)
 - [Phase 2 evidence](specs/local-host-validation.md)
+- [Phase 3 protocol and branch limits](specs/slice-protocol.md)
+- [Phase 3 evidence](specs/browser-slice-validation.md)
 - [Provenance](PROVENANCE.md)
 
 Canonical axe-core remains independent and untouched, never a dependency or the

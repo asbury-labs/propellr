@@ -11,6 +11,7 @@ import type {
   Reply,
   Session,
   SessionId,
+  ScanResult,
   VersionRef,
 } from "../contracts.js";
 import { operationIdSchema, sessionIdSchema } from "../validation.js";
@@ -23,13 +24,23 @@ import {
   dialogManifest,
   dialogVersion,
   runDialog,
-  scanUnavailable,
+  scanInterrupted,
 } from "./playbook.js";
 import { BoundedStream } from "./stream.js";
 import { FIXTURE_URL } from "./fixture.js";
+import { selectedRequest } from "../analysis.js";
+import { scanTarget } from "./scan.js";
+import { applyGate, reportScan } from "../reporting/index.js";
 
 export const LOCAL_POLICY = { id: "local-fixture", version: "1" } as const;
 const configuration = { id: "local-host", version: "1" } as const;
+export const LOCAL_GATE = {
+  id: "local-zero-violations",
+  version: "1",
+  maxUniqueViolations: 0,
+  maxViolationOccurrences: 0,
+  exceptions: [],
+} as const;
 const limitsSchema = z.strictObject({
   sessions: z.number().int().min(1).max(8).default(8),
   operations: z.number().int().min(1).max(32).default(32),
@@ -54,6 +65,7 @@ interface RecordState {
   session: Session;
   target: BrowserTarget | undefined;
   readonly operations: Map<OperationId, Operation>;
+  readonly scans: ScanResult[];
   readonly events: Event[];
   readonly streams: Set<BoundedStream<EventDelivery>>;
   sequence: number;
@@ -335,7 +347,16 @@ export class SessionHost {
         },
         pages: [target.pageId],
         documents: [{ pageId: target.pageId, documentId: target.documentId }],
-        capabilities: ["local-ipc", "dialog-open-close@1", "scan-unavailable", "bounded-replay"],
+        capabilities: [
+          "local-ipc",
+          "dialog-open-close@1",
+          "three-rule-slice",
+          "full-scan-fallback",
+          "open-shadow",
+          "same-origin-frames",
+          "closed-roots-unavailable",
+          "bounded-replay",
+        ],
         policy: this.policy,
         configuration,
       };
@@ -343,6 +364,7 @@ export class SessionHost {
         session,
         target,
         operations: new Map(),
+        scans: [],
         events: [],
         streams: new Set(),
         sequence: 0,
@@ -371,7 +393,9 @@ export class SessionHost {
             ...operation,
             state: "lost",
             diagnostics: [reason],
-            completedScans: [],
+            completedScans: (record.active?.checkpoints ?? []).flatMap((checkpoint) =>
+              checkpoint.state === "reached" ? checkpoint.scans : [],
+            ),
             checkpoints: [...(record.active?.checkpoints ?? [])],
             sideEffects: "uncertain",
             cleanup: "incomplete",
@@ -396,6 +420,11 @@ export class SessionHost {
       return denied("session-inactive", "Session has no active browser");
     if (record.active)
       return denied("operation-conflict", "Another operation owns this session's page actions");
+    if (
+      request.command === "scan" &&
+      !this.origins.includes(new URL(record.target.page.url()).origin)
+    )
+      return denied("permission-denied", "Current scan origin is not authorized");
     let inputs: z.infer<typeof dialogInputs> | undefined;
     if (request.command === "runPlaybook") {
       const parsed = dialogInputs.safeParse(request.input.inputs);
@@ -438,6 +467,10 @@ export class SessionHost {
     const abort = new AbortController();
     const target = record.target;
     const documentId = target.documentId;
+    const guardScanCommit = () => {
+      if (abort.signal.aborted) throw new Error("scan-cancelled");
+      if (target.documentId !== documentId) throw new Error("scan-document-changed");
+    };
     const checkpoints: Checkpoint[] = [];
     const lost = () => record.operations.get(operation.id)?.state === "lost";
     const done = new Promise<void>((resolve) => {
@@ -448,21 +481,65 @@ export class SessionHost {
             ...operation,
             state: abort.signal.aborted ? "cancelling" : "running",
           });
-          if (operation.kind === "scan") {
-            this.updateOperation(record, {
-              ...operation,
-              state: abort.signal.aborted ? "cancelled" : "failed",
-              diagnostics: [
-                abort.signal.aborted
-                  ? { code: "cancelled", message: "Scan cancelled before evaluation" }
-                  : scanUnavailable,
-              ],
-              completedScans: [],
-              sideEffects: "none",
-              cleanup: "not-required",
-            });
+          if (operation.kind === "scan" && request.command === "scan") {
+            try {
+              const result = await scanTarget(
+                target,
+                request.input.scan,
+                {
+                  policy: operation.policy,
+                  configuration: operation.configuration,
+                  origin: { kind: "direct" },
+                },
+                abort.signal,
+                documentId,
+              );
+              guardScanCommit();
+              if (result.coverage.state === "stale") throw new Error("scan-stale");
+              if (!lost())
+                this.updateOperation(record, {
+                  ...operation,
+                  state: "completed",
+                  result: this.report(record, result),
+                });
+            } catch (error) {
+              const code = abort.signal.aborted
+                ? "scan-cancelled"
+                : target.documentId !== documentId
+                  ? "scan-document-changed"
+                  : error instanceof Error &&
+                      (error.message === "scan-result-limit" ||
+                        error.message === "scan-document-changed" ||
+                        error.message === "scan-stale")
+                    ? error.message
+                    : "scan-failed";
+              if (!lost())
+                this.updateOperation(record, {
+                  ...operation,
+                  state: abort.signal.aborted ? "cancelled" : "failed",
+                  diagnostics: [
+                    {
+                      code,
+                      message:
+                        code === "scan-document-changed"
+                          ? "Document generation changed; no current result committed"
+                          : code === "scan-stale"
+                            ? "DOM or viewport changed during transfer; no current result committed"
+                            : code === "scan-cancelled"
+                              ? "Scan cancelled; no current result committed"
+                              : code === "scan-result-limit"
+                                ? "Scan result exceeds retention budget; no current result committed"
+                                : "Scan failed; no current result committed",
+                    },
+                  ],
+                  completedScans: [],
+                  sideEffects: "none",
+                  cleanup: "not-required",
+                });
+            }
             return;
           }
+          if (operation.kind !== "playbook") throw new Error("Operation kind mismatch");
           const execution = await runDialog(
             target,
             inputs!,
@@ -479,17 +556,59 @@ export class SessionHost {
                   checkpoint,
                 });
             },
+            (checkpointId) => {
+              if (
+                !this.permittedActions() ||
+                !this.origins.includes(new URL(target.page.url()).origin)
+              )
+                throw new Error("scan-not-authorized");
+              return scanTarget(
+                target,
+                selectedRequest({ pageId: target.pageId, documentId, path: [] }),
+                {
+                  policy: operation.policy,
+                  configuration: operation.configuration,
+                  origin: { kind: "playbook", playbook: dialogVersion, checkpointId },
+                },
+                abort.signal,
+                documentId,
+              ).then((result) => {
+                guardScanCommit();
+                // The journey blocks stale checkpoints; don't retain them as report history.
+                return result.coverage.state === "stale" ? result : this.report(record, result);
+              });
+            },
           );
           if (lost()) return;
-          if (execution.cancelled || execution.failed) {
+          // Execution/cleanup awaits can outlive the final checkpoint's commit guard.
+          const cancelled = abort.signal.aborted || execution.cancelled;
+          const documentChanged = target.documentId !== documentId;
+          const commitFailure = cancelled
+            ? { code: "cancellation-requested", message: "Journey interrupted by cancellation" }
+            : documentChanged
+              ? {
+                  code: "scan-document-changed",
+                  message: "Document generation changed before journey commit",
+                }
+              : undefined;
+          if (cancelled || documentChanged || execution.failed) {
             this.updateOperation(record, {
               ...operation,
-              state: execution.cancelled ? "cancelled" : "failed",
-              diagnostics: [
-                execution.result.diagnostics[0] ?? scanUnavailable,
-                ...execution.result.diagnostics.slice(1),
-              ],
-              completedScans: [],
+              state: cancelled ? "cancelled" : "failed",
+              diagnostics: commitFailure
+                ? [
+                    commitFailure,
+                    ...execution.result.diagnostics.filter(
+                      (reason) => reason.code !== commitFailure.code,
+                    ),
+                  ]
+                : [
+                    execution.result.diagnostics[0] ?? scanInterrupted,
+                    ...execution.result.diagnostics.slice(1),
+                  ],
+              completedScans: execution.result.checkpoints.flatMap((checkpoint) =>
+                checkpoint.state === "reached" ? checkpoint.scans : [],
+              ),
               checkpoints: execution.result.checkpoints,
               sideEffects: execution.sideEffects,
               cleanup: execution.result.cleanup,
@@ -512,7 +631,9 @@ export class SessionHost {
                     message: "Execution failed; side effects require inspection",
                   },
                 ],
-                completedScans: [],
+                completedScans: checkpoints.flatMap((checkpoint) =>
+                  checkpoint.state === "reached" ? checkpoint.scans : [],
+                ),
                 checkpoints: [...checkpoints],
                 sideEffects: "uncertain",
                 cleanup: "incomplete",
@@ -527,6 +648,36 @@ export class SessionHost {
     record.active = { id: operation.id, abort, done, checkpoints };
     this.updateOperation(record, operation);
     return { ok: true, value: operation };
+  }
+
+  private report(record: RecordState, scan: ScanResult): ScanResult {
+    const gate = (report: NonNullable<ScanResult["report"]>) =>
+      applyGate(scan, report, { ...LOCAL_GATE, exceptions: [] }, new Date().toISOString());
+    let result = { ...scan, report: gate(reportScan(scan, record.scans)) };
+    // Failed playbooks can embed each of two scans twice. Reserve room for all framing/metadata.
+    const fits = () => Buffer.byteLength(JSON.stringify(result), "utf8") <= 192 * 1024;
+    if (!fits()) {
+      const current = reportScan(scan);
+      result = {
+        ...scan,
+        report: gate({
+          ...current,
+          groups: current.groups.map((group) => ({ ...group, lifecycle: "not-compared" })),
+          comparison: {
+            state: "not-comparable",
+            reason: {
+              code: "report-history-limit",
+              message:
+                "Historical groups omitted to fit the result budget; no lifecycle comparison claimed",
+            },
+          },
+        }),
+      };
+    }
+    if (!fits()) throw new Error("scan-result-limit");
+    record.scans.push(scan);
+    if (record.scans.length > 8) record.scans.shift();
+    return result;
   }
 
   private subscribe(record: RecordState, after?: string): Reply<AsyncIterable<EventDelivery>> {
@@ -576,6 +727,7 @@ export class SessionHost {
     try {
       await target?.release();
       record.target = undefined;
+      record.scans.length = 0;
       if (target) this.borrowedInUse.delete(target.page);
       record.session = { ...record.session, state: "ended", pages: [], documents: [] };
     } catch {

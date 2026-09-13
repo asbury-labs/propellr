@@ -2,6 +2,8 @@ import { describe, expect, test, vi } from "vitest";
 import { chromium } from "playwright";
 import { browserTypes, launchTarget } from "../../src/host/browser.js";
 import { runDialog } from "../../src/host/playbook.js";
+import { scanTarget } from "../../src/host/scan.js";
+import { selectedRequest } from "../../src/analysis.js";
 import { DIALOG_HTML, FIXTURE_URL } from "../../src/host/fixture.js";
 import { LOCAL_POLICY } from "../../src/host/runtime.js";
 import { meta, playbookInput, terminal, unwrap, withHost } from "../support/host.js";
@@ -31,13 +33,33 @@ test.each(["visible", "hidden"] as const)(
         abort.signal,
         () => true,
         () => {},
+        (checkpointId) =>
+          scanTarget(
+            target,
+            selectedRequest({ pageId: target.pageId, documentId: target.documentId, path: [] }),
+            {
+              policy: LOCAL_POLICY,
+              configuration: { id: "test", version: "1" },
+              origin: {
+                kind: "playbook",
+                playbook: { id: "dialog-open-close", version: "1" },
+                checkpointId,
+              },
+            },
+            abort.signal,
+          ),
       );
       expect(execution.cancelled).toBe(true);
+      expect(execution.result.diagnostics[0]?.code).toBe("cancellation-requested");
       expect(
         execution.result.checkpoints.find(
           (checkpoint) => checkpoint.id === (state === "visible" ? "opened" : "closed"),
         ),
-      ).toMatchObject({ state: "blocked", observed: { dialogVisible: state === "visible" } });
+      ).toMatchObject({
+        state: "blocked",
+        observed: { dialogVisible: state === "visible" },
+        reason: { code: "scan-cancelled" },
+      });
       expect(execution.result.cleanup).toBe("complete");
       expect(await target.page.locator("#dialog").isVisible()).toBe(false);
     } finally {
@@ -47,9 +69,60 @@ test.each(["visible", "hidden"] as const)(
   },
 );
 
+test.each(["navigation", "cancellation"] as const)(
+  "%s after a completed scan is checked before checkpoint emission",
+  async (change) => {
+    const target = await launchTarget("chromium");
+    const abort = new AbortController();
+    try {
+      await target.page.evaluate(
+        "new Promise(resolve => { const frame = document.createElement('iframe'); frame.onload = resolve; document.querySelector('#dialog').append(frame); })",
+      );
+      const documentId = target.documentId;
+      const execution = await runDialog(
+        target,
+        { timeoutMs: 1000 },
+        documentId,
+        abort.signal,
+        () => true,
+        () => {},
+        async (checkpointId) => {
+          const result = await scanTarget(
+            target,
+            selectedRequest({ pageId: target.pageId, documentId, path: [] }),
+            {
+              policy: LOCAL_POLICY,
+              configuration: { id: "test", version: "1" },
+              origin: {
+                kind: "playbook",
+                playbook: { id: "dialog-open-close", version: "1" },
+                checkpointId,
+              },
+            },
+            abort.signal,
+          );
+          if (change === "navigation") await target.page.frames()[1]!.goto("about:blank#changed");
+          else abort.abort();
+          return result;
+        },
+      );
+      expect(execution.result.checkpoints[0]).toMatchObject({
+        id: "opened",
+        state: change === "navigation" ? "blocked" : "reached",
+      });
+      if (change === "navigation") {
+        expect(target.documentId).not.toBe(documentId);
+        expect(execution.failed).toBe(true);
+      } else expect(execution.cancelled).toBe(true);
+    } finally {
+      await target.release();
+    }
+  },
+);
+
 for (const engine of ["chromium", "firefox", "webkit"] as const) {
   describe(engine, () => {
-    test("actual dialog checkpoints, input record, event correlation, unavailable scans", async () => {
+    test("actual dialog checkpoint scans, input record and event correlation", async () => {
       await withHost(async ({ client, open, reconnect }) => {
         const session = await open(engine);
         const subscriber = await reconnect();
@@ -66,19 +139,27 @@ for (const engine of ["chromium", "firefox", "webkit"] as const) {
           state: "completed",
           invocation: { playbook: input.playbook, inputs: { timeoutMs: 2000 } },
           result: {
-            coverage: { state: "partial", gaps: [{ code: "scan-unavailable" }] },
+            coverage: { state: "complete" },
             cleanup: "complete",
             checkpoints: [
               {
                 id: "opened",
-                state: "blocked",
-                reason: { code: "scan-unavailable" },
+                state: "reached",
+                scans: [
+                  expect.objectContaining({
+                    origin: { kind: "playbook", playbook: input.playbook, checkpointId: "opened" },
+                  }),
+                ],
                 observed: { dialogVisible: true },
               },
               {
                 id: "closed",
-                state: "blocked",
-                reason: { code: "scan-unavailable" },
+                state: "reached",
+                scans: [
+                  expect.objectContaining({
+                    origin: { kind: "playbook", playbook: input.playbook, checkpointId: "closed" },
+                  }),
+                ],
                 observed: { dialogVisible: false, focusReturned: true },
               },
             ],
@@ -180,7 +261,7 @@ test("failed close preserves reached observation and reports incomplete cleanup"
           sideEffects: "uncertain",
           cleanup: "incomplete",
           checkpoints: [
-            { id: "opened", state: "blocked", observed: { dialogVisible: true } },
+            { id: "opened", state: "reached", observed: { dialogVisible: true } },
             { id: "closed", state: "skipped" },
           ],
         });

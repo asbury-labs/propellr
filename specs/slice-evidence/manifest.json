@@ -1,0 +1,2232 @@
+{
+  "recordedAt": "2026-09-12T19:10:34.995964+00:00",
+  "branch": "feat/browser-parity-slice",
+  "baseCommit": "3dca4a5ee5f0dc60f90d3d486a1ef6147136c6b3",
+  "state": "uncommitted, phase 3 only",
+  "reviewCorrections": {
+    "recordedDuring": "PR #12 review, 2026-09-12",
+    "benchmarkLane": "Archived changed-full-fallback samples measured direct browser full scans after mutation. Incremental execution metadata was constructed, not observed; these samples do not measure the host fallback path. Current runner uses changed-full and full/full execution metadata. Structured summaries use changed-full and retain their original label as historicalLane. Archived bytes and checksums remain unchanged."
+  },
+  "agent": "pi / gpt-6-astra",
+  "session": "01a096d5-6e32-7314-97d0-6eac44caafef",
+  "sourceTreeSha256": "f832579fbef5dc2fd1a5ab363849583786ac53fd938bf0608cc6c777abe59918",
+  "sourceHashMethod": "SHA-256 over sorted path UTF-8 + NUL + file bytes + NUL",
+  "sourceFiles": [
+    ".github/workflows/validate.yml",
+    ".node-version",
+    ".npmrc",
+    ".oxlintrc.json",
+    "bench/slice.test.ts",
+    "package.json",
+    "pnpm-lock.yaml",
+    "reference.json",
+    "specs/slice-protocol.md",
+    "src/analysis.ts",
+    "src/browser/geometry.ts",
+    "src/browser/index.ts",
+    "src/catalog.json",
+    "src/contracts.ts",
+    "src/host/browser.ts",
+    "src/host/cli.ts",
+    "src/host/client.ts",
+    "src/host/daemon.ts",
+    "src/host/fixture.ts",
+    "src/host/framing.ts",
+    "src/host/playbook.ts",
+    "src/host/requests.ts",
+    "src/host/runtime.ts",
+    "src/host/scan.ts",
+    "src/host/server.ts",
+    "src/host/stream.ts",
+    "src/reporting/index.ts",
+    "src/validation.ts",
+    "test/browser/reader.test.ts",
+    "test/contracts/requests.test.ts",
+    "test/fixtures/slice.ts",
+    "test/host/lifecycle.test.ts",
+    "test/host/session.test.ts",
+    "test/host/startup.test.ts",
+    "test/host/transport.test.ts",
+    "test/parity/epochs.test.ts",
+    "test/parity/slice.test.ts",
+    "test/playbooks/dialog.test.ts",
+    "test/reporting/report.test.ts",
+    "test/support/host.ts",
+    "test/support/parity.ts",
+    "test/types/browser.typecheck.ts",
+    "test/types/contracts.typecheck.ts",
+    "test/types/host.typecheck.ts",
+    "test/types/portable.typecheck.ts",
+    "tools/reference.ts",
+    "tsconfig.browser-test.json",
+    "tsconfig.browser.json",
+    "tsconfig.build.json",
+    "tsconfig.host.json",
+    "tsconfig.json",
+    "tsconfig.portable.json",
+    "tsconfig.test.json",
+    "vite.config.ts",
+    "vitest.config.ts"
+  ],
+  "browserBundleSha256": "2efaeb6e650ceb2d01b865678ea81dc6bb725d2176cfff1e37e54df011e70c7a",
+  "reference": {
+    "repository": "https://github.com/dequelabs/axe-core",
+    "primary": {
+      "version": "4.13.0",
+      "tag": "v4.13.0",
+      "commit": "1cc54b900413660610180d631feb73c9e74f4dc9",
+      "tarball": "https://registry.npmjs.org/axe-core/-/axe-core-4.13.0.tgz",
+      "bundleSha256": "c24f097bd2f451d4f933e8bc7d8d539f8672a2ebcb5cc9f9f3eec8ca9470a0c1",
+      "integrity": "sha512-UzGt8zg7Ny8djbYMhxl2zuEevVa7r2gJjYY5Lwr1xM7+XU2nd6CkIWFTVcCIbAP63vSz71NaVyyuSk9lHKcy0A=="
+    },
+    "secondaryCommit": "4d306cbb7c456849c6f964444a6a7174d2be502a",
+    "artifactVerified": true,
+    "note": "Published tarball SHA-512 and extracted axe.min.js SHA-256 verified in external cache for phase 3. Source remains independently pinned; no reproducible-build claim."
+  },
+  "validation": {
+    "worktree": "pnpm validate passed",
+    "fresh": "frozen install + pnpm validate passed",
+    "freshPath": "/tmp/propellr-phase3-fresh.e8upOI",
+    "tests": {
+      "contracts": 62,
+      "host": 29,
+      "playbooks": 11,
+      "parityAndBrowser": 23,
+      "reporting": 16
+    },
+    "benchmarks": 3,
+    "benchmarkMeasuredSamples": 360,
+    "initialExploratorySamples": 90,
+    "ci": "not dispatched"
+  },
+  "archive": {
+    "path": "raw-results.tar.gz",
+    "sha256": "302cf20b74972f4d617e09c159dcd49998a6bb28f9cafec7967a25efa8ca3b31",
+    "bytes": 679293,
+    "members": [
+      {
+        "path": "artifacts/bench/chromium.json",
+        "sha256": "e44979ee0f8205f35303dc8eeacc6577ff49378325cc8a04bdbecf4e975f0363",
+        "bytes": 4370479
+      },
+      {
+        "path": "artifacts/bench/firefox.json",
+        "sha256": "8853acac19de8248774f5d6fe45c586909a7f8ab75d8781ae7f594e754d65ca2",
+        "bytes": 4367468
+      },
+      {
+        "path": "artifacts/bench/webkit.json",
+        "sha256": "b0602917c5221f310ebfab5f1a4c97730d2eb9d326aea20fd349801682f5db2a",
+        "bytes": 4369395
+      },
+      {
+        "path": "artifacts/bench-initial/chromium.json",
+        "sha256": "13031fe06efac39e4dbd0fd4614abd530f0271e791f382e11fc64203da83210b",
+        "bytes": 600091
+      },
+      {
+        "path": "artifacts/bench-initial/firefox.json",
+        "sha256": "4bdc4b0355a3533f9ccf53b02ed3cfe72cda576ed79d29d94bddc8957c730d06",
+        "bytes": 599414
+      },
+      {
+        "path": "artifacts/bench-initial/webkit.json",
+        "sha256": "c265e01a1bff32e9d1493a57d692065d21ad9748608c39b644109b06e3708ba9",
+        "bytes": 599990
+      },
+      {
+        "path": "artifacts/parity/chromium-dynamic.json",
+        "sha256": "6c8b3343afb51f7d180b733651fa02fe60dc10860c2c23d9a568cc39d1b810ec",
+        "bytes": 134662
+      },
+      {
+        "path": "artifacts/parity/chromium.json",
+        "sha256": "98b4e9b7fd59f4e3e892988e74f49a984d1c040eabd70e2cd6cca89454458150",
+        "bytes": 257135
+      },
+      {
+        "path": "artifacts/parity/firefox-dynamic.json",
+        "sha256": "251dcbf3805dfb65f53569768c5d16793365e7a021a329e5e094d8bff116a0b9",
+        "bytes": 134434
+      },
+      {
+        "path": "artifacts/parity/firefox.json",
+        "sha256": "103656b3633ca9f1e2a06f214c27cb846a8328e6633244258be3a9fed43d0558",
+        "bytes": 256553
+      },
+      {
+        "path": "artifacts/parity/webkit-dynamic.json",
+        "sha256": "8ade59d2d74aafd42c7ddb2748dd2e8510d1550fd1f9a68f7234f0fbb509a512",
+        "bytes": 134604
+      },
+      {
+        "path": "artifacts/parity/webkit.json",
+        "sha256": "c0f5cc6c0ca14acbe41637949e0a9c335703094bb1e107cf86fa058465e8cc6b",
+        "bytes": 256960
+      },
+      {
+        "path": "artifacts/validation/bench-final.log",
+        "sha256": "2013e72fc4d7a100589ab8a354d284a42b027286461d222eefacdef8d649f9ee",
+        "bytes": 631
+      },
+      {
+        "path": "artifacts/validation/cancellation-retested.log",
+        "sha256": "6acff4aab7ae5697b27830ff34b48911b8925e0408315fcc4234aaa79dd1e4d8",
+        "bytes": 658
+      },
+      {
+        "path": "artifacts/validation/fresh-install-and-validation.log",
+        "sha256": "a0dee31b33925830f4893ac039b0c585a283bba4f367411718a92308e85fa519",
+        "bytes": 4142
+      },
+      {
+        "path": "artifacts/validation/hidden-control-repair.log",
+        "sha256": "471de26483964b3f229b82111962f9f28069cc1fa8f430f3a362b733ece1c581",
+        "bytes": 1647
+      },
+      {
+        "path": "artifacts/validation/initial-invalid-reference-context.log",
+        "sha256": "6384f0abe031dab1b6d67b2521833b2af44c0d0023c9b372008a019f7f0942a5",
+        "bytes": 4636
+      },
+      {
+        "path": "artifacts/validation/old-cancellation-expectation.log",
+        "sha256": "75aa7d91178ee78b6d4af8acd29ceb80a80b31bf65b54ff2ab5b481e99da36a9",
+        "bytes": 6936
+      },
+      {
+        "path": "artifacts/validation/worktree.log",
+        "sha256": "d6a7b732ad3df53170cd7281c5b5ffe4529fc772491fa727e5d850dd155b640a",
+        "bytes": 3619
+      }
+    ]
+  },
+  "engines": [
+    {
+      "engine": "chromium",
+      "environment": {
+        "node": "v26.8.2",
+        "playwright": "1.63.0",
+        "browser": "153.0.8010.12",
+        "os": "darwin 25.6.0",
+        "architecture": "arm64",
+        "cpu": "Apple M4",
+        "logicalCpus": 10,
+        "totalMemoryBytes": 17179869184,
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "fonts": "Arial/system fallback",
+        "readiness": "load plus document.fonts.ready",
+        "browserCpu": null,
+        "browserMemory": null,
+        "unavailableReason": "No comparable cross-engine CPU/memory collector",
+        "hostMemory": {
+          "rss": 278364160,
+          "heapTotal": 199901184,
+          "heapUsed": 149404256,
+          "external": 11688528,
+          "arrayBuffers": 793966
+        }
+      },
+      "parityFixtures": 13,
+      "mismatches": [
+        {
+          "fixture": "denied-no-main",
+          "changedKeys": ["landmark-one-main:html"],
+          "evidenceDifferences": [],
+          "disposition": {
+            "classification": "unsupported-scope",
+            "disposition": "Missing main cannot be established when denied frame might contain it; reference selected rules can report a top-document violation without inspecting that frame.",
+            "reproduction": "pnpm test:parity (chromium, denied-no-main)"
+          }
+        },
+        {
+          "fixture": "generated-name",
+          "changedKeys": ["button-name:#generated"],
+          "evidenceDifferences": [],
+          "disposition": {
+            "classification": "unsupported-scope",
+            "disposition": "CSS-generated naming not implemented: explicit incomplete instead of reference pass.",
+            "reproduction": "pnpm test:parity (chromium, generated-name)"
+          }
+        },
+        {
+          "fixture": "overlap",
+          "changedKeys": ["target-size:#over", "target-size:#under"],
+          "evidenceDifferences": [
+            "target-size:#under:height",
+            "target-size:#under:closestOffset",
+            "target-size:#over:closestOffset"
+          ],
+          "disposition": {
+            "classification": "unsupported-scope",
+            "disposition": "Obscured geometry not implemented: explicit incomplete instead of canonical obscuration handling.",
+            "reproduction": "pnpm test:parity (chromium, overlap)"
+          }
+        }
+      ],
+      "measuredSamples": 120,
+      "longLivedJourneys": 5,
+      "fixtureDensities": [
+        {
+          "fixture": "geometry",
+          "implementation": "propellr",
+          "density": {
+            "elements": 13,
+            "buttons": 5,
+            "frames": 0,
+            "openShadowRoots": 0,
+            "styleRules": 6
+          }
+        },
+        {
+          "fixture": "geometry",
+          "implementation": "reference",
+          "density": {
+            "elements": 13,
+            "buttons": 5,
+            "frames": 0,
+            "openShadowRoots": 0,
+            "styleRules": 6
+          }
+        },
+        {
+          "fixture": "dense",
+          "implementation": "propellr",
+          "density": {
+            "elements": 47,
+            "buttons": 40,
+            "frames": 0,
+            "openShadowRoots": 0,
+            "styleRules": 6
+          }
+        },
+        {
+          "fixture": "dense",
+          "implementation": "reference",
+          "density": {
+            "elements": 47,
+            "buttons": 40,
+            "frames": 0,
+            "openShadowRoots": 0,
+            "styleRules": 6
+          }
+        },
+        {
+          "fixture": "shadow",
+          "implementation": "propellr",
+          "density": {
+            "elements": 14,
+            "buttons": 2,
+            "frames": 0,
+            "openShadowRoots": 2,
+            "styleRules": 7
+          }
+        },
+        {
+          "fixture": "shadow",
+          "implementation": "reference",
+          "density": {
+            "elements": 14,
+            "buttons": 2,
+            "frames": 0,
+            "openShadowRoots": 2,
+            "styleRules": 7
+          }
+        },
+        {
+          "fixture": "frames",
+          "implementation": "propellr",
+          "density": {
+            "elements": 23,
+            "buttons": 2,
+            "frames": 2,
+            "openShadowRoots": 0,
+            "styleRules": 18
+          }
+        },
+        {
+          "fixture": "frames",
+          "implementation": "reference",
+          "density": {
+            "elements": 23,
+            "buttons": 2,
+            "frames": 2,
+            "openShadowRoots": 0,
+            "styleRules": 18
+          }
+        }
+      ],
+      "summaries": [
+        {
+          "fixture": "geometry",
+          "lane": "cold",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 40.457165999999916,
+            "median": 41.86558299999996,
+            "p95": 43.243625000000065,
+            "max": 43.243625000000065,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 6.722915999999941,
+            "median": 6.795208000000002,
+            "p95": 7.05316700000003,
+            "max": 7.05316700000003,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "geometry",
+          "lane": "cold",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 89.64029200000004,
+            "median": 90.87758299999996,
+            "p95": 92.15720900000008,
+            "max": 92.15720900000008,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 14.473124999999982,
+            "median": 15.054415999999947,
+            "p95": 16.098041999999964,
+            "max": 16.098041999999964,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "geometry",
+          "lane": "warm",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 0.6700839999998607,
+            "median": 0.9414589999998952,
+            "p95": 3.2162499999999454,
+            "max": 3.2162499999999454,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 0.5772500000000491,
+            "median": 0.8507500000000618,
+            "p95": 3.0335000000000036,
+            "max": 3.0335000000000036,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "geometry",
+          "lane": "warm",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 2.7009579999999005,
+            "median": 2.966667000000143,
+            "p95": 3.916917000000012,
+            "max": 3.916917000000012,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 2.686749999999847,
+            "median": 2.953875000000153,
+            "p95": 3.9013330000000224,
+            "max": 3.9013330000000224,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "geometry",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 1.1250829999999041,
+            "median": 1.276834000000008,
+            "p95": 2.596041000000014,
+            "max": 2.596041000000014,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 0.822832999999946,
+            "median": 0.8520000000000891,
+            "p95": 1.1271669999998721,
+            "max": 1.1271669999998721,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "geometry",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 2.827874999999949,
+            "median": 3.100832999999966,
+            "p95": 3.341084000000137,
+            "max": 3.341084000000137,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 2.583499999999958,
+            "median": 2.7832089999999425,
+            "p95": 3.032084000000168,
+            "max": 3.032084000000168,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "dense",
+          "lane": "cold",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 43.037708000000066,
+            "median": 44.3609170000002,
+            "p95": 46.75512499999991,
+            "max": 46.75512499999991,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 8.319124999999985,
+            "median": 8.876207999999906,
+            "p95": 9.974875000000111,
+            "max": 9.974875000000111,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "dense",
+          "lane": "cold",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 101.09129100000018,
+            "median": 102.45958300000007,
+            "p95": 109.22341699999993,
+            "max": 109.22341699999993,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 25.90104199999996,
+            "median": 26.314999999999827,
+            "p95": 28.207542000000103,
+            "max": 28.207542000000103,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "dense",
+          "lane": "warm",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 2.3277499999999236,
+            "median": 2.5550829999997404,
+            "p95": 3.331833000000188,
+            "max": 3.331833000000188,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 2.1039590000000317,
+            "median": 2.302624999999807,
+            "p95": 3.044333000000279,
+            "max": 3.044333000000279,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "dense",
+          "lane": "warm",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 11.97458400000005,
+            "median": 12.71245799999997,
+            "p95": 15.768209000000297,
+            "max": 15.768209000000297,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 11.921415999999681,
+            "median": 12.66695800000025,
+            "p95": 15.717959000000064,
+            "max": 15.717959000000064,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "dense",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 2.495749999999589,
+            "median": 2.8968340000001263,
+            "p95": 3.0633750000001783,
+            "max": 3.0633750000001783,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 2.0227920000002086,
+            "median": 2.250833000000057,
+            "p95": 2.270042000000103,
+            "max": 2.270042000000103,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "dense",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 11.297707999999602,
+            "median": 12.13904199999979,
+            "p95": 12.889000000000124,
+            "max": 12.889000000000124,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 10.759625000000142,
+            "median": 11.348500000000058,
+            "p95": 12.5239160000001,
+            "max": 12.5239160000001,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "shadow",
+          "lane": "cold",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 40.56399999999985,
+            "median": 41.25579199999993,
+            "p95": 45.16437500000029,
+            "max": 45.16437500000029,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 6.503083999999944,
+            "median": 6.854499999999916,
+            "p95": 7.900709000000006,
+            "max": 7.900709000000006,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "shadow",
+          "lane": "cold",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 89.58041700000012,
+            "median": 91.03570900000022,
+            "p95": 93.10333300000002,
+            "max": 93.10333300000002,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 13.715958999999657,
+            "median": 13.855375000000095,
+            "p95": 14.254084000000148,
+            "max": 14.254084000000148,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "shadow",
+          "lane": "warm",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 0.7247079999997368,
+            "median": 0.7819579999995767,
+            "p95": 1.234375,
+            "max": 1.234375,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 0.6548749999997199,
+            "median": 0.7203340000000935,
+            "p95": 1.1367499999996653,
+            "max": 1.1367499999996653,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "shadow",
+          "lane": "warm",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 2.0388340000004064,
+            "median": 2.559834000000137,
+            "p95": 3.4609590000000026,
+            "max": 3.4609590000000026,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 2.028208000000177,
+            "median": 2.5492079999999078,
+            "p95": 3.4456669999999576,
+            "max": 3.4456669999999576,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "shadow",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 0.8907090000002427,
+            "median": 1.0085410000001502,
+            "p95": 2.1870829999998023,
+            "max": 2.1870829999998023,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 0.606666000000132,
+            "median": 0.659458000000086,
+            "p95": 1.7840420000002268,
+            "max": 1.7840420000002268,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "shadow",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 2.133874999999989,
+            "median": 2.198957999999948,
+            "p95": 2.7468340000000353,
+            "max": 2.7468340000000353,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 1.8877919999999904,
+            "median": 1.9702919999999722,
+            "p95": 2.3510000000001128,
+            "max": 2.3510000000001128,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "frames",
+          "lane": "cold",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 44.513374999999996,
+            "median": 45.74295799999982,
+            "p95": 47.70191599999998,
+            "max": 47.70191599999998,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 6.542500000000018,
+            "median": 6.770999999999731,
+            "p95": 6.864125000000058,
+            "max": 6.864125000000058,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "frames",
+          "lane": "cold",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 187.47129199999972,
+            "median": 191.22016699999995,
+            "p95": 200.71091699999988,
+            "max": 200.71091699999988,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 21.55724999999984,
+            "median": 22.001416000000063,
+            "p95": 23.82608300000038,
+            "max": 23.82608300000038,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "frames",
+          "lane": "warm",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 0.7476249999999709,
+            "median": 1.0216669999999795,
+            "p95": 2.722874999999476,
+            "max": 2.722874999999476,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 0.6865829999997004,
+            "median": 0.9318749999993088,
+            "p95": 2.603208999999879,
+            "max": 2.603208999999879,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "frames",
+          "lane": "warm",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 3.923291000000063,
+            "median": 4.4059580000002825,
+            "p95": 5.847082999999657,
+            "max": 5.847082999999657,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 3.909958999999617,
+            "median": 4.388832999999977,
+            "p95": 5.830500000000029,
+            "max": 5.830500000000029,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "frames",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 0.9750830000002679,
+            "median": 1.1940829999994094,
+            "p95": 1.4747089999991658,
+            "max": 1.4747089999991658,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 0.6657079999995403,
+            "median": 0.7712910000000193,
+            "p95": 0.9066670000001977,
+            "max": 0.9066670000001977,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "frames",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 3.9222919999992882,
+            "median": 4.211333000000195,
+            "p95": 5.243459000000257,
+            "max": 5.243459000000257,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 3.666041999999834,
+            "median": 3.828332999999475,
+            "p95": 4.2838339999998425,
+            "max": 4.2838339999998425,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        }
+      ]
+    },
+    {
+      "engine": "firefox",
+      "environment": {
+        "node": "v26.8.2",
+        "playwright": "1.63.0",
+        "browser": "155.0",
+        "os": "darwin 25.6.0",
+        "architecture": "arm64",
+        "cpu": "Apple M4",
+        "logicalCpus": 10,
+        "totalMemoryBytes": 17179869184,
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "fonts": "Arial/system fallback",
+        "readiness": "load plus document.fonts.ready",
+        "browserCpu": null,
+        "browserMemory": null,
+        "unavailableReason": "No comparable cross-engine CPU/memory collector",
+        "hostMemory": {
+          "rss": 228130816,
+          "heapTotal": 125976576,
+          "heapUsed": 68424616,
+          "external": 11571221,
+          "arrayBuffers": 676824
+        }
+      },
+      "parityFixtures": 13,
+      "mismatches": [
+        {
+          "fixture": "denied-no-main",
+          "changedKeys": ["landmark-one-main:html"],
+          "evidenceDifferences": [],
+          "disposition": {
+            "classification": "unsupported-scope",
+            "disposition": "Missing main cannot be established when denied frame might contain it; reference selected rules can report a top-document violation without inspecting that frame.",
+            "reproduction": "pnpm test:parity (firefox, denied-no-main)"
+          }
+        },
+        {
+          "fixture": "generated-name",
+          "changedKeys": ["button-name:#generated"],
+          "evidenceDifferences": [],
+          "disposition": {
+            "classification": "unsupported-scope",
+            "disposition": "CSS-generated naming not implemented: explicit incomplete instead of reference pass.",
+            "reproduction": "pnpm test:parity (firefox, generated-name)"
+          }
+        },
+        {
+          "fixture": "overlap",
+          "changedKeys": ["target-size:#over", "target-size:#under"],
+          "evidenceDifferences": [
+            "target-size:#under:height",
+            "target-size:#under:closestOffset",
+            "target-size:#over:closestOffset"
+          ],
+          "disposition": {
+            "classification": "unsupported-scope",
+            "disposition": "Obscured geometry not implemented: explicit incomplete instead of canonical obscuration handling.",
+            "reproduction": "pnpm test:parity (firefox, overlap)"
+          }
+        }
+      ],
+      "measuredSamples": 120,
+      "longLivedJourneys": 5,
+      "fixtureDensities": [
+        {
+          "fixture": "geometry",
+          "implementation": "propellr",
+          "density": {
+            "elements": 13,
+            "buttons": 5,
+            "frames": 0,
+            "openShadowRoots": 0,
+            "styleRules": 6
+          }
+        },
+        {
+          "fixture": "geometry",
+          "implementation": "reference",
+          "density": {
+            "elements": 13,
+            "buttons": 5,
+            "frames": 0,
+            "openShadowRoots": 0,
+            "styleRules": 6
+          }
+        },
+        {
+          "fixture": "dense",
+          "implementation": "propellr",
+          "density": {
+            "elements": 47,
+            "buttons": 40,
+            "frames": 0,
+            "openShadowRoots": 0,
+            "styleRules": 6
+          }
+        },
+        {
+          "fixture": "dense",
+          "implementation": "reference",
+          "density": {
+            "elements": 47,
+            "buttons": 40,
+            "frames": 0,
+            "openShadowRoots": 0,
+            "styleRules": 6
+          }
+        },
+        {
+          "fixture": "shadow",
+          "implementation": "propellr",
+          "density": {
+            "elements": 14,
+            "buttons": 2,
+            "frames": 0,
+            "openShadowRoots": 2,
+            "styleRules": 7
+          }
+        },
+        {
+          "fixture": "shadow",
+          "implementation": "reference",
+          "density": {
+            "elements": 14,
+            "buttons": 2,
+            "frames": 0,
+            "openShadowRoots": 2,
+            "styleRules": 7
+          }
+        },
+        {
+          "fixture": "frames",
+          "implementation": "propellr",
+          "density": {
+            "elements": 23,
+            "buttons": 2,
+            "frames": 2,
+            "openShadowRoots": 0,
+            "styleRules": 18
+          }
+        },
+        {
+          "fixture": "frames",
+          "implementation": "reference",
+          "density": {
+            "elements": 23,
+            "buttons": 2,
+            "frames": 2,
+            "openShadowRoots": 0,
+            "styleRules": 18
+          }
+        }
+      ],
+      "summaries": [
+        {
+          "fixture": "geometry",
+          "lane": "cold",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 117.62862500000028,
+            "median": 119.46704200000022,
+            "p95": 203.5715420000006,
+            "max": 203.5715420000006,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 2.8189579999998386,
+            "median": 3.0289580000007845,
+            "p95": 4.701792000000751,
+            "max": 4.701792000000751,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "geometry",
+          "lane": "cold",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 156.8152909999999,
+            "median": 168.9892090000003,
+            "p95": 182.66341600000032,
+            "max": 182.66341600000032,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 11.990875000000415,
+            "median": 12.468540999999277,
+            "p95": 21.761500000000524,
+            "max": 21.761500000000524,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "geometry",
+          "lane": "warm",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 1.234707999999955,
+            "median": 2.580792000000656,
+            "p95": 4.395499999998719,
+            "max": 4.395499999998719,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 1.1220409999987169,
+            "median": 2.4759590000012395,
+            "p95": 4.22045799999978,
+            "max": 4.22045799999978,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "geometry",
+          "lane": "warm",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 4.041124999999738,
+            "median": 4.899457999999868,
+            "p95": 9.467540999999983,
+            "max": 9.467540999999983,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 4.027250000001004,
+            "median": 4.884792000000743,
+            "p95": 9.449040999999852,
+            "max": 9.449040999999852,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "geometry",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 1.3651669999999285,
+            "median": 2.313749999999345,
+            "p95": 4.2277500000000146,
+            "max": 4.2277500000000146,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 0.9834159999991243,
+            "median": 1.5082500000007713,
+            "p95": 2.6061250000002474,
+            "max": 2.6061250000002474,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "geometry",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 4.144874999999956,
+            "median": 4.426499999999578,
+            "p95": 7.142791000000216,
+            "max": 7.142791000000216,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 3.6821249999993597,
+            "median": 3.9417079999984708,
+            "p95": 5.597249999998894,
+            "max": 5.597249999998894,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "dense",
+          "lane": "cold",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 121.19420799999898,
+            "median": 127.03195799999958,
+            "p95": 152.96479100000033,
+            "max": 152.96479100000033,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 5.234000000000378,
+            "median": 6.650541999999405,
+            "p95": 22.24920900000143,
+            "max": 22.24920900000143,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "dense",
+          "lane": "cold",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 181.1039579999997,
+            "median": 188.5315410000003,
+            "p95": 198.30887500000063,
+            "max": 198.30887500000063,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 30.77887499999997,
+            "median": 32.199915999999575,
+            "p95": 33.157750000000306,
+            "max": 33.157750000000306,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "dense",
+          "lane": "warm",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 3.049874999998792,
+            "median": 3.552041000000827,
+            "p95": 16.82416700000067,
+            "max": 16.82416700000067,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 2.8015830000003916,
+            "median": 3.2209160000002157,
+            "p95": 16.485458999999537,
+            "max": 16.485458999999537,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "dense",
+          "lane": "warm",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 17.289291999999477,
+            "median": 19.248125000000073,
+            "p95": 27.72941600000013,
+            "max": 27.72941600000013,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 17.239583999999013,
+            "median": 19.199916999999914,
+            "p95": 27.68054099999972,
+            "max": 27.68054099999972,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "dense",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 3.135832999998456,
+            "median": 3.450417000000016,
+            "p95": 4.279500000000553,
+            "max": 4.279500000000553,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 2.497709000001123,
+            "median": 2.6694580000003043,
+            "p95": 3.1572919999998703,
+            "max": 3.1572919999998703,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "dense",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 17.904624999999214,
+            "median": 18.04216699999961,
+            "p95": 19.125084000001152,
+            "max": 19.125084000001152,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 17.33391699999993,
+            "median": 17.389749999998457,
+            "p95": 18.46795800000109,
+            "max": 18.46795800000109,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "shadow",
+          "lane": "cold",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 111.08037500000137,
+            "median": 121.38008300000001,
+            "p95": 139.4981659999994,
+            "max": 139.4981659999994,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 2.51129199999923,
+            "median": 2.6205410000002303,
+            "p95": 3.2416249999987485,
+            "max": 3.2416249999987485,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "shadow",
+          "lane": "cold",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 158.47354199999972,
+            "median": 166.63195799999994,
+            "p95": 177.6512500000008,
+            "max": 177.6512500000008,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 10.569625000000087,
+            "median": 10.774875000000975,
+            "p95": 11.282375000000684,
+            "max": 11.282375000000684,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "shadow",
+          "lane": "warm",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 1.0866669999995793,
+            "median": 1.6576249999998254,
+            "p95": 9.477915999999823,
+            "max": 9.477915999999823,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 1.006708000000799,
+            "median": 1.5508329999993293,
+            "p95": 9.33454200000051,
+            "max": 9.33454200000051,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "shadow",
+          "lane": "warm",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 3.673208000000159,
+            "median": 4.716166999998677,
+            "p95": 8.879750000000058,
+            "max": 8.879750000000058,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 3.662333000000217,
+            "median": 4.700582999999824,
+            "p95": 8.861791999999696,
+            "max": 8.861791999999696,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "shadow",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 1.170124999998734,
+            "median": 1.4242919999996957,
+            "p95": 2.1965840000011667,
+            "max": 2.1965840000011667,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 0.8202500000006694,
+            "median": 0.940708000000086,
+            "p95": 1.6696249999986321,
+            "max": 1.6696249999986321,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "shadow",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 3.4989999999997963,
+            "median": 3.5532919999986916,
+            "p95": 4.0864999999994325,
+            "max": 4.0864999999994325,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 3.1902920000011363,
+            "median": 3.205832999999984,
+            "p95": 3.616707999999562,
+            "max": 3.616707999999562,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "frames",
+          "lane": "cold",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 129.22654200000034,
+            "median": 135.86175000000003,
+            "p95": 151.91295899999932,
+            "max": 151.91295899999932,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 3.3077089999969758,
+            "median": 3.611624999999549,
+            "p95": 5.7942500000008295,
+            "max": 5.7942500000008295,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "frames",
+          "lane": "cold",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 251.4395000000004,
+            "median": 260.4572500000013,
+            "p95": 526.1916249999995,
+            "max": 526.1916249999995,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 13.71929099999943,
+            "median": 13.832166000000143,
+            "p95": 15.472917000000962,
+            "max": 15.472917000000962,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "frames",
+          "lane": "warm",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 1.4007910000000265,
+            "median": 1.7497500000026776,
+            "p95": 9.082749999997759,
+            "max": 9.082749999997759,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 1.3132919999989099,
+            "median": 1.6405420000010054,
+            "p95": 8.949165999998513,
+            "max": 8.949165999998513,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "frames",
+          "lane": "warm",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 6.081041999997979,
+            "median": 7.694832999997743,
+            "p95": 16.37737500000003,
+            "max": 16.37737500000003,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 6.066584000000148,
+            "median": 7.676917000000685,
+            "p95": 16.35699999999997,
+            "max": 16.35699999999997,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "frames",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 1.4347080000006827,
+            "median": 1.8344170000018494,
+            "p95": 2.770375000000058,
+            "max": 2.770375000000058,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 1.074584000001778,
+            "median": 1.214165999997931,
+            "p95": 1.725749999997788,
+            "max": 1.725749999997788,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "frames",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 5.166207999998733,
+            "median": 5.74541699999827,
+            "p95": 6.431292000001122,
+            "max": 6.431292000001122,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 4.823499999998603,
+            "median": 5.348582999999053,
+            "p95": 6.017208000001119,
+            "max": 6.017208000001119,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "environment": {
+        "node": "v26.8.2",
+        "playwright": "1.63.0",
+        "browser": "26.6",
+        "os": "darwin 25.6.0",
+        "architecture": "arm64",
+        "cpu": "Apple M4",
+        "logicalCpus": 10,
+        "totalMemoryBytes": 17179869184,
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "deviceScaleFactor": 1,
+        "fonts": "Arial/system fallback",
+        "readiness": "load plus document.fonts.ready",
+        "browserCpu": null,
+        "browserMemory": null,
+        "unavailableReason": "No comparable cross-engine CPU/memory collector",
+        "hostMemory": {
+          "rss": 232472576,
+          "heapTotal": 125976576,
+          "heapUsed": 73371816,
+          "external": 11730350,
+          "arrayBuffers": 842059
+        }
+      },
+      "parityFixtures": 13,
+      "mismatches": [
+        {
+          "fixture": "denied-no-main",
+          "changedKeys": ["landmark-one-main:html"],
+          "evidenceDifferences": [],
+          "disposition": {
+            "classification": "unsupported-scope",
+            "disposition": "Missing main cannot be established when denied frame might contain it; reference selected rules can report a top-document violation without inspecting that frame.",
+            "reproduction": "pnpm test:parity (webkit, denied-no-main)"
+          }
+        },
+        {
+          "fixture": "generated-name",
+          "changedKeys": ["button-name:#generated"],
+          "evidenceDifferences": [],
+          "disposition": {
+            "classification": "unsupported-scope",
+            "disposition": "CSS-generated naming not implemented: explicit incomplete instead of reference pass.",
+            "reproduction": "pnpm test:parity (webkit, generated-name)"
+          }
+        },
+        {
+          "fixture": "overlap",
+          "changedKeys": ["target-size:#over", "target-size:#under"],
+          "evidenceDifferences": [
+            "target-size:#under:height",
+            "target-size:#under:closestOffset",
+            "target-size:#over:closestOffset"
+          ],
+          "disposition": {
+            "classification": "unsupported-scope",
+            "disposition": "Obscured geometry not implemented: explicit incomplete instead of canonical obscuration handling.",
+            "reproduction": "pnpm test:parity (webkit, overlap)"
+          }
+        }
+      ],
+      "measuredSamples": 120,
+      "longLivedJourneys": 5,
+      "fixtureDensities": [
+        {
+          "fixture": "geometry",
+          "implementation": "propellr",
+          "density": {
+            "elements": 13,
+            "buttons": 5,
+            "frames": 0,
+            "openShadowRoots": 0,
+            "styleRules": 6
+          }
+        },
+        {
+          "fixture": "geometry",
+          "implementation": "reference",
+          "density": {
+            "elements": 13,
+            "buttons": 5,
+            "frames": 0,
+            "openShadowRoots": 0,
+            "styleRules": 6
+          }
+        },
+        {
+          "fixture": "dense",
+          "implementation": "propellr",
+          "density": {
+            "elements": 47,
+            "buttons": 40,
+            "frames": 0,
+            "openShadowRoots": 0,
+            "styleRules": 6
+          }
+        },
+        {
+          "fixture": "dense",
+          "implementation": "reference",
+          "density": {
+            "elements": 47,
+            "buttons": 40,
+            "frames": 0,
+            "openShadowRoots": 0,
+            "styleRules": 6
+          }
+        },
+        {
+          "fixture": "shadow",
+          "implementation": "propellr",
+          "density": {
+            "elements": 14,
+            "buttons": 2,
+            "frames": 0,
+            "openShadowRoots": 2,
+            "styleRules": 7
+          }
+        },
+        {
+          "fixture": "shadow",
+          "implementation": "reference",
+          "density": {
+            "elements": 14,
+            "buttons": 2,
+            "frames": 0,
+            "openShadowRoots": 2,
+            "styleRules": 7
+          }
+        },
+        {
+          "fixture": "frames",
+          "implementation": "propellr",
+          "density": {
+            "elements": 23,
+            "buttons": 2,
+            "frames": 2,
+            "openShadowRoots": 0,
+            "styleRules": 18
+          }
+        },
+        {
+          "fixture": "frames",
+          "implementation": "reference",
+          "density": {
+            "elements": 23,
+            "buttons": 2,
+            "frames": 2,
+            "openShadowRoots": 0,
+            "styleRules": 18
+          }
+        }
+      ],
+      "summaries": [
+        {
+          "fixture": "geometry",
+          "lane": "cold",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 129.17579200000182,
+            "median": 129.56750000000102,
+            "p95": 129.8787080000002,
+            "max": 129.8787080000002,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 7.907042000002548,
+            "median": 8.123917000000802,
+            "p95": 8.314834000000701,
+            "max": 8.314834000000701,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "geometry",
+          "lane": "cold",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 158.4097499999989,
+            "median": 163.32158300000083,
+            "p95": 168.33008300000074,
+            "max": 168.33008300000074,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 17.64691700000185,
+            "median": 18.030374999998457,
+            "p95": 18.698083999999653,
+            "max": 18.698083999999653,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "geometry",
+          "lane": "warm",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 0.9047499999978754,
+            "median": 1.3807080000005953,
+            "p95": 1.6832910000011907,
+            "max": 1.6832910000011907,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 0.8025409999972908,
+            "median": 1.2595000000001164,
+            "p95": 1.5332080000007409,
+            "max": 1.5332080000007409,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "geometry",
+          "lane": "warm",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 3.3811249999998836,
+            "median": 3.75287500000195,
+            "p95": 6.0147909999977855,
+            "max": 6.0147909999977855,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 3.3552080000008573,
+            "median": 3.7374170000002778,
+            "p95": 5.989333000001352,
+            "max": 5.989333000001352,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "geometry",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 1.2862910000003467,
+            "median": 1.8404159999990952,
+            "p95": 2.0795410000027914,
+            "max": 2.0795410000027914,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 0.838832999997976,
+            "median": 1.071124999998574,
+            "p95": 1.6237079999991693,
+            "max": 1.6237079999991693,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "geometry",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 3.2515000000021246,
+            "median": 4.211416999998619,
+            "p95": 4.455832999999984,
+            "max": 4.455832999999984,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 2.943875000000844,
+            "median": 3.705207999999402,
+            "p95": 4.136833000000479,
+            "max": 4.136833000000479,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "dense",
+          "lane": "cold",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 128.1593329999996,
+            "median": 129.40295799999876,
+            "p95": 133.35662500000035,
+            "max": 133.35662500000035,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 9.979374999998981,
+            "median": 10.042374999997264,
+            "p95": 10.851082999997743,
+            "max": 10.851082999997743,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "dense",
+          "lane": "cold",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 171.1765830000004,
+            "median": 174.93020799999795,
+            "p95": 177.79904199999874,
+            "max": 177.79904199999874,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 30.069292000000132,
+            "median": 30.801167000001442,
+            "p95": 31.337083000002167,
+            "max": 31.337083000002167,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "dense",
+          "lane": "warm",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 2.1152080000028946,
+            "median": 3.1344590000007884,
+            "p95": 3.659665999999561,
+            "max": 3.659665999999561,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 1.8694160000013653,
+            "median": 2.8493750000016007,
+            "p95": 3.3562500000007276,
+            "max": 3.3562500000007276,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "dense",
+          "lane": "warm",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 10.343625000001339,
+            "median": 11.668917000002693,
+            "p95": 13.342832999998791,
+            "max": 13.342832999998791,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 10.29316700000345,
+            "median": 11.612374999996973,
+            "p95": 13.289749999999913,
+            "max": 13.289749999999913,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "dense",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 2.0964590000003227,
+            "median": 2.8009170000004815,
+            "p95": 3.235833000002458,
+            "max": 3.235833000002458,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 1.6034590000017488,
+            "median": 1.9147919999995793,
+            "p95": 2.1757919999981823,
+            "max": 2.1757919999981823,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "dense",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 10.953667000001587,
+            "median": 11.528999999998632,
+            "p95": 12.265416999998706,
+            "max": 12.265416999998706,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 10.412875000001804,
+            "median": 11.102665999998862,
+            "p95": 11.680000000000291,
+            "max": 11.680000000000291,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "shadow",
+          "lane": "cold",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 129.93254100000195,
+            "median": 138.4327919999996,
+            "p95": 154.27666600000157,
+            "max": 154.27666600000157,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 8.265583000000333,
+            "median": 8.980916999997135,
+            "p95": 9.523791999999958,
+            "max": 9.523791999999958,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "shadow",
+          "lane": "cold",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 163.46708299999955,
+            "median": 181.40020899999945,
+            "p95": 183.75345800000287,
+            "max": 183.75345800000287,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 17.03729100000055,
+            "median": 17.93262500000128,
+            "p95": 19.99079200000051,
+            "max": 19.99079200000051,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "shadow",
+          "lane": "warm",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 0.8676249999989523,
+            "median": 1.5082079999992857,
+            "p95": 1.614292000002024,
+            "max": 1.614292000002024,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 0.8039580000004207,
+            "median": 1.3973750000004657,
+            "p95": 1.4863750000004075,
+            "max": 1.4863750000004075,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "shadow",
+          "lane": "warm",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 3.1909580000028654,
+            "median": 4.187916999999288,
+            "p95": 10.562958000002254,
+            "max": 10.562958000002254,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 3.1783329999998386,
+            "median": 4.161166999998386,
+            "p95": 10.542417000000569,
+            "max": 10.542417000000569,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "shadow",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 1.0840420000022277,
+            "median": 1.3474590000005264,
+            "p95": 1.5488330000007409,
+            "max": 1.5488330000007409,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 0.75287500000195,
+            "median": 0.9173330000012356,
+            "p95": 0.9766249999993306,
+            "max": 0.9766249999993306,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "shadow",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 3.007041000000754,
+            "median": 3.207125000000815,
+            "p95": 3.3680830000012065,
+            "max": 3.3680830000012065,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 2.657500000001164,
+            "median": 2.8197500000023865,
+            "p95": 3.0253329999977723,
+            "max": 3.0253329999977723,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "frames",
+          "lane": "cold",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 133.21333400000003,
+            "median": 142.8679579999989,
+            "p95": 143.8650000000016,
+            "max": 143.8650000000016,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 8.465582999997423,
+            "median": 8.674458000001323,
+            "p95": 8.968874999998661,
+            "max": 8.968874999998661,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "frames",
+          "lane": "cold",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 210.48783399999957,
+            "median": 212.75083399999858,
+            "p95": 224.19429200000013,
+            "max": 224.19429200000013,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 21.993249999999534,
+            "median": 22.849207999999635,
+            "p95": 24.295125000000553,
+            "max": 24.295125000000553,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "frames",
+          "lane": "warm",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 0.8101669999996375,
+            "median": 1.3087500000001455,
+            "p95": 1.9088750000009895,
+            "max": 1.9088750000009895,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 0.7350000000005821,
+            "median": 1.2220830000005662,
+            "p95": 1.7830840000024182,
+            "max": 1.7830840000024182,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "frames",
+          "lane": "warm",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 5.697000000000116,
+            "median": 6.836333999999624,
+            "p95": 8.78912499999933,
+            "max": 8.78912499999933,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 5.6799580000006245,
+            "median": 6.820832999997947,
+            "p95": 8.772041000000172,
+            "max": 8.772041000000172,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "frames",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "propellr",
+          "usable": {
+            "count": 5,
+            "min": 0.9623330000031274,
+            "median": 1.3630000000011933,
+            "p95": 1.4624580000017886,
+            "max": 1.4624580000017886,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 0.6795830000010028,
+            "median": 0.8403340000004391,
+            "p95": 0.9377500000009604,
+            "max": 0.9377500000009604,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        },
+        {
+          "fixture": "frames",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
+          "implementation": "reference",
+          "usable": {
+            "count": 5,
+            "min": 5.318125000001601,
+            "median": 5.763458000001265,
+            "p95": 6.096499999999651,
+            "max": 6.096499999999651,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          },
+          "scanTransfer": {
+            "count": 5,
+            "min": 4.9994170000027225,
+            "median": 5.501499999998487,
+            "p95": 5.685083999997005,
+            "max": 5.685083999997005,
+            "uncertainty": "Five exploratory samples; no precise confidence interval"
+          }
+        }
+      ]
+    }
+  ],
+  "claims": {
+    "fullParity": false,
+    "incrementalAlgorithm": false,
+    "speedup": false,
+    "browserCpuAndMemory": "unavailable; host/harness process observations only",
+    "externalIndependentReview": "not performed; one agent checked expectations separately"
+  }
+}

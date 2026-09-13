@@ -1,5 +1,12 @@
 import { z } from "zod";
-import type { Checkpoint, Diagnostic, PlaybookManifest, PlaybookResult } from "../contracts.js";
+import type {
+  Checkpoint,
+  Diagnostic,
+  JsonObject,
+  PlaybookManifest,
+  PlaybookResult,
+  ScanResult,
+} from "../contracts.js";
 import type { BrowserTarget } from "./browser.js";
 import { FIXTURE_URL } from "./fixture.js";
 
@@ -19,9 +26,13 @@ export const dialogManifest: PlaybookManifest = {
     { id: "closed", expectedBehavior: "Dialog hidden; focus returned to opener" },
   ],
 };
-export const scanUnavailable: Diagnostic = {
-  code: "scan-unavailable",
-  message: "Browser analysis is not implemented in phase 2",
+export const scanInterrupted: Diagnostic = {
+  code: "scan-interrupted",
+  message: "Checkpoint observed but scan could not complete",
+};
+const scanCancelled: Diagnostic = {
+  code: "scan-cancelled",
+  message: "Checkpoint scan interrupted by cancellation",
 };
 
 export interface PlaybookExecution {
@@ -39,6 +50,7 @@ export async function runDialog(
   signal: AbortSignal,
   authorize: () => boolean,
   emit: (checkpoint: Checkpoint) => void,
+  scan: (checkpointId: string) => Promise<ScanResult>,
 ): Promise<PlaybookExecution> {
   const { page } = target;
   const checkpoints: Checkpoint[] = [];
@@ -69,6 +81,47 @@ export async function runDialog(
     checkpoints.push(checkpoint);
     emit(checkpoint);
   };
+  const checkpoint = async (id: string, observed: JsonObject) => {
+    if (signal.aborted) {
+      record({ id, observed, state: "blocked", reason: scanCancelled });
+      throw new Error("checkpoint-scan-cancelled");
+    }
+    let reason = scanInterrupted;
+    try {
+      const result = await scan(id);
+      if (!current()) throw new Error("stale-checkpoint");
+      if (result.coverage.state === "stale") {
+        reason = result.coverage.gaps[0];
+        throw new Error("stale-checkpoint-scan");
+      }
+      record({ id, observed, state: "reached", scans: [result] });
+    } catch (error) {
+      if (signal.aborted) reason = scanCancelled;
+      else if (
+        target.documentId !== documentId ||
+        (error instanceof Error && error.message === "scan-document-changed")
+      ) {
+        reason = {
+          code: "scan-document-changed",
+          message: "Document binding changed; checkpoint scan was not committed",
+        };
+      } else if (
+        error instanceof Error &&
+        [
+          "scan-result-limit",
+          "scan-stale",
+          "scan-not-authorized",
+          "scan-cancelled",
+          "scan-failed",
+        ].includes(error.message)
+      ) {
+        // Preserve only known machine codes, never raw evaluator error text.
+        reason = { code: error.message, message: "Checkpoint scan rejected; no result committed" };
+      }
+      record({ id, observed, state: "blocked", reason });
+      throw new Error("checkpoint-scan-failed");
+    }
+  };
   try {
     guard();
     if (
@@ -89,12 +142,7 @@ export async function runDialog(
     // Retain confirmed observations even when cancellation arrived during the browser await.
     if (!current()) throw new Error("stale-observation");
     sideEffects = "confirmed";
-    record({
-      id: "opened",
-      state: "blocked",
-      reason: scanUnavailable,
-      observed: { dialogVisible: true },
-    });
+    await checkpoint("opened", { dialogVisible: true });
     guard();
     sideEffects = "uncertain";
     await closer.click(options);
@@ -103,20 +151,20 @@ export async function runDialog(
     if (!current()) throw new Error("stale-observation");
     if (!focusReturned) throw new Error("focus");
     sideEffects = "confirmed";
-    record({
-      id: "closed",
-      state: "blocked",
-      reason: scanUnavailable,
-      observed: { dialogVisible: false, focusReturned },
-    });
+    await checkpoint("closed", { dialogVisible: false, focusReturned });
   } catch {
     failed = !signal.aborted;
-    const reason = {
-      code: signal.aborted ? "cancellation-requested" : "journey-blocked",
-      message: signal.aborted
-        ? "Journey interrupted by cancellation"
-        : "Prerequisite, authorization, document or interaction check failed",
-    };
+    const reason = signal.aborted
+      ? { code: "cancellation-requested", message: "Journey interrupted by cancellation" }
+      : target.documentId !== documentId
+        ? {
+            code: "scan-document-changed",
+            message: "Document binding changed; journey interrupted",
+          }
+        : (checkpoints.find((checkpoint) => checkpoint.state !== "reached")?.reason ?? {
+            code: "journey-blocked",
+            message: "Prerequisite, authorization, document or interaction check failed",
+          });
     diagnostics.push(reason);
     for (const id of ["opened", "closed"]) {
       if (!checkpoints.some((checkpoint) => checkpoint.id === id))
@@ -141,16 +189,27 @@ export async function runDialog(
   }
   const first = checkpoints[0];
   if (!first) throw new Error("Missing journey checkpoint");
+  const gaps = checkpoints.flatMap((checkpoint) =>
+    checkpoint.state !== "reached"
+      ? [checkpoint.reason]
+      : checkpoint.scans.flatMap((scan) =>
+          scan.coverage.state === "complete" ? [] : scan.coverage.gaps,
+        ),
+  );
+  gaps.push(...diagnostics);
+  const firstGap = gaps[0];
   return {
     cancelled: signal.aborted,
     failed,
     sideEffects,
     result: {
       playbook: dialogVersion,
-      coverage: { state: "partial", gaps: [scanUnavailable, ...diagnostics] },
+      coverage: firstGap
+        ? { state: "partial", gaps: [firstGap, ...gaps.slice(1)] }
+        : { state: "complete" },
       checkpoints: [first, ...checkpoints.slice(1)],
       cleanup,
-      diagnostics: [scanUnavailable, ...diagnostics],
+      diagnostics,
     },
   };
 }

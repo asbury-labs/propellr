@@ -26,3 +26,36 @@ Canonical source and future artifact pins are in `reference.json` and
 `specs/axe-core-reference.md`. No canonical build/install or artifact download was
 performed. Dependency licenses remain with their installed packages; exact resolved
 versions and integrity values are recorded by the new lockfile.
+
+## Phase 3 selective reuse
+
+Canonical checkout remains on `4d306cbb7c456849c6f964444a6a7174d2be502a`, read-only.
+Source below was read with `git show v4.13.0:<path>`, pinned to
+`1cc54b900413660610180d631feb73c9e74f4dc9`; no upstream install/build ran.
+
+- `src/catalog.json`: inventory derived from all 105 `lib/rules/*.json` definitions.
+  IDs, activation flags and tags are upstream standards/rule data under MPL 2.0.
+- `src/browser/geometry.ts`: TypeScript adaptation of
+  `lib/commons/math/rect-has-minimum-size.js`, `get-offset.js` and rounding behavior
+  in `lib/checks/mobile/target-offset-evaluate.js`. Retains 0.05px minimum-size
+  margin and single-decimal radius rounding. Rect splitting, obscuration and
+  overflowing-content algorithms are not ported; those branches stay incomplete.
+- `src/browser/index.ts`: new reader/evaluator using selected rule/check semantics
+  from `lib/rules/{button-name,target-size,landmark-one-main}.json`,
+  `widget-not-inline-matches.js`, `no-explicit-name-required-matches.js`,
+  `lib/checks/generic/has-descendant-{evaluate,after}.js`,
+  `lib/checks/shared/aria-labelledby-evaluate.js`, and
+  `lib/checks/mobile/target-{size,offset}-evaluate.js`. Main presence aggregates
+  across accessible frames; multiple mains do not fail this rule. Naming checks
+  are an OR, not a complete accessible-name computation API.
+
+Adapted source files carry MPL 2.0 identifiers. Retained full license:
+`licenses/axe-core-MPL-2.0.txt`. Original fixture HTML and expectation assertions
+were authored here; no upstream fixture corpus or runtime shell was copied.
+
+Published `axe-core@4.13.0` tarball was obtained independently in an external cache.
+Both tarball SHA-512 and extracted `axe.min.js` SHA-256 are verified by
+`tools/reference.ts`; tests verify bundle hash again before execution. Bundle,
+package metadata and upstream license remain outside the workspace/dependencies.
+Source and package artifact pins are separate provenance records, not a claim
+that the published artifact was reproducibly built from the tagged commit.

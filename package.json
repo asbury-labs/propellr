@@ -4,15 +4,19 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc -p tsconfig.portable.json && tsc -p tsconfig.browser.json && tsc -p tsconfig.host.json && tsc -p tsconfig.test.json",
+    "build": "tsc -p tsconfig.build.json && vite build",
+    "typecheck": "tsc -p tsconfig.portable.json && tsc -p tsconfig.browser.json && tsc -p tsconfig.host.json && tsc -p tsconfig.test.json && tsc -p tsconfig.browser-test.json",
     "lint": "oxlint --deny-warnings .",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
     "test:contracts": "vitest run --project contracts",
     "test:host": "pnpm build && vitest run --project host",
-    "test:playbooks": "vitest run --project playbooks",
-    "validate": "pnpm build && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test:contracts && pnpm test:host && pnpm test:playbooks"
+    "test:playbooks": "pnpm build && vitest run --project playbooks",
+    "reference:prepare": "node tools/reference.ts",
+    "test:parity": "pnpm build && vitest run --project parity --project browser",
+    "test:reporting": "vitest run --project reporting",
+    "bench:slice": "pnpm build && vitest run --project bench",
+    "validate": "pnpm build && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test:contracts && pnpm test:host && pnpm test:playbooks && pnpm test:parity && pnpm test:reporting"
   },
   "dependencies": {
     "playwright": "1.63.0",

@@ -1,4 +1,4 @@
-# Local host protocol, phase 2
+# Local host protocol, phases 2 and 3
 
 Single-user macOS/Linux host. Filesystem access is authentication: owned directory
 0700, Unix socket 0600, no control TCP/HTTP listener. Every local connection has
@@ -78,12 +78,51 @@ host page/document IDs. Required actions: `dialog.open`, `dialog.close`. Require
 origin: exact fixture origin. Prerequisite: exact fixture URL, one marked fixture,
 visible opener, closed dialog. Checkpoints `opened` and `closed` observe actual
 visibility; closed additionally checks returned focus. Each checkpoint records
-observation but remains blocked by `scan-unavailable` until phase 3. Never emit
-an accessibility pass, scan ID or completed scan. Failed setup skips checkpoints
-with explicit reasons. Cleanup closes an open dialog if still authorized; failure
+observation and an actual explicit three-rule scan in phase 3. A reached checkpoint
+may contain violations or partial coverage. Interrupted or stale scans block the
+checkpoint; stale scans are not retained as report history. Failed setup skips
+checkpoints with explicit reasons. Completed
+checkpoint scans survive later cancellation, browser loss and cleanup failure. Cleanup closes an open dialog if still authorized; failure
 is explicit and cancellation preserves checkpoints. Navigation invalidates document
-IDs; a changed document cannot commit an old checkpoint. Page scripts and external
+IDs, including any child-frame navigation; a changed document cannot commit an old checkpoint.
+Direct-scan and journey failures, including blocked checkpoint reasons, retain
+`scan-document-changed` diagnostics instead of collapsing navigation into evaluator failure.
+Other known blocked scan reasons, including `scan-stale` and `scan-result-limit`, also propagate to the failed operation
+rather than becoming generic journey failures; cancellation and document change take priority.
+Journey terminal commits recheck live cancellation/document generation after execution and cleanup;
+already reached checkpoint scans remain historical observations, not completed journey claims.
+Exhausted rule metadata that omits selected results fails as `scan-result-limit`, never an empty
+completed host scan. Page scripts and external
 browser users are not locked out, so this does not claim atomic DOM observation.
+
+Direct scans enforce allowed current origin and one whole current document. Transfer-stale
+results fail with `scan-stale` before reporting or history retention. Each scan
+uses lexical bundle injection with a host-held handle, never a page-owned analyzer global;
+finish/disposal bounds runtime lifetime. Execution remains in the main world, not a claim
+of hostile-page isolation. Defaults
+resolve 89 stable canonical defaults, not the three-rule slice. Unimplemented rules,
+options and narrower/excluded scopes remain not-evaluated/partial. Incremental
+requests record full-scan fallback. DOM/viewport changes detected during transfer
+produce stale coverage; cancelled/navigation-invalidated work cannot commit current
+results. No CSSOM-wide atomicity or closed/cross-origin-root inspection claim.
+
+Raw results and exact-target groups stay separate. Eight prior raw scans support
+bounded local continuity; document/config/rule/policy differences or missing coverage
+prevent false resolution. Host gate `local-zero-violations@1` has zero unwaived
+unique and occurrence thresholds, with incomplete scans indeterminate. Group counts
+refer only to current scan. Report history is released at end; retained operation
+results remain available under operation limits. Each serialized reported scan is
+capped at 192 KiB, leaving room for two checkpoints duplicated in a failed operation
+and framing within the 1 MiB reply limit. Oversized historical groups are omitted
+with `report-history-limit` and no lifecycle comparison. Current raw findings/counts
+remain intact; a still-oversized current-only result fails before commit instead of
+breaking IPC. Reader bounds: 2,000 elements,
+32 boundary steps, 96 occurrences, 1,024 characters per target path, 128 KiB raw
+evidence and 32 gap diagnostics per scan. Budget exhaustion
+is partial. Native modals rooted inside shadow DOM make selected rules not-evaluated
+with `shadow-modal-unavailable`; this cross-root visibility branch is not implemented.
+No text names, page HTML or screenshots are captured; scoped selectors
+and numeric evidence can still contain page identifiers. Controlled fixtures only.
 
 Audit retains only command, decision code, session/operation IDs and timestamp,
 bounded to 128 entries. No payloads, URLs, selectors, browser error text, secrets

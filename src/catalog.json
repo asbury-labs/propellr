@@ -1,0 +1,1337 @@
+{
+  "version": "4.13.0",
+  "commit": "1cc54b900413660610180d631feb73c9e74f4dc9",
+  "rules": [
+    {
+      "id": "accesskeys",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.keyboard", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "area-alt",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.text-alternatives",
+        "wcag2a",
+        "wcag244",
+        "wcag412",
+        "section508",
+        "section508.22.a",
+        "TTv5",
+        "TT6.a",
+        "EN-301-549",
+        "EN-9.2.4.4",
+        "EN-9.4.1.2",
+        "ACT",
+        "RGAAv4",
+        "RGAA-1.1.2"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-allowed-attr",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.aria", "wcag2a", "wcag412", "EN-301-549", "EN-9.4.1.2", "RGAAv4", "RGAA-7.1.1"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-allowed-role",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.aria", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-braille-equivalent",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.aria", "wcag2a", "wcag412", "EN-301-549", "EN-9.4.1.2"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-command-name",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.aria",
+        "wcag2a",
+        "wcag412",
+        "TTv5",
+        "TT6.a",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "ACT",
+        "RGAAv4",
+        "RGAA-11.9.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-conditional-attr",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.aria", "wcag2a", "wcag412", "EN-301-549", "EN-9.4.1.2", "RGAAv4", "RGAA-7.1.1"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-deprecated-role",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.aria", "wcag2a", "wcag412", "EN-301-549", "EN-9.4.1.2", "RGAAv4", "RGAA-7.1.1"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-dialog-name",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.aria", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-hidden-body",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.aria",
+        "wcag2a",
+        "wcag131",
+        "wcag412",
+        "EN-301-549",
+        "EN-9.1.3.1",
+        "EN-9.4.1.2",
+        "RGAAv4",
+        "RGAA-10.8.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-hidden-focus",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.name-role-value",
+        "wcag2a",
+        "wcag412",
+        "TTv5",
+        "TT6.a",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "RGAAv4",
+        "RGAA-10.8.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-input-field-name",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.aria",
+        "wcag2a",
+        "wcag412",
+        "TTv5",
+        "TT5.c",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "ACT",
+        "RGAAv4",
+        "RGAA-11.1.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-meter-name",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.aria",
+        "wcag2a",
+        "wcag111",
+        "EN-301-549",
+        "EN-9.1.1.1",
+        "RGAAv4",
+        "RGAA-11.1.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-progressbar-name",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.aria",
+        "wcag2a",
+        "wcag111",
+        "EN-301-549",
+        "EN-9.1.1.1",
+        "RGAAv4",
+        "RGAA-11.1.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-prohibited-attr",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.aria", "wcag2a", "wcag412", "EN-301-549", "EN-9.4.1.2", "RGAAv4", "RGAA-7.1.1"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-required-attr",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.aria", "wcag2a", "wcag412", "EN-301-549", "EN-9.4.1.2", "RGAAv4", "RGAA-7.1.1"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-required-children",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.aria", "wcag2a", "wcag131", "EN-301-549", "EN-9.1.3.1", "RGAAv4", "RGAA-9.3.1"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-required-parent",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.aria", "wcag2a", "wcag131", "EN-301-549", "EN-9.1.3.1", "RGAAv4", "RGAA-9.3.1"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-roledescription",
+      "defaultEnabled": false,
+      "experimental": false,
+      "tags": ["cat.aria", "wcag2a", "wcag412", "EN-301-549", "EN-9.4.1.2", "deprecated"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-roles",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.aria", "wcag2a", "wcag412", "EN-301-549", "EN-9.4.1.2", "RGAAv4", "RGAA-7.1.1"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-tab-name",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.aria",
+        "wcag2a",
+        "wcag412",
+        "TTv5",
+        "TT5.c",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "ACT",
+        "RGAAv4",
+        "RGAA-7.1.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-text",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.aria", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-toggle-field-name",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.aria",
+        "wcag2a",
+        "wcag412",
+        "TTv5",
+        "TT5.c",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "ACT",
+        "RGAAv4",
+        "RGAA-7.1.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-tooltip-name",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.aria", "wcag2a", "wcag412", "EN-301-549", "EN-9.4.1.2"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-treeitem-name",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.aria", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-valid-attr",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.aria", "wcag2a", "wcag412", "EN-301-549", "EN-9.4.1.2", "RGAAv4", "RGAA-7.1.1"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "aria-valid-attr-value",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.aria", "wcag2a", "wcag412", "EN-301-549", "EN-9.4.1.2", "RGAAv4", "RGAA-7.1.1"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "audio-caption",
+      "defaultEnabled": false,
+      "experimental": false,
+      "tags": [
+        "cat.time-and-media",
+        "wcag2a",
+        "wcag121",
+        "EN-301-549",
+        "EN-9.1.2.1",
+        "section508",
+        "section508.22.a",
+        "deprecated"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "autocomplete-valid",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.forms",
+        "wcag21aa",
+        "wcag135",
+        "EN-301-549",
+        "EN-9.1.3.5",
+        "ACT",
+        "RGAAv4",
+        "RGAA-11.13.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "avoid-inline-spacing",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.structure", "wcag21aa", "wcag1412", "EN-301-549", "EN-9.1.4.12", "ACT"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "blink",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.time-and-media",
+        "wcag2a",
+        "wcag222",
+        "section508",
+        "section508.22.j",
+        "TTv5",
+        "TT2.b",
+        "EN-301-549",
+        "EN-9.2.2.2",
+        "RGAAv4",
+        "RGAA-13.8.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "button-name",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.name-role-value",
+        "wcag2a",
+        "wcag412",
+        "section508",
+        "section508.22.a",
+        "TTv5",
+        "TT6.a",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "ACT",
+        "RGAAv4",
+        "RGAA-11.9.1"
+      ],
+      "implementation": "selected-partial"
+    },
+    {
+      "id": "bypass",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.keyboard",
+        "wcag2a",
+        "wcag241",
+        "section508",
+        "section508.22.o",
+        "TTv5",
+        "TT9.a",
+        "EN-301-549",
+        "EN-9.2.4.1",
+        "RGAAv4",
+        "RGAA-12.7.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "color-contrast",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.color",
+        "wcag2aa",
+        "wcag143",
+        "TTv5",
+        "TT13.c",
+        "EN-301-549",
+        "EN-9.1.4.3",
+        "ACT",
+        "RGAAv4",
+        "RGAA-3.2.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "color-contrast-enhanced",
+      "defaultEnabled": false,
+      "experimental": false,
+      "tags": ["cat.color", "wcag2aaa", "wcag146", "ACT"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "css-orientation-lock",
+      "defaultEnabled": true,
+      "experimental": true,
+      "tags": [
+        "cat.structure",
+        "wcag134",
+        "wcag21aa",
+        "EN-301-549",
+        "EN-9.1.3.4",
+        "RGAAv4",
+        "RGAA-13.9.1",
+        "experimental"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "definition-list",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.structure",
+        "wcag2a",
+        "wcag131",
+        "EN-301-549",
+        "EN-9.1.3.1",
+        "RGAAv4",
+        "RGAA-9.3.3"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "dlitem",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.structure",
+        "wcag2a",
+        "wcag131",
+        "EN-301-549",
+        "EN-9.1.3.1",
+        "RGAAv4",
+        "RGAA-9.3.3"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "document-title",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.text-alternatives",
+        "wcag2a",
+        "wcag242",
+        "TTv5",
+        "TT12.a",
+        "EN-301-549",
+        "EN-9.2.4.2",
+        "ACT",
+        "RGAAv4",
+        "RGAA-8.5.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "duplicate-id",
+      "defaultEnabled": false,
+      "experimental": false,
+      "tags": ["cat.parsing", "wcag2a-obsolete", "wcag411", "deprecated"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "duplicate-id-active",
+      "defaultEnabled": false,
+      "experimental": false,
+      "tags": ["cat.parsing", "wcag2a-obsolete", "wcag411", "deprecated"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "duplicate-id-aria",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.parsing",
+        "wcag2a",
+        "wcag412",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "RGAAv4",
+        "RGAA-8.2.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "empty-heading",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.name-role-value", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "empty-table-header",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.name-role-value", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "focus-order-semantics",
+      "defaultEnabled": true,
+      "experimental": true,
+      "tags": ["cat.keyboard", "best-practice", "RGAAv4", "RGAA-12.8.1", "experimental"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "form-field-multiple-labels",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.forms",
+        "wcag2a",
+        "wcag332",
+        "TTv5",
+        "TT5.c",
+        "EN-301-549",
+        "EN-9.3.3.2",
+        "RGAAv4",
+        "RGAA-11.2.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "frame-focusable-content",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.keyboard",
+        "wcag2a",
+        "wcag211",
+        "TTv5",
+        "TT4.a",
+        "EN-301-549",
+        "EN-9.2.1.1",
+        "RGAAv4",
+        "RGAA-7.3.2"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "frame-tested",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.structure", "best-practice", "review-item"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "frame-title",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.text-alternatives",
+        "wcag2a",
+        "wcag412",
+        "section508",
+        "section508.22.i",
+        "TTv5",
+        "TT12.d",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "RGAAv4",
+        "RGAA-2.1.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "frame-title-unique",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.text-alternatives",
+        "wcag2a",
+        "wcag412",
+        "TTv5",
+        "TT12.d",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "RGAAv4",
+        "RGAA-2.2.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "heading-order",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.semantics", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "hidden-content",
+      "defaultEnabled": true,
+      "experimental": true,
+      "tags": ["cat.structure", "best-practice", "experimental", "review-item"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "html-has-lang",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.language",
+        "wcag2a",
+        "wcag311",
+        "TTv5",
+        "TT11.a",
+        "EN-301-549",
+        "EN-9.3.1.1",
+        "ACT",
+        "RGAAv4",
+        "RGAA-8.3.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "html-lang-valid",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.language",
+        "wcag2a",
+        "wcag311",
+        "TTv5",
+        "TT11.a",
+        "EN-301-549",
+        "EN-9.3.1.1",
+        "ACT",
+        "RGAAv4",
+        "RGAA-8.4.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "html-xml-lang-mismatch",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.language",
+        "wcag2a",
+        "wcag311",
+        "EN-301-549",
+        "EN-9.3.1.1",
+        "ACT",
+        "RGAAv4",
+        "RGAA-8.3.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "identical-links-same-purpose",
+      "defaultEnabled": false,
+      "experimental": false,
+      "tags": ["cat.semantics", "wcag2aaa", "wcag249"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "image-alt",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.text-alternatives",
+        "wcag2a",
+        "wcag111",
+        "section508",
+        "section508.22.a",
+        "TTv5",
+        "TT7.a",
+        "TT7.b",
+        "EN-301-549",
+        "EN-9.1.1.1",
+        "ACT",
+        "RGAAv4",
+        "RGAA-1.1.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "image-redundant-alt",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.text-alternatives", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "input-button-name",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.name-role-value",
+        "wcag2a",
+        "wcag412",
+        "section508",
+        "section508.22.a",
+        "TTv5",
+        "TT5.c",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "ACT",
+        "RGAAv4",
+        "RGAA-11.9.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "input-image-alt",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.text-alternatives",
+        "wcag2a",
+        "wcag111",
+        "wcag412",
+        "section508",
+        "section508.22.a",
+        "TTv5",
+        "TT7.a",
+        "EN-301-549",
+        "EN-9.1.1.1",
+        "EN-9.4.1.2",
+        "ACT",
+        "RGAAv4",
+        "RGAA-1.1.3"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "label",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.forms",
+        "wcag2a",
+        "wcag412",
+        "section508",
+        "section508.22.n",
+        "TTv5",
+        "TT5.c",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "ACT",
+        "RGAAv4",
+        "RGAA-11.1.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "label-content-name-mismatch",
+      "defaultEnabled": true,
+      "experimental": true,
+      "tags": [
+        "cat.semantics",
+        "wcag21a",
+        "wcag253",
+        "EN-301-549",
+        "EN-9.2.5.3",
+        "RGAAv4",
+        "RGAA-6.1.5",
+        "experimental"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "label-title-only",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.forms", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "landmark-banner-is-top-level",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.semantics", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "landmark-complementary-is-top-level",
+      "defaultEnabled": false,
+      "experimental": false,
+      "tags": ["cat.semantics", "best-practice", "deprecated"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "landmark-contentinfo-is-top-level",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.semantics", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "landmark-main-is-top-level",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.semantics", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "landmark-no-duplicate-banner",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.semantics", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "landmark-no-duplicate-contentinfo",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.semantics", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "landmark-no-duplicate-main",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.semantics", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "landmark-one-main",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.semantics", "best-practice"],
+      "implementation": "selected-partial"
+    },
+    {
+      "id": "landmark-unique",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.semantics", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "link-in-text-block",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.color",
+        "wcag2a",
+        "wcag141",
+        "TTv5",
+        "TT13.a",
+        "EN-301-549",
+        "EN-9.1.4.1",
+        "RGAAv4",
+        "RGAA-10.6.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "link-name",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.name-role-value",
+        "wcag2a",
+        "wcag244",
+        "wcag412",
+        "section508",
+        "section508.22.a",
+        "TTv5",
+        "TT6.a",
+        "EN-301-549",
+        "EN-9.2.4.4",
+        "EN-9.4.1.2",
+        "ACT",
+        "RGAAv4",
+        "RGAA-6.2.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "list",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.structure",
+        "wcag2a",
+        "wcag131",
+        "EN-301-549",
+        "EN-9.1.3.1",
+        "RGAAv4",
+        "RGAA-9.3.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "listitem",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.structure",
+        "wcag2a",
+        "wcag131",
+        "EN-301-549",
+        "EN-9.1.3.1",
+        "RGAAv4",
+        "RGAA-9.3.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "marquee",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.parsing",
+        "wcag2a",
+        "wcag222",
+        "TTv5",
+        "TT2.b",
+        "EN-301-549",
+        "EN-9.2.2.2",
+        "RGAAv4",
+        "RGAA-13.8.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "meta-refresh",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.time-and-media",
+        "wcag2a",
+        "wcag221",
+        "TTv5",
+        "TT8.a",
+        "EN-301-549",
+        "EN-9.2.2.1",
+        "RGAAv4",
+        "RGAA-13.1.2"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "meta-refresh-no-exceptions",
+      "defaultEnabled": false,
+      "experimental": false,
+      "tags": ["cat.time-and-media", "wcag2aaa", "wcag224", "wcag325"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "meta-viewport",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.sensory-and-visual-cues",
+        "wcag2aa",
+        "wcag144",
+        "EN-301-549",
+        "EN-9.1.4.4",
+        "ACT",
+        "RGAAv4",
+        "RGAA-10.4.2"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "meta-viewport-large",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.sensory-and-visual-cues", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "nested-interactive",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.keyboard",
+        "wcag2a",
+        "wcag412",
+        "TTv5",
+        "TT6.a",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "RGAAv4",
+        "RGAA-7.1.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "no-autoplay-audio",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.time-and-media",
+        "wcag2a",
+        "wcag142",
+        "TTv5",
+        "TT2.a",
+        "EN-301-549",
+        "EN-9.1.4.2",
+        "ACT",
+        "RGAAv4",
+        "RGAA-4.10.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "object-alt",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.text-alternatives",
+        "wcag2a",
+        "wcag111",
+        "section508",
+        "section508.22.a",
+        "EN-301-549",
+        "EN-9.1.1.1",
+        "RGAAv4",
+        "RGAA-1.1.6"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "p-as-heading",
+      "defaultEnabled": true,
+      "experimental": true,
+      "tags": [
+        "cat.semantics",
+        "wcag2a",
+        "wcag131",
+        "EN-301-549",
+        "EN-9.1.3.1",
+        "RGAAv4",
+        "RGAA-9.1.3",
+        "experimental"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "page-has-heading-one",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.semantics", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "presentation-role-conflict",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.aria", "best-practice", "ACT"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "region",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.keyboard", "best-practice", "RGAAv4", "RGAA-9.2.1"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "role-img-alt",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.text-alternatives",
+        "wcag2a",
+        "wcag111",
+        "section508",
+        "section508.22.a",
+        "TTv5",
+        "TT7.a",
+        "EN-301-549",
+        "EN-9.1.1.1",
+        "ACT",
+        "RGAAv4",
+        "RGAA-1.1.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "scope-attr-valid",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.tables", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "scrollable-region-focusable",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.keyboard",
+        "wcag2a",
+        "wcag211",
+        "wcag213",
+        "TTv5",
+        "TT4.a",
+        "EN-301-549",
+        "EN-9.2.1.1",
+        "EN-9.2.1.3",
+        "RGAAv4",
+        "RGAA-7.3.2"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "select-name",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.forms",
+        "wcag2a",
+        "wcag412",
+        "section508",
+        "section508.22.n",
+        "TTv5",
+        "TT5.c",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "ACT",
+        "RGAAv4",
+        "RGAA-11.1.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "server-side-image-map",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.text-alternatives",
+        "wcag2a",
+        "wcag211",
+        "section508",
+        "section508.22.f",
+        "TTv5",
+        "TT4.a",
+        "EN-301-549",
+        "EN-9.2.1.1",
+        "RGAAv4",
+        "RGAA-1.1.4"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "skip-link",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.keyboard", "best-practice", "RGAAv4", "RGAA-12.7.1"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "summary-name",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.name-role-value",
+        "wcag2a",
+        "wcag412",
+        "section508",
+        "section508.22.a",
+        "TTv5",
+        "TT6.a",
+        "EN-301-549",
+        "EN-9.4.1.2"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "svg-img-alt",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.text-alternatives",
+        "wcag2a",
+        "wcag111",
+        "section508",
+        "section508.22.a",
+        "TTv5",
+        "TT7.a",
+        "EN-301-549",
+        "EN-9.1.1.1",
+        "ACT",
+        "RGAAv4",
+        "RGAA-1.1.5"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "tabindex",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.keyboard", "best-practice"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "table-duplicate-name",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": ["cat.tables", "best-practice", "RGAAv4", "RGAA-5.2.1"],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "table-fake-caption",
+      "defaultEnabled": true,
+      "experimental": true,
+      "tags": [
+        "cat.tables",
+        "experimental",
+        "wcag2a",
+        "wcag131",
+        "section508",
+        "section508.22.g",
+        "EN-301-549",
+        "EN-9.1.3.1",
+        "RGAAv4",
+        "RGAA-5.4.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "target-size",
+      "defaultEnabled": false,
+      "experimental": false,
+      "tags": ["cat.sensory-and-visual-cues", "wcag22aa", "wcag258"],
+      "implementation": "selected-partial"
+    },
+    {
+      "id": "td-has-header",
+      "defaultEnabled": true,
+      "experimental": true,
+      "tags": [
+        "cat.tables",
+        "experimental",
+        "wcag2a",
+        "wcag131",
+        "section508",
+        "section508.22.g",
+        "TTv5",
+        "TT14.b",
+        "EN-301-549",
+        "EN-9.1.3.1",
+        "RGAAv4",
+        "RGAA-5.7.4"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "td-headers-attr",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.tables",
+        "wcag2a",
+        "wcag131",
+        "section508",
+        "section508.22.g",
+        "TTv5",
+        "TT14.b",
+        "EN-301-549",
+        "EN-9.1.3.1",
+        "RGAAv4",
+        "RGAA-5.7.4"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "th-has-data-cells",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.tables",
+        "wcag2a",
+        "wcag131",
+        "section508",
+        "section508.22.g",
+        "TTv5",
+        "TT14.b",
+        "EN-301-549",
+        "EN-9.1.3.1",
+        "RGAAv4",
+        "RGAA-5.7.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "valid-lang",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.language",
+        "wcag2aa",
+        "wcag312",
+        "TTv5",
+        "TT11.b",
+        "EN-301-549",
+        "EN-9.3.1.2",
+        "ACT",
+        "RGAAv4",
+        "RGAA-8.8.1"
+      ],
+      "implementation": "not-implemented"
+    },
+    {
+      "id": "video-caption",
+      "defaultEnabled": true,
+      "experimental": false,
+      "tags": [
+        "cat.text-alternatives",
+        "wcag2a",
+        "wcag122",
+        "section508",
+        "section508.22.a",
+        "TTv5",
+        "TT17.a",
+        "EN-301-549",
+        "EN-9.1.2.2",
+        "RGAAv4",
+        "RGAA-4.3.1"
+      ],
+      "implementation": "not-implemented"
+    }
+  ]
+}
