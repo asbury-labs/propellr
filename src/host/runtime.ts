@@ -495,6 +495,7 @@ export class SessionHost {
                 documentId,
               );
               guardScanCommit();
+              if (result.coverage.state === "stale") throw new Error("scan-stale");
               if (!lost())
                 this.updateOperation(record, {
                   ...operation,
@@ -508,7 +509,8 @@ export class SessionHost {
                   ? "scan-document-changed"
                   : error instanceof Error &&
                       (error.message === "scan-result-limit" ||
-                        error.message === "scan-document-changed")
+                        error.message === "scan-document-changed" ||
+                        error.message === "scan-stale")
                     ? error.message
                     : "scan-failed";
               if (!lost())
@@ -521,7 +523,9 @@ export class SessionHost {
                       message:
                         code === "scan-document-changed"
                           ? "Document generation changed; no current result committed"
-                          : "Scan interrupted, evaluation failed or result budget exceeded; no current result committed",
+                          : code === "scan-stale"
+                            ? "DOM or viewport changed during transfer; no current result committed"
+                            : "Scan interrupted, evaluation failed or result budget exceeded; no current result committed",
                     },
                   ],
                   completedScans: [],

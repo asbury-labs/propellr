@@ -19,36 +19,44 @@ test("canonical geometry rounding and small-target spacing boundaries", () => {
 });
 import type { PageId } from "../../src/contracts.js";
 
-test("occurrence budget stays partial and does not invent later-rule inapplicability", () => {
-  const fixture = document.createElement("main");
-  fixture.innerHTML = Array.from(
-    { length: 110 },
-    (_, index) => `<button id="budget-${index}" disabled>Save</button>`,
-  ).join("");
-  document.body.append(fixture);
-  const analysis = createAnalysis();
-  try {
-    const result = analysis.scan({
-      target: { pageId: "page_browser" as PageId, documentId: "browser-doc", path: [] },
-      rules: [
-        { rule: { id: "button-name", version: "4.13.0" }, options: {} },
-        { rule: { id: "landmark-one-main", version: "4.13.0" }, options: {} },
-        { rule: { id: "target-size", version: "4.13.0" }, options: {} },
-      ],
-    });
-    expect(result.gaps.some((gap) => gap.code === "occurrence-limit")).toBe(true);
-    expect(result.rules[1]).toMatchObject({
-      state: "not-evaluated",
-      reason: { code: "occurrence-limit" },
-    });
-    expect(result.rules[0]?.state === "evaluated" && result.rules[0].occurrences.length).toBe(96);
-    // No focusable widgets exist: applicability is still evaluated, not limited by output retention.
-    expect(result.rules[2]?.state).toBe("inapplicable");
-  } finally {
-    analysis.finish();
-    fixture.remove();
-  }
-});
+test.each([true, false])(
+  "occurrence budget preserves later-rule applicability (disabled=%s)",
+  (disabled) => {
+    const fixture = document.createElement("main");
+    fixture.innerHTML = Array.from(
+      { length: 110 },
+      (_, index) => `<button id="budget-${index}" ${disabled ? "disabled" : ""}>Save</button>`,
+    ).join("");
+    document.body.append(fixture);
+    const analysis = createAnalysis();
+    try {
+      const result = analysis.scan({
+        target: { pageId: "page_browser" as PageId, documentId: "browser-doc", path: [] },
+        rules: [
+          { rule: { id: "button-name", version: "4.13.0" }, options: {} },
+          { rule: { id: "landmark-one-main", version: "4.13.0" }, options: {} },
+          { rule: { id: "target-size", version: "4.13.0" }, options: {} },
+        ],
+      });
+      expect(result.gaps.some((gap) => gap.code === "occurrence-limit")).toBe(true);
+      expect(result.rules[1]).toMatchObject({
+        state: "not-evaluated",
+        reason: { code: "occurrence-limit" },
+      });
+      expect(result.rules[0]?.state === "evaluated" && result.rules[0].occurrences.length).toBe(96);
+      // No candidates is inapplicable; existing candidates after exhaustion remain unknown.
+      if (disabled) expect(result.rules[2]?.state).toBe("inapplicable");
+      else
+        expect(result.rules[2]).toMatchObject({
+          state: "not-evaluated",
+          reason: { code: "occurrence-limit" },
+        });
+    } finally {
+      analysis.finish();
+      fixture.remove();
+    }
+  },
+);
 
 test("occurrence exhaustion stops geometry work, not just output retention", () => {
   const fixture = document.createElement("div");

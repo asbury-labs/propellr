@@ -374,3 +374,14 @@ inapplicable for target-size. A new three-engine control verifies that behavior.
 broadening made. Pinned validation passed 188 tests (60 parity/browser); corpus now has
 33 fixtures per engine / 99 comparisons. Browser/comparator code is unchanged since the
 preceding benchmark run; no new timing claim.
+
+Fifteenth review extends stale rejection to direct host scans before reporting/history
+retention. Both direct and checkpoint IPC controls now perform real transfer-time DOM
+mutations and verify failure, no completed scan and no later history baseline.
+
+The occurrence-budget finding was disproved: the conditional only skips pseudo-element
+precomputation. The separate widget loop always calls available(), marking existing
+candidates not-evaluated after exhaustion. Enabled and disabled controls now verify both
+branches in all engines, with no browser implementation change. Pinned validation passed
+192 tests: 62 contracts, 36 host, 13 playbook, 63 parity/browser and 18 reporting.
+The 33-fixture/99-comparison corpus and browser/comparator implementation are unchanged.
