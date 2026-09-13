@@ -20,7 +20,7 @@ test("canonical geometry rounding and small-target spacing boundaries", () => {
 import type { PageId } from "../../src/contracts.js";
 
 test.each([true, false])(
-  "occurrence budget preserves later-rule applicability (disabled=%s)",
+  "occurrence budget preserves applicability independent of rule order (disabled=%s)",
   (disabled) => {
     const fixture = document.createElement("main");
     fixture.innerHTML = Array.from(
@@ -30,14 +30,19 @@ test.each([true, false])(
     document.body.append(fixture);
     const analysis = createAnalysis();
     try {
-      const result = analysis.scan({
+      const input = {
         target: { pageId: "page_browser" as PageId, documentId: "browser-doc", path: [] },
         rules: [
           { rule: { id: "button-name", version: "4.13.0" }, options: {} },
           { rule: { id: "landmark-one-main", version: "4.13.0" }, options: {} },
           { rule: { id: "target-size", version: "4.13.0" }, options: {} },
         ],
-      });
+      } as const;
+      const result = analysis.scan(input);
+      analysis.finish();
+      expect(
+        analysis.scan({ ...input, rules: [input.rules[2], input.rules[1], input.rules[0]] }),
+      ).toEqual(result);
       expect(result.gaps.some((gap) => gap.code === "occurrence-limit")).toBe(true);
       expect(result.rules[1]).toMatchObject({
         state: "not-evaluated",

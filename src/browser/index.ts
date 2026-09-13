@@ -386,7 +386,9 @@ export function createAnalysis(): BrowserAnalysis {
       : undefined;
     if (roleTokens) gap(roleTokens.code, roleTokens.message, roleTokens.target);
     const unavailableScope = shadowModal ?? roleTokens;
-    const rules: RuleResult[] = input.rules.map(({ rule, options }) => {
+    // Shared occurrence budget must not depend on caller selection order.
+    const orderedRules = input.rules.toSorted((a, b) => a.rule.id.localeCompare(b.rule.id));
+    const rules: RuleResult[] = orderedRules.map(({ rule, options }) => {
       if (unavailableScope) return { rule, state: "not-evaluated", reason: unavailableScope };
       if (
         !["button-name", "target-size", "landmark-one-main"].includes(rule.id) ||
@@ -643,7 +645,7 @@ export function createAnalysis(): BrowserAnalysis {
         "Results exceed 128 KiB retention budget; no usable evaluation retained",
       );
       const fallback: BrowserScanOutput = {
-        rules: input.rules.map(({ rule }) => ({ rule, state: "not-evaluated", reason })),
+        rules: orderedRules.map(({ rule }) => ({ rule, state: "not-evaluated", reason })),
         gaps: [reason, ...gaps.slice(0, 31)],
       };
       // Even not-evaluated metadata can exceed the budget for a large explicit selection.

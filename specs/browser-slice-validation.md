@@ -445,3 +445,15 @@ also preserve document-change reasons, verified by the real IPC navigation case.
 The review's count mismatch used an earlier PR description; current claims were already
 aligned. Full pinned validation passed 193 tests / 105 comparisons, and all three benchmark
 cases passed after these changes.
+
+Twentieth review makes shared occurrence-budget allocation deterministic by sorting selected
+rules by ID before evaluation (including metadata fallback). Reversed equivalent selections
+previously changed coverage in all three engines; enabled/disabled high-cardinality controls
+now produce identical rules and gaps for both orders. This matches order-insensitive reporting
+compatibility without increasing work or retention budgets.
+
+A stale checkpoint's reason now becomes the journey/failed operation diagnostic rather than
+being replaced by journey-blocked. Cancellation and document-generation guards retain priority.
+The real transfer-mutation IPC control failed before repair and now verifies scan-stale at both
+checkpoint and terminal levels. Full pinned validation passed 193 tests / 105 comparisons;
+all three benchmark cases passed again.

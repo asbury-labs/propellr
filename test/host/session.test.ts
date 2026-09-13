@@ -125,6 +125,7 @@ describe("local session host over real Unix IPC", () => {
           expect(await terminal(client, operation)).toMatchObject({
             state: "failed",
             completedScans: [],
+            diagnostics: [expect.objectContaining({ code: "scan-stale" })],
             ...(kind === "playbook"
               ? {
                   cleanup: "complete",
@@ -135,7 +136,6 @@ describe("local session host over real Unix IPC", () => {
                 }
               : {
                   cleanup: "not-required",
-                  diagnostics: [expect.objectContaining({ code: "scan-stale" })],
                 }),
           });
           const next = unwrap(

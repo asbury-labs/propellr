@@ -128,7 +128,8 @@ cross-origin injection is claimed. Complete selected coverage refers to observab
 under these capabilities, not certification of undetectable closed-root contents.
 Reader bounds: 2,000 elements, 32 boundary steps,
 96 total occurrences, 1,024 characters per target path, 128 KiB raw evidence and
-32 diagnostic entries; budget exhaustion stays partial. Native modals rooted inside
+32 diagnostic entries; budget exhaustion stays partial. Rules evaluate in stable ID order
+so equivalent selections consume the shared occurrence budget identically. Native modals rooted inside
 shadow DOM return explicit not-evaluated/partial results, not guessed visibility.
 Generated pseudo-element boxes make target-size incomplete for their document.
 Whitespace/fallback role-token lists return not-evaluated/partial results; full ARIA

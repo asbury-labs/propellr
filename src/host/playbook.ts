@@ -137,16 +137,17 @@ export async function runDialog(
     await checkpoint("closed", { dialogVisible: false, focusReturned });
   } catch {
     failed = !signal.aborted;
-    const reason = {
-      code: signal.aborted
-        ? "cancellation-requested"
-        : target.documentId !== documentId
-          ? "scan-document-changed"
-          : "journey-blocked",
-      message: signal.aborted
-        ? "Journey interrupted by cancellation"
-        : "Prerequisite, authorization, document or interaction check failed",
-    };
+    const reason = signal.aborted
+      ? { code: "cancellation-requested", message: "Journey interrupted by cancellation" }
+      : target.documentId !== documentId
+        ? {
+            code: "scan-document-changed",
+            message: "Document binding changed; journey interrupted",
+          }
+        : (checkpoints.find((checkpoint) => checkpoint.state !== "reached")?.reason ?? {
+            code: "journey-blocked",
+            message: "Prerequisite, authorization, document or interaction check failed",
+          });
     diagnostics.push(reason);
     for (const id of ["opened", "closed"]) {
       if (!checkpoints.some((checkpoint) => checkpoint.id === id))
