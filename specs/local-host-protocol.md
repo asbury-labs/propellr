@@ -87,7 +87,7 @@ is explicit and cancellation preserves checkpoints. Navigation invalidates docum
 IDs, including any child-frame navigation; a changed document cannot commit an old checkpoint.
 Direct-scan and journey failures, including blocked checkpoint reasons, retain
 `scan-document-changed` diagnostics instead of collapsing navigation into evaluator failure.
-Other blocked scan reasons, including `scan-stale`, also propagate to the failed operation
+Other known blocked scan reasons, including `scan-stale` and `scan-result-limit`, also propagate to the failed operation
 rather than becoming generic journey failures; cancellation and document change take priority. Page scripts and external
 browser users are not locked out, so this does not claim atomic DOM observation.
 

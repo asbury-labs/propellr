@@ -54,7 +54,11 @@ test.each(["visible", "hidden"] as const)(
         execution.result.checkpoints.find(
           (checkpoint) => checkpoint.id === (state === "visible" ? "opened" : "closed"),
         ),
-      ).toMatchObject({ state: "blocked", observed: { dialogVisible: state === "visible" } });
+      ).toMatchObject({
+        state: "blocked",
+        observed: { dialogVisible: state === "visible" },
+        reason: { code: "scan-cancelled" },
+      });
       expect(execution.result.cleanup).toBe("complete");
       expect(await target.page.locator("#dialog").isVisible()).toBe(false);
     } finally {

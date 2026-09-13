@@ -457,3 +457,12 @@ being replaced by journey-blocked. Cancellation and document-generation guards r
 The real transfer-mutation IPC control failed before repair and now verifies scan-stale at both
 checkpoint and terminal levels. Full pinned validation passed 193 tests / 105 comparisons;
 all three benchmark cases passed again.
+
+Twenty-first review preserves allowlisted callback scan failures, including scan-result-limit,
+instead of replacing them with scan-interrupted. Cancellation and document-change precedence
+remain explicit; unknown evaluator errors stay redacted. A real oversized checkpoint with
+long-ID disabled buttons fits raw evidence retention but exceeds reported-result retention.
+Before repair it reported scan-interrupted; now checkpoint, skipped successor and failed
+operation carry scan-result-limit, retain no completed scan, finish cleanup and keep IPC active.
+Existing cancellation controls also verify scan-cancelled checkpoint reasons.
+Full pinned validation passed 193 tests / 105 comparisons; all three benchmark cases passed.

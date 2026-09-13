@@ -285,6 +285,31 @@ describe("local session host over real Unix IPC", () => {
             diagnostics: [{ code: "scan-result-limit" }],
             completedScans: [],
           });
+          await page.goto(FIXTURE_URL);
+          const largeCheckpoint = Array.from(
+            { length: 85 },
+            (_, index) => `<button disabled id="checkpoint-${index}-${"x".repeat(850)}"></button>`,
+          ).join("");
+          await page.evaluate(
+            `document.querySelector('#dialog').insertAdjacentHTML('beforeend', ${JSON.stringify(largeCheckpoint)})`,
+          );
+          const current = unwrap(
+            await client.inspect({ ...meta(), sessionId: session.id }),
+          ).session;
+          const checkpointOperation = await terminal(
+            client,
+            unwrap(await client.runPlaybook(playbookInput(current))),
+          );
+          expect(checkpointOperation).toMatchObject({
+            state: "failed",
+            diagnostics: [{ code: "scan-result-limit" }],
+            completedScans: [],
+            cleanup: "complete",
+            checkpoints: [
+              { id: "opened", state: "blocked", reason: { code: "scan-result-limit" } },
+              { id: "closed", state: "skipped", reason: { code: "scan-result-limit" } },
+            ],
+          });
           expect(
             unwrap(await client.inspect({ ...meta(), sessionId: session.id })).session.state,
           ).toBe("active");

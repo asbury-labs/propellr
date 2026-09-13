@@ -30,6 +30,10 @@ export const scanInterrupted: Diagnostic = {
   code: "scan-interrupted",
   message: "Checkpoint observed but scan could not complete",
 };
+const scanCancelled: Diagnostic = {
+  code: "scan-cancelled",
+  message: "Checkpoint scan interrupted by cancellation",
+};
 
 export interface PlaybookExecution {
   readonly result: PlaybookResult;
@@ -79,7 +83,7 @@ export async function runDialog(
   };
   const checkpoint = async (id: string, observed: JsonObject) => {
     if (signal.aborted) {
-      record({ id, observed, state: "blocked", reason: scanInterrupted });
+      record({ id, observed, state: "blocked", reason: scanCancelled });
       return;
     }
     let reason = scanInterrupted;
@@ -92,7 +96,8 @@ export async function runDialog(
       }
       record({ id, observed, state: "reached", scans: [result] });
     } catch (error) {
-      if (
+      if (signal.aborted) reason = scanCancelled;
+      else if (
         target.documentId !== documentId ||
         (error instanceof Error && error.message === "scan-document-changed")
       ) {
@@ -100,6 +105,18 @@ export async function runDialog(
           code: "scan-document-changed",
           message: "Document binding changed; checkpoint scan was not committed",
         };
+      } else if (
+        error instanceof Error &&
+        [
+          "scan-result-limit",
+          "scan-stale",
+          "scan-not-authorized",
+          "scan-cancelled",
+          "scan-failed",
+        ].includes(error.message)
+      ) {
+        // Preserve only known machine codes, never raw evaluator error text.
+        reason = { code: error.message, message: "Checkpoint scan rejected; no result committed" };
       }
       record({ id, observed, state: "blocked", reason });
       throw new Error("checkpoint-scan-failed");
