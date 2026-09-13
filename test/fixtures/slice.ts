@@ -36,6 +36,13 @@ export const fixtures: readonly Fixture[] = [
     html: doc(`<button id="named">Save</button>`),
     expected: { "landmark-one-main": ["html"] },
   },
+  {
+    id: "label-hidden-descendants",
+    html: doc(
+      '<main><span id="visible-label"><span aria-hidden="true">Hidden text</span></span><button id="visible-ref" aria-labelledby="visible-label"></button><span id="hidden-label" hidden><span aria-hidden="true">Hidden text</span></span><button id="hidden-ref" aria-labelledby="hidden-label"></button></main>',
+    ),
+    expected: { "button-name": ["#visible-ref"] },
+  },
   { id: "two-mains", html: doc(`<main id="one"></main><main id="two"></main>`), expected: {} },
   { id: "inapplicable", html: doc(`<main></main>`), expected: {} },
   {

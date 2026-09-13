@@ -35,7 +35,9 @@ No dependency pins changed in phases 2 or 3.
 `~/.cache/propellr-reference/axe-core-4.13.0` (override `PROPELLR_REFERENCE_CACHE`),
 verifies integrity, then extracts the browser bundle/license/metadata without
 installing axe-core. Cache must stay outside this worktree. Parity/benchmark tests
-verify the bundle hash again and fail if absent or changed. No canonical checkout
+verify the bundle hash again and fail if absent or changed. Preparation also fails
+closed on corrupt cached tarballs; inspect and explicitly repair the configured external
+cache before retrying. No silent integrity-error recovery. No canonical checkout
 or upstream tooling is needed in CI. Raw generated results: `artifacts/parity/`
 and `artifacts/bench/`; these are ignored, not a publishing channel.
 

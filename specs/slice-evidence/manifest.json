@@ -5,7 +5,7 @@
   "state": "uncommitted, phase 3 only",
   "reviewCorrections": {
     "recordedDuring": "PR #12 review, 2026-09-12",
-    "benchmarkLane": "Archived changed-full-fallback samples measured direct browser full scans after mutation. Incremental execution metadata was constructed, not observed; these samples do not measure the host fallback path. Current runner uses changed-full and full/full execution metadata. Archived bytes and checksums remain unchanged."
+    "benchmarkLane": "Archived changed-full-fallback samples measured direct browser full scans after mutation. Incremental execution metadata was constructed, not observed; these samples do not measure the host fallback path. Current runner uses changed-full and full/full execution metadata. Structured summaries use changed-full and retain their original label as historicalLane. Archived bytes and checksums remain unchanged."
   },
   "agent": "pi / gpt-6-astra",
   "session": "01a096d5-6e32-7314-97d0-6eac44caafef",
@@ -447,7 +447,8 @@
         },
         {
           "fixture": "geometry",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "propellr",
           "usable": {
             "count": 5,
@@ -468,7 +469,8 @@
         },
         {
           "fixture": "geometry",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "reference",
           "usable": {
             "count": 5,
@@ -573,7 +575,8 @@
         },
         {
           "fixture": "dense",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "propellr",
           "usable": {
             "count": 5,
@@ -594,7 +597,8 @@
         },
         {
           "fixture": "dense",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "reference",
           "usable": {
             "count": 5,
@@ -699,7 +703,8 @@
         },
         {
           "fixture": "shadow",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "propellr",
           "usable": {
             "count": 5,
@@ -720,7 +725,8 @@
         },
         {
           "fixture": "shadow",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "reference",
           "usable": {
             "count": 5,
@@ -825,7 +831,8 @@
         },
         {
           "fixture": "frames",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "propellr",
           "usable": {
             "count": 5,
@@ -846,7 +853,8 @@
         },
         {
           "fixture": "frames",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "reference",
           "usable": {
             "count": 5,
@@ -1112,7 +1120,8 @@
         },
         {
           "fixture": "geometry",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "propellr",
           "usable": {
             "count": 5,
@@ -1133,7 +1142,8 @@
         },
         {
           "fixture": "geometry",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "reference",
           "usable": {
             "count": 5,
@@ -1238,7 +1248,8 @@
         },
         {
           "fixture": "dense",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "propellr",
           "usable": {
             "count": 5,
@@ -1259,7 +1270,8 @@
         },
         {
           "fixture": "dense",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "reference",
           "usable": {
             "count": 5,
@@ -1364,7 +1376,8 @@
         },
         {
           "fixture": "shadow",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "propellr",
           "usable": {
             "count": 5,
@@ -1385,7 +1398,8 @@
         },
         {
           "fixture": "shadow",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "reference",
           "usable": {
             "count": 5,
@@ -1490,7 +1504,8 @@
         },
         {
           "fixture": "frames",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "propellr",
           "usable": {
             "count": 5,
@@ -1511,7 +1526,8 @@
         },
         {
           "fixture": "frames",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "reference",
           "usable": {
             "count": 5,
@@ -1777,7 +1793,8 @@
         },
         {
           "fixture": "geometry",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "propellr",
           "usable": {
             "count": 5,
@@ -1798,7 +1815,8 @@
         },
         {
           "fixture": "geometry",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "reference",
           "usable": {
             "count": 5,
@@ -1903,7 +1921,8 @@
         },
         {
           "fixture": "dense",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "propellr",
           "usable": {
             "count": 5,
@@ -1924,7 +1943,8 @@
         },
         {
           "fixture": "dense",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "reference",
           "usable": {
             "count": 5,
@@ -2029,7 +2049,8 @@
         },
         {
           "fixture": "shadow",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "propellr",
           "usable": {
             "count": 5,
@@ -2050,7 +2071,8 @@
         },
         {
           "fixture": "shadow",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "reference",
           "usable": {
             "count": 5,
@@ -2155,7 +2177,8 @@
         },
         {
           "fixture": "frames",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "propellr",
           "usable": {
             "count": 5,
@@ -2176,7 +2199,8 @@
         },
         {
           "fixture": "frames",
-          "lane": "changed-full-fallback",
+          "lane": "changed-full",
+          "historicalLane": "changed-full-fallback",
           "implementation": "reference",
           "usable": {
             "count": 5,

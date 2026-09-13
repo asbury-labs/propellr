@@ -385,3 +385,24 @@ candidates not-evaluated after exhaustion. Enabled and disabled controls now ver
 branches in all engines, with no browser implementation change. Pinned validation passed
 192 tests: 62 contracts, 36 host, 13 playbook, 63 parity/browser and 18 reporting.
 The 33-fixture/99-comparison corpus and browser/comparator implementation are unchanged.
+
+Sixteenth review's queued-origin claim was disproved without code changes. A standalone
+probe held the actual deferred callback, navigated to a routed unauthorized origin,
+confirmed the operation was still queued, then released it. It failed with
+scan-document-changed and zero analyzer injections. Origin admission and document capture
+are synchronous; the captured generation is checked before bundle loading.
+
+Seventeenth review fixes visible aria-labelledby roots admitting hidden descendants.
+Hidden directly referenced roots retain their canonical exception. Both controls match
+canonical behavior in all three engines. Structured archived summaries now use changed-full
+with historicalLane retaining the old label; all 24 corrections were checked against the
+previous manifest, with all other metadata and the archive SHA-256 unchanged.
+
+Corrupt external-cache recovery remains explicit and fail-closed, not silently repaired.
+A temporary corrupt cache failed integrity validation before extraction. Automatic cache
+repair is deferred tooling hardening; README now states the recovery boundary.
+
+The first full validation attempt hit the external 200-second command timeout during the
+combined parity/browser stage. Both projects passed separately, then the full pinned command
+passed all 192 tests on retry; no timeout configuration was changed and cause was not isolated.
+Corpus is now 34 fixtures per engine / 102 comparisons. Benchmark rerun passed all three cases.

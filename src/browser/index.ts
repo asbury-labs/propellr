@@ -121,7 +121,7 @@ function name(node: Element): { value: string; source: string; unsupported: bool
   const labels = refs.map((id) => root.getElementById(id)).filter((label) => label !== null);
   const candidates: { value: string; source: string; unsupported: boolean }[] = [];
   if (labels.length) {
-    const values = labels.map((label) => text(label, true));
+    const values = labels.map((label) => text(label, !visible(label)));
     candidates.push({
       value: compact(values.map((result) => result.value).join(" ")),
       source: "aria-labelledby",
