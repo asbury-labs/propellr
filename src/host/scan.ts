@@ -127,6 +127,7 @@ export async function scanTarget(
     const stable = await target.page.evaluate((runtime) => runtime.finish(), analysis);
     finished = true;
     guard();
+    if (output.rules.length !== resolvedRules.length) throw new Error("scan-result-limit");
     const first = output.gaps[0];
     return {
       ...base,

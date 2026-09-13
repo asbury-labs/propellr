@@ -84,7 +84,7 @@ export async function runDialog(
   const checkpoint = async (id: string, observed: JsonObject) => {
     if (signal.aborted) {
       record({ id, observed, state: "blocked", reason: scanCancelled });
-      return;
+      throw new Error("checkpoint-scan-cancelled");
     }
     let reason = scanInterrupted;
     try {

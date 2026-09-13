@@ -7,6 +7,7 @@ import { DIALOG_HTML, FIXTURE_URL } from "../../src/host/fixture.js";
 import { LOCAL_POLICY } from "../../src/host/runtime.js";
 import { selectedRequest } from "../../src/analysis.js";
 import * as scans from "../../src/host/scan.js";
+import * as playbooks from "../../src/host/playbook.js";
 import { sessionIdSchema } from "../../src/validation.js";
 import { meta, playbookInput, terminal, unwrap, withHost } from "../support/host.js";
 
@@ -83,6 +84,76 @@ describe("local session host over real Unix IPC", () => {
       expect(await next.runPlaybook(playbookInput(session))).toMatchObject({ ok: false });
     });
   });
+
+  test.each(["cancellation", "child-navigation"] as const)(
+    "%s after journey execution is checked before terminal commit",
+    async (change) => {
+      await withHost(async ({ client, open }) => {
+        const session = await open();
+        const run = playbooks.runDialog;
+        const spy = vi.spyOn(playbooks, "runDialog").mockImplementationOnce(async (...args) => {
+          const execution = await run(...args);
+          expect(execution.cancelled || execution.failed).toBe(false);
+          expect(execution.result.checkpoints.map((checkpoint) => checkpoint.state)).toEqual([
+            "reached",
+            "reached",
+          ]);
+          if (change === "cancellation") {
+            const operation = unwrap(await client.inspect({ ...meta(), sessionId: session.id }))
+              .operations[0];
+            if (!operation) throw new Error("Missing in-flight journey");
+            expect(
+              unwrap(
+                await client.cancel({
+                  ...meta(),
+                  sessionId: session.id,
+                  operationId: operation.id,
+                }),
+              ).disposition,
+            ).toBe("requested");
+          } else {
+            const documentId = args[0].documentId;
+            await args[0].page.evaluate(
+              "new Promise(resolve => { const frame = document.createElement('iframe'); frame.onload = resolve; document.body.append(frame); })",
+            );
+            await args[0].page.frames()[1]!.goto("about:blank#terminal", { timeout: 1000 });
+            expect(args[0].documentId).not.toBe(documentId);
+          }
+          return execution;
+        });
+        try {
+          const result = await terminal(
+            client,
+            unwrap(await client.runPlaybook(playbookInput(session))),
+          );
+          expect(result).toMatchObject({
+            state: change === "cancellation" ? "cancelled" : "failed",
+            diagnostics: [
+              expect.objectContaining({
+                code:
+                  change === "cancellation" ? "cancellation-requested" : "scan-document-changed",
+              }),
+            ],
+            checkpoints: [
+              { id: "opened", state: "reached" },
+              { id: "closed", state: "reached" },
+            ],
+            completedScans: [
+              expect.objectContaining({
+                origin: expect.objectContaining({ checkpointId: "opened" }),
+              }),
+              expect.objectContaining({
+                origin: expect.objectContaining({ checkpointId: "closed" }),
+              }),
+            ],
+          });
+          expect(spy).toHaveBeenCalledOnce();
+        } finally {
+          spy.mockRestore();
+        }
+      });
+    },
+  );
 
   test.each(["scan", "playbook"] as const)(
     "%s stale scans fail without becoming report history",
@@ -309,6 +380,30 @@ describe("local session host over real Unix IPC", () => {
               { id: "opened", state: "blocked", reason: { code: "scan-result-limit" } },
               { id: "closed", state: "skipped", reason: { code: "scan-result-limit" } },
             ],
+          });
+          const oversizedSelection = unwrap(
+            await client.scan({
+              ...meta(),
+              sessionId: session.id,
+              scan: {
+                ...selectedRequest({ ...current.documents[0]!, path: [] }),
+                rules: {
+                  kind: "explicit",
+                  rules: [
+                    { id: "unknown-first", options: {} },
+                    ...Array.from({ length: 1023 }, (_, index) => ({
+                      id: `unknown-${index}-${"x".repeat(16)}`,
+                      options: {},
+                    })),
+                  ],
+                },
+              },
+            }),
+          );
+          expect(await terminal(client, oversizedSelection)).toMatchObject({
+            state: "failed",
+            diagnostics: [{ code: "scan-result-limit" }],
+            completedScans: [],
           });
           expect(
             unwrap(await client.inspect({ ...meta(), sessionId: session.id })).session.state,

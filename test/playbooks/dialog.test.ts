@@ -50,6 +50,7 @@ test.each(["visible", "hidden"] as const)(
           ),
       );
       expect(execution.cancelled).toBe(true);
+      expect(execution.result.diagnostics[0]?.code).toBe("cancellation-requested");
       expect(
         execution.result.checkpoints.find(
           (checkpoint) => checkpoint.id === (state === "visible" ? "opened" : "closed"),

@@ -576,14 +576,32 @@ export class SessionHost {
             },
           );
           if (lost()) return;
-          if (execution.cancelled || execution.failed) {
+          // Execution/cleanup awaits can outlive the final checkpoint's commit guard.
+          const cancelled = abort.signal.aborted || execution.cancelled;
+          const documentChanged = target.documentId !== documentId;
+          const commitFailure = cancelled
+            ? { code: "cancellation-requested", message: "Journey interrupted by cancellation" }
+            : documentChanged
+              ? {
+                  code: "scan-document-changed",
+                  message: "Document generation changed before journey commit",
+                }
+              : undefined;
+          if (cancelled || documentChanged || execution.failed) {
             this.updateOperation(record, {
               ...operation,
-              state: execution.cancelled ? "cancelled" : "failed",
-              diagnostics: [
-                execution.result.diagnostics[0] ?? scanInterrupted,
-                ...execution.result.diagnostics.slice(1),
-              ],
+              state: cancelled ? "cancelled" : "failed",
+              diagnostics: commitFailure
+                ? [
+                    commitFailure,
+                    ...execution.result.diagnostics.filter(
+                      (reason) => reason.code !== commitFailure.code,
+                    ),
+                  ]
+                : [
+                    execution.result.diagnostics[0] ?? scanInterrupted,
+                    ...execution.result.diagnostics.slice(1),
+                  ],
               completedScans: execution.result.checkpoints.flatMap((checkpoint) =>
                 checkpoint.state === "reached" ? checkpoint.scans : [],
               ),

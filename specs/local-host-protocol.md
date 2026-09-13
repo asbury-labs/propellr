@@ -88,7 +88,11 @@ IDs, including any child-frame navigation; a changed document cannot commit an o
 Direct-scan and journey failures, including blocked checkpoint reasons, retain
 `scan-document-changed` diagnostics instead of collapsing navigation into evaluator failure.
 Other known blocked scan reasons, including `scan-stale` and `scan-result-limit`, also propagate to the failed operation
-rather than becoming generic journey failures; cancellation and document change take priority. Page scripts and external
+rather than becoming generic journey failures; cancellation and document change take priority.
+Journey terminal commits recheck live cancellation/document generation after execution and cleanup;
+already reached checkpoint scans remain historical observations, not completed journey claims.
+Exhausted rule metadata that omits selected results fails as `scan-result-limit`, never an empty
+completed host scan. Page scripts and external
 browser users are not locked out, so this does not claim atomic DOM observation.
 
 Direct scans enforce allowed current origin and one whole current document. Transfer-stale

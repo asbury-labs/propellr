@@ -466,3 +466,17 @@ Before repair it reported scan-interrupted; now checkpoint, skipped successor an
 operation carry scan-result-limit, retain no completed scan, finish cleanup and keep IPC active.
 Existing cancellation controls also verify scan-cancelled checkpoint reasons.
 Full pinned validation passed 193 tests / 105 comparisons; all three benchmark cases passed.
+
+Twenty-second review closes the final journey commit boundary. Live abort/document-generation
+state is rechecked after execution and cleanup, before publishing completion. Late cancellation
+or child-frame navigation produces cancelled/failed operations while retaining already reached
+checkpoint scans as historical observations. Both real IPC controls completed incorrectly before
+repair and now terminate correctly. Early cancellation at the last checkpoint also enters the
+journey diagnostic path instead of returning with an empty diagnostic list.
+
+A 1,024-rule unknown selection fits request framing but exhausts raw rule-result metadata.
+It previously completed with an empty result inventory; the host now rejects a rule-count
+mismatch as scan-result-limit. Actual metadata exhaustion and final-checkpoint cancellation
+controls failed before repair and pass now. Full pinned validation passed 195 tests:
+62 contracts, 38 host, 13 playbook, 64 parity/browser, 18 reporting. Corpus remains
+35 fixtures per engine / 105 comparisons. All three benchmark cases passed.
