@@ -126,11 +126,12 @@ a current result; detected DOM/viewport changes return stale coverage. No reusab
 incremental facts, CSSOM/animation-wide atomicity, closed-root inspection or
 cross-origin injection is claimed. Complete selected coverage refers to observable DOM
 under these capabilities, not certification of undetectable closed-root contents.
-Reader bounds: 2,000 elements, 32 boundary steps,
+Reader bounds: 2,000 attempted element visits, 32 boundary steps,
 96 total occurrences, 1,024 characters per target path, 128 KiB raw evidence and
 32 diagnostic entries; budget exhaustion stays partial. Rules evaluate in stable ID order
-so equivalent selections consume the shared occurrence budget identically. Native modals rooted inside
-shadow DOM return explicit not-evaluated/partial results, not guessed visibility.
+so equivalent selections consume the shared occurrence budget identically. Child iteration stops
+at reader exhaustion; native layout/query cost is not a constant-time guarantee.
+Native modals rooted inside shadow DOM return explicit not-evaluated/partial results, not guessed visibility.
 Generated pseudo-element boxes make target-size incomplete for their document.
 Whitespace/fallback role-token lists return not-evaluated/partial results; full ARIA
 role resolution is not implemented. Supported button-role comparisons are case-insensitive;

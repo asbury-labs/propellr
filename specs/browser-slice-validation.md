@@ -480,3 +480,12 @@ mismatch as scan-result-limit. Actual metadata exhaustion and final-checkpoint c
 controls failed before repair and pass now. Full pinned validation passed 195 tests:
 62 contracts, 38 host, 13 playbook, 64 parity/browser, 18 reporting. Corpus remains
 35 fixtures per engine / 105 comparisons. All three benchmark cases passed.
+
+Twenty-third review stops light-DOM, shadow and assigned-child loops when the reader visit
+budget is exhausted. Rejected identities/depth branches count toward attempted visits, rather
+than allowing unbounded iteration while retained facts stay below 2,000. A real collection
+iterator control previously visited all 3,000 siblings in every engine; it now stops within the
+budget and retains one reader-limit gap. Native query/layout costs are not claimed constant-time.
+Full pinned validation passed 198 tests: 62 contracts, 38 host, 13 playbook, 67 parity/browser,
+18 reporting. Corpus remains 35 fixtures per engine / 105 comparisons. All three benchmark
+cases passed again.

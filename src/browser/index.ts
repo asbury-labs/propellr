@@ -258,13 +258,19 @@ export function createAnalysis(): BrowserAnalysis {
         unreadScope = true;
       if (gaps.length < 32) gaps.push(diagnostic(code, message, target));
     };
+    let exhausted = false;
     function walk(node: Element, path: Target["path"]): void {
-      if (seen.has(node)) return;
-      if (facts.length >= 2000 || path.length >= 32) {
-        gap("reader-limit", "Node or boundary depth budget exceeded");
+      if (exhausted || seen.has(node)) return;
+      if (seen.size >= 2000) {
+        exhausted = true;
+        gap("reader-limit", "Node traversal budget exceeded");
         return;
       }
       seen.add(node);
+      if (path.length >= 32) {
+        gap("reader-limit", "Boundary depth budget exceeded");
+        return;
+      }
       const nodeSelector = selector(node);
       if (
         nodeSelector.length + path.reduce((size, step) => size + step.selector.length, 0) >
@@ -317,6 +323,7 @@ export function createAnalysis(): BrowserAnalysis {
           );
         }
       }
+      if (exhausted) return;
       if (node.shadowRoot) {
         if (node.shadowRoot.querySelector("dialog:modal")) {
           shadowModal = diagnostic(
@@ -328,12 +335,21 @@ export function createAnalysis(): BrowserAnalysis {
         }
         watch(node.shadowRoot);
         const next = [...path, { kind: "shadow" as const, selector: selector(node) }];
-        for (const child of node.shadowRoot.children) walk(child, next);
+        for (const child of node.shadowRoot.children) {
+          walk(child, next);
+          if (exhausted) break;
+        }
       } else if (node.localName === "slot" && (node as HTMLSlotElement).assignedNodes().length) {
         // Assigned nodes retain their light-DOM identity; composed visibility uses assignedSlot.
-        for (const child of (node as HTMLSlotElement).assignedElements({ flatten: true }))
+        for (const child of (node as HTMLSlotElement).assignedElements({ flatten: true })) {
           walk(child, path.slice(0, -1));
-      } else for (const child of node.children) walk(child, path);
+          if (exhausted) break;
+        }
+      } else
+        for (const child of node.children) {
+          walk(child, path);
+          if (exhausted) break;
+        }
     }
     watch(document);
     documents.push({

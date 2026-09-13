@@ -63,6 +63,42 @@ test.each([true, false])(
   },
 );
 
+test("reader exhaustion stops sibling iteration and retains one limit gap", () => {
+  const fixture = document.createElement("div");
+  fixture.id = "traversal-fixture";
+  fixture.innerHTML = Array.from(
+    { length: 3000 },
+    (_, index) => `<span id="traversal-${index}"></span>`,
+  ).join("");
+  document.body.append(fixture);
+  const children = fixture.children;
+  const iterate = children[Symbol.iterator].bind(children);
+  let iterations = 0;
+  Object.defineProperty(children, Symbol.iterator, {
+    configurable: true,
+    value: function* () {
+      for (const child of iterate()) {
+        iterations++;
+        yield child;
+      }
+    },
+  });
+  const analysis = createAnalysis();
+  try {
+    const result = analysis.scan({
+      target: { pageId: "page_browser" as PageId, documentId: "browser-doc", path: [] },
+      rules: [{ rule: { id: "landmark-one-main", version: "4.13.0" }, options: {} }],
+    });
+    expect(iterations).toBeGreaterThan(1000);
+    expect(iterations).toBeLessThanOrEqual(2001);
+    expect(result.gaps.filter((gap) => gap.code === "reader-limit")).toHaveLength(1);
+  } finally {
+    analysis.finish();
+    Reflect.deleteProperty(children, Symbol.iterator);
+    fixture.remove();
+  }
+});
+
 test("occurrence exhaustion stops geometry work, not just output retention", () => {
   const fixture = document.createElement("div");
   let geometryReads = 0;
