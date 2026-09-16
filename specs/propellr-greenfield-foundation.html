@@ -352,7 +352,7 @@
               2026-09-12T14:13:33Z; 2026-09-12T14:23:45Z; 2026-09-12T15:40:45Z;
               2026-09-12T16:17:57Z; 2026-09-12T16:34:01Z; 2026-09-12T16:58:06Z;
               2026-09-12T19:06:00Z; 2026-09-12T19:50:23Z; 2026-09-15T11:08:47Z;
-              2026-09-15T12:09:34Z; 2026-09-16T12:58:00Z; 2026-09-16T13:22:20Z
+              2026-09-15T12:09:34Z; 2026-09-16T12:58:00Z; 2026-09-16T13:22:20Z; 2026-09-16T13:46:07Z
             </dd>
             <dt>commits</dt>
             <dd>
@@ -369,7 +369,9 @@
               current checkout); 0beec0b13cd25472cd5806d5e520bc0333352038 (phase 3 PR #12 squash
               merge); 0beec0b13cd25472cd5806d5e520bc0333352038 (phase 4 branch base; implementation
               uncommitted, source hashes in naming-evidence/manifest.json);
-              b4d563f477319af74f95377f6b031faf2cfd9b67 (PR #13 initial head; Ubuntu CI passed)
+              b4d563f477319af74f95377f6b031faf2cfd9b67 (PR #13 initial head; Ubuntu CI passed);
+              1338341e8fd3b58b3ff86e6ec9c5d6f0811223a7 (PR #13 repaired head; Ubuntu CI passed);
+              4b4f51e7de02c42931a58371ea0e72e18d57b699 (PR #13 squash merge; foundation complete)
             </dd>
             <dt>agent name</dt>
             <dd>
@@ -379,7 +381,8 @@
               agent); pi / gpt-6-astra (phase 3, single agent); pi / gpt-6-astra (phase 3 PR
               delivery); pi / gpt-6-astra (phase 4 plan update, single agent); pi / gpt-6-astra
               (phase 4 execution, single agent); pi / gpt-6-astra (phase 4 PR delivery, single
-              agent); pi / gpt-6-astra (PR #13 first review repair, single agent)
+              agent); pi / gpt-6-astra (PR #13 first review repair, single agent); pi / gpt-6-astra
+              (merge record and next-plan references, single agent)
             </dd>
             <dt>session id</dt>
             <dd>
@@ -389,7 +392,7 @@
               01a0962e-071f-7681-98bc-26b90fd97297; 01a096d5-6e32-7314-97d0-6eac44caafef;
               01a09729-ccfa-7314-97d0-6eaf5da86e04; 01a09729-ccfa-7314-97d0-6eaf5da86e04;
               01a0a4db-d25d-7314-97d0-6ec1f2f07a7e; 01a0a4db-d25d-7314-97d0-6ec1f2f07a7e;
-              01a0a4db-d25d-7314-97d0-6ec1f2f07a7e
+              01a0a4db-d25d-7314-97d0-6ec1f2f07a7e; 01a0a4db-d25d-7314-97d0-6ec1f2f07a7e
             </dd>
             <dt>back refs</dt>
             <dd>
@@ -414,7 +417,10 @@
               <a href="#phase-4">Phase 4 proposal</a>;
               <a href="naming-coverage-protocol.md">Phase 4 protocol</a>;
               <a href="naming-coverage-validation.md">Phase 4 evidence</a>;
-              <a href="https://github.com/asbury-labs/propellr/pull/13">PR #13</a>
+              <a href="https://github.com/asbury-labs/propellr/pull/13">PR #13</a>;
+              <a href="propellr-native-form-naming.html"
+                >Proposed native form-control naming plan</a
+              >
             </dd>
           </dl>
         </details>
@@ -594,6 +600,13 @@
       </section>
       <section id="phases">
         <h2>Implementation slices</h2>
+        <p>
+          Foundation complete: PR #13 merged September 16, 2026 at 4b4f51e7 after current-head CI
+          and completed review with explicit finding dispositions. Further coverage is proposed
+          separately in the
+          <a href="propellr-native-form-naming.html">native form-control naming plan</a>; its
+          implementation is not authorized.
+        </p>
         <p>
           Phases 1 through 3 executed and validated; Phase 3 shipped in merged PR #12. Coverage now
           includes six bounded implementations against the 105-rule baseline. Tony authorized Phase
@@ -1045,6 +1058,23 @@
       </section>
       <section id="amendments">
         <h2>Amendments</h2>
+        <details open>
+          <summary>
+            2026-09-16T13:46:07Z: Foundation merged; separate coverage plan proposed
+          </summary>
+          <p>
+            PR #13 merged as 4b4f51e7. Repaired head 1338341 passed all 210 validation tests locally
+            and on Ubuntu. Expected review completed; earlier threads were resolved, and suppressed
+            findings received source-backed, three-engine dispositions. One repair push used. No
+            verified in-scope release blocker remained at merge.
+          </p>
+          <p>
+            Added a forward reference to the separately requested native form-control naming plan,
+            which links back here. It proposes input-button-name, input-image-alt and select-name
+            only. All new tasks remain unstarted; planning does not authorize implementation,
+            another PR, merge or publishing. Historical metadata/evidence retained.
+          </p>
+        </details>
         <details open>
           <summary>2026-09-16T13:22:20Z: PR #13 first review repair</summary>
           <p>
