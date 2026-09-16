@@ -1,9 +1,9 @@
 # Propellr
 
 Private greenfield accessibility engine. Single-user local session host, typed
-SDK/CLI and trusted `dialog-open-close@1` playbook. Phase 3 implements an explicitly
-limited `button-name`, `target-size`, `landmark-one-main` slice with real checkpoint
-scans, Chromium/Firefox/WebKit reference comparisons and conservative reporting.
+SDK/CLI and trusted `dialog-open-close@1` playbook. Six bounded implementations:
+`button-name`, `target-size`, `landmark-one-main`, `image-alt`, `link-name`, `label`.
+Real checkpoint scans, Chromium/Firefox/WebKit reference comparisons and conservative reporting.
 **Not full axe-core parity.** Unsupported branches and inaccessible frames remain
 partial/incomplete. Realtime requests use full scans, never incremental speed claims.
 
@@ -15,21 +15,26 @@ activate an isolated Node installation before running commands.
 
 ```sh
 node --version # v26.8.2
-export PLAYWRIGHT_BROWSERS_PATH="$PWD/.tools/browsers"
 npm exec --yes --package=pnpm@12.4.1 -- pnpm install --frozen-lockfile
-npm exec --yes --package=pnpm@12.4.1 -- pnpm exec playwright install chromium firefox webkit
+npm exec --yes --package=pnpm@12.4.1 -- pnpm browsers:install
 npm exec --yes --package=pnpm@12.4.1 -- pnpm reference:prepare
 npm exec --yes --package=pnpm@12.4.1 -- pnpm validate
 npm exec --yes --package=pnpm@12.4.1 -- pnpm bench:slice
 ```
 
-On supported CI Linux, provision browsers with `--with-deps`. `validate` runs
+Browser-backed test scripts, `bench:slice` and `browsers:install` default to this
+project's `.tools/browsers` cache. An explicit `PLAYWRIGHT_BROWSERS_PATH` overrides
+that default. Tests never download browsers automatically; run `pnpm browsers:install`
+when provisioning is needed. On supported CI Linux, use
+`pnpm browsers:install --with-deps`. These scripts target macOS/Linux.
+
+`validate` runs
 build, strict source/type examples, lint, required Oxfmt, contract tests, real Unix
 IPC, playbook, parity, browser-reader and reporting tests in Chromium/Firefox/WebKit.
 Benchmarks run separately, not as a speed gate. `test:host`, `test:playbooks` and
 `test:parity` build first because they execute emitted host/browser code. `format` is `oxfmt .`;
 `format:check` is `oxfmt --check .`. Lifecycle scripts remain disabled by `.npmrc`.
-No dependency pins changed in phases 2 or 3.
+No dependency pins changed in phases 2 through 4.
 
 `reference:prepare` downloads only the approved tarball into
 `~/.cache/propellr-reference/axe-core-4.13.0` (override `PROPELLR_REFERENCE_CACHE`),
@@ -53,9 +58,10 @@ and `artifacts/bench/`; these are ignored, not a publishing channel.
 macOS/Linux only. Start the built daemon with an explicit private directory whose
 parent exists and is trusted. Directory must be user-owned 0700; socket is 0600.
 Existing sockets/files are never taken over or deleted at startup. No TCP control
-listener. Keep the browser-cache environment above when starting the daemon.
+listener. Direct Node/Playwright commands still need the browser-cache environment:
 
 ```sh
+export PLAYWRIGHT_BROWSERS_PATH="$PWD/.tools/browsers"
 node dist/host/daemon.js /tmp/propellr-local-$UID
 # Another terminal, same user:
 printf '%s\n' '{"command":"open","input":{"protocol":"propellr/0.1","requestId":"open-1","policy":{"id":"local-fixture","version":"1"},"target":{"kind":"managed","browser":"chromium"}}}' \
@@ -116,7 +122,9 @@ show the controlled fixture. No arbitrary website journeys or secret inputs.
 
 Use `selectedRequest(documentTarget, "incremental")` from `dist/analysis.js` with
 `client.scan({ ...metadata, sessionId, scan: request })` for explicit three-rule
-selection. `incremental` records `actual: "full"` plus a fallback reason. Explicit
+selection. `sixRuleRequest(documentTarget, "incremental")` explicitly selects all
+six implemented rules. Existing playbook/benchmark selection remains three rules.
+`incremental` records `actual: "full"` plus a fallback reason. Explicit
 selection is essential: `rules: { kind: "defaults" }` resolves the 89 canonical
 stable defaults, with unimplemented rules marked not-evaluated and partial coverage.
 `target-size` is opt-in. Nonempty options, unknown rules, subtree/excluded scope
@@ -142,6 +150,21 @@ landmark selectors retain canonical case semantics. Canonical target-size exclud
 areas. Naming shares 2,000 traversal/string-processing steps and 16,384 input characters per
 scan, with a 64-level descendant-depth limit. Exhaustion is incomplete; supported positive
 naming checks skip later candidates.
+
+Phase 4 naming retains canonical ANY/NONE check combinations, not a generic
+nonempty-name test. Empty image alt passes; whitespace-only alt fails unless
+presentational semantics apply. Links require `a[href]`; labels cover `input,
+textarea` excluding hidden/image/button/submit/reset input types, not select or
+ARIA widgets. Explicit labels and IDREFs stay root-local; wrapping labels exclude
+the control's own value. Hidden references and visible-reference hidden descendants
+have distinct treatment. Presentation requires no focusability/global-ARIA conflict.
+Raw naming evidence stores check IDs, boolean/unknown results and scoped related
+label paths, not name strings.
+Generated names, embedded-control values, SVG/embedded content, complex ownership,
+unreviewed explicit roles and exhausted budgets remain incomplete. This is not a
+complete accessible-name API. Firefox native image-alt fallback is distinguished
+from authored pseudo content. Six implementations leave **99 catalog rules
+unimplemented**; default requests still resolve all 89 stable defaults.
 
 Playbook checkpoints retain actual scans, including after later failure/cancellation.
 Reached journey and complete selected coverage do not imply clean accessibility:
@@ -221,6 +244,8 @@ exceptions do not suppress project errors or change tool pins.
 - [Phase 2 evidence](specs/local-host-validation.md)
 - [Phase 3 protocol and branch limits](specs/slice-protocol.md)
 - [Phase 3 evidence](specs/browser-slice-validation.md)
+- [Phase 4 naming protocol](specs/naming-coverage-protocol.md)
+- [Phase 4 evidence](specs/naming-coverage-validation.md)
 - [Provenance](PROVENANCE.md)
 
 Canonical axe-core remains independent and untouched, never a dependency or the

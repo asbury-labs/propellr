@@ -9,7 +9,22 @@ import type {
 } from "./contracts.js";
 
 export const sliceRules = ["button-name", "target-size", "landmark-one-main"] as const;
-export const engineVersion = { id: "propellr-slice", version: "0.1" } as const;
+export const namingRules = ["image-alt", "link-name", "label"] as const;
+export const implementedRules = [...sliceRules, ...namingRules] as const;
+export const engineVersion = { id: "propellr-slice", version: "0.2" } as const;
+export function sixRuleRequest(target: Target, mode: ScanRequest["mode"] = "full"): ScanRequest {
+  return {
+    mode,
+    scope: { include: [target], exclude: [] },
+    rules: {
+      kind: "explicit",
+      rules: [
+        { id: implementedRules[0], options: {} },
+        ...implementedRules.slice(1).map((id) => ({ id, options: {} })),
+      ],
+    },
+  };
+}
 export interface BrowserScanInput {
   readonly target: Target;
   readonly rules: NonEmpty<{ readonly rule: VersionRef; readonly options: JsonObject }>;
@@ -22,6 +37,7 @@ export interface BrowserAnalysis {
   scan(input: BrowserScanInput): BrowserScanOutput;
   finish(): boolean;
 }
+// Keep the original explicit workload stable for playbooks and historical benchmarks.
 export function selectedRequest(target: Target, mode: ScanRequest["mode"] = "full"): ScanRequest {
   return {
     mode,

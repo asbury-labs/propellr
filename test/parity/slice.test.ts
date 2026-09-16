@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { describe, expect, test } from "vitest";
 import { browserTypes, BrowserTarget } from "../../src/host/browser.js";
 import { scanTarget } from "../../src/host/scan.js";
-import { selectedRequest, sliceRules } from "../../src/analysis.js";
+import { selectedRequest, sliceRules, implementedRules } from "../../src/analysis.js";
 import catalog from "../../src/catalog.json" with { type: "json" };
 import reference from "../../reference.json" with { type: "json" };
 import { fixtures, dynamicHtml } from "../fixtures/slice.js";
@@ -72,7 +72,7 @@ for (const engine of ["chromium", "firefox", "webkit"] as const)
                 .filter((rule) => rule.implementation === "selected-partial")
                 .map((rule) => rule.id)
                 .sort(),
-            ).toEqual([...sliceRules].sort());
+            ).toEqual([...implementedRules].sort());
             expect(catalog.rules.find((rule) => rule.id === "target-size")?.defaultEnabled).toBe(
               false,
             );

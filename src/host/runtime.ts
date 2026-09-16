@@ -350,7 +350,7 @@ export class SessionHost {
         capabilities: [
           "local-ipc",
           "dialog-open-close@1",
-          "three-rule-slice",
+          "six-rule-slice",
           "full-scan-fallback",
           "open-shadow",
           "same-origin-frames",

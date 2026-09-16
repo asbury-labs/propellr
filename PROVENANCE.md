@@ -59,3 +59,38 @@ Both tarball SHA-512 and extracted `axe.min.js` SHA-256 are verified by
 package metadata and upstream license remain outside the workspace/dependencies.
 Source and package artifact pins are separate provenance records, not a claim
 that the published artifact was reproducibly built from the tagged commit.
+
+## Phase 4 selective reuse
+
+Same canonical source and published artifact pins, no upstream writes/install/build.
+`src/browser/naming.ts` extracts the bounded Phase 3 helpers; `naming-rules.ts`
+adapts selected semantics from:
+
+- `lib/rules/{image-alt,link-name,label}.json`, `label-matches.js`,
+  `no-explicit-name-required-matches.js`.
+- `lib/checks/label/{alt-space-value,explicit,implicit,hidden-explicit-label}-evaluate.js`.
+- `lib/checks/shared/{has-alt,presentational-role,aria-label,aria-labelledby}-evaluate.js`,
+  `lib/checks/generic/has-text-content-evaluate.js`,
+  `lib/checks/keyboard/focusable-no-name-evaluate.js`.
+- `lib/commons/text/{accessible-text-virtual,subtree-text,label-text}.js`,
+  `lib/commons/aria/arialabelledby-text.js`, `lib/commons/dom/{is-focusable,is-in-tab-order}.js`,
+  and global attribute membership in `lib/standards/aria-attrs.js`.
+
+Reviewed upstream integration fixtures at
+`test/integration/rules/{image-alt,link-name,label}/` and focused hidden-label,
+alt and focusability check tests. New HTML and expectations in
+`test/fixtures/naming.ts` are original controls, not copied upstream files.
+MPL 2.0 identifiers and retained license cover adapted logic/data. Runtime remains
+independent; no canonical evaluator or bundle is loaded as Propellr implementation.
+
+Rule-level impact overrides check metadata. Canonical accessible text falls through
+empty IDREF text to later sources. Both details were confirmed against source/raw
+outputs after the first differential run corrected initial protocol expectations.
+Firefox exposes `-moz-alt-content` for native broken-image alt fallback; this is
+handled as native alt, not arbitrary CSS-generated text. All other declared
+Phase 3 geometry limits remain unchanged. Combined six-rule fixture uses a disabled
+input so label applies without claiming enabled-input target-size support.
+
+Engine revision is `propellr-slice@0.2`; catalog/version and activation remain
+canonical 4.13.0. New rules are selected-partial, never full-catalog completion.
+Phase 3 evidence archives remain historical and unchanged.

@@ -12,8 +12,6 @@ jobs:
   foundation:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    env:
-      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.tools/browsers
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -22,7 +20,7 @@ jobs:
       - name: Frozen install (lifecycle scripts disabled by .npmrc)
         run: npm exec --yes --package=pnpm@12.4.1 -- pnpm install --frozen-lockfile
       - name: Provision pinned test browsers and Linux dependencies
-        run: npm exec --yes --package=pnpm@12.4.1 -- pnpm exec playwright install --with-deps chromium firefox webkit
+        run: npm exec --yes --package=pnpm@12.4.1 -- pnpm browsers:install --with-deps
       - name: Configure reference cache outside workspace
         run: echo "PROPELLR_REFERENCE_CACHE=$RUNNER_TEMP/propellr-reference/axe-core-4.13.0" >> "$GITHUB_ENV"
       - name: Obtain independently integrity-pinned reference outside workspace

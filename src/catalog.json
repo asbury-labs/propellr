@@ -691,7 +691,7 @@
         "RGAAv4",
         "RGAA-1.1.1"
       ],
-      "implementation": "not-implemented"
+      "implementation": "selected-partial"
     },
     {
       "id": "image-redundant-alt",
@@ -760,7 +760,7 @@
         "RGAAv4",
         "RGAA-11.1.1"
       ],
-      "implementation": "not-implemented"
+      "implementation": "selected-partial"
     },
     {
       "id": "label-content-name-mismatch",
@@ -885,7 +885,7 @@
         "RGAAv4",
         "RGAA-6.2.1"
       ],
-      "implementation": "not-implemented"
+      "implementation": "selected-partial"
     },
     {
       "id": "list",

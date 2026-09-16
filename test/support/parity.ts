@@ -6,7 +6,7 @@ import { z } from "zod";
 import type { Browser, Page } from "playwright";
 import reference from "../../reference.json" with { type: "json" };
 import type { BrowserAnalysis, BrowserScanInput, BrowserScanOutput } from "../../src/analysis.js";
-import { sliceRules } from "../../src/analysis.js";
+import { sliceRules, namingRules } from "../../src/analysis.js";
 import type { Fixture } from "../fixtures/slice.js";
 import { fixtureUrl } from "../fixtures/slice.js";
 import type { JsonObject, ScanResult, Target } from "../../src/contracts.js";
@@ -24,6 +24,13 @@ const checkSchema = z.looseObject({
     .array(z.looseObject({ target: z.array(z.union([z.string(), z.array(z.string())])) }))
     .optional(),
 });
+const namingChecksSchema = z.array(
+  z.strictObject({
+    id: z.string(),
+    result: z.boolean().nullable(),
+    related: z.array(targetPathSchema).optional(),
+  }),
+);
 const resultSchema = z.looseObject({
   id: z.string(),
   nodes: z.array(
@@ -269,6 +276,34 @@ export function evidenceDifferences(own: BrowserScanOutput | ScanResult, axe: Ax
         if (!checks.some((check) => check.id === "page-has-main"))
           differences.push(`${key}:main-check`);
         // Canonical check data does not expose its modal boolean; fixtures assert that independently.
+      }
+      if (namingRules.some((id) => id === rule.rule.id)) {
+        if (node.outcome === "incomplete") differences.push(`${key}:naming-evidence-unvalidated`);
+        else {
+          const ownAny = namingChecksSchema.parse(observed?.["any"]);
+          const ownNone = namingChecksSchema.parse(observed?.["none"]);
+          const anyPass = ownAny.some((check) => check.result === true);
+          for (const check of ownAny) {
+            const relevant = node.outcome === "pass" ? check.result === true : !anyPass;
+            const matched = reference.any.find((ref) => ref.id === check.id);
+            if (relevant && !matched) differences.push(`${key}:any:${check.id}`);
+            if (relevant && matched && check.related) {
+              const ownRelated = check.related
+                .map((path) => JSON.stringify(normalizePath(path)))
+                .sort();
+              const axeRelated = (matched.relatedNodes ?? [])
+                .map((node) => JSON.stringify(axeTargetPath(node.target)))
+                .sort();
+              if (JSON.stringify(ownRelated) !== JSON.stringify(axeRelated))
+                differences.push(`${key}:related:${check.id}`);
+            }
+          }
+          for (const check of ownNone) {
+            const relevant = check.result === (node.outcome !== "pass");
+            if (relevant && !reference.none.some((ref) => ref.id === check.id))
+              differences.push(`${key}:none:${check.id}`);
+          }
+        }
       }
       if (rule.rule.id === "button-name") {
         const passed = axe.passes.some(

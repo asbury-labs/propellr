@@ -5,7 +5,9 @@ local IPC sessions, Playwright ownership and one trusted dialog playbook. See
 [foundation evidence](foundation-validation.md) and [local host evidence](local-host-validation.md).
 Phase 3 adds a bounded browser-native three-rule slice, full-scan fallback and
 portable exact-target reporting. See [slice evidence](browser-slice-validation.md);
-unsupported branches and full catalog parity remain explicit limits. The proposal below is retained
+unsupported branches and full catalog parity remain explicit limits. Phase 4 adds three
+bounded naming/form-label rules; see [naming evidence](naming-coverage-validation.md).
+The proposal below is retained
 at its capture state; current protocol details live in [local host protocol](local-host-protocol.md).
 
 September 11, 2026; revised at 19:38 UTC. **Stateful sessions, playbooks and

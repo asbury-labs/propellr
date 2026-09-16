@@ -10,7 +10,8 @@ envelopes and limits are documented in [README](../README.md) and
 [local host protocol](local-host-protocol.md). SDK validates envelopes, not full output
 schemas. Phase 3 now returns bounded three-rule scans, reports and real playbook
 checkpoints, with unavailable coverage explicit. See [phase 2 evidence](local-host-validation.md)
-and [phase 3 evidence](browser-slice-validation.md).
+and [phase 3 evidence](browser-slice-validation.md). Phase 4 adds three bounded naming/form-label
+rules without changing public result types; see [naming evidence](naming-coverage-validation.md).
 
 **Historical prototype status at capture: types only; no daemon, transport,
 browser adapter or SDK implementation existed.** The [architecture boundaries](propellr-architecture-boundaries.md)

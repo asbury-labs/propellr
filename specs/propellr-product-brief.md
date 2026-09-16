@@ -4,7 +4,8 @@
 See [foundation evidence](foundation-validation.md) and
 [local host evidence](local-host-validation.md). Phase 3 adds a limited three-rule
 browser/reporting proof; see [slice evidence](browser-slice-validation.md). Full
-catalog parity and broader product goals remain incomplete.
+catalog parity and broader product goals remain incomplete. Phase 4 adds bounded
+image-alt, link-name and label coverage; see [naming evidence](naming-coverage-validation.md).
 Remaining text records the agreed
 planning direction at capture time, not current implementation status.
 
