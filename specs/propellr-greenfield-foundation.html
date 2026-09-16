@@ -351,7 +351,8 @@
               2026-09-11T20:27:25Z; 2026-09-12T13:35:14Z; 2026-09-12T14:06:24Z;
               2026-09-12T14:13:33Z; 2026-09-12T14:23:45Z; 2026-09-12T15:40:45Z;
               2026-09-12T16:17:57Z; 2026-09-12T16:34:01Z; 2026-09-12T16:58:06Z;
-              2026-09-12T19:06:00Z; 2026-09-12T19:50:23Z
+              2026-09-12T19:06:00Z; 2026-09-12T19:50:23Z; 2026-09-15T11:08:47Z;
+              2026-09-15T12:09:34Z; 2026-09-16T12:58:00Z; 2026-09-16T13:22:20Z
             </dd>
             <dt>commits</dt>
             <dd>
@@ -364,7 +365,11 @@
               ae38766ad7bcd5e2b46bcead32a7d2a4a513d8d7 (first review repairs, Ubuntu CI passed);
               8403876dcffcc8e7c81282cc15f69a790d109b8d (second review repairs, Ubuntu CI passed);
               3dca4a5ee5f0dc60f90d3d486a1ef6147136c6b3 (phase 3 branch base; implementation
-              uncommitted)
+              uncommitted); 86a3b36318024360769ee691135ebc1df5bb42a5 (phase 4 planning context,
+              current checkout); 0beec0b13cd25472cd5806d5e520bc0333352038 (phase 3 PR #12 squash
+              merge); 0beec0b13cd25472cd5806d5e520bc0333352038 (phase 4 branch base; implementation
+              uncommitted, source hashes in naming-evidence/manifest.json);
+              b4d563f477319af74f95377f6b031faf2cfd9b67 (PR #13 initial head; Ubuntu CI passed)
             </dd>
             <dt>agent name</dt>
             <dd>
@@ -372,7 +377,9 @@
               (phase 2, single agent); pi / gpt-6-astra (PR #11, single agent); pi / gpt-6-astra (PR
               #11 second review, single agent); pi / gpt-6-astra (PR #11 third review, single
               agent); pi / gpt-6-astra (phase 3, single agent); pi / gpt-6-astra (phase 3 PR
-              delivery)
+              delivery); pi / gpt-6-astra (phase 4 plan update, single agent); pi / gpt-6-astra
+              (phase 4 execution, single agent); pi / gpt-6-astra (phase 4 PR delivery, single
+              agent); pi / gpt-6-astra (PR #13 first review repair, single agent)
             </dd>
             <dt>session id</dt>
             <dd>
@@ -380,7 +387,9 @@
               01a095e0-cd7f-701c-91a3-cf37ea4a0cb5; 01a0962e-071f-7681-98bc-26b90fd97297;
               01a0962e-071f-7681-98bc-26b90fd97297; 01a0962e-071f-7681-98bc-26b90fd97297;
               01a0962e-071f-7681-98bc-26b90fd97297; 01a096d5-6e32-7314-97d0-6eac44caafef;
-              01a09729-ccfa-7314-97d0-6eaf5da86e04
+              01a09729-ccfa-7314-97d0-6eaf5da86e04; 01a09729-ccfa-7314-97d0-6eaf5da86e04;
+              01a0a4db-d25d-7314-97d0-6ec1f2f07a7e; 01a0a4db-d25d-7314-97d0-6ec1f2f07a7e;
+              01a0a4db-d25d-7314-97d0-6ec1f2f07a7e
             </dd>
             <dt>back refs</dt>
             <dd>
@@ -400,7 +409,12 @@
               <a href="local-host-protocol.md">Local host protocol</a>;
               <a href="https://github.com/asbury-labs/propellr/pull/11">PR #11</a>;
               <a href="browser-slice-validation.md">Phase 3 evidence</a>;
-              <a href="slice-protocol.md">Phase 3 protocol</a>
+              <a href="slice-protocol.md">Phase 3 protocol</a>;
+              <a href="https://github.com/asbury-labs/propellr/pull/12">PR #12 (merged)</a>;
+              <a href="#phase-4">Phase 4 proposal</a>;
+              <a href="naming-coverage-protocol.md">Phase 4 protocol</a>;
+              <a href="naming-coverage-validation.md">Phase 4 evidence</a>;
+              <a href="https://github.com/asbury-labs/propellr/pull/13">PR #13</a>
             </dd>
           </dl>
         </details>
@@ -410,7 +424,7 @@
         <p>
           Prove the greenfield session and analysis boundaries without restarting the old
           modernization program. Full axe-core accessibility parity remains the product floor; this
-          plan establishes only a named initial slice.
+          plan establishes a named initial slice and one bounded naming/forms coverage batch.
         </p>
       </section>
       <section id="problem">
@@ -556,8 +570,8 @@
             trusted playbook registration.
           </li>
           <li>
-            <code>src/browser/</code>: DOM reader, scan epochs, shared facts and the three selected
-            rule implementations.
+            <code>src/browser/</code>: DOM reader, scan epochs, shared facts and selected rule
+            implementations. Phase 4 adds three bounded rules without a new runtime or package.
           </li>
           <li>
             <code>src/reporting/</code>: raw-to-grouped reporting and the small gate policy,
@@ -581,9 +595,11 @@
       <section id="phases">
         <h2>Implementation slices</h2>
         <p>
-          Phases 1 through 3 executed and validated. Phase 3 is only a bounded technical slice, with
-          explicit unsupported coverage. Tony authorized Phase 3 PR delivery, monitoring until clean
-          and merge. Further implementation phases and publishing remain unauthorized.
+          Phases 1 through 3 executed and validated; Phase 3 shipped in merged PR #12. Coverage now
+          includes six bounded implementations against the 105-rule baseline. Tony authorized Phase
+          4 execution on September 15, 2026; its evidence is recorded below. On September 16, Tony
+          authorized PR delivery, monitoring until clean and merge. Publishing and further
+          implementation batches remain unauthorized.
         </p>
         <div class="phase">
           <h3><code class="status">[x]</code>1. Clean foundation and validated contracts</h3>
@@ -804,9 +820,162 @@
             check remains blocked; do not replace it with a no-op.
           </div>
         </div>
+        <div class="phase" id="phase-4">
+          <h3><code class="status">[x]</code>4. Naming and form-label coverage batch</h3>
+          <p>
+            Add <code>image-alt</code>, <code>link-name</code> and <code>label</code>, all stable,
+            default-enabled rules in the pinned baseline. Goal: six named implementations with
+            explicit branch limits, not full accessible-name support or full axe-core parity.
+            Execute only after approval, on a fresh short-lived branch from current main; preserve
+            the existing worktrees, local plan edits and legacy PRs.
+          </p>
+          <h4>4.1 Deliverables</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[x]</code>Before implementation, record selectors, applicability,
+              check combinations, supported branches, expected outcomes and unsupported evidence in
+              planned <code>specs/naming-coverage-protocol.md</code>. Inspect pinned source and
+              fixtures, then author expectations separately from differential outputs. Keep the
+              complete catalog inventory and default activation intact; a default request must not
+              silently become a six-rule scan.
+            </li>
+          </ul>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rule</th>
+                  <th>Required case families</th>
+                  <th>Boundary</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>image-alt</code></td>
+                  <td>
+                    Named images; missing, empty and whitespace-only alt; ARIA names, title and
+                    presentation-role conditions; hidden/inapplicable controls.
+                  </td>
+                  <td>
+                    Native <code>img</code> scope. Preserve canonical check combinations, not a
+                    generic non-empty-name test. Other image-related rules remain unimplemented.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>link-name</code></td>
+                  <td>
+                    Text and image-content names, ARIA references and title; empty and hidden
+                    content; focusability-related checks and anchors without href.
+                  </td>
+                  <td>
+                    Native <code>a[href]</code> scope, not every ARIA link widget. Visibility and
+                    focusability evidence must retain their distinct semantics.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>label</code></td>
+                  <td>
+                    Explicit and wrapping labels; ARIA names, title and placeholder; empty, missing
+                    and hidden labels; input-type and presentation-role applicability.
+                  </td>
+                  <td>
+                    Canonical matcher over <code>input, textarea</code>. Do not absorb separate
+                    select, input-button, input-image or ARIA-widget rules into this implementation.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <ul class="checklist">
+            <li>
+              <code class="status">[x]</code>Selectively reuse reviewed canonical algorithms and
+              fixtures with license/provenance updates. Extract shared naming, visibility or
+              relationship capabilities only where these rules need them. Do not turn the limited
+              button-name helper into an assumed complete accessible-name engine. Preserve strict
+              browser/host types, bounded work/evidence and explicit exhaustion outcomes.
+            </li>
+            <li>
+              <code class="status">[x]</code>Cover ordinary DOM, open shadow roots with root-local
+              references, slots, same-origin frames and denied scope. Add one small owned local page
+              combining images, links and a form, with deterministic broken/fixed states. Exercise
+              it through the existing host and reporting path, not only direct evaluators; no new
+              playbook, production target, credentials or customer data.
+            </li>
+            <li>
+              <code class="status">[x]</code>Integrate new raw occurrences with existing grouping,
+              history and gate policy. Demonstrate introduced, persistent, resolved and recurring
+              findings in equivalent full-scan states; partial/narrower scans cannot resolve prior
+              findings. Keep realtime requests explicitly full-scan fallback.
+            </li>
+            <li>
+              <code class="status">[x]</code>Update capabilities, fixtures, semantic comparison
+              projections, README and provenance together. Record the new revision, raw results,
+              exact coverage and mismatch dispositions in planned
+              <code>specs/naming-coverage-validation.md</code>. Retain Phase 3 evidence and
+              benchmark archives as historical results, not evidence for six-rule coverage.
+            </li>
+          </ul>
+          <h4>4.2 Testing strategy and acceptance</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[x]</code><code>pnpm test:parity</code>: every new rule has real
+              positive, negative, inapplicable and incomplete cases in Chromium, Firefox and WebKit.
+              Ordinary native positive/negative controls must produce matching pass/fail results,
+              not incomplete stand-ins. Include malformed/missing references, hidden descendants,
+              dynamic name/label changes and work-budget exhaustion. Keep the original three-rule
+              cases passing. Compare rule outcomes, scoped targets, impact and relevant check
+              evidence before grouping in separate equivalent contexts against the integrity-pinned
+              external reference.
+            </li>
+            <li>
+              <code class="status">[x]</code><code>pnpm test:host</code> and
+              <code>pnpm test:reporting</code>: scan the combined local page through the host,
+              verify selected six-rule results and repaired-state history/gates, and retain explicit
+              denied-scope, cancellation and stale-result behavior. Unsupported branches need
+              narrow, reproduced dispositions; do not blanket-allowlist mismatches or update
+              expectations merely to agree with canonical output.
+            </li>
+            <li>
+              <code class="status">[x]</code><code>pnpm validate</code> under pinned Node 26.8.2 and
+              PNPM 12.4.1: build, strict types, lint, mandatory Oxfmt and all existing suites. No
+              dependency/tool upgrades or new benchmark target. Run <code>pnpm bench:slice</code>
+              once for the implementation's affected shared browser path; keep its selected
+              three-rule workload and scope explicit. Do not rerun it for unrelated documentation
+              repairs or claim six-rule performance from it.
+            </li>
+          </ul>
+          <h4>4.3 Stop boundary and delivery</h4>
+          <p>
+            Exit with six named implementations, declared limits, no unresolved mismatches in the
+            claimed supported scope, and demonstrated host/reporting integration. Missing coverage
+            remains incomplete, never a pass. Stop for evidence review; no automatic next batch.
+            Defer incremental optimization, additional playbooks, dashboards, enterprise adapters,
+            generalized extensions and further host/tooling hardening unless a verified defect
+            blocks this slice.
+          </p>
+          <p>
+            If PR delivery is separately authorized, use one scoped ready PR rebased onto latest
+            main. Freeze edits immediately after pushing until current-head review completes;
+            collect and verify the complete review before one repair batch. At most two autonomous
+            repair pushes; the second handles repair regressions or demonstrated release blockers.
+            Further repairs require approval. Required checks/approvals and explicit finding
+            dispositions define readiness, not optional bot wording. Escalate stalled reviews and
+            late blockers; never silently waive required gates or merge without authorization.
+          </p>
+          <div class="loop">
+            <strong>Checkpoint:</strong> Phase 4 complete. See
+            <a href="naming-coverage-validation.md">executed evidence and limitations</a>. Stop at
+            implementation scope. PR delivery, monitoring until clean and merge are now authorized;
+            further implementation scope requires approval.
+          </div>
+        </div>
       </section>
       <section id="validation">
-        <h2>Final validation</h2>
+        <h2>Foundation validation (Phases 1 to 3)</h2>
+        <p>
+          Checked items below record completed foundation work. Phase 4 acceptance is recorded
+          separately above; these historical checks alone do not validate the new rules.
+        </p>
         <p>
           All commands below run in the new worktree under Node 26.8.2. Bare <code>pnpm</code> means
           the pinned 12.4.1 executable; use
@@ -876,6 +1045,82 @@
       </section>
       <section id="amendments">
         <h2>Amendments</h2>
+        <details open>
+          <summary>2026-09-16T13:22:20Z: PR #13 first review repair</summary>
+          <p>
+            Initial head b4d563f passed Ubuntu CI. Completed review verified an image-role
+            regression in shared button naming and a dropped still-supported capability flag. Fixed
+            both with cross-browser button/link controls and IPC assertions. Canonical source/output
+            disproved the ARIA-relatedNodes and contenteditable findings; native label indexing
+            remains deferred optimization under documented native-query limits.
+          </p>
+          <p>
+            Pinned pnpm validate passed 210 tests; 40 naming and 37 original-slice fixtures per
+            engine now pass their declared expectations. Shared naming changed, so one new
+            three-rule benchmark run passed 360 measurements. Separate repair evidence retains new
+            source/bundle hashes without rewriting original archives. One autonomous repair push
+            prepared; current-head CI and completed review still required before merge.
+          </p>
+        </details>
+        <details open>
+          <summary>2026-09-16T12:58:00Z: Phase 4 evidence reviewed; PR delivery authorized</summary>
+          <p>
+            Tony authorized filing a ready PR, monitoring until checks/reviews are clean, then
+            merging. Scope is Phase 4 plus the project-local browser-cache script repair. The exact
+            failing Firefox startup case and pinned pnpm validate passed with
+            PLAYWRIGHT_BROWSERS_PATH unset: 210 tests, build, strict types, lint and Oxfmt.
+          </p>
+          <p>
+            Evidence review verified archive integrity, supported raw parity, dynamic equivalence
+            and conservative history/gates. The measured browser bundle is unchanged; archived
+            package.json hash predates the script repair and remains historical. No benchmark rerun
+            for tooling/docs. Current-head CI and completed review remain delivery gates; at most
+            two autonomous repair pushes. Further coverage gets a separate plan after delivery, not
+            implementation in this PR. Publishing remains unauthorized.
+          </p>
+        </details>
+        <details open>
+          <summary>2026-09-15T12:09:34Z: Phase 4 executed, stop boundary reached</summary>
+          <p>
+            Tony authorized Phase 4 only. Created feat/naming-form-coverage from current main at
+            0beec0b1, preserving existing local plan edits. Added image-alt, link-name and label
+            with bounded shared naming, root-local relationships and canonical ANY/NONE evidence.
+            Six partial implementations; 99 catalog rules remain unimplemented. Defaults still
+            resolve all 89 stable defaults. No full accessible-name/parity claim.
+          </p>
+          <p>
+            Pinned frozen install and pnpm validate passed: build, five strict type scopes, lint,
+            mandatory Oxfmt and 210 tests. New comparisons cover 39 fixtures per engine in Chromium,
+            Firefox and WebKit, with explicit unsupported dispositions, six dynamic full/fallback
+            states and seven IPC/history scans per engine. Related evidence, repaired/recurring
+            issues and partial/narrower resolution safety verified.
+          </p>
+          <p>
+            One pnpm bench:slice run passed 360 measurements plus 15 long-lived journeys on the
+            unchanged three-rule workload. No six-rule or incremental performance claim.
+            <a href="naming-coverage-validation.md">Phase 4 evidence</a> retains raw results,
+            source/artifact hashes, environment and limitations. Prior archives unchanged. Phase 4
+            [x]; no [f] task. Implementation uncommitted; no push, PR, merge, publishing or next
+            batch.
+          </p>
+        </details>
+        <details open>
+          <summary>2026-09-15T11:08:47Z: Phase 4 naming/forms coverage planned</summary>
+          <p>
+            Tony requested the suggested next-phase update. Added a bounded image-alt, link-name and
+            label batch, native applicability boundaries, a combined owned local page, three-engine
+            semantic comparisons, reporting acceptance and a two-repair-push delivery limit. Shared
+            capabilities are extracted only when required; broader platform and performance work
+            stay deferred. Phase 4 execution and PR delivery are not authorized by this planning
+            request. All new implementation/acceptance tasks remain unchecked.
+          </p>
+          <p>
+            Verified PR #12 is merged at 0beec0b13cd25472cd5806d5e520bc0333352038 and inspected the
+            three proposed rule definitions at canonical v4.13.0 read-only. Prior metadata,
+            completed-phase checklists and historical evidence remain preserved. This amendment
+            changes the plan only; it makes no new-rule implementation or validation claim.
+          </p>
+        </details>
         <details open>
           <summary>2026-09-12T19:50:23Z: Phase 3 PR delivery authorized</summary>
           <p>

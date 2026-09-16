@@ -36,7 +36,7 @@ export function resolveRules(
   return [first, ...rules.slice(1)];
 }
 
-// Whole-document only. Never silently widen requested scope or turn defaults into three rules.
+// Whole-document only. Never silently widen scope or reduce defaults to implemented rules.
 export async function scanTarget(
   target: BrowserTarget,
   request: ScanRequest,

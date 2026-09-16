@@ -11,6 +11,10 @@ import type {
   Target,
 } from "../contracts.js";
 import { minimumSize, offsetDiameter } from "./geometry.js";
+import { composedContains, parent, visible, name } from "./naming.js";
+import type { NamingBudget } from "./naming.js";
+import { evaluateNamingRule, namingApplicability } from "./naming-rules.js";
+import { implementedRules, namingRules } from "../analysis.js";
 
 interface Fact {
   readonly node: Element;
@@ -24,20 +28,6 @@ const diagnostic = (code: string, message: string, target?: Target): Diagnostic 
   message,
   ...(target ? { target } : {}),
 });
-const compact = (text: string) => text.replace(/\s+/g, " ").trim().slice(0, 160);
-function parent(node: Element): Element | null {
-  if (node.assignedSlot) return node.assignedSlot;
-  if (node.parentElement) return node.parentElement;
-  const root = node.getRootNode();
-  return root.nodeType === Node.DOCUMENT_FRAGMENT_NODE ? (root as ShadowRoot).host : null;
-}
-function composedContains(ancestor: Element, node: Element, budget?: NamingBudget): boolean {
-  for (let current: Element | null = node; current; current = parent(current)) {
-    if (budget && !takeNameBudget(budget)) return false;
-    if (current === ancestor) return true;
-  }
-  return false;
-}
 function selector(node: Element): string {
   const root = node.getRootNode();
   if (
@@ -57,152 +47,6 @@ function selector(node: Element): string {
     current = current.parentElement;
   }
   return pieces.join(" > ");
-}
-function visible(node: Element, budget?: NamingBudget): boolean {
-  for (let current: Element | null = node; current; current = parent(current)) {
-    if (budget && !takeNameBudget(budget)) return false;
-    const style = current.ownerDocument.defaultView!.getComputedStyle(current);
-    if (
-      current.getAttribute("aria-hidden") === "true" ||
-      current.hasAttribute("inert") ||
-      style.display === "none" ||
-      style.visibility !== "visible" ||
-      style.contentVisibility === "hidden"
-    )
-      return false;
-  }
-  const frame = node.ownerDocument.defaultView?.frameElement;
-  if (frame && !visible(frame, budget)) return false;
-  const modal = node.ownerDocument.querySelector("dialog:modal");
-  if (modal && !composedContains(modal, node, budget)) return false;
-  return true;
-}
-interface NamingBudget {
-  nodes: number;
-  characters: number;
-  exhausted: boolean;
-}
-function takeNameBudget(budget: NamingBudget, characters = 0): boolean {
-  if (budget.exhausted || budget.nodes < 1 || characters > budget.characters) {
-    budget.exhausted = true;
-    return false;
-  }
-  budget.nodes--;
-  budget.characters -= characters;
-  return true;
-}
-function nameString(value: string, budget: NamingBudget): string {
-  return takeNameBudget(budget, value.length) ? compact(value) : "";
-}
-function children(node: Element): Iterable<Node> {
-  if (node.localName === "slot") {
-    const assigned = (node as HTMLSlotElement).assignedNodes({ flatten: true });
-    if (assigned.length) return assigned;
-  }
-  return (node.shadowRoot ?? node).childNodes;
-}
-function text(
-  node: Element,
-  budget: NamingBudget,
-  includeHidden = false,
-  seen = new Set<Element>(),
-  depth = 0,
-): { value: string; unsupported: boolean } {
-  if (seen.has(node)) return { value: "", unsupported: false };
-  if (depth >= 64 || !takeNameBudget(budget)) {
-    budget.exhausted = true;
-    return { value: "", unsupported: true };
-  }
-  seen.add(node);
-  if (!includeHidden && !visible(node, budget)) return { value: "", unsupported: budget.exhausted };
-  let unsupported = node.namespaceURI !== "http://www.w3.org/1999/xhtml";
-  for (const pseudo of ["::before", "::after"]) {
-    const content = node.ownerDocument.defaultView!.getComputedStyle(node, pseudo).content;
-    if (content && !["none", "normal", '""'].includes(content)) unsupported = true;
-  }
-  const label = nameString(node.getAttribute("aria-label") ?? "", budget);
-  if (label || budget.exhausted)
-    return { value: label, unsupported: unsupported || budget.exhausted };
-  if (node.localName === "img")
-    return { value: nameString(node.getAttribute("alt") ?? "", budget), unsupported };
-  let value = "";
-  for (const child of children(node)) {
-    if (!takeNameBudget(budget)) break;
-    if (child.nodeType === Node.TEXT_NODE) {
-      const textNode = child as Text;
-      if (!takeNameBudget(budget, textNode.length)) break;
-      value += textNode.substringData(0, textNode.length);
-    } else if (child.nodeType === Node.ELEMENT_NODE) {
-      const element = child as Element;
-      if (
-        element.hasAttribute("aria-labelledby") ||
-        ["input", "select", "textarea"].includes(element.localName)
-      )
-        unsupported = true;
-      const result = text(element, budget, includeHidden, seen, depth + 1);
-      value += result.value;
-      unsupported ||= result.unsupported;
-    }
-    if (budget.exhausted) break;
-  }
-  return { value: compact(value), unsupported: unsupported || budget.exhausted };
-}
-function name(
-  node: Element,
-  budget: NamingBudget,
-): { value: string; source: string; unsupported: boolean } {
-  if (budget.exhausted) return { value: "", source: "none", unsupported: true };
-  function* candidates() {
-    const refs = node.getAttribute("aria-labelledby") ?? "";
-    const root = node.getRootNode() as Document | ShadowRoot;
-    const referenced: ReturnType<typeof text>[] = [];
-    if (takeNameBudget(budget, refs.length)) {
-      for (const id of refs.trim().split(/\s+/)) {
-        if (!id) continue;
-        if (!takeNameBudget(budget)) break;
-        const label = root.getElementById(id);
-        if (label) referenced.push(text(label, budget, !visible(label, budget)));
-        if (budget.exhausted) break;
-      }
-    }
-    if (referenced.length || budget.exhausted)
-      yield {
-        value: compact(referenced.map((result) => result.value).join(" ")),
-        source: "aria-labelledby",
-        unsupported: referenced.some((result) => result.unsupported),
-      };
-    yield {
-      value: nameString(node.getAttribute("aria-label") ?? "", budget),
-      source: "aria-label",
-      unsupported: false,
-    };
-    if (node.localName === "button") {
-      const values: ReturnType<typeof text>[] = [];
-      for (const label of (node as HTMLButtonElement).labels ?? []) {
-        values.push(text(label, budget));
-        if (budget.exhausted) break;
-      }
-      yield {
-        value: compact(values.map((result) => result.value).join(" ")),
-        source: "label",
-        unsupported: values.some((result) => result.unsupported),
-      };
-    }
-    yield { ...text(node, budget), source: "contents" };
-    yield {
-      value: nameString(node.getAttribute("title") ?? "", budget),
-      source: "title",
-      unsupported: false,
-    };
-  }
-  let unsupported: { value: string; source: string; unsupported: boolean } | undefined;
-  // button-name is an OR of naming checks. Stop after a supported positive check.
-  for (const candidate of candidates()) {
-    if (budget.exhausted) return { ...candidate, unsupported: true };
-    if (candidate.value && !candidate.unsupported) return candidate;
-    if (candidate.unsupported) unsupported ??= candidate;
-  }
-  return unsupported ?? { value: "", source: "none", unsupported: false };
 }
 function widget(node: Element): boolean {
   if (node.localName === "area" || node.matches(":disabled")) return false;
@@ -421,9 +265,9 @@ export function createAnalysis(): BrowserAnalysis {
         impact:
           outcome === "pass"
             ? null
-            : rule === "button-name"
+            : ["button-name", "image-alt", "label"].includes(rule)
               ? ("critical" as const)
-              : rule === "target-size"
+              : rule === "target-size" || rule === "link-name"
                 ? ("serious" as const)
                 : ("moderate" as const),
         evidence: [evidence],
@@ -451,16 +295,14 @@ export function createAnalysis(): BrowserAnalysis {
       : undefined;
     if (roleTokens) gap(roleTokens.code, roleTokens.message, roleTokens.target);
     const unavailableScope = shadowModal ?? roleTokens;
+    const targetsByNode = new Map(facts.map(({ node, target }) => [node, target.path]));
     const namingBudget: NamingBudget = { nodes: 2000, characters: 16_384, exhausted: false };
     let namingLimitReported = false;
     // Shared occurrence budget must not depend on caller selection order.
     const orderedRules = input.rules.toSorted((a, b) => a.rule.id.localeCompare(b.rule.id));
     const rules: RuleResult[] = orderedRules.map(({ rule, options }) => {
       if (unavailableScope) return { rule, state: "not-evaluated", reason: unavailableScope };
-      if (
-        !["button-name", "target-size", "landmark-one-main"].includes(rule.id) ||
-        Object.keys(options).length
-      ) {
+      if (!implementedRules.some((id) => id === rule.id) || Object.keys(options).length) {
         const reason = diagnostic(
           "rule-unavailable",
           "Rule or non-default options not implemented",
@@ -510,6 +352,33 @@ export function createAnalysis(): BrowserAnalysis {
             ),
           );
         }
+      const namingRule = namingRules.find((id) => id === rule.id);
+      if (namingRule)
+        for (const fact of facts) {
+          if (!fact.visible) continue;
+          const applies = namingApplicability(fact.node, namingRule);
+          if (applies === false) continue;
+          if (!available()) break;
+          const result = evaluateNamingRule(fact.node, namingRule, namingBudget, applies, (node) =>
+            targetsByNode.get(node),
+          );
+          if (namingBudget.exhausted && !namingLimitReported) {
+            namingLimitReported = true;
+            gap("naming-limit", "Naming node, text or depth budget exceeded", fact.target);
+          }
+          add(() => ({
+            ...occurrence(
+              fact,
+              rule.id,
+              result.outcome,
+              result.evidence,
+              namingBudget.exhausted
+                ? "Naming traversal budget exceeded"
+                : "Complex naming or role evidence is unsupported",
+            ),
+            impact: result.impact,
+          }));
+        }
       if (rule.id === "target-size") {
         const generatedDocuments = new Set<Document>();
         if (widgets.length && count < 96)
@@ -519,7 +388,12 @@ export function createAnalysis(): BrowserAnalysis {
             if (
               ["::before", "::after"].some((pseudo) => {
                 const content = view.getComputedStyle(fact.node, pseudo).content;
-                return content && content !== "none" && content !== "normal";
+                return (
+                  content &&
+                  content !== "none" &&
+                  content !== "normal" &&
+                  !(fact.node.localName === "img" && content === "-moz-alt-content")
+                );
               })
             )
               generatedDocuments.add(fact.node.ownerDocument);
