@@ -50,6 +50,53 @@ export function takeNameBudget(budget: NamingBudget, characters = 0): boolean {
 export function nameString(value: string, budget: NamingBudget): string {
   return takeNameBudget(budget, value.length) ? compact(value) : "";
 }
+// Pinned canonical focusability for this native naming slice, not a browser tab-order API.
+export function focusable(node: Element): boolean {
+  return (
+    !node.matches(":disabled") &&
+    (node.matches("a[href], input, textarea") ||
+      /^\s*[+-]?\d/.test(node.getAttribute("tabindex") ?? ""))
+  );
+}
+export function presentation(node: Element, budget: NamingBudget): boolean | null {
+  if (!["none", "presentation"].includes(node.getAttribute("role")?.toLowerCase() ?? ""))
+    return false;
+  if (focusable(node)) return false;
+  // Known global attributes conflict. Other ARIA attributes require standards-role resolution.
+  const globals = [
+    "aria-actions",
+    "aria-braillelabel",
+    "aria-brailleroledescription",
+    "aria-description",
+    "aria-label",
+    "aria-labelledby",
+    "aria-describedby",
+    "aria-live",
+    "aria-atomic",
+    "aria-busy",
+    "aria-controls",
+    "aria-current",
+    "aria-details",
+    "aria-disabled",
+    "aria-dropeffect",
+    "aria-errormessage",
+    "aria-flowto",
+    "aria-grabbed",
+    "aria-haspopup",
+    "aria-hidden",
+    "aria-invalid",
+    "aria-keyshortcuts",
+    "aria-owns",
+    "aria-relevant",
+    "aria-roledescription",
+  ];
+  if (globals.some((attr) => node.hasAttribute(attr))) return false;
+  for (const attr of node.attributes) {
+    if (!takeNameBudget(budget)) return null;
+    if (attr.name.startsWith("aria-")) return null;
+  }
+  return true;
+}
 function children(node: Element): Iterable<Node> {
   if (node.localName === "slot") {
     const assigned = (node as HTMLSlotElement).assignedNodes({ flatten: true });
@@ -90,11 +137,19 @@ export function text(
     if (node.localName === "img" && content === "-moz-alt-content") continue;
     if (content && !["none", "normal", '""'].includes(content)) unsupported = true;
   }
+  if (node.localName === "img") {
+    const role = node.getAttribute("role")?.toLowerCase();
+    if (role === "none" || role === "presentation") {
+      const presentational = presentation(node, budget);
+      if (presentational === true)
+        return { value: "", unsupported: unsupported || budget.exhausted };
+      if (presentational === null) unsupported = true;
+    } else if (role && role !== "img") unsupported = true;
+  }
   const label = contentsOnly ? "" : nameString(node.getAttribute("aria-label") ?? "", budget);
   if (label || budget.exhausted)
     return { value: label, unsupported: unsupported || budget.exhausted };
   if (node.localName === "img") {
-    if (node.hasAttribute("role")) unsupported = true;
     return {
       value: nameString(node.getAttribute("alt") ?? node.getAttribute("title") ?? "", budget),
       unsupported,

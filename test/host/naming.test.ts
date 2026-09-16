@@ -38,7 +38,9 @@ for (const engine of ["chromium", "firefox", "webkit"] as const)
               target: { kind: "attached", targetId: "naming-fixture" },
             }),
           );
-          expect(session.capabilities).toContain("six-rule-slice");
+          expect(session.capabilities).toEqual(
+            expect.arrayContaining(["three-rule-slice", "six-rule-slice"]),
+          );
           const scan = async (change?: (request: ScanRequest) => ScanRequest) => {
             const current = unwrap(
               await client.inspect({ ...meta(), sessionId: session.id }),

@@ -352,7 +352,7 @@
               2026-09-12T14:13:33Z; 2026-09-12T14:23:45Z; 2026-09-12T15:40:45Z;
               2026-09-12T16:17:57Z; 2026-09-12T16:34:01Z; 2026-09-12T16:58:06Z;
               2026-09-12T19:06:00Z; 2026-09-12T19:50:23Z; 2026-09-15T11:08:47Z;
-              2026-09-15T12:09:34Z; 2026-09-16T12:58:00Z
+              2026-09-15T12:09:34Z; 2026-09-16T12:58:00Z; 2026-09-16T13:22:20Z
             </dd>
             <dt>commits</dt>
             <dd>
@@ -368,7 +368,8 @@
               uncommitted); 86a3b36318024360769ee691135ebc1df5bb42a5 (phase 4 planning context,
               current checkout); 0beec0b13cd25472cd5806d5e520bc0333352038 (phase 3 PR #12 squash
               merge); 0beec0b13cd25472cd5806d5e520bc0333352038 (phase 4 branch base; implementation
-              uncommitted, source hashes in naming-evidence/manifest.json)
+              uncommitted, source hashes in naming-evidence/manifest.json);
+              b4d563f477319af74f95377f6b031faf2cfd9b67 (PR #13 initial head; Ubuntu CI passed)
             </dd>
             <dt>agent name</dt>
             <dd>
@@ -378,7 +379,7 @@
               agent); pi / gpt-6-astra (phase 3, single agent); pi / gpt-6-astra (phase 3 PR
               delivery); pi / gpt-6-astra (phase 4 plan update, single agent); pi / gpt-6-astra
               (phase 4 execution, single agent); pi / gpt-6-astra (phase 4 PR delivery, single
-              agent)
+              agent); pi / gpt-6-astra (PR #13 first review repair, single agent)
             </dd>
             <dt>session id</dt>
             <dd>
@@ -387,7 +388,8 @@
               01a0962e-071f-7681-98bc-26b90fd97297; 01a0962e-071f-7681-98bc-26b90fd97297;
               01a0962e-071f-7681-98bc-26b90fd97297; 01a096d5-6e32-7314-97d0-6eac44caafef;
               01a09729-ccfa-7314-97d0-6eaf5da86e04; 01a09729-ccfa-7314-97d0-6eaf5da86e04;
-              01a0a4db-d25d-7314-97d0-6ec1f2f07a7e; 01a0a4db-d25d-7314-97d0-6ec1f2f07a7e
+              01a0a4db-d25d-7314-97d0-6ec1f2f07a7e; 01a0a4db-d25d-7314-97d0-6ec1f2f07a7e;
+              01a0a4db-d25d-7314-97d0-6ec1f2f07a7e
             </dd>
             <dt>back refs</dt>
             <dd>
@@ -411,7 +413,8 @@
               <a href="https://github.com/asbury-labs/propellr/pull/12">PR #12 (merged)</a>;
               <a href="#phase-4">Phase 4 proposal</a>;
               <a href="naming-coverage-protocol.md">Phase 4 protocol</a>;
-              <a href="naming-coverage-validation.md">Phase 4 evidence</a>
+              <a href="naming-coverage-validation.md">Phase 4 evidence</a>;
+              <a href="https://github.com/asbury-labs/propellr/pull/13">PR #13</a>
             </dd>
           </dl>
         </details>
@@ -1042,6 +1045,23 @@
       </section>
       <section id="amendments">
         <h2>Amendments</h2>
+        <details open>
+          <summary>2026-09-16T13:22:20Z: PR #13 first review repair</summary>
+          <p>
+            Initial head b4d563f passed Ubuntu CI. Completed review verified an image-role
+            regression in shared button naming and a dropped still-supported capability flag. Fixed
+            both with cross-browser button/link controls and IPC assertions. Canonical source/output
+            disproved the ARIA-relatedNodes and contenteditable findings; native label indexing
+            remains deferred optimization under documented native-query limits.
+          </p>
+          <p>
+            Pinned pnpm validate passed 210 tests; 40 naming and 37 original-slice fixtures per
+            engine now pass their declared expectations. Shared naming changed, so one new
+            three-rule benchmark run passed 360 measurements. Separate repair evidence retains new
+            source/bundle hashes without rewriting original archives. One autonomous repair push
+            prepared; current-head CI and completed review still required before merge.
+          </p>
+        </details>
         <details open>
           <summary>2026-09-16T12:58:00Z: Phase 4 evidence reviewed; PR delivery authorized</summary>
           <p>

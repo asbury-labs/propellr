@@ -33,6 +33,9 @@ separate from defaults.
   Negative tabindex does not waive missing text, but removes focusable-no-name
   failure. Empty reference text falls through to contents for the separate
   accessible-name check; it does not suppress otherwise valid link text.
+  Native image descendants with `role="img"` contribute their name; valid
+  none/presentation descendants contribute no name. Focus/global-ARIA conflicts
+  restore native image semantics. These controls also cover existing button-name.
 - Forms: nonempty explicit/wrapping labels, ARIA, title and placeholder pass.
   Empty/missing labels fail. Hidden explicit label contributes positive explicit
   check but fails hidden-explicit-label when accessible name is absent; title or
@@ -61,7 +64,16 @@ comparison needs an exact fixture/rule/target disposition; no blanket allowlist.
 Use root-local native references/labels with bounded iteration, separate ANY
 check sources from accessible-name precedence and NONE checks. Retain check IDs,
 boolean/unknown results and scoped related label paths; do not retain name
-strings or raw input values. Reference raw outputs remain test artifacts only.
+strings or raw input values. Related paths correspond to canonical explicit/implicit
+label-check `relatedNodes`. Canonical aria-labelledby emits boolean check evidence
+without relatedNodes; opposite-name shadow/light-root fixtures verify its root-local
+resolution separately. Reference raw outputs remain test artifacts only.
+
+Budgets cap explicit traversal/string processing and retained evidence. As in the
+reader, native DOM/layout query internals are not a constant-time guarantee;
+root-local `querySelectorAll` can still scan/materialize labels before bounded
+iteration. A reusable label index is deferred optimization, not a measured speed
+or adversarial-page execution-time guarantee.
 
 ## Verification and artifacts
 

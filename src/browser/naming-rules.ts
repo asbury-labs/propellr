@@ -3,7 +3,15 @@
 // Source pins and supported branches: specs/naming-coverage-protocol.md, PROVENANCE.md.
 import type { namingRules } from "../analysis.js";
 import type { Evidence, Occurrence, Target } from "../contracts.js";
-import { nameString, parent, takeNameBudget, text, visible } from "./naming.js";
+import {
+  nameString,
+  parent,
+  takeNameBudget,
+  text,
+  visible,
+  focusable,
+  presentation,
+} from "./naming.js";
 import type { NamingBudget } from "./naming.js";
 
 type NamingRule = (typeof namingRules)[number];
@@ -16,52 +24,6 @@ interface Check {
 const negate = (value: Truth): Truth => (value === null ? null : !value);
 const truth = (value: ReturnType<typeof text>): Truth =>
   value.unsupported ? null : Boolean(value.value);
-function focusable(node: Element): boolean {
-  return (
-    !node.matches(":disabled") &&
-    (node.matches("a[href], input, textarea") ||
-      /^\s*[+-]?\d/.test(node.getAttribute("tabindex") ?? ""))
-  );
-}
-function presentation(node: Element, budget: NamingBudget): Truth {
-  if (!["none", "presentation"].includes(node.getAttribute("role")?.toLowerCase() ?? ""))
-    return false;
-  if (focusable(node)) return false;
-  // Known global attributes conflict. Other ARIA attributes require standards-role resolution.
-  const globals = [
-    "aria-actions",
-    "aria-braillelabel",
-    "aria-brailleroledescription",
-    "aria-description",
-    "aria-label",
-    "aria-labelledby",
-    "aria-describedby",
-    "aria-live",
-    "aria-atomic",
-    "aria-busy",
-    "aria-controls",
-    "aria-current",
-    "aria-details",
-    "aria-disabled",
-    "aria-dropeffect",
-    "aria-errormessage",
-    "aria-flowto",
-    "aria-grabbed",
-    "aria-haspopup",
-    "aria-hidden",
-    "aria-invalid",
-    "aria-keyshortcuts",
-    "aria-owns",
-    "aria-relevant",
-    "aria-roledescription",
-  ];
-  if (globals.some((attr) => node.hasAttribute(attr))) return false;
-  for (const attr of node.attributes) {
-    if (!takeNameBudget(budget)) return null;
-    if (attr.name.startsWith("aria-")) return null;
-  }
-  return true;
-}
 export function namingApplicability(node: Element, rule: NamingRule): Truth {
   if (rule === "link-name") return node.matches("a[href]");
   if (rule === "label")

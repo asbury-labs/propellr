@@ -179,3 +179,42 @@ Delivery is limited to Phase 4 plus the browser-cache repair, at most two autono
 repair pushes under the plan's review-freeze policy. Current-head CI/review and
 final merge status will be recorded on the PR. No next coverage batch is included;
 its separate plan follows delivery.
+
+## PR #13: first review repair, September 16
+
+Initial head `b4d563f477319af74f95377f6b031faf2cfd9b67` passed
+[Ubuntu CI](https://github.com/asbury-labs/propellr/actions/runs/35099406244).
+Completed Copilot review produced three inline findings and two suppressed findings.
+Verified and handled the complete batch before one repair push:
+
+- **Repaired:** explicit image roles in shared text traversal regressed button
+  naming. Native `role=img` descendants now contribute their alternatives; valid
+  none/presentation descendants contribute no name; focus/global-ARIA conflicts
+  restore native semantics. Shared reviewed predicate also serves new naming rules.
+  Button and link fixtures cover five controls each in all three engines.
+- **Repaired:** preserve `three-rule-slice` alongside `six-rule-slice`, since the
+  existing three-rule request/playbook path remains supported. IPC assertions cover both.
+- **False positive:** canonical aria-labelledby check has no relatedNodes output.
+  Existing evidence compares scoped native label-check relationships; root-local
+  IDREF resolution is tested with opposite-name shadow/light-root controls. No
+  invented canonical relation data or weakened comparison.
+- **False positive against pinned baseline:** contenteditable-only presentational
+  images pass both engines in Chromium/Firefox/WebKit. Canonical
+  `is-natively-focusable.js` does not treat contenteditable alone as native focusability.
+- **Deferred optimization:** replacing root-local native label queries with an
+  index. Explicit JS iteration/retention is bounded; native query internals are
+  already documented as not constant time. No adversarial-page timing guarantee.
+
+Focused image-role reproductions and IPC capability tests passed. Full pinned
+`pnpm validate` passed all 210 tests, including **40 naming fixtures** (22 supported,
+18 unsupported/gap) plus **37 original-slice fixtures** per engine. Shared naming
+changed, so one new three-rule `bench:slice` run passed all 360 measurements and
+15 long-lived journeys. Repaired-head CI and fresh review remain required before merge.
+
+[Repair manifest](naming-evidence/review-1-manifest.json) and
+[repair raw archive](naming-evidence/review-1-results.tar.gz) pin repaired sources,
+raw results and logs separately from the original immutable archive. Initial-head
+CI/reproductions in that archive are explicitly labeled historical; they are not
+repaired-head evidence. Current measured browser bundle SHA-256:
+`69fb0c6a9c671ad57df27acdc95c95a81e7e95ef8c068e8cc30c92e5e59dc23f`.
+One autonomous repair push prepared; one remains under the delivery policy.

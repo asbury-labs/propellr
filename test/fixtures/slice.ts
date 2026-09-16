@@ -24,6 +24,13 @@ export const fixtures: readonly Fixture[] = [
     expected: { "button-name": ["#empty", "#missing"] },
   },
   {
+    id: "button-image-roles",
+    html: doc(
+      '<main><button id="image-present"><img role="presentation" width="16" height="16"></button><button id="image-named"><img role="img" alt="Save" width="16" height="16"></button><button id="image-decorative"><img role="none" alt="Save" width="16" height="16"></button><button id="image-focus-conflict"><img role="presentation" tabindex="-1" alt="Save" width="16" height="16"></button><button id="image-global-conflict"><img role="presentation" aria-live="polite" alt="Save" width="16" height="16"></button></main>',
+    ),
+    expected: { "button-name": ["#image-present", "#image-decorative"] },
+  },
+  {
     id: "geometry",
     html: doc(
       `<main><button id="boundary" style="width:24px;height:24px">A</button><button id="rounding" style="width:23.96px;height:24px">B</button><div class="pair"><button class="small" id="close-a">A</button><button class="small" id="close-b">B</button></div><button class="small" id="isolated">I</button></main>`,

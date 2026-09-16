@@ -42,6 +42,15 @@ export const namingFixtures: readonly NamingFixture[] = [
     passes: ["#text", "#image", "#aria", "#title", "#reference", "#present", "#overridden"],
   },
   {
+    id: "link-image-roles",
+    rule: "link-name",
+    html: namingDocument(
+      '<main><a id="image-present" href="#"><img role="presentation"></a><a id="image-named" href="#"><img role="img" alt="Open"></a><a id="image-decorative" href="#"><img role="none" alt="Open"></a><a id="image-focus-conflict" href="#"><img role="presentation" tabindex="-1" alt="Open"></a><a id="image-global-conflict" href="#"><img role="presentation" aria-live="polite" alt="Open"></a></main>',
+    ),
+    expected: { "link-name": ["#image-present", "#image-decorative"] },
+    passes: ["#image-named", "#image-focus-conflict", "#image-global-conflict"],
+  },
+  {
     id: "forms-native",
     rule: "label",
     html: namingDocument(
