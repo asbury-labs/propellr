@@ -1,0 +1,1207 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plan: Propellr realtime observation and agent conformance</title>
+    <style>
+      /* ===== VISUAL IDENTITY =====
+     Source of truth for this page AND every image embedded in it. Inline SVG
+     resolves var() against this page, so diagrams reference these roles
+     (never hardcoded hex) and the identity stays synced.
+
+     The structure is fixed: --bg, --paper-2, --ink, --muted, --soft, --rule,
+     --accent and --accent-tint must all exist, because an undeclared custom
+     property renders as no fill and fails silently. The values are a starting
+     point: re-tune the hues per plan to suit its subject. */
+      :root {
+        --bg: #000000;
+        --paper-2: #000000;
+        --ink: #ffffff;
+        --muted: #cccccc;
+        --soft: #bbbbbb;
+        --rule: rgba(255, 255, 255, 0.18);
+        --rule-solid: #333333;
+        --accent: #8cceff;
+        --accent-tint: rgba(140, 206, 255, 0.06);
+
+        --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+        --serif: ui-serif, "Iowan Old Style", Georgia, "Times New Roman", serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 4rem 1.5rem 6rem;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      main {
+        max-width: 60rem;
+        margin: 0 auto;
+      }
+
+      h1 {
+        font-family: var(--serif);
+        font-size: 2.5rem;
+        font-weight: 400;
+        line-height: 1.15;
+        letter-spacing: -0.01em;
+        margin: 0 0 1rem;
+      }
+      h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        letter-spacing: -0.005em;
+        margin: 3.5rem 0 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--rule);
+      }
+      h3 {
+        font-size: 1.0625rem;
+        font-weight: 600;
+        margin: 2rem 0 0.5rem;
+      }
+      h4 {
+        font-family: var(--mono);
+        font-size: 0.8125rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin: 1.5rem 0 0.5rem;
+      }
+      p {
+        margin: 0 0 1rem;
+        max-width: 46rem;
+      }
+      a {
+        color: var(--accent);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 2px;
+      }
+
+      code {
+        font-family: var(--mono);
+        font-size: 0.85em;
+        background: rgba(27, 26, 24, 0.05);
+        border-radius: 4px;
+        padding: 0.1em 0.35em;
+      }
+      pre {
+        background: var(--paper-2);
+        border: 1px solid var(--rule);
+        border-radius: 6px;
+        padding: 1rem 1.25rem;
+        overflow-x: auto;
+        font-size: 0.8125rem;
+        line-height: 1.6;
+      }
+      pre code {
+        background: none;
+        padding: 0;
+        font-size: inherit;
+      }
+
+      /* --- header + metadata --- */
+      header {
+        margin-bottom: 2.5rem;
+      }
+      details.meta {
+        border: 1px solid var(--rule);
+        border-radius: 6px;
+        background: var(--paper-2);
+        padding: 0.625rem 1rem;
+        font-size: 0.8125rem;
+      }
+      details.meta summary {
+        cursor: pointer;
+        font-family: var(--mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      details.meta dl {
+        display: grid;
+        grid-template-columns: 8rem 1fr;
+        gap: 0.25rem 1rem;
+        margin: 0.875rem 0 0.25rem;
+      }
+      details.meta dt {
+        font-family: var(--mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--soft);
+        padding-top: 0.15rem;
+      }
+      details.meta dd {
+        margin: 0;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        word-break: break-word;
+      }
+
+      /* --- figures --- */
+      figure {
+        margin: 2rem auto;
+        padding: 0;
+        text-align: center;
+      }
+      figure svg,
+      figure img {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        margin: 0 auto;
+      }
+      figcaption {
+        margin-top: 0.875rem;
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        line-height: 1.5;
+        color: var(--soft);
+        max-width: 40rem;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      /* --- tables (the Notes canvas invites them) --- */
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.875rem;
+        margin: 0 0 1rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.5rem 0.75rem;
+        border-bottom: 1px solid var(--rule);
+        vertical-align: top;
+      }
+      th {
+        font-family: var(--mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--soft);
+        font-weight: 500;
+      }
+      td code {
+        white-space: nowrap;
+      }
+
+      /* --- relevant files --- */
+      .files ul {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 1rem;
+      }
+      .files li {
+        padding: 0.375rem 0;
+        border-bottom: 1px solid var(--rule);
+        font-size: 0.9375rem;
+      }
+      .tag {
+        display: inline-block;
+        font-family: var(--mono);
+        font-size: 0.625rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border-radius: 2px;
+        padding: 0.1rem 0.35rem;
+        margin-right: 0.4rem;
+        border: 1px solid;
+      }
+      .tag.existing {
+        color: var(--muted);
+        border-color: var(--rule-solid);
+      }
+      .tag.new {
+        color: var(--accent);
+        border-color: var(--accent);
+        background: var(--accent-tint);
+      }
+
+      /* --- phases --- */
+      .phase {
+        background: var(--paper-2);
+        border: 1px solid var(--rule);
+        border-radius: 6px;
+        padding: 1.25rem 1.5rem 1.5rem;
+        margin: 1.5rem 0;
+      }
+      .phase h3 {
+        margin-top: 0.25rem;
+      }
+      ul.checklist {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 1rem;
+      }
+      ul.checklist li {
+        padding: 0.25rem 0;
+        font-size: 0.9375rem;
+        line-height: 1.55;
+      }
+      code.status {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--soft);
+        background: none;
+        padding: 0;
+        margin-right: 0.4rem;
+      }
+      .loop {
+        border-left: 2px solid var(--accent);
+        background: var(--accent-tint);
+        border-radius: 0 4px 4px 0;
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+        color: var(--muted);
+      }
+      .loop strong {
+        color: var(--ink);
+      }
+
+      /* --- questionables / notes / amendments --- */
+      #questionables details,
+      #notes details,
+      #amendments details {
+        border-bottom: 1px solid var(--rule);
+        padding: 0.625rem 0;
+      }
+      #questionables summary,
+      #notes summary,
+      #amendments summary {
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9375rem;
+      }
+      .qa-answer,
+      #amendments details p {
+        margin: 0.5rem 0 0;
+        color: var(--muted);
+        font-size: 0.9375rem;
+      }
+
+      h1 {
+        font-family: var(--sans);
+        font-weight: 650;
+      }
+      .phase,
+      details.meta,
+      pre {
+        border-radius: 0;
+        background: none;
+      }
+      .phase {
+        border: 0;
+        border-top: 1px solid var(--rule);
+        padding: 1.25rem 0;
+      }
+      code {
+        background: none;
+        border-radius: 0;
+      }
+      .files code {
+        overflow-wrap: anywhere;
+      }
+      .table-scroll {
+        overflow-x: auto;
+      }
+      figure {
+        max-width: 34rem;
+      }
+      @media (max-width: 640px) {
+        body {
+          padding: 2rem 1rem;
+        }
+        h1 {
+          font-size: 2rem;
+        }
+        details.meta dl {
+          grid-template-columns: 1fr;
+        }
+        td code {
+          white-space: normal;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Plan: Propellr realtime observation and agent conformance</h1>
+        <details class="meta">
+          <summary>Metadata</summary>
+          <dl>
+            <dt>created</dt>
+            <dd>2026-09-16T21:50:11Z</dd>
+            <dt>modified</dt>
+            <dd>2026-09-16T21:50:11Z; 2026-09-16T21:56:52Z (planning validation)</dd>
+            <dt>commits</dt>
+            <dd>
+              c98d0a3ad76a75f7581abe0bed9b55a0778c1d68 (HEAD; native-form batch is uncommitted,
+              completion source-tree SHA-256
+              58df188368571a076beaede907263bf5bd234be9bfa07e1c84f50310e01523e9)
+            </dd>
+            <dt>agent name</dt>
+            <dd>pi / gpt-6-astra (planning, single agent)</dd>
+            <dt>session id</dt>
+            <dd>01a0ab04-7b74-734c-aa54-72e60d140edd</dd>
+            <dt>back refs</dt>
+            <dd>
+              <a href="propellr-native-form-naming.html">Native-form plan</a>;
+              <a href="native-form-naming-validation.md">Current implementation evidence</a>;
+              <a href="propellr-product-brief.md">Product brief</a>;
+              <a href="propellr-acceptance-contract.md">Acceptance contract</a>;
+              <a href="propellr-architecture-boundaries.md">Architecture boundaries</a>;
+              <a href="propellr-improvements.md">Improvements ledger</a>
+            </dd>
+            <dt>forward refs</dt>
+            <dd>
+              None. Proposed plan only; implementation, provider/model spend and PR delivery require
+              approval.
+            </dd>
+          </dl>
+        </details>
+      </header>
+      <figure>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 500 430"
+          role="img"
+          aria-labelledby="flow-title flow-desc"
+        >
+          <title id="flow-title">One live browser, automatic findings, agent feedback</title>
+          <desc id="flow-desc">
+            An agent acts through Stagehand on a borrowed page. Browser signals schedule bounded
+            full scans. Versioned finding events return to the agent through the existing host, with
+            document and generation checks before commit.
+          </desc>
+          <defs>
+            <marker
+              id="flow-arrow"
+              viewBox="0 0 10 10"
+              refX="9"
+              refY="5"
+              markerWidth="7"
+              markerHeight="7"
+              orient="auto-start-reverse"
+            >
+              <path d="M0 0 L10 5 L0 10 Z" fill="var(--accent)" />
+            </marker>
+          </defs>
+          <g id="agent" font-family="var(--sans)" fill="var(--ink)">
+            <text x="28" y="36" font-size="24">Agent + Stagehand actions</text>
+            <text x="28" y="63" font-size="17" fill="var(--muted)">
+              Agent owns the browser session
+            </text>
+          </g>
+          <g id="page" font-family="var(--sans)" fill="var(--ink)">
+            <text x="28" y="141" font-size="24">Same live page</text>
+            <text x="28" y="168" font-size="17" fill="var(--muted)">
+              Propellr borrows, never replaces it
+            </text>
+          </g>
+          <g id="observation" font-family="var(--sans)" fill="var(--ink)">
+            <text x="28" y="246" font-size="24">Signals → bounded full scans</text>
+            <text x="28" y="273" font-size="17" fill="var(--muted)">
+              Coalesce work; reject stale generations
+            </text>
+          </g>
+          <g id="findings" font-family="var(--sans)" fill="var(--ink)">
+            <text x="28" y="351" font-size="24">Typed finding events</text>
+            <text x="28" y="378" font-size="17" fill="var(--muted)">
+              Issues, scope, freshness, gaps, history
+            </text>
+          </g>
+          <g
+            id="connections"
+            fill="none"
+            stroke="var(--accent)"
+            stroke-width="2"
+            marker-end="url(#flow-arrow)"
+          >
+            <path d="M48 76 V111" />
+            <path d="M48 181 V216" />
+            <path d="M48 286 V321" />
+            <path d="M425 348 H467 V33 H427" />
+          </g>
+        </svg>
+        <figcaption>
+          Continuous observation is new. Rule evaluation still uses explicit full-scan fallback; no
+          incremental speed claim.
+        </figcaption>
+      </figure>
+      <section id="purpose">
+        <h2>Purpose</h2>
+        <p>
+          Make automatic change detection and one real agent/browser integration the next bounded
+          implementation phase. Find lifecycle, transport and performance incompatibilities now,
+          with nine selected-partial rules, rather than waiting for all 105. Reuse the same
+          conformance suite for Browserbase and Browse CLI in separately approved follow-ups.
+        </p>
+        <p>
+          Full canonical coverage and materially better equivalent-work performance remain the
+          product goals. This phase validates the execution model, not catalog completion or a
+          nine-rule speed advantage.
+        </p>
+      </section>
+      <section id="problem">
+        <h2>Current gap</h2>
+        <p>
+          Today, clients explicitly request scans. Incremental requests fall back to full scans;
+          observers only guard a scan's transfer window. Existing mutation/history tests prove
+          rechecking, not an always-on observer or change-to-agent delivery latency.
+        </p>
+        <p>
+          The host assumes a Playwright Page, one active operation and a fixed fixture URL.
+          Stagehand v4 has its own Page API. Remote reconnect semantics and CLI session identity are
+          untested. Matching a URL is not proof of inspecting the agent's actual tab.
+        </p>
+      </section>
+      <section id="solution">
+        <h2>Chosen sequence</h2>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Phase</th>
+                <th>Deliverable</th>
+                <th>Boundary</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1. Next bounded phase</td>
+                <td>
+                  Automatic observation, reusable conformance harness, real Stagehand agent on local
+                  Chromium, early performance evidence.
+                </td>
+                <td>
+                  Stop for review. No further rules, true incremental cache or cloud provider
+                  required.
+                </td>
+              </tr>
+              <tr>
+                <td>2. Browserbase</td>
+                <td>
+                  Run the same scenarios on an authorized disposable remote session, including
+                  connection ownership, replay and latency.
+                </td>
+                <td>Separate cloud/account/network/spend approval. Chromium evidence only.</td>
+              </tr>
+              <tr>
+                <td>3. Browse CLI</td>
+                <td>
+                  Drive the same scenarios through the CLI used by browse.sh skills; prove identity
+                  and stale element-reference handling.
+                </td>
+                <td>Separate approval; local mode first, no public-site skill execution.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Use narrow adapters at the host/test boundary. Keep browser analysis free of Node,
+          Playwright, Stagehand, model SDKs and runtime schemas. Do not introduce a plugin platform,
+          additional package graph, MCP server or provider-specific rule logic.
+        </p>
+      </section>
+      <section id="files" class="files">
+        <h2>Relevant files</h2>
+        <h3>Existing</h3>
+        <ul>
+          <li>
+            <code>src/browser/index.ts</code>, <code>src/analysis.ts</code>: scan lifetime, finish
+            guard and explicit rule selections. Retain nine implementations, 105-rule inventory and
+            89 stable defaults.
+          </li>
+          <li>
+            <code>src/contracts.ts</code>, <code>src/validation.ts</code>: schema-inferred
+            observation inputs, correlated events, freshness and bounded output types.
+          </li>
+          <li>
+            <code>src/host/browser.ts</code>, <code>src/host/scan.ts</code>,
+            <code>src/host/runtime.ts</code>: borrowed resource lifetime, scheduling, commit guards,
+            origin grants and reporting history.
+          </li>
+          <li>
+            <code>src/host/requests.ts</code>, <code>src/host/framing.ts</code>,
+            <code>src/host/server.ts</code>, <code>src/host/stream.ts</code>,
+            <code>src/host/client.ts</code>, <code>src/host/cli.ts</code>: authorization, replay,
+            framing, event delivery and SDK/CLI surfaces.
+          </li>
+          <li>
+            <code>test/support/parity.ts</code>, <code>test/parity/epochs.test.ts</code>,
+            <code>test/host/native-form-naming.test.ts</code>: raw comparisons, race injection,
+            same-state full/reference and issue history.
+          </li>
+          <li>
+            <code>package.json</code>, <code>pnpm-lock.yaml</code>, <code>vitest.config.ts</code>,
+            <code>tsconfig*.json</code>, <code>.github/workflows/</code>: scoped runner additions
+            and exact integration dependency pins. Preserve existing tool pins/lifecycle policy.
+          </li>
+          <li>
+            <code>README.md</code>, <code>PROVENANCE.md</code>,
+            <code>specs/propellr-improvements.md</code>: supported behavior, attribution and
+            evidence-backed improvements only.
+          </li>
+        </ul>
+        <h3>Proposed new files, not created</h3>
+        <ul>
+          <li>
+            <code>src/browser/observation.ts</code>, <code>src/host/observation.ts</code>:
+            persistent signal collection and one bounded host scheduler per session.
+          </li>
+          <li>
+            <code>test/fixtures/realtime.ts</code>, <code>test/support/agent-conformance.ts</code>:
+            original owned application and provider-neutral scenario/oracle definitions.
+          </li>
+          <li>
+            <code>test/observation/</code>, <code>test/integrations/</code>,
+            <code>test/agents/</code>: no-key observer tests, deterministic adapter conformance and
+            opt-in real-model journeys.
+          </li>
+          <li>
+            <code>test/support/integrations/stagehand.ts</code>, later
+            <code>browserbase.ts</code> and <code>browse.ts</code>: setup/action/identity/teardown
+            adapters only.
+          </li>
+          <li>
+            <code>bench/observation.test.ts</code>, <code>specs/realtime-agent-protocol.md</code>,
+            <code>specs/realtime-agent-validation.md</code>,
+            <code>specs/realtime-agent-evidence/</code>: frozen protocol, raw results, hashes,
+            trials and dispositions.
+          </li>
+        </ul>
+      </section>
+      <section id="phases">
+        <h2>Implementation phases</h2>
+        <p>
+          All tasks unstarted. Approval of this plan is not permission to execute every phase:
+          authorize phase 1 first and stop at each checkpoint. External model/cloud calls require
+          the additional execution gates below.
+        </p>
+        <div class="phase">
+          <h3><code class="status">[]</code>1. Observation + Stagehand local</h3>
+          <p>
+            One implementation checkpoint containing the attach spike, automatic scans, real agent
+            journey and measured responsiveness. Execute in this order; a failed attachment or
+            unacceptable overhead blocks expansion rather than triggering a broad refactor.
+          </p>
+          <h4>1.1 Freeze the baseline and prove the attachment first</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code>Preserve the uncommitted native-form batch and all
+              archives/worktrees. Agree the implementation base before creating the next branch:
+              current HEAD alone does not contain those changes. No reset, silent cherry-pick, PR
+              delivery or merge to manufacture a clean base.
+            </li>
+            <li>
+              <code class="status">[]</code>Pin proposed
+              <code>@browserbasehq/stagehand@4.1.0</code> as an integration/test dependency only,
+              after reviewing tarball, transitive dependencies, licenses, native/extension
+              requirements and install scripts. Existing Node 26.8.2, PNPM 12.4.1, Playwright 1.63.0
+              and Zod 4.6.2 stay unchanged; lifecycle scripts stay disabled. No global install or
+              implicit browser download.
+            </li>
+            <li>
+              <code class="status">[]</code>First run a no-model connection spike: a disposable
+              local Chromium, temporary profile, loopback-only debugging endpoint and a real HTTP
+              fixture server. Stagehand and existing Playwright each hold their own connection to
+              the same browser. Never cast a Stagehand Page into a Playwright Page. Verify
+              page/document identity with a run nonce and cross-connection state assertions, not
+              page-array position or URL alone.
+            </li>
+            <li>
+              <code class="status">[]</code>Verify full Chromium from the pinned project cache works
+              with Stagehand’s required extension/debugging flags. Do not use a daily-driver Chrome
+              profile or silently substitute a global browser. Test two-client coexistence,
+              navigation, loss and independent disconnect. If same-page ownership cannot be proved,
+              stop and propose the smallest boundary change before observation implementation.
+            </li>
+            <li>
+              <code class="status">[]</code>Write the execution protocol before runs: exact
+              versions/artifacts, selected naming rules, observer signal scope,
+              compatibility/version policy, fixture expectations, bounds, performance guardrails and
+              failure dispositions. Review Stagehand’s Zod 4.4.x type constraint without downgrading
+              project Zod or casting schemas; use its action primitives and JSON boundary, not
+              cross-version extract schemas.
+            </li>
+          </ul>
+          <h4>1.2 Add a bounded observation lifecycle, not a perpetual scan operation</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code>Add a schema-derived <code>observe</code> command
+              returning a long-lived operation ID. Reuse <code>inspect</code>,
+              <code>subscribe</code>, <code>cancel</code> and <code>end</code> for state, replay and
+              cleanup. Keep manual <code>scan</code> and existing seven operations working. Decide
+              and test additive capability/version handling before changing unions, wire validation,
+              SDK/CLI or negative type examples.
+            </li>
+            <li>
+              <code class="status">[]</code>One observation per session, one in-flight evaluation
+              and one coalesced dirty follow-up. An observation must not hold the existing
+              active-operation lock forever. Manual scans/playbooks serialize with scan work;
+              external agent mutations invalidate work rather than being presumed locked. Emit
+              correlated scan-result events under the observation operation; retain bounded latest
+              status plus existing raw history, not an unbounded child-operation list.
+            </li>
+            <li>
+              <code class="status">[]</code>Events carry session/observation ID, document
+              generation, scan ID/epoch, dirty generation, reason categories and completeness.
+              Separate observer status/freshness from static scan coverage: a past complete scan is
+              not an evergreen clean page. Emit dirty/stale/paused/lost diagnostics even if the last
+              committed result passed. New document generations never resolve old-document issues.
+            </li>
+            <li>
+              <code class="status">[]</code>Protect the live observation from operation eviction.
+              Keep event/history retention and IPC byte caps explicit; test slow subscribers,
+              dropped events and reconnect cursors without replaying browser actions.
+              Stop/cancel/end waits for observer/timer cleanup, prevents later commits, and detaches
+              without closing borrowed pages, contexts, connections or browser processes.
+            </li>
+            <li>
+              <code class="status">[]</code>Replace fixture-only borrowed admission with
+              host-configured target registration and explicit allowed origins for this owned test
+              application. Clients still cannot supply CDP URLs, grant origins or browser ownership.
+              Recheck grants at navigation, collection and commit; deny redirects outside scope and
+              do not expose credentials in session metadata. Managed dialog behavior remains
+              unchanged.
+            </li>
+          </ul>
+          <h4>1.3 Observe supported changes and schedule truthful full scans</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code>Install signal collection before the initial scan,
+              capturing a dirty generation so mutations during installation/collection/transfer
+              cannot disappear. Observe DOM child/attribute/text changes, accessible open-root/slot
+              changes, same-origin frame lifecycle, resize/scroll, relevant input/change/focus
+              events, stylesheet resource load and font readiness. Record bounded invalidation
+              metadata, not arbitrary DOM text, input values or event payloads.
+            </li>
+            <li>
+              <code class="status">[]</code>Coalesce signals with proposed 75 ms quiet delay and 500
+              ms maximum wait; use bounded scheduled work, never a continuously repainting or
+              requestAnimationFrame polling loop. At sustained churn attempt bounded progress, then
+              emit an explicit unstable/overrun state; do not fabricate an atomic snapshot. A scan
+              invalidated before commit cannot enter report history. Drain newer dirtiness after any
+              valid commit.
+            </li>
+            <li>
+              <code class="status">[]</code>Keep evaluation <code>actual: full</code>. No reusable
+              incremental facts, dependency graph or new native-query index in this batch. A
+              requested incremental mode still reports its full-scan fallback. Preserve reader,
+              naming, occurrence, evidence and diagnostic bounds, and expose saturation instead of
+              dropping it silently.
+            </li>
+            <li>
+              <code class="status">[]</code>Document signal limits up front: CSSOM-only edits,
+              continuous animation, property-only changes without events, attachShadow on an
+              existing host, closed roots and denied frames are not magically observable. For each,
+              implement and test a bounded supported trigger/reconciliation path or declare
+              observation coverage unavailable for that branch. Do not turn a manual refresh into
+              proof of automatic detection. Known unsupported CSSOM/animation watch scope cannot
+              advertise comprehensive live freshness.
+            </li>
+            <li>
+              <code class="status">[]</code>Rebind authorized observation on full/same-document
+              navigation, back/forward restoration and frame replacement without leaking observers
+              or reusing stale document IDs. Background-page throttling/suspension must be visible
+              and force reconciliation on resume. Synchronous browser evaluation is not forcibly
+              interruptible on a borrowed page: measure overruns and report limits; never kill an
+              agent’s browser to satisfy a timeout.
+            </li>
+          </ul>
+          <h4>1.4 Build one reusable conformance suite</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code>Create one owned HTTP application with deterministic
+              clean/broken/repaired/recurring states: native naming defects, DOM replacement,
+              external label updates, dialogs, async content, styles/classes, open shadow/slots and
+              same-origin/denied frames. No new product playbook or public-site automation. Expected
+              defects are authored before engine comparisons; every state is held until the test
+              barrier, with the guarantee limited to observable settled states, not every transient
+              frame.
+            </li>
+            <li>
+              <code class="status">[]</code>Provider adapter responsibility: start/attach, identify
+              current page, execute an action, resolve a scoped target, disconnect/reconnect and
+              release owned resources. Shared suite owns journeys, expected states, stale/partial
+              semantics and reporting assertions. Do not fork expected results per provider.
+              Maintain an explicit capability matrix; unsupported mandatory capabilities block that
+              provider’s support claim.
+            </li>
+            <li>
+              <code class="status">[]</code>For each settled mutation, await an automatically
+              emitted result with no manual scan call or fixture-specific invalidation shortcut.
+              Replay the same state into separate equivalent fresh-full Propellr and
+              integrity-checked canonical contexts. Compare rule state, raw occurrences, scoped
+              target, impact and check evidence before grouping. Retain existing IMP-001/002
+              dispositions separately, not in an expanded allowlist.
+            </li>
+            <li>
+              <code class="status">[]</code>Test mutation during scan/transfer/commit,
+              last-update-wins ordering, queue saturation, lost page, cancellation, subscription
+              gaps and cross-navigation identity. Verify introduced/persistent/resolved/recurring
+              findings and that narrower, stale or partial scans cannot resolve history. Include an
+              idle watch with no repeatedly scheduled full scans.
+            </li>
+            <li>
+              <code class="status">[]</code>Run core observation across Chromium, Firefox and WebKit
+              using existing Playwright support. Stagehand lane is Chromium-only; never present its
+              results as three-engine adapter coverage. Complete naming/history scenarios use
+              explicit supported rules; separate nine-rule/default requests retain
+              target-size/unimplemented-rule gaps and indeterminate gates.
+            </li>
+          </ul>
+          <h4>1.5 Prove real agent usefulness, not only SDK connectivity</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code>Add a small opt-in tool-use harness: Stagehand supplies
+              browser actions; schema-derived Propellr commands/results supply accessibility tools.
+              Stagehand v4 exposes act/observe/extract primitives, not an assumed legacy agent()
+              API. Use one explicitly approved model/client and a bounded tool loop, not a new
+              general agent framework. Typed findings must reach the model, not merely an assertion
+              hidden beside a scripted browser driver.
+            </li>
+            <li>
+              <code class="status">[]</code>Freeze model/version, prompt, available tools, token
+              limits, deadline and maximum 12 tool steps per journey. Proposed evaluation set: three
+              journeys (new/repair, partial-or-stale, reconnect/target-replacement), three
+              independently initialized trials each. Obtain explicit model/provider/data/spend
+              approval and a numeric cost cap before any charged call. No credentials means blocked
+              live validation, never a mock-only success or silently skipped support gate.
+            </li>
+            <li>
+              <code class="status">[]</code>The agent navigates/opens a fixture state, starts
+              observation, consumes findings, identifies the actual scoped target, invokes a
+              permitted test-fixture repair and verifies the subsequent result. Do not hand it the
+              oracle’s defect list, expected verdict or hidden repair answer. Use task prompts and
+              ordinary fixture UI, with an independent runner checking real state. No agent-authored
+              arbitrary JavaScript repair outside the owned fixture permissions.
+            </li>
+            <li>
+              <code class="status">[]</code>Score semantic correctness separately from
+              navigation/model reliability: expected issues found, exact targets inspected, verified
+              resolution, tool errors, latency, tokens/cost and human intervention. Require zero
+              false clean, false resolution or unauthorized actions; report every attempt and block
+              on failed mandatory journeys. No rerun-until-green, cached action substituted for live
+              inference, or treating LLM navigation failure as engine success.
+            </li>
+            <li>
+              <code class="status">[]</code>Test page-text prompt injection and malformed/stale tool
+              inputs against deterministic host grants. Model/browser/provider secrets remain
+              outside page evaluation. Send only synthetic fixture data to approved providers; raw
+              DOM/screenshot/recording capture is opt-in and sanitized. Page content cannot
+              authorize tools, change rule selection or suppress coverage gaps.
+            </li>
+          </ul>
+          <h4>1.6 Measure before scaling rule coverage</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code>Freeze a local performance protocol before collection:
+              200- and 1,000-element fixtures with the same explicit supported naming selection in
+              both engines; two warm-up sequences, 30 measured held revisions per size/engine, one
+              200-mutation burst, a 60-second idle interval and a 10-minute Chromium soak after
+              retention warm-up. Keep all samples, failures and exclusions. This is engineering
+              evidence, not high-confidence percentile certification.
+            </li>
+            <li>
+              <code class="status">[]</code>Compare no-observer baseline, Propellr automatic
+              full-scan observation and a reference full scan triggered by the identical
+              test-harness change signal. Give both equal browser reuse and page states. Separate
+              correctness replay from timed runs to avoid canonical scans or extra parallel browsers
+              distorting Propellr delivery time. Alternate engine order and record host load.
+            </li>
+            <li>
+              <code class="status">[]</code>Measure mutation-to-invalidation, queue delay,
+              scan/transfer, report commit and client delivery using correlated timestamps in each
+              clock domain; do not subtract unsynchronized remote clocks. Report end-to-end p50/p95,
+              throughput, event-loop delay, host CPU/RSS/heap and retained resource counts. Browser
+              CPU/memory unavailable under a comparable collector is null with a reason, not zero.
+            </li>
+            <li>
+              <code class="status">[]</code>Proposed local responsiveness gate, reviewed in the
+              protocol before measured runs: p95 mutation-to-usable-client-result at most 500 ms for
+              the 200-element supported fixture, zero missed held revisions, no overlapping
+              evaluations and zero idle repeated full scans. Report the 1,000-element/burst/soak
+              results and investigate stalls or unbounded growth before accepting the architecture.
+              Do not silently relax a failed target or invent a speedup from reduced coverage.
+            </li>
+            <li>
+              <code class="status">[]</code>Agent/model latency and provider RTT are separate lanes
+              from engine latency. Record tool result bytes and time to actionable findings,
+              including subscription delivery. Keep original bench:slice workload intact; run it
+              once only if shared scan code changed. Watch-only costs belong in the new benchmark,
+              not a nine-rule headline ratio.
+            </li>
+          </ul>
+          <h4>1.7 Testing strategy and acceptance</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code><code>pnpm validate</code> under unchanged pins:
+              existing suites plus real no-key observation and local deterministic integration
+              suites wired into CI when implemented. No placeholder script and no existing fixture
+              expectation weakened.
+            </li>
+            <li>
+              <code class="status">[]</code>Planned <code>pnpm test:observation</code>:
+              scheduler/races, automatic three-engine results, freshness, history, budgets and
+              cleanup. Planned
+              <code>PROPELLR_INTEGRATION=stagehand-local pnpm test:integration</code>: real
+              SDK/session identity and common conformance, no model calls.
+            </li>
+            <li>
+              <code class="status">[]</code>Planned
+              <code>PROPELLR_INTEGRATION=stagehand-local pnpm test:agent</code>: required opt-in
+              real-model journeys after approval. Fail clearly on missing credentials/configuration
+              when invoked; local default validation must not spend money. Planned
+              <code>pnpm bench:observation</code>: the frozen no-model responsiveness/idle/soak
+              protocol.
+            </li>
+            <li>
+              <code class="status">[]</code>Retain source/bundle/fixture/provider/model pins,
+              commands, exact outcomes, conformance capability matrix, resource cleanup and raw
+              timing samples in a fresh archive. Update README, provenance and improvements ledger
+              only with verified benefits. A green no-key CI run alone does not establish agent
+              compatibility.
+            </li>
+          </ul>
+          <div class="loop">
+            <strong>Stop boundary:</strong> review working observation, actual Stagehand/model
+            evidence and performance together. Missing live approval, failed compatibility or
+            unresolved performance/correctness findings leave phase 1 incomplete. No automatic
+            provider rollout or new rules.
+          </div>
+        </div>
+        <div class="phase">
+          <h3><code class="status">[]</code>2. Reuse on Browserbase</h3>
+          <p>
+            Separately approved follow-up, not part of phase 1’s completion claim. Browserbase is
+            the browser infrastructure lane; reuse the same agent/scenario definitions rather than
+            invent another accessibility runner.
+          </p>
+          <h4>2.1 Remote lifecycle and conformance</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code>After explicit cloud/test-account, origin, model,
+              recording/retention and numeric spend approval, pin the Browserbase client, returned
+              browser build and region. Create only disposable authorized sessions. No publishing
+              Functions, customer sites/data or permanent deployment. Use a dedicated ephemeral
+              fixture endpoint or reviewed in-session network interception; do not assume remote
+              Chrome can reach localhost or expose a workstation tunnel by default.
+            </li>
+            <li>
+              <code class="status">[]</code>Reuse the same page identity handshake, fixtures, raw
+              comparison oracle, event/freshness/history assertions and agent journeys. A
+              provider-managed browser revision may differ from local Playwright: run Propellr and
+              canonical comparisons in equivalent independent sessions of that same returned build;
+              do not compare remote Chromium against local WebKit.
+            </li>
+            <li>
+              <code class="status">[]</code>Explicitly request and verify supported keep-alive
+              semantics before testing connection loss. Default disconnect can end a Browserbase
+              session; reconnect guarantees depend on plan/capabilities. Test agent-connection loss
+              separately from Propellr-client loss, two connections, remote timeout, navigation and
+              denied frames. Provider expiration becomes lost/unknown, not recovered success.
+            </li>
+            <li>
+              <code class="status">[]</code>Propellr detach must not release the agent’s cloud
+              session. The test owner explicitly releases created keep-alive sessions in final
+              cleanup and verifies release even after failures. Redact connection URLs/session
+              tokens and provider logs; no implicit raw page recordings. Report actual retention
+              capabilities and require approval where recording cannot be disabled.
+            </li>
+          </ul>
+          <h4>2.2 Testing strategy</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code>Planned
+              <code>PROPELLR_INTEGRATION=browserbase pnpm test:integration</code> and
+              <code>PROPELLR_INTEGRATION=browserbase pnpm test:agent</code>: same mandatory
+              scenarios, real cloud session and approved model. Missing access is blocked, not
+              skipped success.
+            </li>
+            <li>
+              <code class="status">[]</code>Planned
+              <code>PROPELLR_INTEGRATION=browserbase pnpm bench:observation</code>: a separately
+              frozen remote protocol, equivalent-work comparisons and browser/host/network/model
+              components kept distinct. Approve its trial count/cost and remote responsiveness
+              threshold before runs; do not apply or loosen the local 500 ms gate retrospectively.
+            </li>
+            <li>
+              <code class="status">[]</code><code>pnpm validate</code>, exact capability/mismatch
+              dispositions and a new provider-specific evidence archive. Zero borrowed-session
+              termination, secret leakage, undisposed semantic mismatch or false clean result.
+              Unsupported mandatory features block the Browserbase claim.
+            </li>
+          </ul>
+          <div class="loop">
+            <strong>Stop:</strong> review Browserbase conformance, cost, cleanup and latency before
+            adding the CLI lane. No remote support claim from local-only evidence.
+          </div>
+        </div>
+        <div class="phase">
+          <h3><code class="status">[]</code>3. Reuse through Browse CLI / browse.sh</h3>
+          <p>
+            Separately approved follow-up. browse.sh is a skills catalog; the documented browser
+            execution surface is the <code>browse</code> CLI. Do not imply every catalog skill is
+            validated by testing its transport.
+          </p>
+          <h4>3.1 CLI adapter, same oracles</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code>Pin/review the actual <code>browse</code> package and
+              documented command/output schema at execution. Use a project-scoped executable with an
+              isolated CLI state directory and temporary profile. Prove isolation before
+              starting/stopping its daemon; never attach to or <code>stop --force</code> a user’s
+              existing browse session. Do not follow documentation’s global install recommendation.
+            </li>
+            <li>
+              <code class="status">[]</code>Use documented <code>open --local</code>,
+              <code>status</code>, <code>eval</code>, <code>cdp</code> and action surfaces only
+              after verifying their current behavior. Determine whether a supported host-side shared
+              CDP connection exists. If not, assess a bounded evaluate/event-drain adapter;
+              explicitly block unavailable mandatory streaming/identity capabilities instead of
+              reverse-engineering private daemon state.
+            </li>
+            <li>
+              <code class="status">[]</code>Run the common fixtures and same real agent tasks
+              through CLI tools. Map Propellr’s frame/shadow paths to the live page at the returned
+              generation; transient browse snapshot references are not durable issue IDs. Test stale
+              refs after rerender/navigation, multiple tabs, daemon restart, disconnect/reconnect,
+              bounded JSON parsing and cancellation.
+            </li>
+            <li>
+              <code class="status">[]</code>No remote skill downloads or public-site workflows
+              required. If demonstrating a skill, use one original fixture-only local skill with
+              pinned content and permissions. Agent CLI output and page text remain untrusted. Reuse
+              the same verdict/history/performance expectations, not provider-specific goldens.
+            </li>
+          </ul>
+          <h4>3.2 Testing strategy</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code>Planned
+              <code>PROPELLR_INTEGRATION=browse-local pnpm test:integration</code> and
+              <code>PROPELLR_INTEGRATION=browse-local pnpm test:agent</code>: actual CLI and
+              approved model using the shared suite; missing CLI/session isolation/keys fail
+              explicitly.
+            </li>
+            <li>
+              <code class="status">[]</code>Planned
+              <code>PROPELLR_INTEGRATION=browse-local pnpm bench:observation</code>: reuse local
+              workload, report CLI process/serialization/event-drain overhead separately. Preserve
+              automatic-detection and freshness requirements; polling cannot be hidden from
+              latency/idle cost.
+            </li>
+            <li>
+              <code class="status">[]</code><code>pnpm validate</code>; publish only local evidence
+              and exact supported CLI/provider versions/capabilities. Browserbase remote mode via
+              browse, other catalog skills and other browser products need their own explicit scope,
+              not inferred compatibility.
+            </li>
+          </ul>
+          <div class="loop">
+            <strong>Stop:</strong> three named integration lanes with versioned evidence, or
+            explicitly blocked lanes. No wider adapter platform, deployment, additional rules or PR
+            delivery without approval.
+          </div>
+        </div>
+      </section>
+      <section id="validation">
+        <h2>Acceptance and final validation</h2>
+        <ul class="checklist">
+          <li>
+            <code class="status">[]</code>One live agent-owned page, automatic supported-change
+            results and a machine-readable freshness/coverage contract. No manual scan masquerading
+            as continuous observation; no incomplete-to-pass conversion.
+          </li>
+          <li>
+            <code class="status">[]</code>No-key core observer tests pass in
+            Chromium/Firefox/WebKit; each separately claimed integration has actual version-pinned
+            conformance and real-model evidence. Local Stagehand success does not certify cloud
+            lifecycle or browse CLI.
+          </li>
+          <li>
+            <code class="status">[]</code>Correct same-state fresh-full/canonical comparisons, no
+            undisposed mismatch, no stale commit/false resolution, bounded queue/retention and
+            verified observer/session cleanup. The two approved naming divergences stay explicit.
+          </li>
+          <li>
+            <code class="status">[]</code><code>pnpm validate</code>, applicable
+            <code>test:observation</code>, <code>test:integration</code>,
+            <code>test:agent</code> and <code>bench:observation</code> commands executed under
+            pinned tools. These new scripts are planned, not existing successes. No credential-gated
+            no-op target.
+          </li>
+          <li>
+            <code class="status">[]</code>Compare overhead with identical coverage and trigger
+            opportunity. Meet the frozen local guardrail, adjudicate larger/churn/soak results and
+            set remote thresholds before paid runs. Record unavailable metrics and all failures,
+            never claim full-catalog speed from a subset.
+          </li>
+          <li>
+            <code class="status">[]</code><code>git diff --check</code>; plan validator with a
+            pre-edit snapshot on execution updates; verify unchanged canonical checkout, historical
+            archives, unrelated worktrees and global pins. Update the improvements ledger only with
+            evidence-backed entries.
+          </li>
+        </ul>
+        <div class="loop">
+          <strong>Completion:</strong> phase-specific evidence review, not automatic shipping. A
+          blocked live/provider lane remains [f]; completing phase 1 never marks phases 2 or 3
+          complete. PR, merge, publishing and production work are separately gated.
+        </div>
+      </section>
+      <section id="notes">
+        <h2>Research, execution gates and limits</h2>
+        <h3>Public documentation checked September 16, 2026</h3>
+        <p>
+          Read-only docs and registry inspection, no installs, provider session creation, model
+          calls or credentials inspected. These observations guide the spike; they are not
+          executable compatibility evidence. All decisions needed to understand this plan are
+          summarized here for offline use.
+        </p>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>Observed constraint</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <a href="https://docs.stagehand.dev/v4/configuration/browser.md"
+                    >Stagehand browser configuration</a
+                  >;
+                  <a href="https://docs.stagehand.dev/v4/migrations/playwright.md"
+                    >Playwright migration guide</a
+                  >
+                </td>
+                <td>
+                  v4 uses its own Chromium/CDP runtime, no Playwright Page interop. Local
+                  launch/connect supported; connect normally needs shared filesystem for its
+                  extension. Separate SDK close versus browser close. Local launch adds
+                  unsafe-extension-debugging and remote-origin flags: isolate the process/profile
+                  and review them, never apply to daily-driver browsers.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <a href="https://docs.stagehand.dev/v4/first-steps/quickstart.md"
+                    >Stagehand quickstart</a
+                  >;
+                  <a href="https://registry.npmjs.org/@browserbasehq%2fstagehand/4.1.0"
+                    >4.1.0 package metadata</a
+                  >
+                </td>
+                <td>
+                  Observed latest 4.1.0, Node &gt;=22.18.0, direct Zod 4.4.3 dependency. Docs warn
+                  extract schemas should stay on Zod 4.4.x. Proposed pin is not installed/approved.
+                  Keep Propellr’s Zod 4.6.2; avoid a shared-schema cast or silent downgrade. Browser
+                  extension and transitive package compatibility remain spike gates.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <a href="https://docs.browserbase.com/welcome/quickstarts/playwright.md"
+                    >Browserbase Playwright quickstart</a
+                  >;
+                  <a
+                    href="https://docs.browserbase.com/platform/browser/long-sessions/keep-alive.md"
+                    >Keep alive</a
+                  >
+                </td>
+                <td>
+                  Session connect URL supports Playwright CDP. Without keepAlive, connection close
+                  can end the session; keepAlive is documented as paid-plan functionality and needs
+                  explicit release. Remote transport and ownership must be tested, not inferred from
+                  local borrowed pages.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <a href="https://docs.browserbase.com/integrations/skills/browse-cli.md"
+                    >Browse CLI</a
+                  >; <a href="https://browse.sh">browse.sh</a>
+                </td>
+                <td>
+                  Catalog plus current browse command surface, including local/remote open, eval,
+                  cdp and daemon controls. No specific CLI version or machine-readable attachment
+                  contract was proved. Pin/review those in phase 3; no global install, user-daemon
+                  takeover or implied public skill compatibility.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Approval gates before execution</h3>
+        <ul>
+          <li>
+            Approve phase 1 implementation and its dependency/isolated-browser changes. Preserve and
+            agree the native-form baseline first; it is still uncommitted.
+          </li>
+          <li>
+            Approve exact model/client, synthetic data disclosure, trial counts, token/step/time
+            ceilings and numeric spend cap before live agent calls. Tests can be prepared without
+            keys; agent support cannot be accepted without actual live evidence.
+          </li>
+          <li>
+            Approve cloud test account, allowed fixture origin and any remote fixture
+            hosting/recording before phase 2. No customer data, production app, Functions deployment
+            or implicit workstation tunnel.
+          </li>
+          <li>
+            Freeze proposed 500 ms/200-element responsiveness guardrail and protocol before
+            measurements. If it fails, retain evidence and request a scoped scheduling/design
+            decision; do not wait for all rules or tune the measurement after seeing results.
+          </li>
+        </ul>
+        <h3>Deliberate exclusions</h3>
+        <p>
+          No additional rule batch, complete accessible-name algorithm, target-size expansion, true
+          incremental cache, cross-origin injection, closed-root access, generalized plugins,
+          dashboard, enterprise adapter, durable crash recovery or arbitrary untrusted-rule sandbox.
+          Existing full scans remain the correctness fallback. Brief transient errors between
+          observable settled states and undetected CSSOM/animation changes are not guaranteed
+          captured.
+        </p>
+        <h3>Planning verification</h3>
+        <p>
+          Plan/SVG structural validation and Oxfmt passed. Existing pnpm validate passed under Node
+          26.8.2 and PNPM 12.4.1: build, five strict type scopes, lint, format and 217 tests (62
+          contracts, 44 host, 13 playbooks, 80 parity/browser, 18 reporting). Local log:
+          artifacts/realtime-plan/validate.log. Browser bundle hash remained unchanged; canonical
+          checkout remained clean. These checks validate the current implementation and plan
+          artifact only. Proposed observation, SDK/CLI/model integrations and performance tests
+          remain unexecuted. Visual browser review was not run: playwright-cli is unavailable;
+          nothing was installed to replace it.
+        </p>
+      </section>
+      <section id="amendments">
+        <h2>Amendments</h2>
+        <p>None. New proposed plan; execution not authorized.</p>
+      </section>
+    </main>
+  </body>
+</html>

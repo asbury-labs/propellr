@@ -9,9 +9,16 @@ import type {
 } from "./contracts.js";
 
 export const sliceRules = ["button-name", "target-size", "landmark-one-main"] as const;
-export const namingRules = ["image-alt", "link-name", "label"] as const;
+export const namingRules = [
+  "image-alt",
+  "link-name",
+  "label",
+  "input-button-name",
+  "input-image-alt",
+  "select-name",
+] as const;
 export const implementedRules = [...sliceRules, ...namingRules] as const;
-export const engineVersion = { id: "propellr-slice", version: "0.2" } as const;
+export const engineVersion = { id: "propellr-slice", version: "0.3" } as const;
 export function sixRuleRequest(target: Target, mode: ScanRequest["mode"] = "full"): ScanRequest {
   return {
     mode,
@@ -19,8 +26,12 @@ export function sixRuleRequest(target: Target, mode: ScanRequest["mode"] = "full
     rules: {
       kind: "explicit",
       rules: [
-        { id: implementedRules[0], options: {} },
-        ...implementedRules.slice(1).map((id) => ({ id, options: {} })),
+        { id: "button-name", options: {} },
+        { id: "target-size", options: {} },
+        { id: "landmark-one-main", options: {} },
+        { id: "image-alt", options: {} },
+        { id: "link-name", options: {} },
+        { id: "label", options: {} },
       ],
     },
   };

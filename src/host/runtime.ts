@@ -352,6 +352,7 @@ export class SessionHost {
           "dialog-open-close@1",
           "three-rule-slice",
           "six-rule-slice",
+          "native-form-naming",
           "full-scan-fallback",
           "open-shadow",
           "same-origin-frames",

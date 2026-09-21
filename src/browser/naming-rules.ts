@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 // Canonical ANY/NONE combinations, separate from bounded accessible-name precedence.
-// Source pins and supported branches: specs/naming-coverage-protocol.md, PROVENANCE.md.
+// Source pins/branches: specs/{naming-coverage,native-form-naming}-protocol.md, PROVENANCE.md.
 import type { namingRules } from "../analysis.js";
 import type { Evidence, Occurrence, Target } from "../contracts.js";
 import {
@@ -26,6 +26,21 @@ const truth = (value: ReturnType<typeof text>): Truth =>
   value.unsupported ? null : Boolean(value.value);
 export function namingApplicability(node: Element, rule: NamingRule): Truth {
   if (rule === "link-name") return node.matches("a[href]");
+  if (rule === "select-name") return node.localName === "select";
+  if (rule === "input-button-name" || rule === "input-image-alt") {
+    if (
+      !node.matches(
+        rule === "input-button-name"
+          ? 'input[type="button"], input[type="submit"], input[type="reset"]'
+          : 'input[type="image"]',
+      )
+    )
+      return false;
+    const role = node.getAttribute("role")?.toLowerCase();
+    if (!role || ["button", "img", "none", "presentation"].includes(role)) return true;
+    if (["gridcell", "separator"].includes(role)) return focusable(node);
+    return null;
+  }
   if (rule === "label")
     return (
       node.matches("input, textarea") &&
@@ -147,7 +162,7 @@ export function evaluateNamingRule(
       if (value !== false) return value;
     }
     const title = attr("title");
-    return title !== false || rule === "link-name" ? title : attr("placeholder");
+    return title !== false || rule !== "label" ? title : attr("placeholder");
   };
   const role = node.getAttribute("role")?.toLowerCase();
   const roleSupported =
@@ -156,7 +171,11 @@ export function evaluateNamingRule(
       ? ["img", "none", "presentation", "button", "separator"]
       : rule === "link-name"
         ? ["link", "none", "presentation"]
-        : ["textbox", "none", "presentation"]
+        : rule === "select-name"
+          ? ["combobox", "listbox", "none", "presentation"]
+          : rule === "input-button-name" || rule === "input-image-alt"
+            ? ["button", "img", "none", "presentation", "gridcell", "separator"]
+            : ["textbox", "none", "presentation"]
     ).includes(role);
   if (applicable === null || !roleSupported || node.hasAttribute("aria-owns")) {
     any.push({ id: "unsupported-naming-branch", result: null });
@@ -190,6 +209,23 @@ export function evaluateNamingRule(
       result: (node as HTMLElement).tabIndex < 0 ? false : negate(accessibleName()),
     });
   } else {
+    const input = rule === "input-button-name" || rule === "input-image-alt";
+    if (rule === "input-button-name") {
+      check(
+        "non-empty-if-present",
+        () =>
+          ["submit", "reset"].includes(node.getAttribute("type")?.toLowerCase() ?? "") &&
+          !node.hasAttribute("value"),
+      );
+      check("non-empty-value", () => attr("value"));
+    } else if (rule === "input-image-alt") {
+      check("non-empty-alt", () => attr("alt"));
+    }
+    if (input) {
+      check("aria-label", () => attr("aria-label"));
+      check("aria-labelledby", references);
+      check("non-empty-title", () => attr("title"));
+    }
     check("implicit-label", () => {
       const label = implicitLabel();
       if (label) related("implicit-label", [label]);
@@ -217,21 +253,25 @@ export function evaluateNamingRule(
       }
       return budget.exhausted ? null : result;
     });
-    check("aria-label", () => attr("aria-label"));
-    check("aria-labelledby", references);
-    check("non-empty-title", () => attr("title"));
-    check("non-empty-placeholder", () => attr("placeholder"));
-    check("presentational-role", () => presentation(node, budget));
-    const first = explicitLabels()[0];
-    none.push({
-      id: "hidden-explicit-label",
-      result:
-        first && !visible(first, budget)
-          ? negate(accessibleName())
-          : budget.exhausted
-            ? null
-            : false,
-    });
+    if (!input) {
+      check("aria-label", () => attr("aria-label"));
+      check("aria-labelledby", references);
+      check("non-empty-title", () => attr("title"));
+    }
+    if (rule === "label") check("non-empty-placeholder", () => attr("placeholder"));
+    if (rule !== "input-image-alt") check("presentational-role", () => presentation(node, budget));
+    if (!input) {
+      const first = explicitLabels()[0];
+      none.push({
+        id: "hidden-explicit-label",
+        result:
+          first && !visible(first, budget)
+            ? negate(accessibleName())
+            : budget.exhausted
+              ? null
+              : false,
+      });
+    }
   }
   const failed =
     none.some((check) => check.result === true) || any.every((check) => check.result === false);

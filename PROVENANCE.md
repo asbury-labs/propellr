@@ -91,6 +91,36 @@ handled as native alt, not arbitrary CSS-generated text. All other declared
 Phase 3 geometry limits remain unchanged. Combined six-rule fixture uses a disabled
 input so label applies without claiming enabled-input target-size support.
 
-Engine revision is `propellr-slice@0.2`; catalog/version and activation remain
+Phase 4 engine revision was `propellr-slice@0.2`; catalog/version and activation remain
 canonical 4.13.0. New rules are selected-partial, never full-catalog completion.
 Phase 3 evidence archives remain historical and unchanged.
+
+## Native form naming
+
+Same pinned source/artifact, read-only canonical checkout. Revision 0.3
+adds selected semantics to `src/browser/naming-rules.ts` from:
+
+- `lib/rules/{input-button-name,input-image-alt,select-name}.json` and
+  `no-explicit-name-required-matches.js`.
+- `lib/checks/shared/non-empty-if-present-evaluate.js`,
+  `lib/checks/shared/{non-empty-value,non-empty-alt}.json`,
+  `lib/checks/generic/attr-non-space-content-evaluate.js`.
+- Existing explicit/implicit/hidden-explicit-label evaluators and
+  `lib/commons/text/{accessible-text-virtual,label-text,native-text-alternative}.js`.
+- `lib/commons/dom/is-natively-focusable.js`: select focusability, keeping
+  enabled presentation conflicts distinct from disabled controls.
+
+Reviewed corresponding integration fixtures, matcher tests and
+non-empty-if-present unit tests. `test/fixtures/native-form-naming.ts` contains
+original independently expected controls. MPL identifiers/license retained.
+No upstream code, bundle or tooling added as a runtime dependency.
+
+Differential investigation also inspected `lib/core/utils/{matches,selector-cache}.js`,
+`lib/commons/text/{subtree-text,form-control-value,native-text-methods}.js`,
+`lib/standards/html-elms.js`. Tony approved two intentional improvements on
+September 16, 2026: native uppercase input-type applicability and rejection of
+empty image-input wrapping labels that reuse their control's default name.
+Exact three-engine assertions preserve both implementations' outcomes and check
+evidence; original expectations are unchanged. These cases are not parity matches.
+See `specs/propellr-improvements.md` (IMP-001/002) and
+`specs/native-form-naming-validation.md`. Historical archives remain unchanged.
