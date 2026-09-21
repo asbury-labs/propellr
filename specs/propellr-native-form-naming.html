@@ -346,13 +346,24 @@
             <dt>created</dt>
             <dd>2026-09-16T13:46:07Z</dd>
             <dt>modified</dt>
-            <dd>2026-09-16T13:46:07Z</dd>
+            <dd>
+              2026-09-16T13:46:07Z; 2026-09-16T16:38:00Z; 2026-09-16T16:45:41Z; 2026-09-16T19:25:00Z
+            </dd>
             <dt>commits</dt>
-            <dd>4b4f51e7de02c42931a58371ea0e72e18d57b699 (main; merged foundation PR #13)</dd>
+            <dd>
+              4b4f51e7de02c42931a58371ea0e72e18d57b699 (main; merged foundation PR #13);
+              c98d0a3ad76a75f7581abe0bed9b55a0778c1d68 (execution branch base; changes uncommitted)
+            </dd>
             <dt>agent name</dt>
-            <dd>pi / gpt-6-astra (single agent)</dd>
+            <dd>
+              pi / gpt-6-astra (single agent); pi / gpt-6-astra (execution, single agent); pi /
+              gpt-6-astra (approved-divergence completion, single agent)
+            </dd>
             <dt>session id</dt>
-            <dd>01a0a4db-d25d-7314-97d0-6ec1f2f07a7e</dd>
+            <dd>
+              01a0a4db-d25d-7314-97d0-6ec1f2f07a7e; 01a0ab04-7b74-734c-aa54-72e60d140edd;
+              01a0ab04-7b74-734c-aa54-72e60d140edd (completion)
+            </dd>
             <dt>back refs</dt>
             <dd>
               <a href="propellr-greenfield-foundation.html">Completed foundation</a>;
@@ -363,7 +374,13 @@
               <a href="https://github.com/asbury-labs/propellr/pull/13">Merged PR #13</a>
             </dd>
             <dt>forward refs</dt>
-            <dd>None. Implementation and PR delivery require separate authorization.</dd>
+            <dd>
+              None. Implementation and PR delivery require separate authorization.;
+              <a href="native-form-naming-protocol.md">Execution protocol</a>;
+              <a href="native-form-naming-validation.md">Blocked checkpoint evidence</a>;
+              <a href="native-form-naming-validation.md">Completed batch evidence</a>;
+              <a href="propellr-improvements.md">Improvements and coverage ledger</a>
+            </dd>
           </dl>
         </details>
       </header>
@@ -373,8 +390,8 @@
         <p>
           Extend the completed foundation with three adjacent native form-control rules:
           <code>input-button-name</code>, <code>input-image-alt</code> and <code>select-name</code>.
-          One proposed implementation phase, then evidence review. Planning only; no new rule is
-          implemented or validated by this document.
+          One approved implementation phase, then evidence review. Execution authorized by Tony's
+          build request; current progress and executed evidence are recorded below.
         </p>
       </section>
 
@@ -384,8 +401,8 @@
           The six existing implementations deliberately exclude these controls. A named native
           button does not prove an input button is named; decorative-image handling cannot be reused
           unchanged for an image submit control; selected option text is not a select label. The
-          full catalog still has 99 unimplemented rules. Broadening a generic nonempty-name helper
-          would hide these semantic differences.
+          full catalog had 99 unimplemented rules at planning time. Broadening a generic
+          nonempty-name helper would hide these semantic differences.
         </p>
       </section>
 
@@ -428,7 +445,7 @@
             unchanged reference and tool pins. No new dependency or runtime package.
           </li>
         </ul>
-        <h3>Planned, not yet created</h3>
+        <h3>New artifacts</h3>
         <ul>
           <li>
             <code>specs/native-form-naming-protocol.md</code>: reviewed selectors, checks,
@@ -447,18 +464,23 @@
             <code>specs/native-form-naming-validation.md</code>: source/bundle/fixture hashes, raw
             artifact archive, commands, environment and exact mismatch dispositions.
           </li>
+          <li>
+            <code>specs/propellr-improvements.md</code>: requested evidence ledger for semantic
+            improvements, shared rule coverage and future additional coverage.
+          </li>
         </ul>
       </section>
 
       <section id="phases">
         <h2>Implementation phase</h2>
         <p>
-          All tasks are unstarted. Obtain execution approval before changing source, fixtures or
-          runtime behavior. Use a fresh short-lived branch from current main; preserve existing
-          worktrees and historical evidence.
+          Complete on feat/native-form-naming from main@c98d0a3a, uncommitted. Tony approved both
+          documented divergences and requested the improvements ledger. Exact assertions, enabled
+          host/history coverage and pinned validation passed. Historical evidence preserved; stop
+          for evidence review, with PR delivery separately gated.
         </p>
         <div class="phase">
-          <h3><code class="status">[]</code>1. Native form-control naming batch</h3>
+          <h3><code class="status">[x]</code>1. Native form-control naming batch</h3>
           <p>
             Small adjacent catalog expansion. Keep outcomes, coverage, grouping and gate policy
             separate. Partial is never pass.
@@ -466,14 +488,14 @@
           <h4>1.1 Define semantics before implementation</h4>
           <ul class="checklist">
             <li>
-              <code class="status">[]</code>Read pinned canonical rule definitions, check evaluators
-              and relevant upstream fixtures at <code>v4.13.0</code>. Write the protocol and
-              independently expected controls before running new differential comparisons. Record
-              any corrected expectation with source-backed rationale, never silently regenerate
-              goldens.
+              <code class="status">[x]</code>Read pinned canonical rule definitions, check
+              evaluators and relevant upstream fixtures at <code>v4.13.0</code>. Write the protocol
+              and independently expected controls before running new differential comparisons.
+              Record any corrected expectation with source-backed rationale, never silently
+              regenerate goldens.
             </li>
             <li>
-              <code class="status">[]</code>Cover the required native branches below. Inspect
+              <code class="status">[x]</code>Cover the required native branches below. Inspect
               role/matcher cases explicitly; unreviewed roles, generated names and complex
               references stay incomplete with narrow reproductions. Positive and negative ordinary
               controls must yield real pass/fail results.
@@ -533,19 +555,19 @@
           <h4>1.2 Implement only needed shared capabilities</h4>
           <ul class="checklist">
             <li>
-              <code class="status">[]</code>Implement native selectors and canonical check
+              <code class="status">[x]</code>Implement native selectors and canonical check
               combinations. Attribute-based input value checks must not accidentally become
               arbitrary form-value capture. Keep name/value text out of retained evidence; retain
               decisive check IDs, booleans and canonical related paths.
             </li>
             <li>
-              <code class="status">[]</code>Distinguish root-local IDREF/explicit-for lookup from
+              <code class="status">[x]</code>Distinguish root-local IDREF/explicit-for lookup from
               canonical composed implicit-label traversal. Exclude each control’s own value/selected
               option from its label. Preserve cycle/depth/step/character budgets and explicit
               exhaustion; browser analysis remains free of Node, Playwright and runtime schemas.
             </li>
             <li>
-              <code class="status">[]</code>Update catalog status, engine revision, capability
+              <code class="status">[x]</code>Update catalog status, engine revision, capability
               discovery and inventory assertions together. Preserve
               <code>three-rule-slice</code> and <code>six-rule-slice</code>. Do not let growth of
               <code>implementedRules</code> silently broaden <code>selectedRequest</code> or
@@ -553,7 +575,7 @@
               types; no generalized plugin API.
             </li>
             <li>
-              <code class="status">[]</code>Preserve prior six-rule behavior, including image-role
+              <code class="status">[x]</code>Preserve prior six-rule behavior, including image-role
               conflict handling and known incomplete branches. No dependency/tool upgrade,
               native-query index, new transport, additional playbook, dashboard or adapter.
             </li>
@@ -561,34 +583,34 @@
           <h4>1.3 Differential and host coverage</h4>
           <ul class="checklist">
             <li>
-              <code class="status">[]</code>Add positive, negative, inapplicable and incomplete
+              <code class="status">[x]</code>Add positive, negative, inapplicable and incomplete
               cases per new rule in Chromium, Firefox and WebKit. Cover shadow/slot relationships,
               accessible and denied frames, broken/empty/duplicate references, hidden descendants
               and exhausted work budgets. Keep original fixture expectations intact.
             </li>
             <li>
-              <code class="status">[]</code>Use separate equivalent contexts and integrity-checked
+              <code class="status">[x]</code>Use separate equivalent contexts and integrity-checked
               external axe-core. Compare raw rule state, occurrence outcome, scoped target, impact,
               check evidence and related nodes before grouping. Unknown/missing results and
               undisposed mismatches block the supported-scope claim. Distinguish a reference defect
               from an implementation defect before any intentional divergence.
             </li>
             <li>
-              <code class="status">[]</code>Exercise an enabled local form through existing
+              <code class="status">[x]</code>Exercise an enabled local form through existing
               host/reporting, using deterministic value-attribute, label and option-state mutations.
               Compare full-scan fallback with fresh full/canonical results at each state.
               Demonstrate new, persistent, resolved and recurring findings; narrower/partial scans
               cannot resolve history.
             </li>
             <li>
-              <code class="status">[]</code>Do not disable all form controls merely to obtain a
+              <code class="status">[x]</code>Do not disable all form controls merely to obtain a
               clean nine-rule gate. Use an explicit supported naming-rule selection for complete
               naming/history assertions, and a separate nine-rule scan that retains existing
               target-size limitations as partial/indeterminate. Do not expand enabled-control
               geometry in this naming batch.
             </li>
             <li>
-              <code class="status">[]</code>Update README, provenance and evidence together. Retain
+              <code class="status">[x]</code>Update README, provenance and evidence together. Retain
               original foundation/Phase 4 archives unchanged; pin new source and fixture hashes with
               fresh raw outputs. Report supported comparisons and declared-limit comparisons
               separately.
@@ -603,20 +625,20 @@
           </p>
           <ul class="checklist">
             <li>
-              <code class="status">[]</code><code>pnpm test:parity</code>: original and new cases,
+              <code class="status">[x]</code><code>pnpm test:parity</code>: original and new cases,
               three engines, exact supported-scope comparison and reproduced incomplete cases.
             </li>
             <li>
-              <code class="status">[]</code><code>pnpm test:host</code> and
+              <code class="status">[x]</code><code>pnpm test:host</code> and
               <code>pnpm test:reporting</code>: real IPC, truthful gates/history and existing
               cancellation/stale-result safety.
             </li>
             <li>
-              <code class="status">[]</code><code>pnpm validate</code>: build, strict types, lint,
+              <code class="status">[x]</code><code>pnpm validate</code>: build, strict types, lint,
               required Oxfmt and every current suite under unchanged pins.
             </li>
             <li>
-              <code class="status">[]</code><code>pnpm bench:slice</code> once after an affected
+              <code class="status">[x]</code><code>pnpm bench:slice</code> once after an affected
               shared-browser implementation change. Keep its original three-rule workload; no
               nine-rule performance claim and no rerun for documentation-only repairs.
             </li>
@@ -633,21 +655,22 @@
         <h2>Acceptance and final validation</h2>
         <ul class="checklist">
           <li>
-            <code class="status">[]</code>Nine named selected-partial implementations; full 105-rule
-            inventory and 89 stable defaults preserved. Exactly 96 unimplemented catalog rules
-            remain, with no implied full parity.
+            <code class="status">[x]</code>Nine named selected-partial implementations; full
+            105-rule inventory and 89 stable defaults preserved. Exactly 96 unimplemented catalog
+            rules remain, with no implied full parity.
           </li>
           <li>
-            <code class="status">[]</code>No unresolved semantic/evidence mismatch in the named
+            <code class="status">[x]</code>No unresolved semantic/evidence mismatch in the named
             supported scope. Every declared gap has a narrow reproduction and disposition. No loss
             of prior six-rule request selection or capability compatibility.
           </li>
           <li>
-            <code class="status">[]</code>Pinned <code>pnpm validate</code> and affected shared-path
-            benchmark passed, with command results and source-specific evidence retained.
+            <code class="status">[x]</code>Pinned <code>pnpm validate</code> and affected
+            shared-path benchmark passed, with command results and source-specific evidence
+            retained.
           </li>
           <li>
-            <code class="status">[]</code><code>git diff --check</code>; plan validator with
+            <code class="status">[x]</code><code>git diff --check</code>; plan validator with
             pre-edit snapshot; verify no canonical checkout, original archives, global tool pins or
             unrelated worktrees changed.
           </li>
@@ -701,7 +724,52 @@
 
       <section id="amendments">
         <h2>Amendments</h2>
-        <p>None. Proposed plan; execution not authorized.</p>
+        <details open>
+          <summary>2026-09-16: Approved divergences, implementation complete, ledger added</summary>
+          <p>
+            Tony approved native uppercase input-type matching and rejecting empty image-input
+            labels that borrow the control's default name. Exact assertions preserve both raw
+            outcomes, impacts, paths and check evidence; neither case is a parity match or a blanket
+            allowlist. New improvements ledger records IMP-001/002 and honest coverage: nine
+            selected-partial canonical IDs, zero Propellr-only rule IDs, 96 unimplemented.
+          </p>
+          <p>
+            Pinned pnpm validate passed 217 tests, build, five strict type scopes, lint and Oxfmt.
+            Per engine: 24 supported exact comparisons, 24 declared-limit comparisons, two approved
+            divergences, and ten new enabled-form IPC scans including seven fresh-full/ canonical
+            comparisons. New, persistent, resolved and recurring findings, narrower/ partial
+            resolution safety and nine-rule indeterminate geometry verified. Original six-rule
+            behavior preserved; no runtime change after the already passed three-rule benchmark, so
+            its measured bundle/evidence is reused without another run.
+          </p>
+          <p>
+            Completion archive and manifest preserve final source/fixture hashes and raw outputs
+            separately from the blocked checkpoint and foundation archives. No failed task remains.
+            Work uncommitted; stop at evidence review. No PR, push, merge, publishing or next batch.
+          </p>
+        </details>
+        <h3>Historical blocked checkpoint, before approval</h3>
+        <p>
+          Build authorized by Tony. Draft revision 0.3 implements three rules and fixes existing
+          three/six-rule helper memberships. Fifty new fixtures per engine executed: 24 exact
+          supported comparisons, 24 declared-limit comparisons and two blocking reference/plan
+          conflicts. Uppercase SUBMIT is skipped by canonical selection; an empty image-input
+          wrapping label passes canonical by reusing the input's default Submit text. Original
+          expected outcomes retained. No divergence approved and no incomplete substitute added.
+        </p>
+        <p>
+          Pinned pnpm validate failed on those two cases in each engine: three failing aggregate
+          tests, with build/types/lint/Oxfmt and 193 tests passing before its short-circuit.
+          Separate pnpm test:reporting passed 18 tests. Existing six-rule behavior passed. One
+          unchanged three-rule pnpm bench:slice run passed all three engine tests; no new-rule
+          performance claim. New IPC/history and nine-rule partial-gate work remains deferred.
+          Evidence, source/fixture hashes and initial/final raw outputs are retained in
+          <a href="native-form-naming-validation.md">blocked checkpoint evidence</a>.
+        </p>
+        <p>
+          Phase [f], not complete. Ask for support decisions before continuing. Work uncommitted; no
+          PR, push, publishing, canonical source edits or subsequent batch.
+        </p>
       </section>
     </main>
   </body>

@@ -54,7 +54,7 @@ export function nameString(value: string, budget: NamingBudget): string {
 export function focusable(node: Element): boolean {
   return (
     !node.matches(":disabled") &&
-    (node.matches("a[href], input, textarea") ||
+    (node.matches("a[href], input, textarea, select") ||
       /^\s*[+-]?\d/.test(node.getAttribute("tabindex") ?? ""))
   );
 }

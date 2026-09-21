@@ -1,0 +1,262 @@
+{
+  "state": "blocked",
+  "created": "2026-09-16T16:45:07.900167+00:00",
+  "baseCommit": "c98d0a3ad76a75f7581abe0bed9b55a0778c1d68",
+  "branch": "feat/native-form-naming",
+  "implementation": "uncommitted",
+  "agent": "pi / gpt-6-astra",
+  "sessionId": "01a0ab04-7b74-734c-aa54-72e60d140edd",
+  "reference": {
+    "version": "4.13.0",
+    "tag": "v4.13.0",
+    "commit": "1cc54b900413660610180d631feb73c9e74f4dc9",
+    "tarball": "https://registry.npmjs.org/axe-core/-/axe-core-4.13.0.tgz",
+    "bundleSha256": "c24f097bd2f451d4f933e8bc7d8d539f8672a2ebcb5cc9f9f3eec8ca9470a0c1",
+    "integrity": "sha512-UzGt8zg7Ny8djbYMhxl2zuEevVa7r2gJjYY5Lwr1xM7+XU2nd6CkIWFTVcCIbAP63vSz71NaVyyuSk9lHKcy0A=="
+  },
+  "environment": {
+    "chromium": {
+      "node": "v26.8.2",
+      "playwright": "1.63.0",
+      "browser": "153.0.8010.12",
+      "os": "darwin 25.6.0",
+      "architecture": "arm64",
+      "cpu": "Apple M4",
+      "logicalCpus": 10,
+      "totalMemoryBytes": 17179869184,
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "deviceScaleFactor": 1,
+      "fonts": "Arial/system fallback",
+      "readiness": "load plus document.fonts.ready",
+      "browserCpu": null,
+      "browserMemory": null,
+      "unavailableReason": "No comparable cross-engine CPU/memory collector",
+      "hostMemory": {
+        "rss": 230670336,
+        "heapTotal": 128696320,
+        "heapUsed": 70314800,
+        "external": 11289598,
+        "arrayBuffers": 396159
+      }
+    },
+    "firefox": {
+      "node": "v26.8.2",
+      "playwright": "1.63.0",
+      "browser": "155.0",
+      "os": "darwin 25.6.0",
+      "architecture": "arm64",
+      "cpu": "Apple M4",
+      "logicalCpus": 10,
+      "totalMemoryBytes": 17179869184,
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "deviceScaleFactor": 1,
+      "fonts": "Arial/system fallback",
+      "readiness": "load plus document.fonts.ready",
+      "browserCpu": null,
+      "browserMemory": null,
+      "unavailableReason": "No comparable cross-engine CPU/memory collector",
+      "hostMemory": {
+        "rss": 185188352,
+        "heapTotal": 110821376,
+        "heapUsed": 57801552,
+        "external": 11297301,
+        "arrayBuffers": 431091
+      }
+    },
+    "webkit": {
+      "node": "v26.8.2",
+      "playwright": "1.63.0",
+      "browser": "26.6",
+      "os": "darwin 25.6.0",
+      "architecture": "arm64",
+      "cpu": "Apple M4",
+      "logicalCpus": 10,
+      "totalMemoryBytes": 17179869184,
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "deviceScaleFactor": 1,
+      "fonts": "Arial/system fallback",
+      "readiness": "load plus document.fonts.ready",
+      "browserCpu": null,
+      "browserMemory": null,
+      "unavailableReason": "No comparable cross-engine CPU/memory collector",
+      "hostMemory": {
+        "rss": 183713792,
+        "heapTotal": 109461504,
+        "heapUsed": 49354848,
+        "external": 11258819,
+        "arrayBuffers": 414896
+      }
+    }
+  },
+  "versions": {
+    "pnpm": "12.4.1",
+    "engine": "propellr-slice@0.3"
+  },
+  "commands": {
+    "pnpm validate": {
+      "exitCode": 1,
+      "passedTests": 193,
+      "failedTests": 3,
+      "shortCircuitedBefore": "test:reporting"
+    },
+    "pnpm test:reporting": {
+      "exitCode": 0,
+      "passedTests": 18
+    },
+    "pnpm bench:slice": {
+      "exitCode": 0,
+      "passedTests": 3,
+      "invocations": 1,
+      "workload": "original three-rule slice"
+    }
+  },
+  "coveragePerEngine": {
+    "fixtures": 50,
+    "supportedMatching": 24,
+    "declaredLimits": 24,
+    "blocked": 2
+  },
+  "blockers": [
+    "input-button-uppercase:input-button-name:#uppercase",
+    "input-image-empty-wrap:input-image-alt:#empty-wrap"
+  ],
+  "benchmark": {
+    "chromium": {
+      "samples": 120,
+      "retained": 71,
+      "failures": []
+    },
+    "firefox": {
+      "samples": 120,
+      "retained": 71,
+      "failures": []
+    },
+    "webkit": {
+      "samples": 120,
+      "retained": 71,
+      "failures": []
+    }
+  },
+  "sourceHashes": {
+    ".node-version": "8f8e373d500f414f7435fdc1d2fe9dd697e60cfb03b69657cecb873ac31b84df",
+    ".npmrc": "c990f3fbba71e8c50b487ddc948fcc226d946783c8220992943b00b34ac41aaf",
+    ".oxlintrc.json": "51ea7e416b65cd69920eb44596339413999155f8ebd85fcb7b8f769a17b22e50",
+    "bench/slice.test.ts": "e777875eb53740346775525dbfd5d3ba4769bc618214fd8294ce728526b1a384",
+    "package.json": "61b8ed3a685ff38f80129300f748480923c235b22efefb53a41b88d70efbe990",
+    "pnpm-lock.yaml": "b16b60a2d6f490885230fea5cc0adb26ea2fb55b2db20b8840ad71b9c3ceb0a0",
+    "reference.json": "9d835429949f7972c192454d3494f255f9311009dd224c70e4fc97f5c93fe60b",
+    "src/analysis.ts": "e45039f1197736e5a4db2a6453d4885f0db09e747c1a57171fd9e33024932de8",
+    "src/browser/geometry.ts": "a088780e0a7f25a5e57bc84f0dc6c753db9e76b67504b74e45adff22e515557a",
+    "src/browser/index.ts": "2a9333a5da6d5cfaf17210b6d7932444f4945ad0a4df71f6d94544b9b5c5faf0",
+    "src/browser/naming-rules.ts": "f637527bd4e04bf68fc3bfc7c20131e01d76154ce8a484bb28ae7d9882c20832",
+    "src/browser/naming.ts": "9ef039f985bae371e491dc4addf510321a339e024d7acb300b4ce31879486546",
+    "src/catalog.json": "0135033840e650af72ab91e115838b805a61951e27eb093480f309c5af51770b",
+    "src/contracts.ts": "5eeabdadc8e0a68cea919cb5d908799560bf5d12cb4a9c0bad3716319c07a532",
+    "src/host/browser.ts": "b555eba7d39088732ed8621d4af3444c9e18384682cbf9cfade23653291645c0",
+    "src/host/cli.ts": "de1de84aea299fd9ee8f54d8f0a6cc7ccdacbf9a59769ae2b279b47028124cda",
+    "src/host/client.ts": "988db0d6206231b071cd31d9a8104042933f5d074731e3ed3f307c1e83423c4b",
+    "src/host/daemon.ts": "646894dd5d121392926ccc54b5b95f5a356f3173eba188c15a1226254f0942f0",
+    "src/host/fixture.ts": "852a2354cfc706fd30f809f24c568fddb88f5a154b514d0225a598b9cf705543",
+    "src/host/framing.ts": "888dc52cd4f93c8bf839e1d96a925b3a7ed99a84cc73eba0b806f0d1eca60b1b",
+    "src/host/playbook.ts": "333658af7cfd89dcbbff913276eff01350d22405a353342c889ab840e58ec8da",
+    "src/host/requests.ts": "2cd69417dc9bccb1b481f18256fe75def0c2ca6f56fc69bdc812ff8bba8c2709",
+    "src/host/runtime.ts": "7df276e104568cb2a46d1fc137517f3dee50185195eef213852448c5cf01df46",
+    "src/host/scan.ts": "4d48f6e81f006edf6897a56f212608d49c3bbeb184bcd4c9973c432a7a2364af",
+    "src/host/server.ts": "8005aefa63bd8f39e616bec6ad9012f94162ff4f054097a85699139d98a6e288",
+    "src/host/stream.ts": "cf68d6b57fa8d52dac9e829fb0eb5bdadad34e021c23dff5143ca4f8f198da1c",
+    "src/reporting/index.ts": "c71b566234cc13da05ee9aae6f53f317e0015c39376261829797d57bd8e4fd27",
+    "src/validation.ts": "893af897d126f02cea488aec25fa13f3870c514d2a0d3ef6727401a152a42a9f",
+    "test/browser/reader.test.ts": "1fafe7ee40e4760f26b1cae9fc7451f69bf6b6b1a82e49801c39485172e21fae",
+    "test/contracts/requests.test.ts": "43d82c0fc97fd68d7c2633fe224a13c488cab46732d32c6e70762cc51cbc975d",
+    "test/fixtures/naming.ts": "54991619f1ff05b3a1f9e64ac8ae87cfeea7b0c6ff4ef4c5d725dbfef83439f2",
+    "test/fixtures/native-form-naming.ts": "b54e8d9c821e70bdde105acb67ad49809ed7fcee51d7ce99c2f74e7577328adc",
+    "test/fixtures/slice.ts": "24522a6318a57907a594cc3d65d3cdfe5f2c19bf5977faa1ee8125560cfa61bf",
+    "test/host/lifecycle.test.ts": "f098fb30caaa6728be23d1c4db459b06458096580ddcb89f010b05ed352be8c8",
+    "test/host/naming.test.ts": "6130d1db73665a1c826f9a7ff9d3084fadb5182de8b717c71dfa6381e99ba7b7",
+    "test/host/session.test.ts": "e8eea16495ed86286f8a0b5679a91654d03ac07d23f62492d83c88bb4485e873",
+    "test/host/startup.test.ts": "d19c079481dd49d0fd4f1a3ea7660d5a94d21b6fd68c91b678f24fe76f0a93fd",
+    "test/host/transport.test.ts": "b1e9b1eafa2a5554586416cebe8aa6bf7097fa7cfb817a661ee3e80d036bacc7",
+    "test/parity/epochs.test.ts": "5bfe51002bad1c8e6c725ba4e49c0bd199c6cad1bf31974bb454c74cbfc07f7b",
+    "test/parity/naming.test.ts": "c3e5fc3da75c0ee440fa1527309186190263fb98d19e2cd97ee5739d6112ae73",
+    "test/parity/native-form-naming.test.ts": "8058a43683174d120345072c82e9b7e46ca7bd0663ca9389da74f3b33fed910e",
+    "test/parity/reference.test.ts": "683b245cb2b996e7ac07d3967b18affd25028262eae701ebc2a99a7d8db48cd6",
+    "test/parity/slice.test.ts": "98ba4533e0e402116cd20a07772b865b94f4bee18df37191d35575aa2d1a323b",
+    "test/playbooks/dialog.test.ts": "624f2f1e5d24a4b34737faa79bb15b9981b7046ac9bc2507d6fed4ded5adc9b0",
+    "test/reporting/report.test.ts": "44d1a7550c10806dbdf45d6162804f790de926ff1456fb34f19e1da4078993ee",
+    "test/support/host.ts": "797ac1e25d45597f0831de10a295483aef84858ae43410ba05bd1242f9118daf",
+    "test/support/parity.ts": "35b72e0993a4ab8fbfd63051810915681343e17e4fc74a02eb8d792931740e0b",
+    "test/types/browser.typecheck.ts": "1828a728ba6ecbfe97535071244258152d6a102c911edb9aa184d13d25758301",
+    "test/types/contracts.typecheck.ts": "d8871bfb44065ec6b2b24ccca025287cad2f7b939795d56efff2e4a242f2bced",
+    "test/types/host.typecheck.ts": "b789602ad6b5ca4403758dd64b6a2a8860be3389cd6bd28012e21bdcc7b1c732",
+    "test/types/portable.typecheck.ts": "7275a432cf5e2352e2972390a95ce51759c8a00204569966eed15fd263cc9eaf",
+    "tools/reference.ts": "96ebebcfdaf12b563cb4186391160ffc95c8f6254367be20106c82691459ee3d",
+    "tsconfig.browser-test.json": "a43e0b89859662b923de23b7cefe51c0a61fc6ca1e5d50786d089b1f0721c279",
+    "tsconfig.browser.json": "733cddda63eaacb80bc54b1406bfdd93de768cb9e60f58490e82d4a73315e8d0",
+    "tsconfig.build.json": "6305724e7b80325ef6ba9cc49958239a448e7dc5b1890badee5cd6c4563e9c6d",
+    "tsconfig.host.json": "a98ad06ca7cfb33c980d95d4ba0dda7ebb1a73d3cac29ee2c4fc74243e774c4e",
+    "tsconfig.json": "abf63f8676b0afc0ec7c919fbb0ea696f5fb8ce43d00de5bc5ce995426f98f91",
+    "tsconfig.portable.json": "186caceb924a1b2d0707081721c1d5d2eb2cc800543c816313f41df282fc53d8",
+    "tsconfig.test.json": "0dc2975696f3461aa59ce88c3bd4f781ddae959baf4e5f6ad9d10d0f68baad30",
+    "vite.config.ts": "da54831006846021c64dc8363265b27367de512eb528b26fe031a403288e1dbe",
+    "vitest.config.ts": "3dbb199bb1e7c5b09a70ef71fb714c5bc241f2ff2094ac45381997f37796b3d5"
+  },
+  "sourceTreeSha256": "b1c1f6e6545c68632f982da9091972e1940c9926d3c02ad15d0a6c444f9a10b9",
+  "sourceTreeHashAlgorithm": "SHA-256 of UTF-8 compact sorted-key JSON sourceHashes",
+  "browserBundleSha256": "ca7770ceaa274887e2aa8b436b38edc9464d01781a6da6bfe033cc64c175b1f4",
+  "archive": {
+    "path": "specs/native-form-evidence/blocked-results.tar.gz",
+    "sha256": "26194272ea07d6c76967ec336a723b30954cca23b202c3208e2579279b4f053e",
+    "fileCount": 29
+  },
+  "archivedFiles": {
+    "artifacts/bench/chromium.json": "d6473f8d8ec6e58cc72e123aa113e2976df0bbba77201a0a45044d1a65073454",
+    "artifacts/bench/firefox.json": "a36dfb1420a743dfef7c90282a5b32004d9ba82cf06dfab003fae471ddf22e1d",
+    "artifacts/bench/webkit.json": "526d47ea4c066c09a6a2a48781478f4903fd5d9677b24ef86062f0b96d20cd66",
+    "artifacts/native-form-initial/chromium-native-form-naming.json": "a7c1b13ec70d4846a727adc13b04f925190e14e67798562d8fa5df4a199d7338",
+    "artifacts/native-form-initial/firefox-native-form-naming.json": "dd28ea6cfc49f50f8e97d51d9f6800329294cbec9563bd9ff32bb67aa64bd48c",
+    "artifacts/native-form-initial/webkit-native-form-naming.json": "92619809890b27e1ce99cea04ceae74309d8f7938e0d2744b01e91105039e514",
+    "artifacts/native-form-logs/bench.log": "c83c4fb3d0d29e8a95afea608bc6cb02b89abca93454d1d6168e47b40ed8d091",
+    "artifacts/native-form-logs/initial-parity.log": "47bbfb1eaf5f379c7fc88c07f372d83313a0183c76b5c865fc279cabb1153025",
+    "artifacts/native-form-logs/reporting.log": "90171915c2d94365566e61f8de1841be7623b68332a6e6d9b13921578855d208",
+    "artifacts/native-form-logs/validate-before-disposition-assertion.log": "fc8d4a5da4aed72affdadc9a51dcbe4f225674cd550402382a3887493aa7c93c",
+    "artifacts/native-form-logs/validate.log": "07be210aa30925f6e9a24bdab5b5b611643221e700fa85f4031b3a04239e10c2",
+    "artifacts/parity/chromium-dynamic.json": "07814de17205b291643a107fbb45f06ac1895220db8614d1286515c60c1857db",
+    "artifacts/parity/chromium-naming-dynamic.json": "3d315b9bfd9a0c36427ee32d4d4950787719b3054a06fda4ddb72f6f6ad27653",
+    "artifacts/parity/chromium-naming-host.json": "d99de8e16d2873346efdf2e57fcbb451eac6fda2a9efa626514ec8781fac2f55",
+    "artifacts/parity/chromium-naming.json": "3a26fb30c03d30cdea02203469735c618b89dbbfb9befb6708ea4cae1634070e",
+    "artifacts/parity/chromium-native-form-naming.json": "d8e1f559cdc6b740a2564639f3a9c5ac5d3339d50c95d58a9ed309e74f9cb92c",
+    "artifacts/parity/chromium.json": "5ac2266c1e6a2b0dbeb3911465ca6dfc77382c7f869b632d1b603271f412cf24",
+    "artifacts/parity/firefox-dynamic.json": "27921040842c899dee1a288a2619d2cab40be5c83ac9076728f3e5d4c6691ac6",
+    "artifacts/parity/firefox-naming-dynamic.json": "a172c3fbffaa678bb881b2df89899c8dc871f84ac9bab75ec8aa7aeb7e347428",
+    "artifacts/parity/firefox-naming-host.json": "511c856bf4d5ff3ad64035f1fd90a9d42a906187df777d83d88a64371209bd44",
+    "artifacts/parity/firefox-naming.json": "6cd47dd64c1471ac3fc29d9e674ff14bf937aec282e3bb9d1dcaea04812e8bab",
+    "artifacts/parity/firefox-native-form-naming.json": "d05d0d6d7a4dea91212e5cd772facca704581cbede8f65d89353f59aee86e56a",
+    "artifacts/parity/firefox.json": "6cff6f009c190ad83f08ed4e8158ec730b18c3e3543f0a6beb1c2ddad37a7737",
+    "artifacts/parity/webkit-dynamic.json": "13af76a3428dff0e2790c9ee90b4b9b0555bcc4323fc9de72c963b5bd5bcb759",
+    "artifacts/parity/webkit-naming-dynamic.json": "c703b28026a3ead8d3f095bf5d70fce91092b11f795c7b3e57fde14fff0340e9",
+    "artifacts/parity/webkit-naming-host.json": "78bd8755490d42ebda81c5773fa0b2b20abb5c3ddc5d44c30b850a3ceb0f8130",
+    "artifacts/parity/webkit-naming.json": "2dc98b24b8a07febbab6964d18ab7c9312f06b38cdb66c0e1988b5756549735b",
+    "artifacts/parity/webkit-native-form-naming.json": "83f6fec1df6d03b970c304260d8a3060e5365d2dd16869d3d0cec9cb5023b620",
+    "artifacts/parity/webkit.json": "597f28a10f583d64a2729770085ac1344db040a4cb1514d9ffa4081617f75dd6"
+  },
+  "historicalEntries": [
+    "artifacts/native-form-initial/*",
+    "artifacts/native-form-logs/initial-parity.log",
+    "artifacts/native-form-logs/validate-before-disposition-assertion.log"
+  ],
+  "deferred": [
+    "new enabled IPC form/history suite",
+    "native form dynamic full/fallback/reference scans",
+    "nine-rule partial geometry gate",
+    "support decision and batch acceptance"
+  ]
+}

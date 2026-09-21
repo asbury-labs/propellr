@@ -3,7 +3,7 @@ import { expect, test } from "vitest";
 import { browserTypes } from "../../src/host/browser.js";
 import { FIXTURE_URL } from "../../src/host/fixture.js";
 import { LOCAL_POLICY } from "../../src/host/runtime.js";
-import { implementedRules, sixRuleRequest } from "../../src/analysis.js";
+import { sixRuleRequest } from "../../src/analysis.js";
 import type { ScanRequest, ScanResult } from "../../src/contracts.js";
 import { combinedNamingHtml, repairNaming, breakNaming } from "../fixtures/naming.js";
 import { meta, terminal, unwrap, withHost } from "../support/host.js";
@@ -63,7 +63,14 @@ for (const engine of ["chromium", "firefox", "webkit"] as const)
           };
           const first = await scan();
           expect(first.rules.map(({ rule }) => rule.id).sort()).toEqual(
-            [...implementedRules].sort(),
+            [
+              "button-name",
+              "target-size",
+              "landmark-one-main",
+              "image-alt",
+              "link-name",
+              "label",
+            ].sort(),
           );
           expect(first.coverage.state).toBe("complete");
           expect(first.execution).toMatchObject({ requested: "incremental", actual: "full" });

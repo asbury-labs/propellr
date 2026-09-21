@@ -1,11 +1,19 @@
 # Propellr
 
 Private greenfield accessibility engine. Single-user local session host, typed
-SDK/CLI and trusted `dialog-open-close@1` playbook. Six bounded implementations:
-`button-name`, `target-size`, `landmark-one-main`, `image-alt`, `link-name`, `label`.
+SDK/CLI and trusted `dialog-open-close@1` playbook. Nine bounded implementations:
+`button-name`, `target-size`, `landmark-one-main`, `image-alt`, `link-name`, `label`,
+`input-button-name`, `input-image-alt`, `select-name`.
 Real checkpoint scans, Chromium/Firefox/WebKit reference comparisons and conservative reporting.
 **Not full axe-core parity.** Unsupported branches and inaccessible frames remain
 partial/incomplete. Realtime requests use full scans, never incremental speed claims.
+
+Native form naming (`propellr-slice@0.3`) preserves two approved improvements over
+pinned axe-core: native uppercase input-type matching and rejection of empty
+image-input labels that reuse the control's own default text. See
+[native form evidence](specs/native-form-naming-validation.md) and the
+[improvements/coverage ledger](specs/propellr-improvements.md).
+Existing three/six-rule helpers keep their exact memberships; select new rules explicitly.
 
 ## Development
 
@@ -123,7 +131,7 @@ show the controlled fixture. No arbitrary website journeys or secret inputs.
 Use `selectedRequest(documentTarget, "incremental")` from `dist/analysis.js` with
 `client.scan({ ...metadata, sessionId, scan: request })` for explicit three-rule
 selection. `sixRuleRequest(documentTarget, "incremental")` explicitly selects all
-six implemented rules. Existing playbook/benchmark selection remains three rules.
+six foundation rules. Existing playbook/benchmark selection remains three rules.
 `incremental` records `actual: "full"` plus a fallback reason. Explicit
 selection is essential: `rules: { kind: "defaults" }` resolves the 89 canonical
 stable defaults, with unimplemented rules marked not-evaluated and partial coverage.
@@ -163,8 +171,16 @@ label paths, not name strings.
 Generated names, embedded-control values, SVG/embedded content, complex ownership,
 unreviewed explicit roles and exhausted budgets remain incomplete. This is not a
 complete accessible-name API. Firefox native image-alt fallback is distinguished
-from authored pseudo content. Six implementations leave **99 catalog rules
-unimplemented**; default requests still resolve all 89 stable defaults.
+from authored pseudo content. Nine selected-partial implementations leave
+**96 catalog rules unimplemented**; default requests still resolve all 89 stable defaults.
+
+Native input buttons use attribute-based value checks: absent submit/reset value
+gets a default name; empty/whitespace value does not. Image inputs need nonempty
+alt or another supported naming check, never decorative empty-alt treatment.
+Select names exclude their own selected option; hidden-explicit-label stays an
+independent NONE check. These are bounded native branches, not fully ported rules.
+Enabled local-form history uses explicit naming rules; a nine-rule scan keeps
+existing target-size limitations partial/indeterminate rather than disabling controls.
 
 Playbook checkpoints retain actual scans, including after later failure/cancellation.
 Reached journey and complete selected coverage do not imply clean accessibility:
@@ -246,6 +262,9 @@ exceptions do not suppress project errors or change tool pins.
 - [Phase 3 evidence](specs/browser-slice-validation.md)
 - [Phase 4 naming protocol](specs/naming-coverage-protocol.md)
 - [Phase 4 evidence](specs/naming-coverage-validation.md)
+- [Native form naming protocol](specs/native-form-naming-protocol.md)
+- [Native form naming evidence](specs/native-form-naming-validation.md)
+- [Improvements and coverage ledger](specs/propellr-improvements.md)
 - [Provenance](PROVENANCE.md)
 
 Canonical axe-core remains independent and untouched, never a dependency or the
