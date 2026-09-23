@@ -231,7 +231,7 @@ export const exhaustionOracle: Readonly<Record<string, ExpectedExhaustion>> = {
     gap: "component-instance-limit",
     availability: "partial",
     supported: 1,
-    unattributed: 1,
+    unattributed: 2,
   },
   "relation-limit": {
     gap: "component-relation-limit",

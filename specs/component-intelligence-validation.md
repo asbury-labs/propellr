@@ -30,8 +30,8 @@ yields `unavailable` evidence while cancellation/document change reject outright
 
 ## Executed results
 
-**Final pinned `pnpm validate` passed all 246 tests**: 62 contract, 44 host,
-13 playbook, 80 parity/browser, 29 component and 18 reporting, plus build, five strict
+**Pre-review pinned `pnpm validate` (head `2cc3e09`) passed all 246 tests**: 62 contract,
+44 host, 13 playbook, 80 parity/browser, 29 component and 18 reporting, plus build, five strict
 type scopes (including new negative component examples), lint and required Oxfmt.
 Node 26.8.2, PNPM 12.4.1, Playwright 1.63.0; Chromium 153.0.8010.12, Firefox 155.0,
 WebKit 26.6 from the project-local cache.
@@ -102,6 +102,19 @@ passes after it. Pinned `pnpm validate` then passed all 247 tests (30 component)
 browser bundle is unchanged, so the benchmark was not rerun. The archive and manifest
 below describe the pre-review head `2cc3e09`; `src/components/attribution.ts` and
 `test/components/contracts.test.ts` changed afterward.
+
+## Review repair 2, PR #16
+
+Copilot found that a root beyond the 256-root bound reusing a recorded token was dropped,
+so a conflicting declaration could hide while its token's parts stayed `supported`. Any
+token with an unrecorded root now owns no parts (`component-instance-limit`). The
+`instance-limit` fixture gained such a root; it failed before the fix (2 supported, 1
+expected) and passes after in all three engines. **Latest pinned `pnpm validate` passed
+all 247 tests** (30 component). The browser bundle changed
+(`cb5d9f42453ae9166fa0ebe2a139e31b46f8733cb2266ffba83c360e8119811b`), so the unchanged
+three-rule `pnpm bench:slice` ran once more: 3 engine tests, 0 failures, matching bundle
+hash. No performance claim. The evidence-schema check of callsite caller against parent
+was deferred as hardening: the resolver enforces it and only hand-built evidence reaches it.
 
 ## Evidence artifacts
 

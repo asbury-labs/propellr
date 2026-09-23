@@ -89,8 +89,8 @@ export function captureComponents(
         rootTokens.set(node, instance);
       } else {
         gap("component-instance-limit", "More than 256 instance roots; later roots not recorded");
-        if (!tokens.has(instance))
-          overflow.set(document, (overflow.get(document) ?? new Set()).add(instance));
+        // An unrecorded root could conflict with a recorded one; its token owns nothing.
+        overflow.set(document, (overflow.get(document) ?? new Set()).add(instance));
       }
     }
     if (part !== null) owned.push({ node, target, part, owner });

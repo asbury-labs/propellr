@@ -99,16 +99,16 @@ Capture runs in the same synchronous browser call as the scan, after raw rules a
 under the same epoch, document guard and mutation/viewport transfer checks. Raw rule
 results, gaps and coverage are identical with capture on or off.
 
-| Bound                          | Value   | On exhaustion                                                             |
-| ------------------------------ | ------- | ------------------------------------------------------------------------- |
-| Capture JSON                   | 128 KiB | Drop all declarations; evidence `unavailable`, `component-evidence-limit` |
-| Recorded instance roots        | 256     | Keep first 256 in reader order; later parts `instance-limit`              |
-| Relations (parts) per instance | 64      | Keep first 64 in reader order; later parts `relation-limit`               |
-| Candidates per target          | 32      | Keep nearest 32; `truncated`; `component-candidate-limit` gap             |
-| Additional element visits      | 2,000   | Stop placement/containment walks; `component-visit-limit` gap             |
-| Resolved evidence JSON         | 128 KiB | Evidence `unavailable`, `component-evidence-limit`                        |
-| Capture gaps retained          | 32      | One per code                                                              |
-| Elements considered for bridge | reader  | Reader-visited elements only; unread scope makes capture partial          |
+| Bound                          | Value   | On exhaustion                                                               |
+| ------------------------------ | ------- | --------------------------------------------------------------------------- |
+| Capture JSON                   | 128 KiB | Drop all declarations; evidence `unavailable`, `component-evidence-limit`   |
+| Recorded instance roots        | 256     | Keep first 256; parts of any token with an unrecorded root `instance-limit` |
+| Relations (parts) per instance | 64      | Keep first 64 in reader order; later parts `relation-limit`                 |
+| Candidates per target          | 32      | Keep nearest 32; `truncated`; `component-candidate-limit` gap               |
+| Additional element visits      | 2,000   | Stop placement/containment walks; `component-visit-limit` gap               |
+| Resolved evidence JSON         | 128 KiB | Evidence `unavailable`, `component-evidence-limit`                          |
+| Capture gaps retained          | 32      | One per code                                                                |
+| Elements considered for bridge | reader  | Reader-visited elements only; unread scope makes capture partial            |
 
 Reading bridge attributes on reader-visited elements is not an additional visit. Each
 ancestor step during placement or containment is one visit. Any gap makes evidence

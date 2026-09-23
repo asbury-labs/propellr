@@ -394,12 +394,16 @@ export const exhaustionCases: readonly ComponentCase[] = [
     associate: [storefront],
     render: (arm) => {
       const b = bridge(arm);
+      // A root beyond the bound reuses x0 with another build; x0 must stop owning parts.
       const roots = range(300).map((k) =>
-        k === 0 || k === 299
+        k === 0 || k === 1 || k === 299
           ? `<div${b.root("ProductCard", `x${k}`)}><button id="n${k}"${b.part("favorite-control", `x${k}`)}>${icon}</button></div>`
           : `<div${b.root("ProductCard", `x${k}`)}></div>`,
       );
-      return page("instance-limit", `<main>${roots.join("")}</main>`);
+      return page(
+        "instance-limit",
+        `<main>${roots.join("")}<div${b.root("ProductCard", "x0", { build: "b9" })}></div></main>`,
+      );
     },
   },
   {
