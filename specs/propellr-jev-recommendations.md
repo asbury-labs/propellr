@@ -168,7 +168,7 @@ Jev-assisted cost = evidence collection + Jev + fallback fraction × larger-mode
 
 Use the same decomposition for expected latency only when the stages are sequential. Measure tail latency directly; do not add stage p95s and call the sum an end-to-end p95. Also report cost and time **per successfully verified journey**, including failures and retries.
 
-At listed prices, an illustrative 4,000-input-token request costs $0.000168; 10,000 cost $1.68 before other models, browsers and infrastructure. That is not a measured Propellr workload or an approved spend budget.
+At listed prices, an illustrative 4,000-input-token request costs $0.000168; 10,000 such requests cost $1.68 before other models, browsers and infrastructure. That is not a measured Propellr workload or an approved spend budget.
 
 Capacity may matter before price: 1,200 requests/minute is an average of 20/second. One request/second across 100 sessions would require 100 requests/second and, at 4,000 tokens each, 400,000 tokens/second, above both published limits. Batch related questions, trigger at meaningful checkpoints and respect backpressure. Never issue an inference call for every node or mutation. [S7]
 

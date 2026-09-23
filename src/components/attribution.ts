@@ -118,23 +118,37 @@ export function resolveEvidence(input: ResolveInput): ComponentEvidence {
       reasons.push(reason("parent-missing", "Parent token is not another declared instance"));
     local.set(group.key, { ...(definition ? { definition } : {}), reasons });
   }
-  // Second pass: a declared parent must pass local checks and match the callsite caller.
+  // Second pass: a callsite caller must match a parent that passed local checks.
+  const locallyValid = new Set(
+    [...local].filter(([, state]) => !state.reasons.length).map(([key]) => key),
+  );
   for (const group of groups.values()) {
     const first = group.roots[0];
     const state = local.get(group.key)!;
     if (state.reasons.length || first.parent === undefined) continue;
     const parent = lookup(first.target, first.parent)!;
-    const parentState = local.get(parent.key)!;
     const parentRoot = parent.roots[0];
-    if (parentState.reasons.length)
-      state.reasons.push(reason("parent-conflicting", "Declared parent is not supported"));
-    else if (
+    if (
+      locallyValid.has(parent.key) &&
       first.callsite !== undefined &&
       (!sameBuild(parentRoot, first) ||
         manifestFor(first)?.callsites.find(({ id }) => id === first.callsite)?.caller !==
           parentRoot.definition)
     )
       state.reasons.push(reason("callsite-mismatch", "Callsite caller differs from the parent"));
+  }
+  // Propagate unsupported parents to a fixed point so declaration order never matters.
+  for (let changed = true; changed;) {
+    changed = false;
+    for (const group of groups.values()) {
+      const first = group.roots[0];
+      const state = local.get(group.key)!;
+      if (state.reasons.length || first.parent === undefined) continue;
+      if (local.get(lookup(first.target, first.parent)!.key)!.reasons.length) {
+        state.reasons.push(reason("parent-conflicting", "Declared parent is not supported"));
+        changed = true;
+      }
+    }
   }
 
   const definitions: ComponentEvidence["definitions"][number][] = [];

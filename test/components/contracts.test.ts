@@ -330,6 +330,30 @@ describe("attribution resolution", () => {
     expect(evidence.availability).toEqual({ state: "complete" });
   });
 
+  test("parent conflicts propagate regardless of declaration order", () => {
+    // The child precedes a parent that only fails the callsite-caller check against Tile.
+    const value = scan([{ selector: "#x" }]);
+    const evidence = resolve(
+      capture({
+        instances: [
+          root("#c", "ProductCard", "child", { parent: "ib" }),
+          root("#g", "Tile", "tile"),
+          root("#ib", "IconButton", "ib", { parent: "tile", callsite: "row-remove" }),
+          root("#gc", "ProductCard", "grandchild", { parent: "child" }),
+        ],
+        parts: [part("#x", "favorite", "grandchild")],
+      }),
+      { scan: value },
+    );
+    expect(codes(evidence, "ib")).toEqual(["callsite-mismatch"]);
+    expect(codes(evidence, "child")).toEqual(["parent-conflicting"]);
+    expect(codes(evidence, "grandchild")).toEqual(["parent-conflicting"]);
+    expect(evidenceSchema.parse(evidence)).toEqual(evidence);
+    expect(buildRepairView(value, evidence).unattributed).toMatchObject([
+      { status: "conflicting", reasons: [{ code: "owner-conflicting" }] },
+    ]);
+  });
+
   test("tokens are document-scoped, identical roots form fragments and manifests set provenance", () => {
     const evidence = resolve(
       capture({

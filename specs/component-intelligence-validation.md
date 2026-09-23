@@ -92,6 +92,17 @@ overhead claim**; `bench:components` belongs to phase 4.
 - A contract test found the evidence schema accepted a self-parent instance; the schema
   now rejects it.
 
+## Review repair 1, PR #16
+
+Copilot found order-dependent parent resolution: a child declared before a parent that
+fails only the callsite-caller check stayed `supported`, producing evidence the schema
+rejects. The resolver now checks callsites against pass-one status and propagates
+`parent-conflicting` to a fixed point. A new contract test failed before the fix and
+passes after it. Pinned `pnpm validate` then passed all 247 tests (30 component). The
+browser bundle is unchanged, so the benchmark was not rerun. The archive and manifest
+below describe the pre-review head `2cc3e09`; `src/components/attribution.ts` and
+`test/components/contracts.test.ts` changed afterward.
+
 ## Evidence artifacts
 
 - [Manifest](component-intelligence-evidence/phase-1-manifest.json): environments,
