@@ -6,5 +6,11 @@
     "rootDir": "src",
     "outDir": "dist"
   },
-  "include": ["src/contracts.ts", "src/validation.ts", "src/host/**/*.ts", "src/reporting/**/*.ts"]
+  "include": [
+    "src/contracts.ts",
+    "src/validation.ts",
+    "src/host/**/*.ts",
+    "src/reporting/**/*.ts",
+    "src/components/**/*.ts"
+  ]
 }

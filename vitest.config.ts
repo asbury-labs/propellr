@@ -20,6 +20,16 @@ export default defineConfig({
       },
       {
         test: {
+          name: "components",
+          environment: "node",
+          include: ["test/components/**/*.test.ts"],
+          testTimeout: 180_000,
+          hookTimeout: 30_000,
+          fileParallelism: false,
+        },
+      },
+      {
+        test: {
           name: "bench",
           environment: "node",
           include: ["bench/**/*.test.ts"],

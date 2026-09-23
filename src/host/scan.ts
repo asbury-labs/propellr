@@ -36,18 +36,31 @@ export function resolveRules(
   return [first, ...rules.slice(1)];
 }
 
+type ScanContext = {
+  readonly policy: VersionRef;
+  readonly configuration: VersionRef;
+  readonly origin: ScanResult["origin"];
+};
 // Whole-document only. Never silently widen scope or reduce defaults to implemented rules.
 export async function scanTarget(
   target: BrowserTarget,
   request: ScanRequest,
-  context: {
-    readonly policy: VersionRef;
-    readonly configuration: VersionRef;
-    readonly origin: ScanResult["origin"];
-  },
+  context: ScanContext,
   signal: AbortSignal,
   expectedDocument = target.documentId,
 ): Promise<ScanResult> {
+  return (await collectScan(target, request, context, signal, expectedDocument)).result;
+}
+// Optional component capture shares the scan call, epoch and guards. Capture is untrusted
+// page-derived output for the caller to validate; the raw result never depends on it.
+export async function collectScan(
+  target: BrowserTarget,
+  request: ScanRequest,
+  context: ScanContext,
+  signal: AbortSignal,
+  expectedDocument = target.documentId,
+  components?: BrowserScanInput["components"],
+): Promise<{ readonly result: ScanResult; readonly capture?: unknown }> {
   const started = performance.now();
   const id = `scan_${randomUUID()}` as ScanId;
   const epoch = ++target.scanEpoch;
@@ -91,19 +104,21 @@ export async function scanTarget(
     root.documentId === expectedDocument;
   if (!whole)
     return {
-      ...base,
-      durationMs: performance.now() - started,
-      coverage: {
-        state: "partial",
-        gaps: [
-          { code: "scope-unavailable", message: "Only one whole current document is supported" },
-        ],
+      result: {
+        ...base,
+        durationMs: performance.now() - started,
+        coverage: {
+          state: "partial",
+          gaps: [
+            { code: "scope-unavailable", message: "Only one whole current document is supported" },
+          ],
+        },
+        rules: resolvedRules.map(({ rule }) => ({
+          rule,
+          state: "not-evaluated",
+          reason: { code: "scope-unavailable", message: "Requested scope was not evaluated" },
+        })),
       },
-      rules: resolvedRules.map(({ rule }) => ({
-        rule,
-        state: "not-evaluated",
-        reason: { code: "scope-unavailable", message: "Requested scope was not evaluated" },
-      })),
     };
   // Lexical injection returns a host-held handle, never a page-controlled global.
   // One runtime per scan keeps observer/handle lifetime bounded, including borrowed pages.
@@ -116,7 +131,11 @@ export async function scanTarget(
       `(() => {\n${source}\nreturn PropellrBrowser;\n})()`,
     );
     guard();
-    const input: BrowserScanInput = { target: root, rules: resolvedRules };
+    const input: BrowserScanInput = {
+      target: root,
+      rules: resolvedRules,
+      ...(components ? { components } : {}),
+    };
     const output = JSON.parse(
       await target.page.evaluate(
         ({ runtime, json }) => JSON.stringify(runtime.scan(JSON.parse(json) as BrowserScanInput)),
@@ -129,7 +148,7 @@ export async function scanTarget(
     guard();
     if (output.rules.length !== resolvedRules.length) throw new Error("scan-result-limit");
     const first = output.gaps[0];
-    return {
+    const result: ScanResult = {
       ...base,
       rules: output.rules,
       durationMs: performance.now() - started,
@@ -145,6 +164,7 @@ export async function scanTarget(
           ? { state: "partial", gaps: [first, ...output.gaps.slice(1)] }
           : { state: "complete" },
     };
+    return output.components === undefined ? { result } : { result, capture: output.components };
   } catch (error) {
     // Context destruction can reject any browser await before its following guard runs.
     guard();
