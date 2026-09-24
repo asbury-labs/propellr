@@ -42,6 +42,44 @@ const sentinels = ["none", "insufficient-evidence"] as const;
 const REQUEST_BYTES = 65_536;
 const RESPONSE_BYTES = 262_144;
 type Failure = Extract<DecisionResult, { state: "failed" }>["code"];
+// Egress boundary: only text-free structural labels, opaque shapes and code-generated IDs.
+const label = z
+  .string()
+  .max(64)
+  .regex(/^[A-Za-z][A-Za-z0-9._-]*(\|[a-z]+)?$/);
+const decisionCaseSchema = z
+  .strictObject({
+    target: label,
+    chain: z
+      .array(
+        z
+          .strictObject({
+            distance: z.number().int().min(0).max(8),
+            label,
+            shape: z.string().regex(/^[0-9a-f]{8}$/),
+            repeats: z.number().int().min(0).max(2000),
+          })
+          .readonly(),
+      )
+      .min(1)
+      .max(9)
+      .readonly(),
+    candidates: z
+      .array(z.string().regex(/^ancestor-[1-8]$/))
+      .max(8)
+      .readonly(),
+    parts: z
+      .array(
+        z
+          .string()
+          .max(640)
+          .regex(/^([A-Za-z][A-Za-z0-9._-]*(\|[a-z]+)?(>|$))*$/),
+      )
+      .max(8)
+      .readonly(),
+  })
+  .readonly()
+  .refine((value) => value.candidates.length === value.parts.length, "One part per candidate");
 const CACHE_ENTRIES = 256;
 
 export interface DecisionClientOptions {
@@ -108,7 +146,8 @@ export type DecisionResult =
         | "invalid-response"
         | "request-limit"
         | "budget-exhausted"
-        | "redirect-refused";
+        | "redirect-refused"
+        | "invalid-request";
       readonly attempts: number;
     };
 
@@ -244,7 +283,10 @@ export class DecisionClient {
     return { requests: this.requests, spentUsd: this.spent };
   }
 
-  async decide(input: DecisionCase, signal: AbortSignal): Promise<DecisionResult> {
+  async decide(untrusted: DecisionCase, signal: AbortSignal): Promise<DecisionResult> {
+    const parsed = decisionCaseSchema.safeParse(untrusted);
+    if (!parsed.success) return { state: "failed", code: "invalid-request", attempts: 0 };
+    const input: DecisionCase = parsed.data;
     const request = decisionRequest(input);
     // Closed-set questions are capped at 255 options, sentinels included.
     if (Math.max(input.candidates.length, input.parts.length) + sentinels.length > 255)

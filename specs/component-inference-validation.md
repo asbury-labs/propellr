@@ -129,6 +129,16 @@ per family, so the dev metrics above are unchanged. This third push exceeded the
 two-push babysit limit under Tony's standing instruction to reach a clean merge. Pinned
 `pnpm validate` passed all 298 tests (75 component).
 
+## Review repair 4, PR #19
+
+Copilot found that `decide()` trusted the TypeScript-only decision input at runtime, so a host
+caller could send page text or unbounded values. A strict runtime schema now admits only labels
+in the text-free grammar, opaque shapes, bounded distances and repeat counts, and
+code-generated `ancestor-N` IDs, with one part per candidate. Anything else is `invalid-request`
+and is never sent. The test failed before the fix: seven bad shapes are refused, the server
+receives nothing, and a valid case still succeeds. This fourth push also ran under Tony's
+standing instruction. Pinned `pnpm validate` passed all 299 tests (76 component).
+
 ## Evidence artifacts
 
 - [Manifest](component-inference-evidence/phase-2-manifest.json): approval state, corpus split,

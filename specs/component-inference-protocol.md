@@ -93,8 +93,8 @@ re-evaluation. This small study cannot certify rare-error rates.
 - Request: minimal state (labels, opaque shape IDs, distances, repeat counts, candidate IDs) and
   separate questions for membership, part and cause. Choices include `none` and
   `insufficient-evidence` and are capped at 255 options. No text, no page strings except
-  allowlisted roles. Every question carries complete instructions (question IDs are invisible
-  to the model).
+  allowlisted roles, enforced at runtime by a strict schema (`invalid-request` before sending).
+  Every question carries complete instructions (question IDs are invisible to the model).
 - Bounds: request at most 64 KiB; total deadline at most 10 s across all attempts; at most 3
   attempts; retry only 429, 529 and network errors, with backoff inside the deadline; 401 and 422
   are never retried. The caller's AbortSignal cancels immediately. Responses are read to at most
