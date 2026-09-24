@@ -188,6 +188,23 @@ The part test failed before its fix. The holdout finding was declined: the froze
 opens the holdout only when every approved arm can run, and no LLM client exists. Pinned
 `pnpm validate` passed all 303 tests (80 component).
 
+## Review repair 9, PR #19
+
+Copilot found three issues:
+
+- **Custom element names (fixed):** page-controlled custom element names passed the label
+  grammar. Element names are now allowlisted in shared constants; custom elements become
+  `custom` and others `unknown`, enforced in the browser, the capture schema and at egress.
+- **Part abstentions (fixed):** a part abstention still formed a repair group. It now keeps
+  membership and forms no group.
+- **Decision unit (defined):** live decisions carried no rule identity. They are now explicitly
+  target-level, because membership and part describe the element, not the rule. Each
+  (rule, path) case shares its target's decision, and the report records `decisionUnit`.
+
+The custom-name and scoring tests failed before their fixes. Only structure labels changed in
+the browser, and the capture on/off tests still hold in three engines, so the benchmark was not
+rerun. Pinned `pnpm validate` passed all 304 tests (81 component).
+
 ## Evidence artifacts
 
 - [Manifest](component-inference-evidence/phase-2-manifest.json): approval state, corpus split,

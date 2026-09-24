@@ -250,6 +250,7 @@ export function providerCases(
         const link = chain[distance];
         return link?.target !== undefined && entry.truthRoots.includes(pathKey(link.target));
       };
+      // Decisions are target-level: every (rule, path) case on one target shares its decision.
       const decision = byCase.get(canonical([run.family, entry.path]))?.result;
       const choice =
         decision?.state === "answered" ? decision.answers.membership.choice : undefined;
@@ -257,13 +258,16 @@ export function providerCases(
       const correct = distance !== undefined && inRoots(Number(distance));
       if (decision?.state === "answered" && distance !== undefined)
         calibration.push({ confidence: decision.answers.membership.confidence, correct });
+      // A part abstention keeps membership but never forms a repair group.
+      const part = decision?.state === "answered" ? decision.answers.part.choice : undefined;
+      const partDecided = part !== undefined && part !== "none" && part !== "insufficient-evidence";
       cases.push({
         ...entry,
         candidateHit: decisionCase(chain).candidates.some((_, index) => inRoots(index + 1)),
         decided: distance !== undefined,
         correct,
         group:
-          decision?.state === "answered" && distance !== undefined
+          decision?.state === "answered" && distance !== undefined && partDecided
             ? canonical([
                 "provider",
                 chain[Number(distance)]?.shape,
@@ -292,6 +296,8 @@ export function providerReport(runs: readonly FamilyRun[], decisions: readonly P
     cases: cases.filter(({ family }) => family === run.family),
   }));
   return {
+    // Requests, latency and attempts are per target; scored cases are per (rule, path).
+    decisionUnit: "target" as const,
     pooled: metrics(cases),
     perFamily: Object.fromEntries(
       scored.map((entry, index) => [runs[index]!.family, metrics(entry.cases)]),

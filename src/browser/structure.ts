@@ -2,7 +2,7 @@
 // Labels carry only element names and allowlisted roles; page strings never leave the page.
 import type { Target } from "../contracts.js";
 import type { StructureCapture } from "../components/contracts.js";
-import { structureCollector, structureRoles } from "../analysis.js";
+import { structureCollector, structureElement, structureRoles } from "../analysis.js";
 import { parent } from "./naming.js";
 
 type Chain = Extract<StructureCapture, { state: "available" }>["targets"][number]["chain"];
@@ -17,9 +17,9 @@ function fnv(text: string): string {
 }
 export function structureLabel(node: Element): string {
   const role = node.getAttribute("role")?.trim().toLowerCase();
-  return role === undefined || role === ""
-    ? node.localName
-    : `${node.localName}|${roles.has(role) ? role : "other"}`;
+  // Page-controlled names (custom elements) never become labels verbatim.
+  const name = structureElement(node.localName);
+  return role === undefined || role === "" ? name : `${name}|${roles.has(role) ? role : "other"}`;
 }
 
 export function captureStructure(

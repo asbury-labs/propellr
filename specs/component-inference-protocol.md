@@ -33,8 +33,9 @@ no arm, including the heuristic, is run on it until all approved arms run togeth
 Optional browser capture for uninstrumented attribution, in the same guarded scan call as the
 bridge capture and after raw rules are fixed. Raw results are unchanged with it on or off.
 
-- Element label: `localName` plus `role` when it is a known ARIA role, otherwise `other`. No text,
-  attribute values, IDs, classes or URLs.
+- Element label: an allowlisted HTML/SVG element name (custom elements become `custom`, other
+  names `unknown`), plus `role` when it is a known ARIA role, otherwise `other`. No text,
+  attribute values, IDs, classes, URLs or page-chosen names.
 - Shape: FNV-1a hash of the label and up to 16 child labels, recursively to depth 2, over light
   children and open shadow-root children. Counts of each depth-2 shape over reader-visited elements.
 - For each violation target (at most 96): the composed ancestor chain up to 8 levels, each with
@@ -75,7 +76,9 @@ are instrumented-oracle labels, **not** two-reviewer adjudications.
   families these intervals are wide and are reported as such.
 - Provider arms add calibration (Brier score of membership confidence), latency p50/p95,
   attempts, failures by code and spend. They are scored by the same oracle and chains as the
-  heuristic: `none` and `insufficient-evidence` abstain, failed calls are undecided. The
+  heuristic: `none` and `insufficient-evidence` abstain, and a part abstention forms no group.
+  Failed calls are undecided. Decisions are target-level: every (rule, path) case on a target
+  shares that target's decision, and request, latency and attempt metrics count targets. The
   adoption check applies the frozen bar and is eligible only on the holdout.
 
 ## Adoption bar (frozen now, before any holdout use)
