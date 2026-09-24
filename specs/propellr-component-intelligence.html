@@ -1,0 +1,1384 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plan: Propellr component intelligence and repair-scope deduplication</title>
+    <style>
+      :root {
+        --bg: #000;
+        --paper-2: #000;
+        --ink: #fff;
+        --muted: #c8d2d8;
+        --soft: #aabac4;
+        --rule: rgba(255, 255, 255, 0.22);
+        --rule-solid: #475760;
+        --accent: #70e4d2;
+        --accent-tint: rgba(112, 228, 210, 0.08);
+        --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+        --serif: ui-serif, Georgia, serif;
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 3rem 1.5rem 5rem;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.6;
+      }
+      main {
+        max-width: 64rem;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: clamp(1.9rem, 4vw, 3rem);
+        line-height: 1.12;
+        letter-spacing: -0.035em;
+        margin: 0 0 1.5rem;
+        max-width: 55rem;
+      }
+      h2 {
+        font-size: 1.4rem;
+        margin: 3rem 0 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--rule);
+      }
+      h3 {
+        font-size: 1.12rem;
+        margin: 1.7rem 0 0.6rem;
+      }
+      h4 {
+        font-size: 0.95rem;
+        margin: 1.3rem 0 0.4rem;
+      }
+      p {
+        margin: 0 0 1rem;
+        max-width: 56rem;
+      }
+      a {
+        color: var(--accent);
+        text-underline-offset: 3px;
+      }
+      a:focus-visible,
+      summary:focus-visible,
+      [tabindex]:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 4px;
+      }
+      code {
+        font-family: var(--mono);
+        font-size: 0.85em;
+        overflow-wrap: anywhere;
+      }
+      pre {
+        padding: 1rem 0;
+        overflow-x: auto;
+        border-block: 1px solid var(--rule);
+        font-size: 0.84rem;
+        line-height: 1.6;
+      }
+      pre code {
+        font-size: inherit;
+      }
+      header {
+        margin-bottom: 2rem;
+      }
+      details.meta {
+        border-block: 1px solid var(--rule);
+        padding: 0.65rem 0;
+        font-size: 0.8rem;
+      }
+      details.meta summary {
+        cursor: pointer;
+        color: var(--muted);
+      }
+      details.meta dl {
+        display: grid;
+        grid-template-columns: 8rem 1fr;
+        gap: 0.5rem 1rem;
+        margin: 1rem 0;
+      }
+      details.meta dt {
+        font-family: var(--mono);
+        color: var(--soft);
+      }
+      details.meta dd {
+        margin: 0;
+        overflow-wrap: anywhere;
+      }
+      figure {
+        margin: 1.8rem 0;
+      }
+      figure svg {
+        display: block;
+        width: 100%;
+        min-width: 600px;
+        height: auto;
+        font-family: var(--sans);
+      }
+      figcaption {
+        margin-top: 0.7rem;
+        color: var(--muted);
+        font-size: 0.88rem;
+        max-width: 55rem;
+      }
+      .scroll {
+        overflow-x: auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 680px;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.65rem 0.7rem;
+        border-bottom: 1px solid var(--rule);
+        vertical-align: top;
+      }
+      th {
+        color: var(--accent);
+        font-weight: 600;
+      }
+      th:first-child,
+      td:first-child {
+        padding-left: 0;
+      }
+      ul,
+      ol {
+        padding-left: 1.3rem;
+      }
+      li {
+        margin: 0.4rem 0;
+      }
+      .files ul {
+        list-style: none;
+        padding: 0;
+      }
+      .files li {
+        border-bottom: 1px solid var(--rule);
+        padding: 0.45rem 0;
+      }
+      .phase {
+        border-top: 2px solid var(--accent);
+        margin: 2rem 0;
+        padding-top: 0.8rem;
+        background: var(--paper-2);
+      }
+      .phase h3 {
+        margin-top: 0.2rem;
+      }
+      ul.checklist {
+        list-style: none;
+        padding: 0;
+      }
+      ul.checklist li {
+        padding-left: 2rem;
+        text-indent: -2rem;
+      }
+      code.status {
+        color: var(--accent);
+        background: none;
+        margin-right: 0.65rem;
+      }
+      .loop {
+        border-left: 2px solid var(--accent);
+        padding: 0.4rem 0 0.4rem 1rem;
+        margin: 1.2rem 0;
+      }
+      .loop p {
+        margin: 0;
+      }
+      #notes details,
+      #amendments details {
+        padding: 0.65rem 0;
+        border-bottom: 1px solid var(--rule);
+      }
+      #notes summary,
+      #amendments summary {
+        cursor: pointer;
+        font-weight: 600;
+      }
+      @media (max-width: 640px) {
+        body {
+          padding: 1.5rem 1rem 3rem;
+        }
+        details.meta dl {
+          grid-template-columns: 1fr;
+          gap: 0.25rem;
+        }
+        details.meta dd {
+          margin-bottom: 0.65rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Plan: Component intelligence and repair-scope deduplication</h1>
+        <p>Recognize the component. Locate the defect. Group by what a fix would change.</p>
+        <details class="meta">
+          <summary>Metadata</summary>
+          <dl>
+            <dt>created</dt>
+            <dd>2026-09-23T12:27:53Z</dd>
+            <dt>modified</dt>
+            <dd>
+              2026-09-23T12:27:53Z; 2026-09-23 (planning review: source-trust and benchmark bounds
+              clarified); 2026-09-23T21:08:29Z (phase 1 built and validated; stopped for review)
+            </dd>
+            <dt>commits</dt>
+            <dd>
+              42f7a47b927c1a5b40b3533f6666ad4d5c2e0312 (main; planning baseline). Jev brief and
+              recommendations are existing uncommitted research documents. Phase 1 implementation is
+              uncommitted on <code>feat/component-intelligence</code> from that base.
+            </dd>
+            <dt>agent name</dt>
+            <dd>
+              pi / gpt-6-astra (single-agent planning); claude-code / claude-opus-5-5 (phase 1
+              build, single lane)
+            </dd>
+            <dt>session id</dt>
+            <dd>01a0ce1c-15c6-7506-bcfd-43bd61554227; e090228a-8284-4f44-814f-782d9c7da67b</dd>
+            <dt>back refs</dt>
+            <dd>
+              <a href="jev-brief.md">Jev brief</a>;
+              <a href="propellr-jev-recommendations.md">Initial recommendations</a>;
+              <a href="propellr-product-brief.md">Product direction</a>;
+              <a href="propellr-acceptance-contract.md">Acceptance contract</a>;
+              <a href="propellr-architecture-boundaries.md">Architecture boundaries</a>;
+              <a href="propellr-greenfield-foundation.html">Foundation</a>;
+              <a href="propellr-realtime-agent-conformance.html">Proposed realtime/agent work</a>.
+            </dd>
+            <dt>forward refs</dt>
+            <dd>
+              None. Implementation protocols, evidence artifacts and provider evaluations described
+              below do not exist yet. Every phase requires separate approval. Phase 1:
+              <a href="component-intelligence-protocol.md">protocol</a>;
+              <a href="component-intelligence-validation.md">evidence</a>;
+              <a href="component-intelligence-evidence/phase-1-manifest.json">manifest</a>.
+            </dd>
+          </dl>
+        </details>
+      </header>
+
+      <figure>
+        <div
+          class="scroll"
+          tabindex="0"
+          role="region"
+          aria-label="Component identity and repair scope diagram"
+        >
+          <svg viewBox="0 0 960 300" role="img" aria-labelledby="identity-title identity-desc">
+            <title id="identity-title">
+              Component intelligence is shared evidence, not a reporting heuristic
+            </title>
+            <desc id="identity-desc">
+              A scoped element belongs to a component instance, which renders a versioned
+              definition. Its part and cause evidence establish a repair-scope hypothesis. The same
+              identity evidence supports deduplication, probe selection and repair verification
+              without replacing raw findings.
+            </desc>
+            <defs>
+              <marker
+                id="identity-arrow"
+                viewBox="0 0 10 10"
+                refX="9"
+                refY="5"
+                markerWidth="7"
+                markerHeight="7"
+                orient="auto-start-reverse"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)" />
+              </marker>
+            </defs>
+            <g id="identity-chain" fill="var(--ink)" font-size="18">
+              <text x="15" y="40">Scoped element</text>
+              <text x="265" y="40">Component instance</text>
+              <text x="575" y="40">Versioned definition</text>
+              <text x="15" y="75" fill="var(--muted)" font-size="16">favorite button</text>
+              <text x="265" y="75" fill="var(--muted)" font-size="16">ProductCard / item 123</text>
+              <text x="575" y="75" fill="var(--muted)" font-size="16">ProductCard / build B</text>
+              <path
+                d="M 175 35 H 245 M 465 35 H 555"
+                fill="none"
+                stroke="var(--accent)"
+                stroke-width="2"
+                marker-end="url(#identity-arrow)"
+              />
+              <text x="190" y="65" font-size="13">part of</text>
+              <text x="475" y="65" font-size="13">renders</text>
+            </g>
+            <g id="repair-scope-evidence">
+              <path
+                d="M 695 95 V 125 H 490 V 150"
+                fill="none"
+                stroke="var(--accent)"
+                stroke-width="2"
+                marker-end="url(#identity-arrow)"
+              />
+              <text x="15" y="125" fill="var(--muted)" font-size="17">
+                Part identity + defect signature + cause evidence
+              </text>
+              <rect
+                x="15"
+                y="160"
+                width="920"
+                height="56"
+                fill="var(--accent-tint)"
+                stroke="var(--accent)"
+              />
+              <text x="35" y="194" fill="var(--ink)" font-size="20">
+                Repair scope: shared template, caller binding or instance data?
+              </text>
+            </g>
+            <g id="component-consumers" fill="var(--ink)" font-size="17">
+              <path
+                d="M 475 217 V 241 H 165 V 255 M 475 241 V 255 M 475 241 H 795 V 255"
+                fill="none"
+                stroke="var(--accent)"
+                stroke-width="2"
+                marker-end="url(#identity-arrow)"
+              />
+              <text x="60" y="285">Component-aware groups</text>
+              <text x="380" y="285">Variant-aware probes</text>
+              <text x="690" y="285">Repair verification</text>
+            </g>
+          </svg>
+        </div>
+        <figcaption>
+          Component membership, source ownership and shared repair cause are separate assertions.
+          Confidence in one does not prove the others.
+        </figcaption>
+      </figure>
+
+      <section id="purpose">
+        <h2>Purpose</h2>
+        <p>
+          Make component identity a first-class shared capability in Propellr. The initial product
+          is component-aware deduplication: turn repeated occurrences into actionable repair scopes
+          without losing evidence. The same model then supports state exploration, agent targeting
+          and verification of shared fixes.
+        </p>
+        <p>
+          <strong>Revised priority:</strong> component attribution becomes the first Jev evaluation,
+          ahead of the general probe-selector experiment in the initial recommendations. Component
+          intelligence itself must work without Jev. The provider earns its place by improving
+          ambiguous attribution over useful deterministic baselines.
+        </p>
+        <p>
+          Preserve the agreed accessibility baseline and independent canonical reference. This plan
+          adds identity and investigation capabilities, not axe-core APIs, new rule coverage or a
+          probabilistic replacement for exact browser checks. Planning is authorized;
+          implementation, dependencies, model spend, PR delivery and production use are not.
+        </p>
+      </section>
+
+      <section id="problem">
+        <h2>Problem</h2>
+        <p>
+          Current reporting groups by exact rule version and scoped target within one document
+          generation. That preserves correctness, but cannot tell an agent whether 80 unlabeled
+          buttons need 80 edits or two. Selector equality, visual similarity and common ancestry
+          cannot answer that question reliably.
+        </p>
+        <div class="scroll" tabindex="0" role="region" aria-label="Component grouping example">
+          <table>
+            <thead>
+              <tr>
+                <th>Observed cases</th>
+                <th>Required interpretation</th>
+                <th>What must not happen</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  70 favorite buttons in ProductCard; 10 in RecommendationTile. Similar markup.
+                </td>
+                <td>Two candidate repair scopes if each template omits its label.</td>
+                <td>Merge unrelated implementations because their DOM looks alike.</td>
+              </tr>
+              <tr>
+                <td>
+                  Desktop/mobile ProductCard variants have different markup but the same faulty
+                  binding.
+                </td>
+                <td>One supported repair scope with separate variant obligations.</td>
+                <td>Split solely on markup, or assume one tested variant proves all others.</td>
+              </tr>
+              <tr>
+                <td>Same IconButton primitive receives an empty label from one caller.</td>
+                <td>Renderer is IconButton; responsibility may lie in caller binding or data.</td>
+                <td>Blame the primitive or group every IconButton finding together.</td>
+              </tr>
+              <tr>
+                <td>Identical sibling cards; one has missing product data.</td>
+                <td>Same definition, different instance-level cause.</td>
+                <td>Treat component membership as proof of a common defect.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          These are target behaviors for new original fixtures, not observed results. Current nine
+          bounded implementations, 96 unimplemented catalog rules, fixture-restricted host and
+          full-scan fallback remain the baseline. Naming evidence currently excludes name text;
+          semantic capture needs a new explicit policy.
+        </p>
+      </section>
+
+      <section id="solution">
+        <h2>Architecture</h2>
+        <p>
+          Introduce a bounded <strong>component evidence model</strong> shared by browser
+          collection, host inference, portable grouping and agent consumers. Begin with ordinary
+          TypeScript records and indexed relations, not a graph database or a platform. Keep
+          authoritative scan output and identity enrichment on separate paths.
+        </p>
+        <figure>
+          <div
+            class="scroll"
+            tabindex="0"
+            role="region"
+            aria-label="Component collection, inference and reporting boundaries"
+          >
+            <svg viewBox="0 0 960 360" role="img" aria-labelledby="boundary-title boundary-desc">
+              <title id="boundary-title">Exact scans stay independent of component inference</title>
+              <desc id="boundary-desc">
+                Browser exact facts feed raw scans and existing gates. Optional component evidence
+                and host-supplied source manifests feed candidate generation. Jev may resolve
+                ambiguous candidates, with abstention. Portable repair groups and agent views
+                reference raw occurrences; no inferred result flows into the existing gate.
+              </desc>
+              <defs>
+                <marker
+                  id="boundary-arrow"
+                  viewBox="0 0 10 10"
+                  refX="9"
+                  refY="5"
+                  markerWidth="7"
+                  markerHeight="7"
+                  orient="auto"
+                >
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)" />
+                </marker>
+              </defs>
+              <g id="exact-lane" fill="var(--ink)" font-size="18">
+                <text x="15" y="35">Browser: exact facts</text>
+                <text x="365" y="35">Raw scans</text>
+                <text x="665" y="35">Existing reports + gates</text>
+                <path
+                  d="M 225 30 H 345 M 480 30 H 645"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="2"
+                  marker-end="url(#boundary-arrow)"
+                />
+                <text x="15" y="72" fill="var(--muted)" font-size="15">
+                  No inference wait. No model-based suppression.
+                </text>
+              </g>
+              <g id="enrichment-lane" fill="var(--ink)" font-size="17">
+                <path d="M 15 100 H 935" stroke="var(--rule)" />
+                <text x="15" y="135">Optional component facts</text>
+                <text x="15" y="164">Host source manifest</text>
+                <path
+                  d="M 255 140 H 325"
+                  stroke="var(--accent)"
+                  stroke-width="2"
+                  marker-end="url(#boundary-arrow)"
+                />
+                <text x="345" y="137">Bounded candidates</text>
+                <text x="345" y="167" fill="var(--muted)" font-size="15">Exact evidence first</text>
+                <path
+                  d="M 555 140 H 625"
+                  stroke="var(--accent)"
+                  stroke-width="2"
+                  marker-end="url(#boundary-arrow)"
+                />
+                <text x="645" y="137">Optional Jev judgment</text>
+                <text x="645" y="167" fill="var(--muted)" font-size="15">
+                  Select, abstain, request evidence
+                </text>
+                <path
+                  d="M 760 185 V 220 H 480 V 252"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="2"
+                  marker-end="url(#boundary-arrow)"
+                />
+                <text x="15" y="220" fill="var(--muted)" font-size="15">
+                  Validated, versioned, state-bound assertions
+                </text>
+              </g>
+              <g id="enrichment-output">
+                <rect
+                  x="15"
+                  y="265"
+                  width="920"
+                  height="65"
+                  fill="var(--accent-tint)"
+                  stroke="var(--accent)"
+                />
+                <text x="35" y="291" fill="var(--ink)" font-size="18">
+                  Repair groups + agent evidence views
+                </text>
+                <text x="35" y="316" fill="var(--muted)" font-size="15">
+                  Reference every occurrence. Expose unknown ownership, conflicts and coverage gaps.
+                </text>
+              </g>
+            </svg>
+          </div>
+          <figcaption>
+            Inference is optional enrichment. Known mappings remain useful offline; a missing
+            provider never blocks a scan or creates a pass.
+          </figcaption>
+        </figure>
+
+        <h3>Identity and evidence contract</h3>
+        <div class="scroll" tabindex="0" role="region" aria-label="Proposed component entities">
+          <table>
+            <thead>
+              <tr>
+                <th>Entity</th>
+                <th>Required meaning</th>
+                <th>Identity boundary</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Definition</td>
+                <td>
+                  Application namespace, definition ID, build/revision, optional source ref and
+                  registered part schema.
+                </td>
+                <td>
+                  Display name, CSS class or role is not a definition ID. No automatic cross-build
+                  continuity.
+                </td>
+              </tr>
+              <tr>
+                <td>Instance</td>
+                <td>
+                  Definition reference if known, session/page/document, epoch-bound element
+                  membership and declared variant/state.
+                </td>
+                <td>
+                  Repeated instances remain distinct. Rerender, list-key reuse, virtualized rows and
+                  navigation invalidate stale mappings.
+                </td>
+              </tr>
+              <tr>
+                <td>Part</td>
+                <td>
+                  Meaningful element role within the component: favorite-control, label, trigger or
+                  error-region.
+                </td>
+                <td>
+                  Part keys are component-local, possibly one-to-many; arbitrary DOM order is not
+                  stable identity.
+                </td>
+              </tr>
+              <tr>
+                <td>Relations</td>
+                <td>
+                  Rendered-by, composed-in, slotted-from and label/content-supplied-by, when
+                  supported by evidence.
+                </td>
+                <td>
+                  DOM parentage differs from framework ownership. Portals, fragments, slots and
+                  external labels need explicit relations or unknowns.
+                </td>
+              </tr>
+              <tr>
+                <td>Attribution assertion</td>
+                <td>
+                  Target and candidate IDs, evidence references, collector/model/rubric versions,
+                  source kind, status and conflict reasons.
+                </td>
+                <td>
+                  Separate source provenance from confidence. Declared, source-linked, inferred,
+                  reviewed and experimentally supported are not interchangeable.
+                </td>
+              </tr>
+              <tr>
+                <td>Repair scope</td>
+                <td>
+                  Proposed owner/callsite or data binding, part, compatible rule/check defect
+                  signature, affected variants and occurrence references.
+                </td>
+                <td>
+                  A shared definition is necessary evidence in some cases, never sufficient proof of
+                  a shared fix.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Inputs derive from strict schemas at the host/portable boundary. Browser analysis imports
+          types only. Use discriminated states for supported, inferred, unknown, conflicting, stale
+          and unavailable results; absence of a candidate is not a negative accessibility verdict. A
+          state digest is correlation metadata, not anonymization.
+        </p>
+
+        <h3>Two evidence paths, one contract</h3>
+        <ol>
+          <li>
+            <strong>Instrumented:</strong> host loads an approved build manifest; a minimal opt-in
+            bridge maps live elements to definition, instance and part IDs. Correlate registration
+            with current document/build. Source locations and callsites stay local unless separately
+            approved for export. Page markers alone are untrusted declarations, not verified source
+            ownership.
+          </li>
+          <li>
+            <strong>Uninstrumented:</strong> collect bounded structural/role/relationship
+            fingerprints and approved local text. Generate candidate component boundaries/templates
+            in code. Unknown templates receive opaque, build-scoped IDs, not invented framework
+            names. Jev may classify membership, parts and variants among those candidates; source
+            identity remains unknown without source evidence.
+          </li>
+        </ol>
+        <p>
+          Start with a framework-neutral manifest fixture. Add one real opt-in Vue integration only
+          after the evidence contract works. Do not scrape private Vue/React internals, assume
+          production DevTools hooks exist, or use nearest DOM ancestor as universal ownership. A
+          host-approved manifest does not attest a hostile page's live execution: source-linked
+          attribution is scoped to the cooperative instrumented application and recorded build
+          provenance, not a security guarantee. Page code can impersonate valid registrations; do
+          not promote these into authorization evidence. Denied frames and closed roots stay
+          unobserved.
+        </p>
+
+        <h3>Grouping is a repair hypothesis, not destructive merging</h3>
+        <p>
+          A candidate key combines application/build scope, supported owner or callsite, part,
+          rule/check version and defect mechanism. Variant conditions refine it. Shared rule ID or
+          name is not enough. Findings spanning multiple targets/components need relationship
+          evidence or remain ungrouped.
+        </p>
+        <ul>
+          <li>
+            Keep the current <code>IssueGroup</code> and <code>applyGate</code> semantics intact.
+            Add a separate versioned component/repair view referencing raw scan and occurrence IDs.
+            Never put probabilistic groups inside the current authoritative group array.
+          </li>
+          <li>
+            Expose counts separately: violation occurrences, existing exact-target issues, supported
+            repair scopes, suggested repair scopes and unattributed occurrences. “Two candidate
+            fixes, 80 occurrences” is allowed; “two confirmed defects” requires cause evidence.
+          </li>
+          <li>
+            Related hypotheses can overlap. Do not sum overlapping groups as unique defects or hide
+            ambiguous members. Each displayed member retains its attribution basis.
+          </li>
+          <li>
+            No transitive union from model similarity: A≈B and B≈C cannot establish A=C. Require
+            common-owner/cause evidence and conflict checks across every admitted member.
+          </li>
+          <li>
+            A template/source mapping establishes membership, not defect cause. Support a shared
+            repair with reviewed binding evidence or a controlled intervention that changes the
+            predicted instances and not controls.
+          </li>
+          <li>
+            Version every matcher and grouping decision. Preserve historical membership and explicit
+            split/supersession; do not rewrite past reports after model changes.
+          </li>
+        </ul>
+        <p>
+          Closing a repair scope requires current evidence for every claimed affected member or
+          explicit removed/inapplicable disposition under reviewed identity and coverage rules.
+          Untested variants, narrower scans, missing targets and partial coverage cannot close a
+          group. Cross-build repair receipts stay separate from existing within-document issue
+          lifecycle.
+        </p>
+
+        <h3>Jev's bounded job</h3>
+        <p>
+          Ask direct questions over code-generated candidates: which component contains this
+          element, which registered part it serves, whether two variants fit a supplied definition,
+          and whether observed evidence supports a particular cause hypothesis. Separate those
+          judgments. Batch questions sharing relevant state; do not send the entire DOM or assume
+          answers within a request depend on one another.
+        </p>
+        <p>
+          Reserve explicit none/insufficient-evidence choices; stay within the 255-option limit
+          including sentinels. Larger catalogs require a deterministic shortlist or measured
+          hierarchical retrieval. Report candidate recall separately from decision accuracy: Jev
+          cannot choose a missing answer. Measure unknown-component discovery, not only matching a
+          conveniently supplied correct candidate.
+        </p>
+        <p>
+          Jev is text-only, not a source inspector or a visual oracle. Its confidence is not a
+          probability that one patch fixes every instance. Page content can steer its decisions.
+          Host checks evidence provenance, allowed IDs, output schema, deadlines and freshness;
+          models never grant permission or waive findings.
+        </p>
+      </section>
+
+      <section id="files" class="files">
+        <h2>Relevant files</h2>
+        <h3>Existing</h3>
+        <ul>
+          <li>
+            <code>src/contracts.ts</code>, <code>src/validation.ts</code>: additive, versioned
+            component evidence/view contracts; keep raw verdicts, coverage, grouping and gate policy
+            separate.
+          </li>
+          <li>
+            <code>src/analysis.ts</code>, <code>src/browser/index.ts</code>: bounded optional
+            collection beside the current reader and scan stability guard. No model SDK or runtime
+            schema imports in browser analysis.
+          </li>
+          <li>
+            <code>src/host/scan.ts</code>, <code>src/host/runtime.ts</code>,
+            <code>src/host/browser.ts</code>: capture identity, authorization, lifecycle, retention
+            and separate enrichment delivery.
+          </li>
+          <li>
+            <code>src/host/requests.ts</code>, <code>src/host/framing.ts</code>,
+            <code>src/host/server.ts</code>, <code>src/host/stream.ts</code>,
+            <code>src/host/client.ts</code>, <code>src/host/cli.ts</code>: eventual opt-in
+            capability, wire correlation, replay/gaps and SDK/CLI support.
+          </li>
+          <li>
+            <code>src/reporting/index.ts</code>: preserve exact grouping and gate recomputation.
+            Component repair view is a separate portable function.
+          </li>
+          <li>
+            <code>test/types/</code>, <code>test/contracts/</code>, <code>test/browser/</code>,
+            <code>test/host/</code>, <code>test/reporting/</code>, <code>test/parity/</code>:
+            negative types, real browsers, transport and raw-result equivalence.
+          </li>
+          <li>
+            <code>package.json</code>, <code>vitest.config.ts</code>, <code>tsconfig*.json</code>,
+            <code>.github/workflows/</code>: real, phase-specific test targets; preserve pins and
+            disabled lifecycle scripts.
+          </li>
+          <li>
+            <code>README.md</code>, <code>PROVENANCE.md</code>,
+            <code>specs/propellr-improvements.md</code>, acceptance/public-contract docs: update
+            only with approved contracts and executed evidence.
+          </li>
+        </ul>
+        <h3>Proposed new files, not created by this plan</h3>
+        <ul>
+          <li>
+            <code>src/components/contracts.ts</code>, <code>src/components/validation.ts</code>,
+            <code>src/components/grouping.ts</code>: portable identities, schema-derived inputs,
+            bounded repair hypotheses.
+          </li>
+          <li>
+            <code>src/browser/components.ts</code>, <code>src/host/components.ts</code>: optional
+            reader/registration bridge and host-owned evidence lifecycle.
+          </li>
+          <li>
+            <code>src/host/component-decisions.ts</code>: narrow provider interface, Jev transport
+            and validated advisory answers. No general provider framework.
+          </li>
+          <li>
+            <code>test/fixtures/components/</code>, <code>test/components/</code>,
+            <code>test/support/component-corpus.ts</code>: owned templates, hidden oracle manifests,
+            evaluator and provenance. Later add one real Vue fixture/bridge here first.
+          </li>
+          <li>
+            <code>bench/components.test.ts</code>, <code>tools/evaluate-components.ts</code>:
+            explicit no-model overhead lane and separately invoked paid evaluation. Missing live
+            approval must fail the requested paid lane.
+          </li>
+          <li>
+            <code>specs/component-intelligence-protocol.md</code>,
+            <code>specs/component-intelligence-validation.md</code>,
+            <code>specs/component-intelligence-evidence/</code>: frozen acceptance, capability
+            matrix and phase-specific raw evidence. No placeholder success artifacts.
+          </li>
+        </ul>
+      </section>
+
+      <section id="phases">
+        <h2>Implementation phases</h2>
+        <p>
+          <strong
+            >Execute only the separately approved phase, in order. Stop at every checkpoint.</strong
+          >
+          Phase 1 is complete pending review; phases 2–4 are unstarted. The initial implementation
+          request authorized phase 1 only. Provider access, source capture and dependency changes
+          have additional gates.
+        </p>
+
+        <div class="phase">
+          <h3>
+            <code class="status">[x]</code> 1. Identity contract and deterministic component proof
+          </h3>
+          <p>
+            Establish useful component-aware deduplication before buying inference. No framework
+            dependency or paid API required.
+          </p>
+          <h4>1.1 Freeze semantics and fixtures</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[x]</code> Agree the current worktree/base without resetting
+              existing research or other worktrees. Write the protocol before implementation:
+              identity lifetimes, ownership relations, evidence trust, repair-scope states, counts,
+              budgets and compatibility/version handling.
+            </li>
+            <li>
+              <code class="status">[x]</code> Create original component fixtures covering the 70/10
+              example, same definition with data defects, nested primitive/caller ownership,
+              desktop/mobile variants, external labels, unrelated lookalikes, same display name in
+              different applications and multiple distinct defects in one component. Use existing
+              naming rules for executable defects; do not add rule coverage.
+            </li>
+            <li>
+              <code class="status">[x]</code> Keep expected definitions, memberships, cause labels
+              and repair outcomes in an independent fixture oracle. Only the instrumented arm may
+              receive its declared manifest. Strip oracle IDs, revealing class names and source
+              metadata from the uninstrumented arm where they would leak answers.
+            </li>
+          </ul>
+          <h4>1.2 Implement bounded evidence and a separate repair view</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[x]</code> Implement strict schemas, portable types and negative
+              type examples for definitions, instances, parts, relations, attribution and repair
+              groups. Validate all references, discriminants, numeric values and array/byte bounds.
+              No <code>any</code> or duplicated input types.
+            </li>
+            <li>
+              <code class="status">[x]</code> Implement host-owned manifest registration and an
+              explicit fixture bridge. Resolve real scoped targets within the current document;
+              validate application/build association and treat forged page registrations as
+              untrusted/conflicting. Do not evaluate uploaded code or read source paths supplied by
+              a page.
+            </li>
+            <li>
+              <code class="status">[x]</code> Collect optional component structure alongside real
+              scans, preserving epoch and transfer guards. Cap enrichment at 128 KiB, 256 observed
+              instances, 32 candidate definitions per target, 64 relations per instance and 2,000
+              additional element visits per capture as proposed starting bounds. Freeze exact
+              truncation rules in the protocol. Exhaustion reports component-evidence gaps without
+              dropping raw findings.
+            </li>
+            <li>
+              <code class="status">[x]</code> Produce a portable repair view from source-linked
+              fixtures and explicit cause evidence. Preserve occurrence references and existing
+              counts/gates. Implement unknown/conflict handling, split hypotheses and common-owner
+              consistency rather than transitive pairwise clustering. Keep free text disabled by
+              default.
+            </li>
+            <li>
+              <code class="status">[x]</code> Support open roots, fragments/multiple roots and
+              same-origin frames where observable. Use explicit bridge relations for slots/portals;
+              without them return uncertain ownership rather than inferred DOM containment. Clear
+              references on navigation, cancellation and disposal.
+            </li>
+          </ul>
+          <h4>1.3 Testing strategy</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[x]</code> Add real <code>pnpm test:components</code> cases to
+              default validation: contracts, corrupt/forged registrations, cross-app collisions,
+              ambiguous part membership, pairwise non-transitivity, evidence exhaustion and exact
+              report/gate preservation. No empty project or optional success stub.
+            </li>
+            <li>
+              <code class="status">[x]</code> Execute collection in Chromium, Firefox and WebKit.
+              Test DOM reorder, removal, rerender, virtualized instance reuse, slot/portal
+              reassignment, frame navigation and mutation during transfer. Stale identity must not
+              attach to a newer occurrence.
+            </li>
+            <li>
+              <code class="status">[x]</code> Run <code>pnpm validate</code>. Compare raw scan
+              semantics with component capture on/off and against current parity cases. If shared
+              browser evaluation changes, run the unchanged <code>pnpm bench:slice</code> once and
+              keep its three-rule scope explicit.
+            </li>
+          </ul>
+          <div class="loop">
+            <p>
+              <strong>Stop for review:</strong> demonstrable component membership and repair
+              grouping on owned instrumented fixtures, explicit unsupported cases, no provider use.
+              A verified mapping alone must not be presented as verified common cause.
+            </p>
+          </div>
+        </div>
+
+        <div class="phase">
+          <h3><code class="status">[]</code> 2. Uninstrumented attribution and Jev evaluation</h3>
+          <p>
+            Test whether semantic inference adds enough value on ambiguous rendered components to
+            justify latency, privacy and operational cost. This phase can reject Jev while
+            preserving phase 1.
+          </p>
+          <h4>2.1 Candidate discovery and controlled comparison</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> Generate candidate boundaries and repeated templates
+              using bounded structural/role/relationship features. Avoid quadratic all-pairs
+              comparison; index structural signatures and compare within capped candidate sets.
+              Retain near-miss alternatives rather than normalizing away semantic differences.
+            </li>
+            <li>
+              <code class="status">[]</code> Freeze 240 adjudicated decision cases: 80 development
+              and 160 held-out, split by application/template family so related variants never cross
+              splits. Cover known catalog matching and unseen component discovery separately. Two
+              reviewers adjudicate membership, part, variant and repair-cause labels separately;
+              preserve genuine ambiguity.
+            </li>
+            <li>
+              <code class="status">[]</code> Compare useful structural heuristics, a native
+              structured-output small LLM, Jev and a Jev-plus-abstention/escalation route on
+              identical permitted evidence. Use instrumented truth only as evaluator oracle in
+              uninstrumented trials. Measure candidate retrieval misses separately from model
+              selection errors.
+            </li>
+          </ul>
+          <h4>2.2 Optional inference boundary</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> Obtain approval for exact provider/model/client,
+              synthetic text disclosure, numeric spend/token/request ceilings and synthetic
+              adversarial tests. Confirm current Jev access/limits, version lifetime, retention and
+              applicable agreement. No distillation or customer-data experiment assumed permitted.
+            </li>
+            <li>
+              <code class="status">[]</code> Add bounded request/response schemas and a host-only
+              adapter. Initially pin <code>jev-1.13.0</code> if still supported; review any SDK
+              before installation or use native HTTP. Explicitly enforce total deadlines,
+              cancellation and retry limits rather than inherit 10-second attempts plus retries.
+              Disable raw-body logs.
+            </li>
+            <li>
+              <code class="status">[]</code> Send minimal approved state and candidate IDs, with
+              complete per-question instructions. Ask component membership, part and cause
+              separately; include abstention. Validate complete answer keys, distributions,
+              candidate membership and finite numbers. Conflicting answers remain conflicts, not a
+              forced winner.
+            </li>
+            <li>
+              <code class="status">[]</code> Cache exact permitted inputs only with
+              application/build, evidence, model, rubric and policy versions. Reuse known
+              definition/variant judgments where equivalent input is established; never reuse raw
+              rule results or instance-specific cause assumptions because two elements look alike.
+            </li>
+          </ul>
+          <h4>2.3 Testing strategy and adoption gate</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> Extend no-key <code>pnpm test:components</code> with
+              actual schema, timeout, malformed response, rate-limit, cancellation, prompt-injection
+              and unavailable-provider cases. These tests verify integration behavior, not model
+              quality.
+            </li>
+            <li>
+              <code class="status">[]</code> After approval, run planned
+              <code
+                >pnpm eval:components -- --provider jev --protocol
+                specs/component-intelligence-protocol.md</code
+              >
+              and the frozen comparison arms. The script must check approval/configuration and fail
+              when invoked without required access; no cached/mock result can count as live
+              inference.
+            </li>
+            <li>
+              <code class="status">[]</code> Report candidate recall, definition/part attribution
+              precision and recall, unknown/abstention rate, calibration, pairwise repair-group
+              precision/recall and overmerge/oversplit counts. Bootstrap uncertainty by application
+              family, not by near-duplicate DOM nodes. Record all attempts and fallback costs.
+            </li>
+            <li>
+              <code class="status">[]</code> Proposed adoption bar to freeze before holdout: at
+              least 98% precision on emitted inferred memberships at at least 60% answer coverage;
+              at least 99% pairwise precision for suggested repair groups; zero observed unsupported
+              automatic cause promotions. Report confidence intervals; this small study cannot
+              certify rare-error rates.
+            </li>
+            <li>
+              <code class="status">[]</code> Require meaningful incremental value: at least 10
+              percentage points more answer coverage than the heuristic at matched precision, or at
+              least 30% lower end-to-end cost or latency than the small LLM at matched
+              quality/coverage. Include collection, candidate generation, queueing and escalations.
+              Freeze which criterion applies before runs; report all metrics.
+            </li>
+            <li>
+              <code class="status">[]</code> Run <code>pnpm validate</code>; retain pinned
+              corpus/rubrics/model IDs, raw responses under approved retention, adjudications and
+              unsupported cases. A changed model or rubric requires re-evaluation, not silent
+              carryover of confidence thresholds.
+            </li>
+          </ul>
+          <div class="loop">
+            <p>
+              <strong>Stop for decision:</strong> adopt Jev only if the frozen evaluation supports
+              it. Missing approval is blocked; weak or inconclusive results leave inference
+              advisory/disabled. No rollout, live website use or probabilistic gate changes follow
+              automatically.
+            </p>
+          </div>
+        </div>
+
+        <div class="phase">
+          <h3>
+            <code class="status">[]</code> 3. Real component ownership and host/agent delivery
+          </h3>
+          <p>
+            Make attribution useful through supported contracts, with one real framework integration
+            and representative repair scopes. Deterministic delivery can proceed after an explicit
+            no-Jev decision; it must not depend on a successful vendor result.
+          </p>
+          <h4>3.1 Validate one opt-in Vue integration</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> Review/pin Vue and any fixture build dependency
+              separately; lifecycle scripts stay disabled. Use documented public registration/ref
+              mechanisms and an explicit manifest. Do not promise transparent automatic extraction
+              from arbitrary production apps.
+            </li>
+            <li>
+              <code class="status">[]</code> Build one real compiled Vue fixture with nested
+              primitives, caller-provided labels, slots, multiple roots, Teleport, conditional
+              variants and keyed lists. Verify render ownership and content/caller responsibility
+              against independently authored source mappings. A plain DOM fixture does not establish
+              Vue support.
+            </li>
+            <li>
+              <code class="status">[]</code> Test missing, stale and conflicting manifests,
+              minified/reused display names and identical component names across applications.
+              Preserve application/build identity. Capture relative source references locally; do
+              not transmit source, props, input values or customer identifiers by default.
+            </li>
+          </ul>
+          <h4>3.2 Deliver additive enrichment without changing authoritative reports</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> Freeze additive capability/version negotiation before
+              touching wire unions. Add a schema-inferred opt-in component-analysis operation using
+              existing admission, operation status, subscription and cancellation patterns; keep all
+              seven existing commands compatible. Old clients must reject unsupported capability
+              requests clearly, not misparse new results.
+            </li>
+            <li>
+              <code class="status">[]</code> Deliver raw scan completion first, then correlated
+              component enrichment with scan ID, document/epoch, evidence generation and
+              availability. Bound enriched results to 192 KiB, retain at most eight result views per
+              session and keep existing 1 MiB reply/65,536-byte request limits. Overflow has
+              explicit component gaps, never omitted raw violations or unbounded attachments.
+            </li>
+            <li>
+              <code class="status">[]</code> Coordinate new work with the host's active-operation,
+              retention and replay policy. One in-flight inference and one coalesced pending request
+              per session; revalidate evidence at completion. Subscription gaps, result eviction and
+              unavailable provider remain explicit. Never replay browser actions on reconnect.
+            </li>
+            <li>
+              <code class="status">[]</code> Expose component membership, repair-scope hypotheses,
+              supporting/conflicting evidence, variant obligations and occurrence references through
+              SDK/CLI and typed agent output. Report “candidate fixes” separately from exact issue
+              counts. No dashboard/UI is in this phase.
+            </li>
+            <li>
+              <code class="status">[]</code> Keep raw counts, <code>applyGate</code>, owner/expiry
+              exceptions and issue lifecycle unchanged. Matcher revisions create a new component
+              view with split/supersession records. Cross-build links require an explicit reviewed
+              lineage map; model confidence cannot establish continuity.
+            </li>
+          </ul>
+          <h4>3.3 Testing strategy</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> Run real Vue fixture collection in
+              Chromium/Firefox/WebKit and host IPC cases for opt-in/off, stale inference, document
+              loss, cancellation, reconnect, event gaps, byte limits and borrowed-resource cleanup.
+              Observe targets after rerender instead of reusing stale handles.
+            </li>
+            <li>
+              <code class="status">[]</code> Exercise the full 80-occurrence/two-repair-scope
+              example through SDK/CLI, plus same-definition/different-cause and
+              different-DOM/same-cause controls. Every member must retain its real rule/check and
+              occurrence evidence. Do not invent one common cause merely to match desired group
+              counts.
+            </li>
+            <li>
+              <code class="status">[]</code> Run <code>pnpm validate</code> with all no-key
+              component/host/reporting cases included. If shared evaluation changes, run original
+              <code>pnpm bench:slice</code> once. Update README, contracts, provenance and
+              improvements ledger only for executed support.
+            </li>
+          </ul>
+          <div class="loop">
+            <p>
+              <strong>Stop for review:</strong> usable component-aware agent/report output, actual
+              opt-in Vue evidence and unchanged enforcement semantics. No React adapter, opaque
+              framework introspection, customer rollout or automatic repair.
+            </p>
+          </div>
+        </div>
+
+        <div class="phase">
+          <h3>
+            <code class="status">[]</code> 4. Variant-aware investigation and repair verification
+          </h3>
+          <p>
+            Reuse component evidence as an agent capability, not just a better report. Prove that
+            repair-scope grouping predicts useful work and verifies its limits.
+          </p>
+          <h4>4.1 Component-guided probes and controlled repairs</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> Select representative instances by supported
+              definition, part, variant and state, plus deliberately dissimilar/outlier instances.
+              Schedule approved optional probes; preserve mandatory scans for every scope claimed
+              evaluated. A representative is an exploration choice, never proof that omitted
+              instances pass.
+            </li>
+            <li>
+              <code class="status">[]</code> Extend only reviewed fixture playbook bindings as
+              needed. Use existing trusted dialog actions initially; new keyboard/interaction
+              oracles need their own approval and tests. No model-generated selectors, arbitrary
+              JavaScript actions or permissions inferred from page content.
+            </li>
+            <li>
+              <code class="status">[]</code> Apply predetermined source changes in disposable owned
+              fixture builds: repair the shared template, repair only one caller, and repair one
+              data record. Observe predicted affected members and unaffected controls independently.
+              Do not substitute a per-node DOM patch for proof of a shared source fix.
+            </li>
+            <li>
+              <code class="status">[]</code> Emit a repair receipt: source/build lineage, asserted
+              repair scope, actual changed source reference, tested instances/variants, pre/post
+              scans and remaining unknowns. One fixed example cannot close a group. Removal, missing
+              coverage and untested variants remain explicit dispositions.
+            </li>
+            <li>
+              <code class="status">[]</code> For a real-agent lane, consume these typed views in the
+              separately proposed realtime/Stagehand conformance harness once its same-page identity
+              and lifecycle work is approved and implemented. Do not build a second observer or
+              claim live agent usefulness from scripted tests. Model approval and numeric spend cap
+              remain separate.
+            </li>
+          </ul>
+          <h4>4.2 Testing strategy and performance</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> Run controlled intervention tests across browsers,
+              including a counterexample that splits a previously suggested group and a cross-build
+              case with no lineage map. Require zero false group closure, source-owner promotion or
+              silent occurrence loss in executed cases.
+            </li>
+            <li>
+              <code class="status">[]</code> Add planned <code>pnpm bench:components</code>: frozen
+              200- and 1,000-element owned fixtures, 10/100 repeated instances, same implemented
+              rules and settled states. Two warm-ups, 30 measured scans per configuration/browser
+              and a 10-minute Chromium retention soak. Compare enrichment off, deterministic
+              enrichment and separately approved inference; retain failures/outliers. Preserve the
+              current 96-occurrence and other reader budgets: freeze rule selections and
+              passing/failing instance mixes, retain partial results where limits are exceeded, and
+              never treat truncated findings as a speed win or complete repair verification.
+            </li>
+            <li>
+              <code class="status">[]</code> Measure collection, transfer, candidate generation,
+              inference, grouping and delivery separately and end to end; record CPU, retained
+              references, memory, p50/p95 and unavailable metrics. Proposed no-model overhead
+              budget: additional p95 time no greater than max(10 ms, 20% of baseline p95) for each
+              frozen fixture. Freeze before runs; no post-hoc loosening.
+            </li>
+            <li>
+              <code class="status">[]</code> Measure duplicate model work avoided, cost per
+              correctly attributed occurrence and per verified repair scope, useful states per agent
+              action and actual reviewer corrections. Fewer groups is not a quality metric. Report
+              reduced inference separately from unchanged full-scan work; no claimed incremental or
+              full-catalog speedup.
+            </li>
+            <li>
+              <code class="status">[]</code> Run <code>pnpm validate</code> and, only when its
+              prerequisite harness exists and access is approved, a component-focused real-agent
+              conformance lane with fixed tasks, model, step limits and repeated trials. Require
+              actual tool consumption and independently verified outcomes.
+            </li>
+          </ul>
+          <div class="loop">
+            <p>
+              <strong>Stop:</strong> review demonstrated repair prediction, agent usefulness,
+              overhead and remaining coverage. Further frameworks, autonomous patching, model-guided
+              enforcement, releases and enterprise deployment require new approval.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="validation">
+        <h2>Acceptance and validation commands</h2>
+        <p>
+          Existing commands use pinned Node 26.8.2 and project-scoped PNPM 12.4.1. New commands
+          below are planned and must execute real cases when introduced. Phase 1 checks have run
+          (see evidence); phase 2–4 commands remain planned.
+        </p>
+        <ul class="checklist">
+          <li>
+            <code class="status">[x]</code>
+            <code>npm exec --yes --package=pnpm@12.4.1 -- pnpm validate</code>: source/type scopes,
+            lint, required Oxfmt, current suites and each implemented no-key component lane.
+          </li>
+          <li>
+            <code class="status">[x]</code> <code>pnpm test:components</code>: identity, real
+            collection, provenance, grouping, unknowns and lifecycle, wired into default validation
+            in phase 1.
+          </li>
+          <li>
+            <code class="status">[]</code>
+            <code
+              >pnpm eval:components -- --provider jev --protocol
+              specs/component-intelligence-protocol.md</code
+            >: live approved synthetic evaluation, introduced in phase 2, never a default-CI paid
+            target.
+          </li>
+          <li>
+            <code class="status">[]</code> <code>pnpm bench:components</code>: frozen
+            equivalent-work enrichment overhead and retention protocol, introduced in phase 4.
+            Original <code>pnpm bench:slice</code> remains unchanged.
+          </li>
+          <li>
+            <code class="status">[x]</code> <code>git diff --check</code>; phase-specific artifact
+            hashes and evidence manifests; verify no canonical changes, dependency drift, customer
+            data or hidden paid/default-CI calls.
+          </li>
+          <li>
+            <code class="status">[x]</code> Update this plan with append-only metadata and validate
+            using
+            <code
+              >python3 /Users/tk/.agents/skills/planf3/scripts/validate_plan.py
+              specs/propellr-component-intelligence.html --previous &lt;pre-edit-copy&gt;</code
+            >.
+          </li>
+        </ul>
+        <div class="loop">
+          <p>
+            <strong>Completion is phase-specific evidence review, not automatic shipping.</strong> A
+            failed or blocked requirement stays visible. Fix and rerun genuine failures; do not
+            weaken expected outcomes, rerun until lucky, or advance beyond an approval boundary.
+          </p>
+        </div>
+      </section>
+
+      <section id="notes">
+        <h2>Decisions, dependencies and exclusions</h2>
+        <h3>Relationship to existing work</h3>
+        <p>
+          Phases 1–2 can run against explicit scans without waiting for continuous observation or
+          the remaining rule catalog. Phase 3 needs bounded host delivery; it must coordinate with
+          any concurrent realtime contract changes rather than duplicate schedulers. Phase 4's
+          real-agent lane depends on approved same-page conformance, but scripted
+          source-intervention tests do not.
+        </p>
+        <p>
+          This plan promotes component inference from a later reporting suggestion into shared
+          architecture. General contextual review and prose claim checking remain useful follow-ups;
+          they are not extra requirements hidden inside this component slice.
+        </p>
+        <h3>Approval gates</h3>
+        <ul>
+          <li>
+            Freeze protocol bounds, metrics, corpus split and thresholds before
+            implementation/evaluation. Proposed numeric gates here are not measured results or
+            spending authorization.
+          </li>
+          <li>
+            Approve provider credentials, exact models, client dependencies, exported synthetic
+            fields, region/retention and numeric budget before live inference. No external image
+            generation needed.
+          </li>
+          <li>
+            Review TypeSafe's applicable MCA for output reuse, model distillation and adversarial
+            testing. No assumption that Jev labels can train a replacement model. The architecture
+            stays provider-neutral and useful offline.
+          </li>
+          <li>
+            Approve Vue/test dependencies and opt-in source registration separately. No silent
+            broadening to customer repositories, live apps, global tools or daily-driver browsers.
+          </li>
+        </ul>
+        <h3>Key risks and responses</h3>
+        <ul>
+          <li>
+            <strong>Missing candidates:</strong> benchmark candidate recall and boundary discovery.
+            No model can recover an omitted component through a closed-set answer.
+          </li>
+          <li>
+            <strong>Wrong shared cause:</strong> separate definition/part recognition from repair
+            responsibility; test caller and instance-data counterexamples and controlled source
+            interventions.
+          </li>
+          <li>
+            <strong>Unknown frameworks:</strong> structural membership can be useful while
+            framework/source ownership stays unknown. Never manufacture source files from rendered
+            markup.
+          </li>
+          <li>
+            <strong>False confidence:</strong> evaluate grouped holdouts, uncertainty and selective
+            prediction. Stable model answers and type-safe outputs do not prove identity.
+          </li>
+          <li>
+            <strong>Privacy and prompt injection:</strong> minimize capture, retain source/props
+            locally by default, redact before egress and preserve deterministic grants. Redaction
+            that removes essential evidence must cause abstention.
+          </li>
+          <li>
+            <strong>Asynchronous staleness:</strong> current scan epochs are not perpetual
+            freshness. Recollect or verify current bindings before acting; continuous observation
+            requires its separate implemented contract.
+          </li>
+          <li>
+            <strong>Cost/latency:</strong> published Jev limits are currently 1,200 requests/minute
+            and 250,000 tokens/second, subject to change. Batch by relevant evidence, not per DOM
+            node. No network calls on the exact scan critical path.
+          </li>
+        </ul>
+        <h3>Deliberate exclusions</h3>
+        <p>
+          No graph database, package split, generic plugin platform, additional rule batch, visual
+          component recognition, closed-root access, automatic cross-origin injection, React
+          adapter, universal production-framework introspection, learned rule skipping, inferred
+          gate exceptions, source patch generation, autonomous merging or production deployment.
+        </p>
+        <h3>Research grounding</h3>
+        <p>
+          <a href="jev-brief.md">Jev brief</a> records reviewed API limits, failure modes, SDK
+          defaults, legal constraints and primary sources. Relevant patterns:
+          <a href="https://docs.typesafe.ai/cookbooks/entity_alignment">entity alignment</a>,
+          <a href="https://docs.typesafe.ai/cookbooks/skill_suggestion"
+            >closed-set candidate selection</a
+          >
+          and
+          <a href="https://docs.typesafe.ai/model-jaggedness/jev-1.13">documented failure modes</a>.
+          Their examples do not establish component-attribution accuracy. Novelty here is a product
+          hypothesis about evidence-backed repair scope, not a prior-art or competitor claim.
+        </p>
+      </section>
+
+      <section id="amendments">
+        <h2>Amendments</h2>
+        <p>None. New proposed plan; execution not authorized.</p>
+        <p>
+          2026-09-23, phase 1 build: protocol written before implementation, then clarified that an
+          oversized capture and a scope-unavailable scan yield <code>unavailable</code> evidence.
+          Resolver logic lives in <code>src/components/attribution.ts</code>, beside the proposed
+          files. One unreproduced existing host timing failure and oracle/fixture corrections are
+          recorded in the <a href="component-intelligence-validation.md">evidence</a>. Phases 2–4
+          remain unapproved.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

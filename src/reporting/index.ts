@@ -24,7 +24,8 @@ export const gatePolicySchema = z.strictObject({
   ),
 });
 export type GatePolicy = z.infer<typeof gatePolicySchema>;
-function canonical(value: unknown): string {
+// Stable key encoding shared by exact reporting and separate component views.
+export function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
   if (value !== null && typeof value === "object")
     return `{${Object.entries(value)

@@ -25,5 +25,5 @@ jobs:
         run: echo "PROPELLR_REFERENCE_CACHE=$RUNNER_TEMP/propellr-reference/axe-core-4.13.0" >> "$GITHUB_ENV"
       - name: Obtain independently integrity-pinned reference outside workspace
         run: npm exec --yes --package=pnpm@12.4.1 -- pnpm reference:prepare
-      - name: Build, types, lint, required formatting, contracts, host, playbooks, parity and reporting
+      - name: Build, types, lint, required formatting, contracts, host, playbooks, parity, components and reporting
         run: npm exec --yes --package=pnpm@12.4.1 -- pnpm validate

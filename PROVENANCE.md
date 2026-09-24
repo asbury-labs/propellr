@@ -124,3 +124,12 @@ Exact three-engine assertions preserve both implementations' outcomes and check
 evidence; original expectations are unchanged. These cases are not parity matches.
 See `specs/propellr-improvements.md` (IMP-001/002) and
 `specs/native-form-naming-validation.md`. Historical archives remain unchanged.
+
+## Component intelligence, phase 1
+
+`src/components/`, `src/browser/components.ts` and `src/host/components.ts` are
+original Propellr code. No axe-core, framework, DevTools or model source was read or
+adapted; no dependency was added. The `propellr-bridge/1` data-attribute bridge,
+manifest schema, resolver and repair grouping follow
+`specs/component-intelligence-protocol.md`. `test/fixtures/components/` holds
+original fixtures and a separately hand-authored oracle, not upstream or customer data.

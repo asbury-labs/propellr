@@ -8,6 +8,7 @@
     "test/support/**/*.ts",
     "test/parity/**/*.ts",
     "test/reporting/**/*.ts",
+    "test/components/**/*.ts",
     "bench/**/*.ts",
     "tools/**/*.ts",
     "vite.config.ts",

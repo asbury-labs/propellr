@@ -15,6 +15,7 @@ import { composedContains, parent, visible, name } from "./naming.js";
 import type { NamingBudget } from "./naming.js";
 import { evaluateNamingRule, namingApplicability } from "./naming-rules.js";
 import { implementedRules, namingRules } from "../analysis.js";
+import { captureComponents } from "./components.js";
 
 interface Fact {
   readonly node: Element;
@@ -586,7 +587,9 @@ export function createAnalysis(): BrowserAnalysis {
             }
           : { rule, state: "inapplicable" };
     });
-    if (new TextEncoder().encode(JSON.stringify({ rules, gaps })).byteLength > 131_072) {
+    const raw = (): BrowserScanOutput => {
+      if (new TextEncoder().encode(JSON.stringify({ rules, gaps })).byteLength <= 131_072)
+        return { rules, gaps };
       const reason = diagnostic(
         "evidence-limit",
         "Results exceed 128 KiB retention budget; no usable evaluation retained",
@@ -599,8 +602,18 @@ export function createAnalysis(): BrowserAnalysis {
       return new TextEncoder().encode(JSON.stringify(fallback)).byteLength <= 131_072
         ? fallback
         : { rules: [], gaps: [reason] };
-    }
-    return { rules, gaps };
+    };
+    const output = raw();
+    if (!input.components) return output;
+    // Enrichment reads the final raw results; it cannot add, drop or reorder findings.
+    const violations = output.rules.flatMap((result) =>
+      result.state === "evaluated"
+        ? result.occurrences
+            .filter((occurrence) => occurrence.outcome === "violation")
+            .map((occurrence) => occurrence.target)
+        : [],
+    );
+    return { ...output, components: captureComponents(facts, violations, unreadScope) };
   }
   return { scan, finish };
 }
