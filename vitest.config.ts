@@ -19,6 +19,16 @@ export default defineConfig({
         test: { name: "reporting", environment: "node", include: ["test/reporting/**/*.test.ts"] },
       },
       {
+        // Explicit evaluation lane; never selected by pnpm validate.
+        test: {
+          name: "evaluation",
+          environment: "node",
+          include: ["tools/**/*.eval.ts"],
+          testTimeout: 600_000,
+          fileParallelism: false,
+        },
+      },
+      {
         test: {
           name: "components",
           environment: "node",

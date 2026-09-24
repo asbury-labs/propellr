@@ -244,6 +244,18 @@ for the compiled fixture; `.vue` script blocks are not `tsc`-checked. See the
 [delivery protocol](specs/component-delivery-protocol.md) and
 [evidence](specs/component-delivery-validation.md).
 
+## Uninstrumented attribution and inference evaluation (phase 2)
+
+`scanComponents(..., { structure: true })` adds text-free structural fingerprints
+(`propellr-structure-capture/1`) and `discoverTemplates` offers structural suggestions
+(`structural-template/1`), never supported scopes. `src/host/component-decisions.ts` is a
+host-only, unwired adapter for TypeSafe's Jev (`jev-1.13.0`, native HTTPS, strict validation,
+bounded retries and deadline). **Jev is not adopted:** no provider, spend or terms approval
+exists and no live call has been made. `pnpm eval:components -- --provider heuristic --split dev`
+runs the heuristic baseline; `jev`, `llm` and the sealed holdout exit 2 without approval. See the
+[inference protocol](specs/component-inference-protocol.md) and
+[evidence](specs/component-inference-validation.md).
+
 ## Boundaries and limits
 
 - `src/contracts.ts`: portable public types; verdicts, coverage, groups and gate
@@ -316,6 +328,8 @@ exceptions do not suppress project errors or change tool pins.
 - [Component intelligence evidence](specs/component-intelligence-validation.md)
 - [Component delivery protocol](specs/component-delivery-protocol.md)
 - [Component delivery evidence](specs/component-delivery-validation.md)
+- [Component inference protocol](specs/component-inference-protocol.md)
+- [Component inference evidence](specs/component-inference-validation.md)
 - [Provenance](PROVENANCE.md)
 
 Canonical axe-core remains independent and untouched, never a dependency or the

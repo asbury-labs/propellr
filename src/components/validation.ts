@@ -179,6 +179,59 @@ export const captureSchema = z
   .readonly()
   .refine(withinBytes, "Component capture exceeds 128 KiB");
 
+// Text-free structural fingerprints for the uninstrumented heuristic and inference arms.
+const shapeSchema = z.string().regex(/^[0-9a-f]{8}$/);
+export const structureSchema = z
+  .discriminatedUnion("state", [
+    z
+      .strictObject({
+        schema: z.literal("propellr-structure-capture/1"),
+        collector: versionRefSchema,
+        state: z.literal("available"),
+        targets: z
+          .array(
+            z
+              .strictObject({
+                target: targetSchema,
+                chain: z
+                  .array(
+                    z
+                      .strictObject({
+                        distance: z.number().int().min(0).max(8),
+                        label: z
+                          .string()
+                          .max(64)
+                          .regex(/^[A-Za-z][A-Za-z0-9._-]*(\|[a-z]+)?$/),
+                        shape: shapeSchema,
+                        repeats: z.number().int().min(0).max(2000),
+                        target: targetSchema.optional(),
+                      })
+                      .readonly(),
+                  )
+                  .min(1)
+                  .max(9)
+                  .readonly(),
+              })
+              .readonly(),
+          )
+          .max(96)
+          .readonly(),
+      })
+      .readonly(),
+    z
+      .strictObject({
+        schema: z.literal("propellr-structure-capture/1"),
+        collector: versionRefSchema,
+        state: z.literal("unavailable"),
+        reason: diagnosticSchema,
+      })
+      .readonly(),
+  ])
+  .refine(
+    (value) => utf8Bytes(JSON.stringify(value)) <= 65_536,
+    "Structure capture exceeds 64 KiB",
+  );
+
 // Host-resolved evidence. Keys are evidence-local; no page token is identity by itself.
 const key = (prefix: string) => z.string().regex(new RegExp(`^${prefix}[0-9]{1,4}$`));
 const provenanceSchema = z.enum(["declared", "source-linked"]);
@@ -399,3 +452,4 @@ export type ValidatedBuildRef = z.infer<typeof buildRefSchema>;
 export type ValidatedCapture = z.infer<typeof captureSchema>;
 export type ValidatedEvidence = z.infer<typeof evidenceSchema>;
 export type ValidatedBinding = z.infer<typeof bindingSchema>;
+export type ValidatedStructure = z.infer<typeof structureSchema>;

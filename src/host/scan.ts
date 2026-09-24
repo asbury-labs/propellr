@@ -60,7 +60,11 @@ export async function collectScan(
   signal: AbortSignal,
   expectedDocument = target.documentId,
   components?: BrowserScanInput["components"],
-): Promise<{ readonly result: ScanResult; readonly capture?: unknown }> {
+): Promise<{
+  readonly result: ScanResult;
+  readonly capture?: unknown;
+  readonly structure?: unknown;
+}> {
   const started = performance.now();
   const id = `scan_${randomUUID()}` as ScanId;
   const epoch = ++target.scanEpoch;
@@ -164,7 +168,11 @@ export async function collectScan(
           ? { state: "partial", gaps: [first, ...output.gaps.slice(1)] }
           : { state: "complete" },
     };
-    return output.components === undefined ? { result } : { result, capture: output.components };
+    return {
+      result,
+      ...(output.components === undefined ? {} : { capture: output.components }),
+      ...(output.structure === undefined ? {} : { structure: output.structure }),
+    };
   } catch (error) {
     // Context destruction can reject any browser await before its following guard runs.
     guard();

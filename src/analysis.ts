@@ -7,7 +7,7 @@ import type {
   VersionRef,
   JsonObject,
 } from "./contracts.js";
-import type { ComponentCapture } from "./components/contracts.js";
+import type { ComponentCapture, StructureCapture } from "./components/contracts.js";
 
 export const sliceRules = ["button-name", "target-size", "landmark-one-main"] as const;
 export const namingRules = [
@@ -21,6 +21,7 @@ export const namingRules = [
 export const implementedRules = [...sliceRules, ...namingRules] as const;
 export const engineVersion = { id: "propellr-slice", version: "0.3" } as const;
 export const componentCollector = { id: "propellr-bridge", version: "1" } as const;
+export const structureCollector = { id: "propellr-structure", version: "1" } as const;
 export function sixRuleRequest(target: Target, mode: ScanRequest["mode"] = "full"): ScanRequest {
   return {
     mode,
@@ -42,12 +43,16 @@ export interface BrowserScanInput {
   readonly target: Target;
   readonly rules: NonEmpty<{ readonly rule: VersionRef; readonly options: JsonObject }>;
   // Optional enrichment in the same call; never changes rules, gaps or coverage.
-  readonly components?: { readonly bridge: "propellr-bridge/1" };
+  readonly components?: {
+    readonly bridge: "propellr-bridge/1";
+    readonly structure?: "propellr-structure/1";
+  };
 }
 export interface BrowserScanOutput {
   readonly rules: readonly RuleResult[];
   readonly gaps: readonly Diagnostic[];
   readonly components?: ComponentCapture;
+  readonly structure?: StructureCapture;
 }
 export interface BrowserAnalysis {
   scan(input: BrowserScanInput): BrowserScanOutput;
