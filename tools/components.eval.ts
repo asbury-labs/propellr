@@ -19,6 +19,7 @@ const approvalSchema = z.strictObject({
   syntheticDisclosureOnly: z.literal(true),
   maxRequests: z.number().int().min(1).max(1000),
   maxSpendUsd: z.number().positive().max(10),
+  pricePerMillionInputTokensUsd: z.number().positive().max(100),
 });
 
 test("component attribution evaluation", { timeout: 600_000 }, async () => {
@@ -56,18 +57,22 @@ test("component attribution evaluation", { timeout: 600_000 }, async () => {
         apiKey: process.env["TYPESAFE_API_KEY"]!,
         policy: { id: "component-eval", version: "1" },
         evidence: { id: "propellr-structure-capture", version: "1" },
+        budget: approval,
       });
       const decisions = [];
-      for (const run of runs) {
+      // The client enforces request and spend ceilings; exhaustion stops the lane.
+      lanes: for (const run of runs) {
         if (run.structure.state !== "available") continue;
         for (const entry of run.structure.targets) {
-          if (decisions.length >= approval.maxRequests) break;
-          decisions.push(
-            await client.decide(decisionCase(entry.chain), AbortSignal.timeout(10_000)),
+          const result = await client.decide(
+            decisionCase(entry.chain),
+            AbortSignal.timeout(10_000),
           );
+          decisions.push(result);
+          if (result.state === "failed" && result.code === "budget-exhausted") break lanes;
         }
       }
-      report["jev"] = { model: decisionModel, approval, decisions };
+      report["jev"] = { model: decisionModel, approval, usage: client.usage, decisions };
     }
     await mkdir(new URL("../artifacts/components/", import.meta.url), { recursive: true });
     await writeFile(

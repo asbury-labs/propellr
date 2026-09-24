@@ -9,6 +9,7 @@ export const decisionModel = "jev-1.13.0";
 export const decisionRubric = { id: "component-attribution-questions", version: "1" } as const;
 const sentinels = ["none", "insufficient-evidence"] as const;
 const REQUEST_BYTES = 65_536;
+const RESPONSE_BYTES = 262_144;
 type Failure = Extract<DecisionResult, { state: "failed" }>["code"];
 const CACHE_ENTRIES = 256;
 
@@ -22,6 +23,12 @@ export interface DecisionClientOptions {
   // Plain HTTP is accepted only for an explicit loopback test endpoint.
   readonly allowLoopback?: boolean;
   readonly fetch?: typeof fetch;
+  // Approved ceilings. Every attempt counts; spend uses the approved price and reported usage.
+  readonly budget: {
+    readonly maxRequests: number;
+    readonly maxSpendUsd: number;
+    readonly pricePerMillionInputTokensUsd: number;
+  };
 }
 const probability = z.number().finite().min(0).max(1);
 const choiceAnswer = z
@@ -68,7 +75,8 @@ export type DecisionResult =
         | "cancelled"
         | "unavailable"
         | "invalid-response"
-        | "request-limit";
+        | "request-limit"
+        | "budget-exhausted";
       readonly attempts: number;
     };
 
@@ -143,12 +151,33 @@ function validateAnswers(
     : undefined;
 }
 
+// Bounded body read: an oversized response is abandoned before parsing, never buffered whole.
+async function readLimited(response: Response): Promise<string | undefined> {
+  const reader = response.body?.getReader();
+  if (!reader) return "";
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > RESPONSE_BYTES) {
+      await reader.cancel().catch(() => {});
+      return undefined;
+    }
+    chunks.push(value);
+  }
+  return Buffer.concat(chunks).toString("utf8");
+}
+
 export class DecisionClient {
   private readonly cache = new Map<string, Extract<DecisionResult, { state: "answered" }>>();
   private readonly endpoint: URL;
   private readonly deadlineMs: number;
   private readonly maxAttempts: number;
   private readonly send: typeof fetch;
+  private requests = 0;
+  private spent = 0;
 
   constructor(private readonly options: DecisionClientOptions) {
     const endpoint = new URL(options.endpoint);
@@ -172,6 +201,15 @@ export class DecisionClient {
       .max(3)
       .parse(options.maxAttempts ?? 3);
     this.send = options.fetch ?? fetch;
+    z.strictObject({
+      maxRequests: z.number().int().min(1).max(1000),
+      maxSpendUsd: z.number().positive().max(10),
+      pricePerMillionInputTokensUsd: z.number().positive().max(100),
+    }).parse(options.budget);
+  }
+
+  get usage(): { readonly requests: number; readonly spentUsd: number } {
+    return { requests: this.requests, spentUsd: this.spent };
   }
 
   async decide(input: DecisionCase, signal: AbortSignal): Promise<DecisionResult> {
@@ -197,8 +235,16 @@ export class DecisionClient {
     const stop = (): Failure => (signal.aborted ? "cancelled" : "timeout");
     let attempts = 0;
     let last: Failure = "unavailable";
+    // Pre-send upper bound: byte-level tokens never outnumber the request's UTF-8 bytes, so a
+    // call that passes this check cannot push spend past the cap unless usage is over-reported.
+    const { maxRequests, maxSpendUsd, pricePerMillionInputTokensUsd: price } = this.options.budget;
+    const estimate = (Buffer.byteLength(body, "utf8") * price) / 1_000_000;
     while (attempts < this.maxAttempts) {
       if (combined.aborted) return { state: "failed", code: stop(), attempts };
+      if (this.requests >= maxRequests || this.spent + estimate > maxSpendUsd)
+        return { state: "failed", code: "budget-exhausted", attempts };
+      this.requests++;
+      this.spent += estimate;
       attempts++;
       let response: Response;
       try {
@@ -227,13 +273,16 @@ export class DecisionClient {
       }
       let value: unknown;
       try {
-        value = response.ok ? await response.json() : undefined;
+        const text = response.ok ? await readLimited(response) : undefined;
+        value = text === undefined ? undefined : JSON.parse(text);
       } catch {
         if (combined.aborted) return { state: "failed", code: stop(), attempts };
         value = undefined;
       }
       const valid = validateAnswers(input, value);
       if (!valid) return { state: "failed", code: "invalid-response", attempts };
+      // Over-reported usage is charged in full, so later calls stop at the cap.
+      this.spent += Math.max(0, (valid.usage.input_tokens * price) / 1_000_000 - estimate);
       const answered = {
         state: "answered",
         model: valid.model,

@@ -3,7 +3,9 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { spawnSync } from "node:child_process";
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { decisionCase } from "../../src/components/discovery.js";
+import { decisionCase, discoverTemplates } from "../../src/components/discovery.js";
+import { structureCollector } from "../../src/analysis.js";
+import type { OccurrenceId, PageId, ScanId, ScanResult } from "../../src/contracts.js";
 import type { DecisionCase } from "../../src/components/discovery.js";
 import { BrowserTarget, browserTypes } from "../../src/host/browser.js";
 import { ComponentRegistry, scanComponents } from "../../src/host/components.js";
@@ -107,6 +109,8 @@ test("chromium: page-controlled roles never reach a provider request", async () 
     const body = JSON.stringify(decisionRequest(decisionCase(chain)));
     expect(body).not.toContain("ignore");
     expect(body).not.toContain("choose-ancestor");
+    // Target paths stay host-side for joining; no selector or page ID reaches a request.
+    expect(body).not.toMatch(/#n0|nth-of-type|page_|document-/);
   } finally {
     await target.release();
     await context.close();
@@ -114,7 +118,66 @@ test("chromium: page-controlled roles never reach a provider request", async () 
   }
 });
 
+test("suggested groups sharing a container shape keep distinct opaque IDs", () => {
+  const at = (selector: string) => ({
+    pageId: "page_x" as PageId,
+    documentId: "document-x",
+    path: [{ kind: "element" as const, selector }],
+  });
+  const container = {
+    distance: 1,
+    label: "article",
+    shape: "0000000a",
+    repeats: 10,
+    target: at("#card"),
+  };
+  const occurrence = (id: string, selector: string, kind: string) => ({
+    id: id as OccurrenceId,
+    target: at(selector),
+    impact: "critical" as const,
+    outcome: "violation" as const,
+    evidence: [{ kind, observed: { failed: true }, explanation: "test" }],
+  });
+  const rule = (id: string) => ({ id, version: "4.13.0" });
+  const scan = {
+    id: "scan_x" as ScanId,
+    epoch: 1,
+    rules: [
+      {
+        rule: rule("button-name"),
+        state: "evaluated",
+        occurrences: [occurrence("b1", "#b", "name")],
+      },
+      {
+        rule: rule("image-alt"),
+        state: "evaluated",
+        occurrences: [occurrence("i1", "#i", "naming-checks")],
+      },
+    ],
+  } as unknown as ScanResult;
+  const discovery = discoverTemplates(scan, {
+    schema: "propellr-structure-capture/1",
+    collector: structureCollector,
+    state: "available",
+    targets: [
+      {
+        target: at("#b"),
+        chain: [{ distance: 0, label: "button", shape: "0000000b", repeats: 10 }, container],
+      },
+      {
+        target: at("#i"),
+        chain: [{ distance: 0, label: "img", shape: "0000000c", repeats: 10 }, container],
+      },
+    ],
+  });
+  if (discovery.state !== "available") throw new Error("unavailable");
+  expect(discovery.groups).toHaveLength(2);
+  expect(new Set(discovery.groups.map(({ id }) => id)).size).toBe(2);
+  expect(discovery.groups.every(({ id }) => id.startsWith("shape:0000000a:"))).toBe(true);
+});
+
 describe("decision adapter without keys", () => {
+  const budget = { maxRequests: 100, maxSpendUsd: 1, pricePerMillionInputTokensUsd: 0.042 };
   const input: DecisionCase = {
     target: "button",
     chain: [
@@ -168,13 +231,21 @@ describe("decision adapter without keys", () => {
     const port = (server.address() as AddressInfo).port;
     return {
       hits: () => hits,
-      client: (options: { deadlineMs?: number; maxAttempts?: number; evidence?: string } = {}) =>
+      client: (
+        options: {
+          deadlineMs?: number;
+          maxAttempts?: number;
+          evidence?: string;
+          budget?: typeof budget;
+        } = {},
+      ) =>
         new DecisionClient({
           endpoint: `http://127.0.0.1:${port}/v1/systemone`,
           apiKey: "test-key",
           policy: { id: "test", version: "1" },
           evidence: { id: "structure", version: options.evidence ?? "1" },
           allowLoopback: true,
+          budget: options.budget ?? budget,
           ...(options.deadlineMs ? { deadlineMs: options.deadlineMs } : {}),
           ...(options.maxAttempts ? { maxAttempts: options.maxAttempts } : {}),
         }),
@@ -355,6 +426,7 @@ describe("decision adapter without keys", () => {
       evidence: { id: "structure", version: "1" },
       allowLoopback: true,
       maxAttempts: 2,
+      budget,
     });
     expect(await refused.decide(input, signal())).toMatchObject({
       state: "failed",
@@ -363,11 +435,70 @@ describe("decision adapter without keys", () => {
     });
   });
 
+  test("request and spend ceilings stop sending before the provider is called", async () => {
+    const { client, hits } = await serve((_, response, hit) =>
+      json(
+        response,
+        200,
+        valid(hit === 3 ? { usage: { input_tokens: 500_000, output_tokens: 0 } } : {}),
+      ),
+    );
+    const bytes = Buffer.byteLength(JSON.stringify(decisionRequest(input)), "utf8");
+    const bound = (bytes * 0.042) / 1_000_000;
+    // Room for one request-byte upper bound, not two.
+    const spend = client({
+      budget: { maxRequests: 100, maxSpendUsd: bound * 1.5, pricePerMillionInputTokensUsd: 0.042 },
+    });
+    expect(await spend.decide(input, signal())).toMatchObject({ state: "answered" });
+    expect(await spend.decide({ ...input, target: "a" }, signal())).toMatchObject({
+      state: "failed",
+      code: "budget-exhausted",
+    });
+    expect(hits()).toBe(1);
+    expect(spend.usage.spentUsd).toBeLessThanOrEqual(bound * 1.5);
+    const requests = client({
+      budget: { maxRequests: 1, maxSpendUsd: 1, pricePerMillionInputTokensUsd: 0.042 },
+    });
+    expect(await requests.decide(input, signal())).toMatchObject({ state: "answered" });
+    expect(await requests.decide({ ...input, target: "c" }, signal())).toMatchObject({
+      code: "budget-exhausted",
+    });
+    expect(hits()).toBe(2);
+    // Over-reported usage (500,000 tokens, $0.021) is charged in full and stops later calls.
+    const reported = client({
+      budget: { maxRequests: 100, maxSpendUsd: 0.02, pricePerMillionInputTokensUsd: 0.042 },
+    });
+    expect(await reported.decide(input, signal())).toMatchObject({ state: "answered" });
+    expect(reported.usage.spentUsd).toBeCloseTo(0.021, 6);
+    expect(await reported.decide({ ...input, target: "d" }, signal())).toMatchObject({
+      code: "budget-exhausted",
+    });
+    expect(hits()).toBe(3);
+    expect(() =>
+      client({ budget: { maxRequests: 0, maxSpendUsd: 1, pricePerMillionInputTokensUsd: 1 } }),
+    ).toThrow();
+    expect(() =>
+      client({ budget: { maxRequests: 1, maxSpendUsd: 1000, pricePerMillionInputTokensUsd: 1 } }),
+    ).toThrow();
+  });
+
+  test("oversized response bodies are abandoned before parsing", async () => {
+    const { client } = await serve((_, response) => {
+      response.writeHead(200, { "content-type": "application/json" });
+      response.end(JSON.stringify({ ...valid(), padding: "x".repeat(300_000) }));
+    });
+    expect(await client().decide(input, signal())).toMatchObject({
+      state: "failed",
+      code: "invalid-response",
+    });
+  });
+
   test("endpoints must be HTTPS unless an explicit loopback test endpoint", () => {
     const base = {
       apiKey: "k",
       policy: { id: "p", version: "1" },
       evidence: { id: "e", version: "1" },
+      budget,
     };
     expect(
       () => new DecisionClient({ ...base, endpoint: "http://api.typesafe.ai/v1/systemone" }),

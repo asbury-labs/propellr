@@ -33,7 +33,8 @@ bridge capture and after raw rules are fixed. Raw results are unchanged with it 
   children and open shadow-root children. Counts of each depth-2 shape over reader-visited elements.
 - For each violation target (at most 96): the composed ancestor chain up to 8 levels, each with
   distance, label, shape, repeat count and the ancestor's exact target path when the reader
-  visited it.
+  visited it. Target paths are the same ones raw results already carry; they exist only for
+  host-side joining and are never sent to a provider.
 - Bounds: 8,000 shape steps (one per element per depth, so up to 6,000 for the reader's 2,000
   elements; amended from 4,000 before any code ran), 64 KiB JSON. Exhaustion yields `component-structure-limit` and an
   `unavailable` capture; raw findings are never dropped.
@@ -45,7 +46,8 @@ ancestors at distance ≥ 1 whose depth-2 shape repeats at least twice (ancestor
 shape in one pass). The decision is the nearest such candidate; with none, the arm abstains.
 Near-miss alternatives (the other repeated ancestors) are retained, not discarded. Groups key
 on shape, relative label path from candidate to target, rule and defect signature. They are
-suggestions only, with opaque IDs `shape:<hash>`, never framework or definition names.
+suggestions only, with opaque IDs `shape:<hash>:<n>`, unique per grouped key, never framework or
+definition names.
 
 ## Corpus
 
@@ -89,8 +91,12 @@ re-evaluation. This small study cannot certify rare-error rates.
   to the model).
 - Bounds: request at most 64 KiB; total deadline at most 10 s across all attempts; at most 3
   attempts; retry only 429, 529 and network errors, with backoff inside the deadline; 401 and 422
-  are never retried. The caller's AbortSignal cancels immediately. No request or response
-  bodies are logged.
+  are never retried. The caller's AbortSignal cancels immediately. Responses are read to at most
+  256 KiB before parsing. No request or response bodies are logged.
+- Budget (required): approved request count, spend cap and price per million input tokens.
+  Every attempt counts. Before sending, the request's UTF-8 byte count is charged as an upper
+  bound on input tokens; reported usage above that bound is charged in full. A call that would
+  exceed either ceiling is `budget-exhausted` and is never sent.
 - Response: strict schema; the model must match; answer keys must equal question keys; choices must
   be offered options; probabilities must cover exactly the options, be finite, lie in [0,1] and sum
   to 1 ± 0.02; confidence must be finite in [0,1]. Anything else is `invalid-response`. Conflicting

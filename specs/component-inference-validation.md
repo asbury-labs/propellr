@@ -33,7 +33,7 @@ human adjudicators exist. **Zero live provider calls were made.**
 
 ## Executed results
 
-**Pinned `pnpm validate` passed all 292 tests**: 68 contract, 44 host, 13 playbook,
+**Pre-review pinned `pnpm validate` (head `33a1215a`) passed all 292 tests**: 68 contract, 44 host, 13 playbook,
 80 parity/browser, 69 component and 18 reporting, plus build, types, lint and Oxfmt. The browser
 bundle changed, so the unchanged three-rule `pnpm bench:slice` ran once: 3 engine tests,
 0 failures, bundle hash matching. No performance claim.
@@ -83,6 +83,24 @@ heuristic never abstains on dev. These are baseline numbers, not an adoption tes
 - Two test issues: a whitespace role triggers the reader's existing role-token limit, so the
   injection test uses one token; and `pnpm eval:components -- ...` forwards a `--` that the parser
   now strips, covered by a test.
+
+## Review repair 1, PR #19
+
+Copilot raised four findings:
+
+- **Response buffering (fixed):** response bodies were buffered whole. They are now read to at
+  most 256 KiB before parsing; a 300 KB body is rejected.
+- **Spend cap (fixed):** the approval's spend cap was not enforced. The client now requires a
+  budget and enforces requests and spend itself, charging the request byte count up front as a
+  token upper bound. The test caught an earlier bytes/3 estimate that could overshoot.
+- **Duplicate group IDs (fixed):** groups sharing a shape shared an ID. IDs are now unique per
+  grouped key. The new test fails before the fix, and the evaluator's workaround is removed.
+- **Page IDs in structure targets (clarified):** that the capture exposed page IDs was partly a
+  false positive. Target paths are permitted, already in raw results, and stripped before any
+  request; a test now asserts that no selector or page ID reaches a request body.
+
+Pinned `pnpm validate` then passed all 295 tests (72 component). Browser source is unchanged by
+this repair. The archive below describes the pre-review head `33a1215a`.
 
 ## Evidence artifacts
 

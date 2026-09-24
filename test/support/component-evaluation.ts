@@ -82,9 +82,8 @@ export async function runFamily(browser: Browser, family: CorpusFamily): Promise
         : new Map();
     const groupOf = new Map<OccurrenceId, string>();
     if (discovery.state === "available")
-      discovery.groups.forEach((group, index) =>
-        group.members.forEach((member) => groupOf.set(member, `${group.id}#${index}`)),
-      );
+      for (const group of discovery.groups)
+        for (const member of group.members) groupOf.set(member, group.id);
     const cases = violations(scan).map((occurrence): CaseOutcome => {
       const key = pathKey(occurrence.target);
       const truth = oracle.truth.get(key);

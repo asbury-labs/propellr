@@ -76,7 +76,8 @@ export function discoverTemplates(scan: ScanResult, input: StructureCapture): Te
         .join(">");
       const key = canonical([decision.shape, part, defectSignature(result.rule, occurrence)]);
       const group = groups.get(key) ?? {
-        id: `shape:${decision.shape}`,
+        // Opaque and unique per grouped key; first-seen order keeps it deterministic.
+        id: `shape:${decision.shape}:${groups.size}`,
         part,
         rule: result.rule.id,
         members: [],
