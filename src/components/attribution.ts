@@ -14,6 +14,7 @@ import { componentByteLimit, utf8Bytes } from "./validation.js";
 export const resolverVersion = { id: "propellr-component-resolver", version: "1" } as const;
 type Declaration = ComponentCapture["instances"][number];
 type Definition = ComponentManifest["definitions"][number];
+type Group = { readonly key: string; readonly roots: NonEmpty<Declaration> };
 const reason = (code: string, message: string): Diagnostic => ({ code, message });
 const sameBuild = (a: BuildRef, b: BuildRef) =>
   a.application === b.application && a.build === b.build;
@@ -81,7 +82,7 @@ export function resolveEvidence(input: ResolveInput): ComponentEvidence {
     });
 
   // Group roots by document-scoped token. Identical declarations form one multi-root instance.
-  const groups = new Map<string, { key: string; roots: NonEmpty<Declaration> }>();
+  const groups = new Map<string, Group>();
   for (const root of value.instances) {
     const id = canonical([documentScope(root.target), root.instance]);
     const group = groups.get(id);
@@ -118,6 +119,31 @@ export function resolveEvidence(input: ResolveInput): ComponentEvidence {
       reasons.push(reason("parent-missing", "Parent token is not another declared instance"));
     local.set(group.key, { ...(definition ? { definition } : {}), reasons });
   }
+  // Parent chains must end: every member of a declared cycle conflicts.
+  const parentOf = (group: Group) => {
+    const first = group.roots[0];
+    return first.parent === undefined || first.parent === first.instance
+      ? undefined
+      : lookup(first.target, first.parent);
+  };
+  const cyclic = new Set<string>();
+  for (const start of groups.values()) {
+    const path: Group[] = [];
+    for (
+      let current: Group | undefined = start;
+      current && !cyclic.has(current.key);
+      current = parentOf(current)
+    ) {
+      const index = path.indexOf(current);
+      if (index >= 0) {
+        for (const member of path.slice(index)) cyclic.add(member.key);
+        break;
+      }
+      path.push(current);
+    }
+  }
+  for (const key of cyclic)
+    local.get(key)!.reasons.push(reason("parent-cycle", "Parent declarations form a cycle"));
   // Second pass: a callsite caller must match a parent that passed local checks.
   const locallyValid = new Set(
     [...local].filter(([, state]) => !state.reasons.length).map(([key]) => key),

@@ -109,12 +109,20 @@ Copilot found that a root beyond the 256-root bound reusing a recorded token was
 so a conflicting declaration could hide while its token's parts stayed `supported`. Any
 token with an unrecorded root now owns no parts (`component-instance-limit`). The
 `instance-limit` fixture gained such a root; it failed before the fix (2 supported, 1
-expected) and passes after in all three engines. **Latest pinned `pnpm validate` passed
-all 247 tests** (30 component). The browser bundle changed
+expected) and passes after in all three engines. Pinned `pnpm validate` then passed
+all 247 tests (30 component). The browser bundle changed
 (`cb5d9f42453ae9166fa0ebe2a139e31b46f8733cb2266ffba83c360e8119811b`), so the unchanged
 three-rule `pnpm bench:slice` ran once more: 3 engine tests, 0 failures, matching bundle
-hash. No performance claim. The evidence-schema check of callsite caller against parent
-was deferred as hardening: the resolver enforces it and only hand-built evidence reaches it.
+hash. No performance claim.
+
+## Review repair 3, PR #16 (approved by Tony)
+
+Declared parent cycles (for example A→B→A) left both instances `supported`. Every cycle
+member now conflicts with `parent-cycle`, and descendants become `parent-conflicting`. The
+evidence schema also rejects hand-built evidence whose callsite caller differs from the
+supported parent, or whose supported parent chain cycles. Two new contract tests failed
+before the change and pass after. **Latest pinned `pnpm validate` passed all 249 tests**
+(32 component). Browser source is unchanged, so the benchmark was not rerun.
 
 ## Evidence artifacts
 

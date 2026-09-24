@@ -349,11 +349,36 @@ export const evidenceSchema = z
         )
           issue(`${instance.key}: callsite does not render this definition`);
       }
+      const parent = instance.parent === undefined ? undefined : instances.get(instance.parent);
       if (
         instance.parent !== undefined &&
-        (instance.parent === instance.key || instances.get(instance.parent)?.status !== "supported")
+        (instance.parent === instance.key || parent?.status !== "supported")
       )
         issue(`${instance.key}: parent is not another supported instance`);
+      // A declared parent must be the callsite's caller in the same build.
+      if (instance.callsite !== undefined && parent?.status === "supported") {
+        const caller = definitions.get(parent.definition);
+        const callsite = callsites.get(instance.callsite);
+        if (
+          caller?.definition !== callsite?.caller ||
+          caller?.application !== callsite?.application ||
+          caller?.build !== callsite?.build
+        )
+          issue(`${instance.key}: callsite caller differs from the parent`);
+      }
+      // Parent chains of supported instances must terminate.
+      let ancestor = parent;
+      for (
+        let steps = 0;
+        ancestor?.status === "supported" && ancestor.parent !== undefined;
+        steps++
+      ) {
+        if (steps >= evidence.instances.length) {
+          issue(`${instance.key}: parent chain forms a cycle`);
+          break;
+        }
+        ancestor = instances.get(ancestor.parent);
+      }
     }
     for (const attribution of evidence.attributions) {
       if (attribution.status === "supported") {

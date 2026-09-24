@@ -354,6 +354,24 @@ describe("attribution resolution", () => {
     ]);
   });
 
+  test("parent cycles conflict every member and propagate to descendants", () => {
+    const evidence = resolve(
+      capture({
+        instances: [
+          root("#a", "Tile", "a", { parent: "b" }),
+          root("#b", "Tile", "b", { parent: "a" }),
+          root("#c", "Tile", "c", { parent: "a" }),
+          root("#d", "Tile", "d"),
+        ],
+      }),
+    );
+    expect(codes(evidence, "a")).toEqual(["parent-cycle"]);
+    expect(codes(evidence, "b")).toEqual(["parent-cycle"]);
+    expect(codes(evidence, "c")).toEqual(["parent-conflicting"]);
+    expect(codes(evidence, "d")).toEqual([]);
+    expect(evidenceSchema.parse(evidence)).toEqual(evidence);
+  });
+
   test("tokens are document-scoped, identical roots form fragments and manifests set provenance", () => {
     const evidence = resolve(
       capture({
@@ -431,6 +449,38 @@ describe("evidence boundary", () => {
   const good = resolve(
     capture({ instances: [root("#a", "Tile", "t0")], parts: [part("#b", "favorite", "t0")] }),
   );
+  test("rejects hand-built callsite owners that contradict the parent or cycle", () => {
+    const valid = resolve(
+      capture({
+        instances: [
+          root("#r", "Row", "r0"),
+          root("#t", "Tile", "t0"),
+          root("#i", "IconButton", "ib", { parent: "r0", callsite: "row-remove" }),
+        ],
+      }),
+    );
+    expect(evidenceSchema.safeParse(valid).success).toBe(true);
+    const keyOf = (token: string) =>
+      valid.instances.find((entry) => entry.status === "supported" && entry.instance === token)!
+        .key;
+    const retarget = valid.instances.map((entry) =>
+      entry.status === "supported" && entry.instance === "ib"
+        ? { ...entry, parent: keyOf("t0") }
+        : entry,
+    );
+    expect(evidenceSchema.safeParse({ ...valid, instances: retarget }).success).toBe(false);
+    const cycle = valid.instances.map((entry) =>
+      entry.status !== "supported"
+        ? entry
+        : entry.instance === "r0"
+          ? { ...entry, parent: keyOf("t0") }
+          : entry.instance === "t0"
+            ? { ...entry, parent: keyOf("r0") }
+            : entry,
+    );
+    expect(evidenceSchema.safeParse({ ...valid, instances: cycle }).success).toBe(false);
+  });
+
   test("rejects dangling references, undeclared parts and stale attributions", () => {
     expect(evidenceSchema.safeParse(good).success).toBe(true);
     const [instance] = good.instances;

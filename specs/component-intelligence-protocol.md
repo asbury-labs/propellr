@@ -80,7 +80,7 @@ phase 2; resolver 1 never emits it. Absence of a candidate is not an accessibili
 
 Instance checks, in order: approved application/build; associated with this document;
 known definition; declared variant listed; callsite exists and renders this definition;
-parent token exists in the same document. Second pass: a declared parent must itself pass
+parent token exists in the same document; parent chains do not cycle. Second pass: a declared parent must itself pass
 local checks, and a callsite's caller must equal the parent's definition in the same build.
 Any failure makes the instance `conflicting` with coded reasons. Part checks: explicit
 owner present (else `unknown`, `ownership-uncertain`); owner resolves (else
