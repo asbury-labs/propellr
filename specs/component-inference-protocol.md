@@ -73,7 +73,10 @@ are instrumented-oracle labels, **not** two-reviewer adjudications.
 - Pairwise repair-group precision and recall against truth scopes; overmerge and oversplit counts.
 - Bootstrap intervals by family (2,000 resamples, fixed seed), never by DOM node. With four dev
   families these intervals are wide and are reported as such.
-- Provider arms add calibration, latency, attempts, fallbacks and cost; unavailable here.
+- Provider arms add calibration (Brier score of membership confidence), latency p50/p95,
+  attempts, failures by code and spend. They are scored by the same oracle and chains as the
+  heuristic: `none` and `insufficient-evidence` abstain, failed calls are undecided. The
+  adoption check applies the frozen bar and is eligible only on the holdout.
 
 ## Adoption bar (frozen now, before any holdout use)
 

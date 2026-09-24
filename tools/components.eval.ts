@@ -10,7 +10,15 @@ import {
 } from "../src/host/component-decisions.js";
 import { decisionCase } from "../src/components/discovery.js";
 import { corpusFamilies } from "../test/fixtures/components/corpus.js";
-import { bootstrap, metrics, runFamily } from "../test/support/component-evaluation.js";
+import {
+  adoption,
+  bootstrap,
+  metrics,
+  providerReport,
+  runFamily,
+} from "../test/support/component-evaluation.js";
+import type { ProviderDecision } from "../test/support/component-evaluation.js";
+import { canonical } from "../src/reporting/index.js";
 import { environment } from "../test/support/parity.js";
 
 const provider = process.env["PROPELLR_EVAL_PROVIDER"];
@@ -81,20 +89,34 @@ test("component attribution evaluation", { timeout: 600_000 }, async () => {
           pricePerMillionInputTokensUsd: approval.pricePerMillionInputTokensUsd,
         },
       });
-      const decisions = [];
+      const decisions: ProviderDecision[] = [];
       // The client enforces request and spend ceilings; exhaustion stops the lane.
       lanes: for (const run of runs) {
         if (run.structure.state !== "available") continue;
         for (const entry of run.structure.targets) {
+          const started = performance.now();
           const result = await client.decide(
             decisionCase(entry.chain),
             AbortSignal.timeout(10_000),
           );
-          decisions.push(result);
+          decisions.push({
+            family: run.family,
+            path: canonical(entry.target.path),
+            result,
+            latencyMs: performance.now() - started,
+          });
           if (result.state === "failed" && result.code === "budget-exhausted") break lanes;
         }
       }
-      report["jev"] = { model: decisionModel, approval, usage: client.usage, decisions };
+      const scored = providerReport(runs, decisions);
+      report["jev"] = {
+        model: decisionModel,
+        approval,
+        usage: client.usage,
+        report: scored,
+        adoption: adoption(split, scored.pooled, metrics(cases), scored.causePromotions),
+        decisions,
+      };
     }
     await mkdir(new URL("../artifacts/components/", import.meta.url), { recursive: true });
     await writeFile(

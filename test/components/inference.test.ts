@@ -19,7 +19,15 @@ import type { CorpusFamily } from "../fixtures/components/corpus.js";
 import { bridge, definition, manifest, page } from "../fixtures/components/cases.js";
 import { namingDocument } from "../fixtures/naming.js";
 import { leaks, request, scanContext } from "../support/component-corpus.js";
-import { metrics, runFamily, truthFor } from "../support/component-evaluation.js";
+import {
+  adoption,
+  metrics,
+  providerReport,
+  runFamily,
+  truthFor,
+} from "../support/component-evaluation.js";
+import type { ProviderDecision } from "../support/component-evaluation.js";
+import { canonical } from "../../src/reporting/index.js";
 import { fixturePage } from "../support/parity.js";
 
 const engines = ["chromium", "firefox", "webkit"] as const;
@@ -128,6 +136,86 @@ test("chromium: dev-split heuristic behaves as the frozen protocol defines", asy
     await browser.close();
   }
 }, 180_000);
+
+test("chromium: provider decisions are scored against the same oracle and the frozen bar", async () => {
+  const browser = await browserTypes.chromium.launch();
+  try {
+    const runs = [
+      await runFamily(
+        browser,
+        dev.find(({ id }) => id === "favorites-grid")!,
+      ),
+      await runFamily(
+        browser,
+        dev.find(({ id }) => id === "lookalikes")!,
+      ),
+    ];
+    // Synthetic answers exercise the scorer only; they are never a provider result.
+    const decisions: ProviderDecision[] = runs.flatMap((run) =>
+      run.structure.state !== "available"
+        ? []
+        : run.structure.targets.map((entry, index) => {
+            const input = decisionCase(entry.chain);
+            const choice =
+              run.family === "lookalikes" && index >= 10 ? "insufficient-evidence" : "ancestor-1";
+            const result =
+              run.family === "favorites-grid" && index === 0
+                ? ({ state: "failed", code: "timeout", attempts: 3 } as const)
+                : ({
+                    state: "answered",
+                    model: decisionModel,
+                    answers: {
+                      membership: { type: "choice", choice, probabilities: {}, confidence: 0.9 },
+                      part: {
+                        type: "choice",
+                        choice: input.parts[0]!,
+                        probabilities: {},
+                        confidence: 0.9,
+                      },
+                      cause: { type: "noul", noul: 0.5 },
+                    },
+                    usage: { inputTokens: 100 },
+                    attempts: 1,
+                    cached: false,
+                  } as const);
+            return {
+              family: run.family,
+              path: canonical(entry.target.path),
+              result,
+              latencyMs: 10 + index,
+            };
+          }),
+    );
+    const report = providerReport(runs, decisions);
+    expect(report.perFamily["favorites-grid"]).toMatchObject({
+      coverage: 0.95,
+      decisionPrecision: 1,
+    });
+    expect(report.perFamily["lookalikes"]).toMatchObject({ coverage: 0.5, decisionPrecision: 1 });
+    expect(report.pooled.coverage).toBeCloseTo(0.725, 6);
+    // Identical markup still overmerges when the provider picks the structural container.
+    expect(report.perFamily["lookalikes"]?.pairwisePrecision).toBeLessThan(0.99);
+    expect(report.calibration).toMatchObject({ decided: 29 });
+    expect(report.calibration.brier).toBeCloseTo(0.01, 6);
+    expect(report.failures).toEqual({ timeout: 1 });
+    expect(report.attempts).toBe(3 + 39);
+    const heuristic = metrics(runs.flatMap(({ cases }) => cases));
+    expect(adoption("dev", report.pooled, heuristic, report.causePromotions)).toMatchObject({
+      eligible: false,
+      adopted: false,
+    });
+    const holdout = adoption("holdout", report.pooled, heuristic, report.causePromotions);
+    expect(holdout).toMatchObject({ eligible: true, adopted: false });
+    expect(holdout.checks).toMatchObject({
+      precision: true,
+      coverage: true,
+      pairwisePrecision: false,
+      incrementalCoverage: false,
+    });
+  } finally {
+    await browser.close();
+  }
+}, 120_000);
 
 test("chromium: page-controlled roles never reach a provider request", async () => {
   const browser = await browserTypes.chromium.launch();
@@ -497,6 +585,8 @@ describe("decision adapter without keys", () => {
       // Candidates must correspond to the chain's ancestors.
       { ...input, chain: [input.chain[0]!], candidates: ["ancestor-1"], parts: ["button"] },
       { ...input, candidates: ["ancestor-2", "ancestor-1"] },
+      // Each part must be the label path for its candidate's chain prefix.
+      { ...input, parts: ["article", "article>button"] },
     ])
       expect(await decisions.decide(bad, signal()), JSON.stringify(bad).slice(0, 80)).toMatchObject(
         {

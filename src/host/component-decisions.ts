@@ -86,7 +86,17 @@ const decisionCaseSchema = z
       value.chain.every((link, index) => link.distance === index) &&
       value.candidates.length === value.parts.length &&
       value.candidates.length === value.chain.length - 1 &&
-      value.candidates.every((candidate, index) => candidate === `ancestor-${index + 1}`),
+      value.candidates.every((candidate, index) => candidate === `ancestor-${index + 1}`) &&
+      // Each part is the label path from that candidate down to the target.
+      value.parts.every(
+        (part, index) =>
+          part ===
+          value.chain
+            .slice(0, index + 1)
+            .map(({ label }) => label)
+            .reverse()
+            .join(">"),
+      ),
     "Candidates must match the chain",
   );
 const CACHE_ENTRIES = 256;

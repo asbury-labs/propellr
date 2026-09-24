@@ -176,6 +176,18 @@ key. It now refuses unapproved providers, the holdout and a missing key itself, 
 launch. The direct-run test failed before the fix. Pinned `pnpm validate` passed all 302 tests
 (79 component).
 
+## Review repair 8, PR #19
+
+Copilot found that an approved live run would spend budget without scoring the provider. A
+provider scorer now maps each decision back to its case through the same chains and oracle,
+computes the heuristic's metrics plus Brier calibration, latency, attempts, failures and spend,
+and applies the frozen adoption bar (eligible only on the holdout). Decision inputs must also
+carry, for each candidate, exactly the part path derived from its chain prefix. The scorer is
+tested with synthetic answers, which only exercise it and never count as a provider result.
+The part test failed before its fix. The holdout finding was declined: the frozen protocol
+opens the holdout only when every approved arm can run, and no LLM client exists. Pinned
+`pnpm validate` passed all 303 tests (80 component).
+
 ## Evidence artifacts
 
 - [Manifest](component-inference-evidence/phase-2-manifest.json): approval state, corpus split,

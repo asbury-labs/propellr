@@ -2,7 +2,9 @@
 import type { Browser } from "playwright";
 import type { OccurrenceId, ScanResult } from "../../src/contracts.js";
 import type { StructureCapture } from "../../src/components/contracts.js";
-import { discoverTemplates } from "../../src/components/discovery.js";
+import { decisionCase, discoverTemplates } from "../../src/components/discovery.js";
+import { defectSignature } from "../../src/components/grouping.js";
+import type { DecisionResult } from "../../src/host/component-decisions.js";
 import type { TemplateCandidate, TemplateDiscovery } from "../../src/components/discovery.js";
 import { canonical } from "../../src/reporting/index.js";
 import { BrowserTarget } from "../../src/host/browser.js";
@@ -14,6 +16,10 @@ import { fixturePage } from "./parity.js";
 export interface CaseOutcome {
   readonly family: string;
   readonly target: string;
+  readonly path: string;
+  readonly rule: string;
+  readonly defect: string;
+  readonly truthRoots: readonly string[];
   readonly candidateHit: boolean;
   readonly decided: boolean;
   readonly correct: boolean;
@@ -107,6 +113,13 @@ export async function runFamily(browser: Browser, family: CorpusFamily): Promise
       return {
         family: family.id,
         target: key,
+        path: pathKey(occurrence.target),
+        rule,
+        defect: defectSignature(
+          scan.rules.find(({ rule: entry }) => entry.id === rule)!.rule,
+          occurrence,
+        ),
+        truthRoots: truth?.roots ?? [],
         candidateHit: decision?.candidates.some(hit) ?? false,
         decided: Boolean(decision?.decision),
         correct: hit(decision?.decision),
@@ -208,5 +221,132 @@ export function bootstrap(
   return {
     low: values[Math.floor(values.length * 0.025)]!,
     high: values[Math.min(values.length - 1, Math.floor(values.length * 0.975))]!,
+  };
+}
+
+// Provider arm scoring: each decision maps back to its case through the same chain the heuristic
+// used. "none" and "insufficient-evidence" are abstentions; failed calls are undecided.
+export interface ProviderDecision {
+  readonly family: string;
+  readonly path: string;
+  readonly result: DecisionResult;
+  readonly latencyMs: number;
+}
+export function providerCases(
+  runs: readonly FamilyRun[],
+  decisions: readonly ProviderDecision[],
+): { cases: CaseOutcome[]; calibration: { confidence: number; correct: boolean }[] } {
+  const byCase = new Map(decisions.map((entry) => [canonical([entry.family, entry.path]), entry]));
+  const cases: CaseOutcome[] = [];
+  const calibration: { confidence: number; correct: boolean }[] = [];
+  for (const run of runs) {
+    if (run.structure.state !== "available") continue;
+    const chains = new Map(
+      run.structure.targets.map(({ target, chain }) => [pathKey(target), chain]),
+    );
+    for (const entry of run.cases) {
+      const chain = chains.get(entry.path) ?? [];
+      const inRoots = (distance: number) => {
+        const link = chain[distance];
+        return link?.target !== undefined && entry.truthRoots.includes(pathKey(link.target));
+      };
+      const decision = byCase.get(canonical([run.family, entry.path]))?.result;
+      const choice =
+        decision?.state === "answered" ? decision.answers.membership.choice : undefined;
+      const distance = choice ? /^ancestor-([1-8])$/.exec(choice)?.[1] : undefined;
+      const correct = distance !== undefined && inRoots(Number(distance));
+      if (decision?.state === "answered" && distance !== undefined)
+        calibration.push({ confidence: decision.answers.membership.confidence, correct });
+      cases.push({
+        ...entry,
+        candidateHit: decisionCase(chain).candidates.some((_, index) => inRoots(index + 1)),
+        decided: distance !== undefined,
+        correct,
+        group:
+          decision?.state === "answered" && distance !== undefined
+            ? canonical([
+                "provider",
+                chain[Number(distance)]?.shape,
+                decision.answers.part.choice,
+                entry.rule,
+                entry.defect,
+              ])
+            : null,
+      });
+    }
+  }
+  return { cases, calibration };
+}
+const percentile = (values: readonly number[], fraction: number) => {
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted.length
+    ? sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * fraction))]!
+    : null;
+};
+export function providerReport(runs: readonly FamilyRun[], decisions: readonly ProviderDecision[]) {
+  const { cases, calibration } = providerCases(runs, decisions);
+  const failures: Record<string, number> = {};
+  for (const { result } of decisions)
+    if (result.state === "failed") failures[result.code] = (failures[result.code] ?? 0) + 1;
+  const scored = runs.map((run) => ({
+    cases: cases.filter(({ family }) => family === run.family),
+  }));
+  return {
+    pooled: metrics(cases),
+    perFamily: Object.fromEntries(
+      scored.map((entry, index) => [runs[index]!.family, metrics(entry.cases)]),
+    ),
+    intervals: {
+      decisionPrecision: bootstrap(scored, (value) => value.decisionPrecision),
+      pairwisePrecision: bootstrap(scored, (value) => value.pairwisePrecision),
+    },
+    // Brier score of membership confidence against correctness, over emitted decisions.
+    calibration: {
+      decided: calibration.length,
+      brier: calibration.length
+        ? calibration.reduce(
+            (sum, { confidence, correct }) => sum + (confidence - (correct ? 1 : 0)) ** 2,
+            0,
+          ) / calibration.length
+        : null,
+    },
+    latencyMs: {
+      p50: percentile(
+        decisions.map(({ latencyMs }) => latencyMs),
+        0.5,
+      ),
+      p95: percentile(
+        decisions.map(({ latencyMs }) => latencyMs),
+        0.95,
+      ),
+    },
+    attempts: decisions.reduce((sum, { result }) => sum + result.attempts, 0),
+    cached: decisions.filter(({ result }) => result.state === "answered" && result.cached).length,
+    failures,
+    // Advisory arm: no cause answer is ever promoted to a supported scope.
+    causePromotions: 0,
+  };
+}
+// Frozen adoption bar. Only a holdout run is eligible; dev results are never an adoption test.
+export function adoption(
+  split: string,
+  provider: Metrics,
+  heuristic: Metrics,
+  causePromotions: number,
+) {
+  const precision = provider.decisionPrecision ?? 0;
+  const checks = {
+    precision: precision >= 0.98,
+    coverage: provider.coverage >= 0.6,
+    pairwisePrecision: (provider.pairwisePrecision ?? 0) >= 0.99,
+    causePromotions: causePromotions === 0,
+    incrementalCoverage:
+      provider.coverage - heuristic.coverage >= 0.1 &&
+      precision >= (heuristic.decisionPrecision ?? 0),
+  };
+  return {
+    eligible: split === "holdout",
+    checks,
+    adopted: split === "holdout" && Object.values(checks).every(Boolean),
   };
 }
