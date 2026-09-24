@@ -1,6 +1,6 @@
 {
   "state": "phase-3-complete-pending-review",
-  "created": "2026-09-24T16:21:48.688590+00:00",
+  "created": "2026-09-24T17:03:33.274642+00:00",
   "plan": "specs/propellr-component-intelligence.html",
   "protocol": "specs/component-delivery-protocol.md",
   "baseCommit": "ae10343acc211cc243143d7e3f3f67f1facd63d0",
@@ -13,17 +13,33 @@
     "installLifecycleScripts": 0
   },
   "commands": {
-    "pnpm validate": {
+    "pnpm validate (pre-review, f73c44de)": {
       "exitCode": 0,
       "tests": 269,
+      "log": "artifacts/component-phase3/validate.log"
+    },
+    "pnpm validate (review repair 1)": {
+      "exitCode": 0,
+      "tests": 272,
+      "log": "artifacts/component-phase3/validate-review-1.log"
+    },
+    "pnpm validate (review repair 2)": {
+      "exitCode": 0,
+      "tests": 272,
+      "log": "artifacts/component-phase3/validate-review-2.log"
+    },
+    "pnpm validate (review repair 3, final source)": {
+      "exitCode": 0,
+      "tests": 272,
       "suites": {
         "contracts": 68,
         "host": 44,
         "playbooks": 13,
         "parityAndBrowser": 80,
-        "components": 46,
+        "components": 49,
         "reporting": 18
-      }
+      },
+      "log": "artifacts/component-phase3/validate-review-3.log"
     },
     "pnpm bench:slice": {
       "run": false,
@@ -127,7 +143,7 @@
     "src/host/framing.ts": "888dc52cd4f93c8bf839e1d96a925b3a7ed99a84cc73eba0b806f0d1eca60b1b",
     "src/host/playbook.ts": "333658af7cfd89dcbbff913276eff01350d22405a353342c889ab840e58ec8da",
     "src/host/requests.ts": "43346cbc323a947fe349ee34f84e2fbb5aa711b0457089902a1978141fed739a",
-    "src/host/runtime.ts": "ea414d75df983e8de050c3d71b3c0f62abf5a9a066ef9ea1b6b7ca198dd69352",
+    "src/host/runtime.ts": "2995129b0454eb1e9e43b85aef0daebd148b2abdf8c1ab5fc1369c30eb01e3bb",
     "src/host/scan.ts": "afd5b7c2b1838dbcd5841bd1d0b9bb5d70b56ad7fe8b97b0151e8e9a895dff5e",
     "src/host/server.ts": "8005aefa63bd8f39e616bec6ad9012f94162ff4f054097a85699139d98a6e288",
     "src/host/stream.ts": "cf68d6b57fa8d52dac9e829fb0eb5bdadad34e021c23dff5143ca4f8f198da1c",
@@ -136,14 +152,14 @@
     "test/browser/reader.test.ts": "1fafe7ee40e4760f26b1cae9fc7451f69bf6b6b1a82e49801c39485172e21fae",
     "test/components/collection.test.ts": "05e56daa608254f82beb5ca9006a6469020113c07225fc078a4c12a91a8d1fb3",
     "test/components/contracts.test.ts": "a0ac0882c5f7a931515ab5634b2b494df3072fb76fbbe60f2ffd449caef4618b",
-    "test/components/vue.test.ts": "5056fd3635e7844fd10a9463b8b7de2d536843738333dd9d15dfae8b3f04dc92",
+    "test/components/vue.test.ts": "a2a01b2a22cc8982ff85f3c502a84c0cbc7be0c42ddad7dd28019e298cc3faed",
     "test/contracts/requests.test.ts": "aa9f093e183d2d9ce7aeab24fafb294c05b8a8d7dddf8063e942f1ccfbdc6e38",
     "test/fixtures/components/cases.ts": "83b24bd8e273af3bad0f53ecdffd607224b22ebb0b9ba8398261e180e1f2f15f",
     "test/fixtures/components/oracle.ts": "e77977ec1996bce6adf45b95815f5155013ee3cf70ae8b3024bad6fd89ae96f9",
-    "test/fixtures/components/vue/App.vue": "40ba2b493c5adb0b5a9f16f58bd435fa9abd0d6b4eaf0c83f089e80115b102bd",
+    "test/fixtures/components/vue/App.vue": "889f43bbd98ec5e534fdc3aee3c84438580c8a94f03807d5f29df947f3370112",
     "test/fixtures/components/vue/PartnerApp.vue": "a1cd4fe2ca9cb4cf8f9ea689b08685a9a4fcde373677ba4905915d3f44efde16",
     "test/fixtures/components/vue/PlainApp.vue": "2a18ecbcf4cb6897a246c4e85a636c9f7fc39e4583a94de56cc59a157289cb06",
-    "test/fixtures/components/vue/bridge.ts": "aafe9dd54c0752f57302a01b312fb6c92cd90eacce4b869a27d8768d9d5df8bd",
+    "test/fixtures/components/vue/bridge.ts": "dee936d2da36c23102868d53b8a1081424234ea19f89eba5d92da5d0a40258cf",
     "test/fixtures/components/vue/components/CartRow.vue": "4fd8ef1c712220cee98e96d80a7cf2a993e58d914c89e9251f5106add4235836",
     "test/fixtures/components/vue/components/FragmentPair.vue": "d195813738a5e6d836fed3cb29978643cd3daa282e313c658177457bc6cf8c56",
     "test/fixtures/components/vue/components/IconButton.vue": "95170e22f444a26f168d73b1a609cbf4806d7ed74da396498d7c604ce6f51c98",
@@ -154,10 +170,10 @@
     "test/fixtures/components/vue/components/RecommendationTile.vue": "91adb9b1e96b6d40d437d74c8fd45745b5dfb83789c3d7f1c464bb612776ebe3",
     "test/fixtures/components/vue/components/SiteHeader.vue": "5c7b0cd1ca1382ff7bc77d5da481df433327bf2f268b1347df4c5a4fb43f06fa",
     "test/fixtures/components/vue/components/SlotPanel.vue": "17e635aa512d1c714e73e436314187616777b8c9337f6ce2654ad0ec11e25d5f",
-    "test/fixtures/components/vue/main.ts": "9ce959c41ba55a2235f464cb6345db3c3395b31cd3a45bbe22a840f526a1d05e",
-    "test/fixtures/components/vue/manifest.ts": "211b15bd28cf2d9723941a97bd1f98291feb11ac8c1c3e64e4bd54d03dd148f7",
+    "test/fixtures/components/vue/main.ts": "e7859de676f317891dddd9d40e91a84da48b61842672c19e8c470d143c3b2220",
+    "test/fixtures/components/vue/manifest.ts": "0ee3d7134e197e3b51876513ed1c8da6783f423c75607e2695b89ecac7c1e9b1",
     "test/fixtures/components/vue/shims.d.ts": "8e6de57b1a2040cc309edb8f38d77f530ac8afc3a693848c0ddc2ff38ba265bf",
-    "test/fixtures/components/vue/store.ts": "df0fae085ad26abe0f9444e3665ea99751faaf1a8fb448bbcc9f5813cfe9bcc0",
+    "test/fixtures/components/vue/store.ts": "970f85fc9fe383341ee968296f0180d25fe25f8939c8f9a0b50ccf9d62a79bc4",
     "test/fixtures/components/vue/vite.config.ts": "6d82885495f07e4eebe020e91c4bf9e6955481546dffb7035be6ef025d0483f7",
     "test/fixtures/naming.ts": "54991619f1ff05b3a1f9e64ac8ae87cfeea7b0c6ff4ef4c5d725dbfef83439f2",
     "test/fixtures/native-form-naming.ts": "97fddb9248a0444139109187c78d469eba037cc3cea88309bbc5082f5d12bb49",
@@ -195,20 +211,23 @@
     "vite.config.ts": "da54831006846021c64dc8363265b27367de512eb528b26fe031a403288e1dbe",
     "vitest.config.ts": "e78a4565e39cc511d2727af3814040dc5ec1153b797dca68607efc5872d1b40f"
   },
-  "sourceTreeSha256": "24c8f5caeaf554e652fd3cf3f008e16317b3286e6ae1fb05f367df73a3d86147",
+  "sourceTreeSha256": "d7369b03c84b95b9f82930e84c0dc98c8c4286f09d04a91f2482447ebb278852",
   "sourceTreeHashAlgorithm": "SHA-256 of UTF-8 compact sorted-key JSON sourceHashes (src, test, bench, tools, root configs)",
-  "fixtureBundleSha256": "9f57dffec038d4a7e1b763f8d3fa7686a1dbda28a99359ba788eeca1baab3142",
+  "fixtureBundleSha256": "f5f053308151052d92cfc6b25bf809634d899587376681ddc01aca01dd05fce3",
   "browserBundleSha256": "cb5d9f42453ae9166fa0ebe2a139e31b46f8733cb2266ffba83c360e8119811b",
   "archive": {
     "path": "specs/component-delivery-evidence/phase-3-results.tar.gz",
-    "sha256": "72e60d5b7b32e2dcf5d52597da8063b94c82164e40e3cf9cc57c2082f25d0fd0",
-    "fileCount": 4
+    "sha256": "7e11ab275acf0c1cff61a91385c5efb1fc51344aa8243edb326510ce4bea620d",
+    "fileCount": 7
   },
   "archivedFiles": {
+    "artifacts/component-phase3/validate-review-1.log": "fa1e7be653b674b66217cf163d0ef233b93cbaf42d66561c0052d3caa36d4803",
+    "artifacts/component-phase3/validate-review-2.log": "2ebecaad12a61c4419ce73e080d2c4182d78e69769e76d2fe6a58e7fc8b43586",
+    "artifacts/component-phase3/validate-review-3.log": "e4822681764c52ba7551c8fc27802110bcda75df4e2a6851b40b51d036b04e7d",
     "artifacts/component-phase3/validate.log": "51c6992e255e7a92c1d8586b1703dcb189d07e5df334db6ed3c2556ee86c0919",
-    "artifacts/components/chromium-vue-oracle.json": "5483e8a98ddf22fbeac6a90c1d287926da6dd4b7996ec174dfe606a9d7acd609",
-    "artifacts/components/firefox-vue-oracle.json": "85421c85406145df203428efffce151a54f11a552eaa6cd5f5f9fbf8cfe4991b",
-    "artifacts/components/webkit-vue-oracle.json": "de24aac1a687090447436b0f86f20dd398382ccaf661816c1184a4a66147a925"
+    "artifacts/components/chromium-vue-oracle.json": "e3fdbc03a0867613ad3276c8166eff91cc105530ba8857216a2cb48a9679b07f",
+    "artifacts/components/firefox-vue-oracle.json": "c0ad01aa85f6213b2bdd60553818f3c5074967ff952f15a501bbc2ee4f87bbe0",
+    "artifacts/components/webkit-vue-oracle.json": "a675e92b7803a1609879e69e6eb201118f7fd90188a78275cf5094cca8b7c4fd"
   },
   "limits": [
     "fixture-scoped Vue bridge, not a shipped adapter",
@@ -216,5 +235,6 @@
     "no inference, provider or coalesced request queue",
     "no cross-build lineage or matcher supersession records",
     "no performance or agent-usefulness claim"
-  ]
+  ],
+  "head": "6ae4dbca077c9249a573073d8ccd2e477bc73edd"
 }

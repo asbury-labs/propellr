@@ -78,7 +78,6 @@ scopes became declaration conflicts. The prefix is now application, build and in
 order. A new `twin` scenario mounts storefront `vue-1` and `vue-2` together. It failed
 before the fix (both favorites `conflicting`) and passes after in all three engines, with
 one scope per build. Pinned `pnpm validate` then passed all 272 tests (49 component).
-The archive below describes the pre-review head `f73c44de`.
 
 The first CI run of this PR timed out one existing WebKit host test (`native-form-naming`,
 30 s). Locally it takes about 960 ms on both this branch and `main` (5 runs each). Earlier
@@ -111,9 +110,9 @@ two-push babysit limit under Tony's standing instruction to reach a clean merge.
 - [Manifest](component-delivery-evidence/phase-3-manifest.json): commands, per-engine Vue counts,
   source, fixture-bundle and archived-file hashes.
 - [Raw archive](component-delivery-evidence/phase-3-results.tar.gz): per-engine Vue operation
-  records and the validate log.
-- Source-tree SHA-256: `24c8f5caeaf554e652fd3cf3f008e16317b3286e6ae1fb05f367df73a3d86147`.
-- Archive SHA-256: `72e60d5b7b32e2dcf5d52597da8063b94c82164e40e3cf9cc57c2082f25d0fd0`.
+  records from the final source and all four validate logs (pre-review and three repairs).
+- Source-tree SHA-256: `d7369b03c84b95b9f82930e84c0dc98c8c4286f09d04a91f2482447ebb278852`.
+- Archive SHA-256: `7e11ab275acf0c1cff61a91385c5efb1fc51344aa8243edb326510ce4bea620d`.
 
 ## Limits
 
