@@ -179,14 +179,39 @@ for (const engine of engines)
     }
   });
 
-// Existing parity fixtures have no bridge: enrichment must be inert on every raw result.
+// First two fixtures per source file and DOM boundary class keep frame, shadow, slot and
+// dialog coverage without rescanning every parity case three times over.
+const boundaryClass = (fixture: (typeof fixtures)[number]) =>
+  [
+    fixture.frames ? "frame" : "",
+    /attachShadow/.test(fixture.html) ? "shadow" : "",
+    /<slot/.test(fixture.html) ? "slot" : "",
+    /showModal|<dialog/.test(fixture.html) ? "dialog" : "",
+  ].join("+");
+const representative = [fixtures, namingFixtures, nativeFormFixtures].flatMap((source) => {
+  const seen = new Map<string, number>();
+  return source.filter((fixture) => {
+    const count = seen.get(boundaryClass(fixture)) ?? 0;
+    seen.set(boundaryClass(fixture), count + 1);
+    return count < 2;
+  });
+});
+test("capture-inert subset keeps every parity boundary class", () => {
+  const classes = (list: readonly (typeof fixtures)[number][]) => new Set(list.map(boundaryClass));
+  expect(classes(representative)).toEqual(
+    classes([...fixtures, ...namingFixtures, ...nativeFormFixtures]),
+  );
+  expect(representative).toHaveLength(25);
+});
+
+// Existing parity fixtures have no bridge: enrichment must be inert on raw results.
 for (const engine of engines)
   test(`${engine}: capture leaves existing parity fixtures' raw results unchanged`, async () => {
     const browser = await browserTypes[engine].launch();
     const registry = new ComponentRegistry([]);
     const records: object[] = [];
     try {
-      for (const fixture of [...fixtures, ...namingFixtures, ...nativeFormFixtures]) {
+      for (const fixture of representative) {
         const { context, page } = await fixturePage(browser, fixture);
         const target = new BrowserTarget(page, "borrowed");
         try {
