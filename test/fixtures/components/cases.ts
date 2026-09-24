@@ -48,7 +48,7 @@ export const definition = (
   ...(sourceRef ? { sourceRef } : {}),
 });
 // Bridge attributes exist only in the instrumented arm.
-function bridge(arm: Arm) {
+export function bridge(arm: Arm) {
   const attributes = (values: Readonly<Record<string, string | undefined>>) =>
     arm === "instrumented"
       ? Object.entries(values)
@@ -63,7 +63,11 @@ function bridge(arm: Arm) {
     raw: attributes,
   };
 }
-const page = (id: string, body: string, frames?: Readonly<Record<string, string>>): Fixture => ({
+export const page = (
+  id: string,
+  body: string,
+  frames?: Readonly<Record<string, string>>,
+): Fixture => ({
   id,
   html: namingDocument(body),
   expected: {},

@@ -140,3 +140,10 @@ original fixtures and a separately hand-authored oracle, not upstream or custome
 The fixture uses Vue 3.5.43 and @vitejs/plugin-vue 6.0.9 (MIT, exact devDependency pins,
 lifecycle scripts disabled). Only public Vue APIs are used; no Vue, DevTools or framework
 internals were read or adapted. The fixture manifest is hand-authored from the SFC sources.
+
+## Component inference, phase 2
+
+Structural capture, the `structural-template/1` heuristic, the decision adapter, the corpus and
+the evaluator are original Propellr code. The adapter's wire format follows TypeSafe's public API
+reference (docs.typesafe.ai/api, read September 24, 2026); no TypeSafe SDK or source is used and
+no request was sent. The 240-case corpus is original and labelled only by the instrumented arm.

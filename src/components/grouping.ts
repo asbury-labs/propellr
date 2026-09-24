@@ -35,6 +35,17 @@ function withoutPaths(value: Json | undefined): Json | undefined {
   return value;
 }
 
+// Rule plus canonical evidence observations, excluding instance-specific target paths.
+export function defectSignature(
+  rule: ScanResult["rules"][number]["rule"],
+  occurrence: Extract<ScanResult["rules"][number], { state: "evaluated" }>["occurrences"][number],
+): string {
+  return canonical([
+    rule,
+    occurrence.evidence.map(({ kind, observed }) => [kind, withoutPaths(observed) ?? null]),
+  ]);
+}
+
 // Separate versioned view over one raw scan. It never edits the scan, report or gate.
 export function buildRepairView(scan: ScanResult, input: ComponentEvidence): ComponentRepairView {
   const evidence = evidenceSchema.parse(input);
@@ -123,10 +134,7 @@ export function buildRepairView(scan: ScanResult, input: ComponentEvidence): Com
         );
         continue;
       }
-      const defect = canonical([
-        result.rule,
-        occurrence.evidence.map(({ kind, observed }) => [kind, withoutPaths(observed) ?? null]),
-      ]);
+      const defect = defectSignature(result.rule, occurrence);
       const shared = {
         application: definition.application,
         build: definition.build,

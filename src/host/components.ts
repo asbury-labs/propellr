@@ -1,6 +1,17 @@
 import type { ScanRequest, ScanResult, VersionRef } from "../contracts.js";
-import type { BuildRef, ComponentEvidence, ComponentManifest } from "../components/contracts.js";
-import { buildRefSchema, captureSchema, manifestSchema } from "../components/validation.js";
+import type {
+  BuildRef,
+  ComponentEvidence,
+  ComponentManifest,
+  StructureCapture,
+} from "../components/contracts.js";
+import { structureCollector } from "../analysis.js";
+import {
+  buildRefSchema,
+  captureSchema,
+  manifestSchema,
+  structureSchema,
+} from "../components/validation.js";
 import { resolveEvidence } from "../components/attribution.js";
 import type { BrowserTarget } from "./browser.js";
 import { collectScan } from "./scan.js";
@@ -61,8 +72,13 @@ export async function scanComponents(
   signal: AbortSignal,
   registry: ComponentRegistry,
   expectedDocument = target.documentId,
-): Promise<{ readonly scan: ScanResult; readonly evidence: ComponentEvidence }> {
-  const { result, capture } = await collectScan(
+  options: { readonly structure?: boolean } = {},
+): Promise<{
+  readonly scan: ScanResult;
+  readonly evidence: ComponentEvidence;
+  readonly structure?: StructureCapture;
+}> {
+  const { result, capture, structure } = await collectScan(
     target,
     request,
     context,
@@ -70,6 +86,7 @@ export async function scanComponents(
     expectedDocument,
     {
       bridge: "propellr-bridge/1",
+      ...(options.structure ? { structure: "propellr-structure/1" as const } : {}),
     },
   );
   const parsed = capture === undefined ? undefined : captureSchema.safeParse(capture);
@@ -87,5 +104,22 @@ export async function scanComponents(
     manifests: registry.manifests,
     associated: registry.associated(target, expectedDocument),
   });
-  return { scan: result, evidence };
+  if (!options.structure) return { scan: result, evidence };
+  // Page-derived structure is validated like the bridge capture; invalid means unavailable.
+  const parsedStructure =
+    structure === undefined ? undefined : structureSchema.safeParse(structure);
+  return {
+    scan: result,
+    evidence,
+    structure: parsedStructure?.success
+      ? parsedStructure.data
+      : {
+          schema: "propellr-structure-capture/1",
+          collector: structureCollector,
+          state: "unavailable",
+          reason: parsedStructure
+            ? { code: "component-structure-invalid", message: "Structure failed validation" }
+            : { code: "component-structure-unavailable", message: "No structure for this scope" },
+        },
+  };
 }

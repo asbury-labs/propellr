@@ -16,6 +16,7 @@ import type { NamingBudget } from "./naming.js";
 import { evaluateNamingRule, namingApplicability } from "./naming-rules.js";
 import { implementedRules, namingRules } from "../analysis.js";
 import { captureComponents } from "./components.js";
+import { captureStructure } from "./structure.js";
 
 interface Fact {
   readonly node: Element;
@@ -613,7 +614,11 @@ export function createAnalysis(): BrowserAnalysis {
             .map((occurrence) => occurrence.target)
         : [],
     );
-    return { ...output, components: captureComponents(facts, violations, unreadScope) };
+    return {
+      ...output,
+      components: captureComponents(facts, violations, unreadScope),
+      ...(input.components.structure ? { structure: captureStructure(facts, violations) } : {}),
+    };
   }
   return { scan, finish };
 }

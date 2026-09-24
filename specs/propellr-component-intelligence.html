@@ -236,7 +236,8 @@
             <dd>
               2026-09-23T12:27:53Z; 2026-09-23 (planning review: source-trust and benchmark bounds
               clarified); 2026-09-23T21:08:29Z (phase 1 built and validated; stopped for review);
-              2026-09-24T16:22:41Z (phase 3 built and validated before phase 2 by direction)
+              2026-09-24T16:22:41Z (phase 3 built and validated before phase 2 by direction);
+              2026-09-24T17:30:21Z (phase 2 built to its approval gates; Jev not adopted)
             </dd>
             <dt>commits</dt>
             <dd>
@@ -270,7 +271,9 @@
               <a href="component-intelligence-validation.md">evidence</a>;
               <a href="component-intelligence-evidence/phase-1-manifest.json">manifest</a>. Phase 3:
               <a href="component-delivery-protocol.md">protocol</a>;
-              <a href="component-delivery-validation.md">evidence</a>.
+              <a href="component-delivery-validation.md">evidence</a>. Phase 2:
+              <a href="component-inference-protocol.md">protocol</a>;
+              <a href="component-inference-validation.md">evidence</a>.
             </dd>
           </dl>
         </details>
@@ -817,9 +820,9 @@
           <strong
             >Execute only the separately approved phase, in order. Stop at every checkpoint.</strong
           >
-          Phases 1 and 3 are complete; phases 2 and 4 are unstarted. The initial implementation
-          request authorized phase 1 only. Provider access, source capture and dependency changes
-          have additional gates.
+          Phases 1 and 3 are complete; phase 2 stopped at its approval gates (Jev not adopted);
+          phase 4 is unstarted. The initial implementation request authorized phase 1 only. Provider
+          access, source capture and dependency changes have additional gates.
         </p>
 
         <div class="phase">
@@ -920,7 +923,7 @@
         </div>
 
         <div class="phase">
-          <h3><code class="status">[]</code> 2. Uninstrumented attribution and Jev evaluation</h3>
+          <h3><code class="status">[f]</code> 2. Uninstrumented attribution and Jev evaluation</h3>
           <p>
             Test whether semantic inference adds enough value on ambiguous rendered components to
             justify latency, privacy and operational cost. This phase can reject Jev while
@@ -929,20 +932,20 @@
           <h4>2.1 Candidate discovery and controlled comparison</h4>
           <ul class="checklist">
             <li>
-              <code class="status">[]</code> Generate candidate boundaries and repeated templates
+              <code class="status">[x]</code> Generate candidate boundaries and repeated templates
               using bounded structural/role/relationship features. Avoid quadratic all-pairs
               comparison; index structural signatures and compare within capped candidate sets.
               Retain near-miss alternatives rather than normalizing away semantic differences.
             </li>
             <li>
-              <code class="status">[]</code> Freeze 240 adjudicated decision cases: 80 development
+              <code class="status">[f]</code> Freeze 240 adjudicated decision cases: 80 development
               and 160 held-out, split by application/template family so related variants never cross
               splits. Cover known catalog matching and unseen component discovery separately. Two
               reviewers adjudicate membership, part, variant and repair-cause labels separately;
               preserve genuine ambiguity.
             </li>
             <li>
-              <code class="status">[]</code> Compare useful structural heuristics, a native
+              <code class="status">[f]</code> Compare useful structural heuristics, a native
               structured-output small LLM, Jev and a Jev-plus-abstention/escalation route on
               identical permitted evidence. Use instrumented truth only as evaluator oracle in
               uninstrumented trials. Measure candidate retrieval misses separately from model
@@ -952,27 +955,27 @@
           <h4>2.2 Optional inference boundary</h4>
           <ul class="checklist">
             <li>
-              <code class="status">[]</code> Obtain approval for exact provider/model/client,
+              <code class="status">[f]</code> Obtain approval for exact provider/model/client,
               synthetic text disclosure, numeric spend/token/request ceilings and synthetic
               adversarial tests. Confirm current Jev access/limits, version lifetime, retention and
               applicable agreement. No distillation or customer-data experiment assumed permitted.
             </li>
             <li>
-              <code class="status">[]</code> Add bounded request/response schemas and a host-only
+              <code class="status">[x]</code> Add bounded request/response schemas and a host-only
               adapter. Initially pin <code>jev-1.13.0</code> if still supported; review any SDK
               before installation or use native HTTP. Explicitly enforce total deadlines,
               cancellation and retry limits rather than inherit 10-second attempts plus retries.
               Disable raw-body logs.
             </li>
             <li>
-              <code class="status">[]</code> Send minimal approved state and candidate IDs, with
+              <code class="status">[x]</code> Send minimal approved state and candidate IDs, with
               complete per-question instructions. Ask component membership, part and cause
               separately; include abstention. Validate complete answer keys, distributions,
               candidate membership and finite numbers. Conflicting answers remain conflicts, not a
               forced winner.
             </li>
             <li>
-              <code class="status">[]</code> Cache exact permitted inputs only with
+              <code class="status">[x]</code> Cache exact permitted inputs only with
               application/build, evidence, model, rubric and policy versions. Reuse known
               definition/variant judgments where equivalent input is established; never reuse raw
               rule results or instance-specific cause assumptions because two elements look alike.
@@ -981,13 +984,13 @@
           <h4>2.3 Testing strategy and adoption gate</h4>
           <ul class="checklist">
             <li>
-              <code class="status">[]</code> Extend no-key <code>pnpm test:components</code> with
+              <code class="status">[x]</code> Extend no-key <code>pnpm test:components</code> with
               actual schema, timeout, malformed response, rate-limit, cancellation, prompt-injection
               and unavailable-provider cases. These tests verify integration behavior, not model
               quality.
             </li>
             <li>
-              <code class="status">[]</code> After approval, run planned
+              <code class="status">[f]</code> After approval, run planned
               <code
                 >pnpm eval:components -- --provider jev --protocol
                 specs/component-intelligence-protocol.md</code
@@ -997,27 +1000,27 @@
               inference.
             </li>
             <li>
-              <code class="status">[]</code> Report candidate recall, definition/part attribution
+              <code class="status">[f]</code> Report candidate recall, definition/part attribution
               precision and recall, unknown/abstention rate, calibration, pairwise repair-group
               precision/recall and overmerge/oversplit counts. Bootstrap uncertainty by application
               family, not by near-duplicate DOM nodes. Record all attempts and fallback costs.
             </li>
             <li>
-              <code class="status">[]</code> Proposed adoption bar to freeze before holdout: at
+              <code class="status">[x]</code> Proposed adoption bar to freeze before holdout: at
               least 98% precision on emitted inferred memberships at at least 60% answer coverage;
               at least 99% pairwise precision for suggested repair groups; zero observed unsupported
               automatic cause promotions. Report confidence intervals; this small study cannot
               certify rare-error rates.
             </li>
             <li>
-              <code class="status">[]</code> Require meaningful incremental value: at least 10
+              <code class="status">[x]</code> Require meaningful incremental value: at least 10
               percentage points more answer coverage than the heuristic at matched precision, or at
               least 30% lower end-to-end cost or latency than the small LLM at matched
               quality/coverage. Include collection, candidate generation, queueing and escalations.
               Freeze which criterion applies before runs; report all metrics.
             </li>
             <li>
-              <code class="status">[]</code> Run <code>pnpm validate</code>; retain pinned
+              <code class="status">[x]</code> Run <code>pnpm validate</code>; retain pinned
               corpus/rubrics/model IDs, raw responses under approved retention, adjudications and
               unsupported cases. A changed model or rubric requires re-evaluation, not silent
               carryover of confidence thresholds.
@@ -1388,6 +1391,12 @@
           lifecycle-script review. The bridge stays fixture-scoped. The inference-specific
           coalesced-request task is marked [f]: concurrent requests are rejected as for every
           operation, pending phase 2 and the realtime scheduler, to avoid a duplicate scheduler.
+        </p>
+        <p>
+          2026-09-24, phase 2: built to its approval gates. Structural capture, the heuristic arm, a
+          host-only Jev adapter and a frozen 240-case corpus exist. No provider, spend, terms,
+          adjudicator or LLM-arm approval exists, so those tasks are [f], the holdout stays sealed
+          and zero live calls were made. Jev is not adopted; inference stays disabled.
         </p>
       </section>
     </main>

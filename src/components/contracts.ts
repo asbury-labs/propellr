@@ -16,6 +16,7 @@ import type {
   ValidatedCapture,
   ValidatedEvidence,
   ValidatedManifest,
+  ValidatedStructure,
 } from "./validation.js";
 
 declare const identity: unique symbol;
@@ -26,6 +27,7 @@ export type PartBinding = ValidatedBinding;
 export type BuildRef = ValidatedBuildRef;
 export type ComponentCapture = ValidatedCapture;
 export type ComponentEvidence = ValidatedEvidence;
+export type StructureCapture = ValidatedStructure;
 export type ComponentAttribution = ComponentEvidence["attributions"][number];
 export type ComponentInstance = ComponentEvidence["instances"][number];
 export type Provenance = Extract<ComponentAttribution, { status: "supported" }>["provenance"];
