@@ -24,6 +24,8 @@ export interface FamilyRun {
   readonly family: string;
   readonly split: CorpusFamily["split"];
   readonly rawEqual: boolean;
+  // Both arms complete and every violation has oracle truth; otherwise nothing is scored.
+  readonly complete: boolean;
   readonly structure: StructureCapture;
   readonly discovery: TemplateDiscovery;
   readonly cases: readonly CaseOutcome[];
@@ -116,6 +118,12 @@ export async function runFamily(browser: Browser, family: CorpusFamily): Promise
       family: family.id,
       split: family.split,
       rawEqual: canonical(raw(scan)) === canonical(raw(oracle.scan)),
+      complete:
+        scan.coverage.state === "complete" &&
+        oracle.scan.coverage.state === "complete" &&
+        capture.state === "available" &&
+        oracle.truth.size === oracle.violations &&
+        cases.length === oracle.violations,
       structure: capture,
       discovery,
       cases,

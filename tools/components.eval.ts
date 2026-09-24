@@ -1,6 +1,6 @@
 // Evaluation lane, run only through tools/evaluate-components.ts. Never part of pnpm validate.
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { expect, test } from "vitest";
+import { test } from "vitest";
 import { browserTypes } from "../src/host/browser.js";
 import {
   DecisionClient,
@@ -20,9 +20,13 @@ test("component attribution evaluation", { timeout: 600_000 }, async () => {
   // Validate every approval gate before any browser work or client construction.
   let approval: ReturnType<typeof decisionApprovalSchema.parse> | undefined;
   if (provider === "jev") {
-    const parsed = decisionApprovalSchema.safeParse(
-      JSON.parse(await readFile(process.env["PROPELLR_DECISION_APPROVAL"]!, "utf8")),
-    );
+    let record: unknown;
+    try {
+      record = JSON.parse(await readFile(process.env["PROPELLR_DECISION_APPROVAL"]!, "utf8"));
+    } catch {
+      throw new Error("blocked: approval record invalid (unreadable JSON)");
+    }
+    const parsed = decisionApprovalSchema.safeParse(record);
     if (!parsed.success)
       throw new Error(
         `blocked: approval record invalid (${parsed.error.issues.map(({ path }) => path.join(".")).join(", ")})`,
@@ -34,7 +38,14 @@ test("component attribution evaluation", { timeout: 600_000 }, async () => {
     const families = corpusFamilies.filter((family) => family.split === split);
     const runs = [];
     for (const family of families) runs.push(await runFamily(browser, family));
-    expect(runs.every(({ rawEqual }) => rawEqual)).toBe(true);
+    // Partial scans, missing structure or missing truth are never scored as results.
+    const incomplete = runs.filter(
+      (run) => !run.rawEqual || !run.complete || run.cases.length !== 20,
+    );
+    if (incomplete.length)
+      throw new Error(
+        `blocked: incomplete evaluation (${incomplete.map(({ family }) => family).join(", ")})`,
+      );
     const cases = runs.flatMap(({ cases }) => cases);
     const report: Record<string, unknown> = {
       protocol: process.env["PROPELLR_EVAL_PROTOCOL"],

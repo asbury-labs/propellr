@@ -49,6 +49,7 @@ for (const engine of engines)
       for (const family of dev) {
         const run = await runFamily(browser, family);
         expect(run.rawEqual, family.id).toBe(true);
+        expect(run.complete, family.id).toBe(true);
         expect(run.structure.state, family.id).toBe("available");
         expect(run.cases, family.id).toHaveLength(20);
         // Labels are element names and allowlisted roles only.
@@ -493,6 +494,9 @@ describe("decision adapter without keys", () => {
       { ...input, parts: ["<script>", "article>button"] },
       { ...input, parts: ["button"] },
       { ...input, extra: "field" } as DecisionCase,
+      // Candidates must correspond to the chain's ancestors.
+      { ...input, chain: [input.chain[0]!], candidates: ["ancestor-1"], parts: ["button"] },
+      { ...input, candidates: ["ancestor-2", "ancestor-1"] },
     ])
       expect(await decisions.decide(bad, signal()), JSON.stringify(bad).slice(0, 80)).toMatchObject(
         {
@@ -528,6 +532,24 @@ describe("decision adapter without keys", () => {
     } finally {
       await new Promise<void>((resolve) => other.close(() => resolve()));
     }
+  });
+
+  test("usage reported by an invalid response is still charged", async () => {
+    const { client, hits } = await serve((_, response) =>
+      json(response, 200, {
+        ...valid({ model: "wrong" }),
+        usage: { input_tokens: 500_000, output_tokens: 0 },
+      }),
+    );
+    const decisions = client({
+      budget: { maxRequests: 100, maxSpendUsd: 0.02, pricePerMillionInputTokensUsd: 0.042 },
+    });
+    expect(await decisions.decide(input, signal())).toMatchObject({ code: "invalid-response" });
+    expect(decisions.usage.spentUsd).toBeCloseTo(0.021, 6);
+    expect(await decisions.decide({ ...input, target: "a" }, signal())).toMatchObject({
+      code: "budget-exhausted",
+    });
+    expect(hits()).toBe(1);
   });
 
   test("request and spend ceilings stop sending before the provider is called", async () => {
@@ -657,6 +679,28 @@ test("eval:components rejects incomplete approval records before any browser or 
     await rm(directory, { recursive: true });
   }
 }, 120_000);
+
+test("eval:components refuses an unreadable approval record with the blocked status", async () => {
+  const { mkdtemp, writeFile, rm } = await import("node:fs/promises");
+  const { join } = await import("node:path");
+  const directory = await mkdtemp("/tmp/pplr-approval-");
+  const record = join(directory, "approval.json");
+  await writeFile(record, "{ not json");
+  try {
+    const result = spawnSync(
+      process.execPath,
+      ["tools/evaluate-components.ts", "--provider", "jev"],
+      {
+        encoding: "utf8",
+        env: { ...process.env, PROPELLR_DECISION_APPROVAL: record, TYPESAFE_API_KEY: "not-a-key" },
+      },
+    );
+    expect(result.status).toBe(2);
+    expect(result.stderr).toContain("approval record invalid (unreadable JSON)");
+  } finally {
+    await rm(directory, { recursive: true });
+  }
+});
 
 test("eval:components refuses provider arms without approval and keeps the holdout sealed", () => {
   const run = (...args: string[]) =>

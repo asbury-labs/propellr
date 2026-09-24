@@ -149,6 +149,25 @@ enforce it, including inside part paths. Terminal responses now cancel their bod
 allowlist test failed before the fix. Body cancellation is resource hygiene and has no separate
 test. Pinned `pnpm validate` passed all 299 tests (76 component).
 
+## Review repair 6, PR #19
+
+Copilot found four more issues:
+
+- **Uncharged usage (fixed):** reported usage on an invalid response was not charged. It now is,
+  and over-reporting stops later calls.
+- **Incomplete runs scored (fixed):** the evaluator could score incomplete runs. It now refuses
+  unless both arms have complete coverage, structure is available and all 20 truth cases per
+  family are present.
+- **Candidate/chain mismatch (fixed):** a candidate naming a missing ancestor threw instead of
+  being refused. Candidates must now match the chain's ancestors in order, or the input is
+  `invalid-request`.
+- **Unreadable approval JSON (fixed):** it now exits 2 with a blocked message, before any
+  browser work.
+
+The three new tests failed before their fixes. The heuristic dev evaluation still passes the
+completeness gate. This sixth push also ran under Tony's standing instruction. Pinned
+`pnpm validate` passed all 301 tests (78 component).
+
 ## Evidence artifacts
 
 - [Manifest](component-inference-evidence/phase-2-manifest.json): approval state, corpus split,

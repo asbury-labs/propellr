@@ -80,7 +80,15 @@ const decisionCaseSchema = z
       .readonly(),
   })
   .readonly()
-  .refine((value) => value.candidates.length === value.parts.length, "One part per candidate");
+  // Candidates must be exactly the chain's ancestors, in order, each with its part path.
+  .refine(
+    (value) =>
+      value.chain.every((link, index) => link.distance === index) &&
+      value.candidates.length === value.parts.length &&
+      value.candidates.length === value.chain.length - 1 &&
+      value.candidates.every((candidate, index) => candidate === `ancestor-${index + 1}`),
+    "Candidates must match the chain",
+  );
 const CACHE_ENTRIES = 256;
 
 export interface DecisionClientOptions {
@@ -221,6 +229,13 @@ function validateAnswers(
     choiceValid(parsed.data.answers.part, input.parts)
     ? parsed.data
     : undefined;
+}
+
+function reportedTokens(value: unknown): number | undefined {
+  const tokens = z
+    .object({ usage: z.object({ input_tokens: z.number().int().min(0) }) })
+    .safeParse(value);
+  return tokens.success ? tokens.data.usage.input_tokens : undefined;
 }
 
 // Bounded body read: an oversized response is abandoned before parsing, never buffered whole.
@@ -368,10 +383,11 @@ export class DecisionClient {
         if (combined.aborted) return { state: "failed", code: stop(), attempts };
         value = undefined;
       }
+      // Reported usage is charged even when the answers are invalid; over-reporting stops later calls.
+      const tokens = reportedTokens(value);
+      if (tokens !== undefined) this.spent += Math.max(0, (tokens * price) / 1_000_000 - estimate);
       const valid = validateAnswers(input, value);
       if (!valid) return { state: "failed", code: "invalid-response", attempts };
-      // Over-reported usage is charged in full, so later calls stop at the cap.
-      this.spent += Math.max(0, (valid.usage.input_tokens * price) / 1_000_000 - estimate);
       const answered = {
         state: "answered",
         model: valid.model,

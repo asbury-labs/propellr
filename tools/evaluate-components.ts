@@ -30,6 +30,11 @@ if (provider === "jev") {
   if (!approval || !existsSync(approval))
     refuse("provider approval record missing (PROPELLR_DECISION_APPROVAL)");
   if (!process.env["TYPESAFE_API_KEY"]) refuse("provider key missing (TYPESAFE_API_KEY)");
+  try {
+    JSON.parse(readFileSync(approval!, "utf8"));
+  } catch {
+    refuse("approval record invalid (unreadable JSON)");
+  }
 }
 // Holdout opens only when every approved arm can run on it together.
 if (split === "holdout")
