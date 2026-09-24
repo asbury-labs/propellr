@@ -96,6 +96,16 @@ live subscriber before eviction are not recalled; that queue is bounded by the s
 The README dependency sentence now says it refers to foundation phases. Pinned `pnpm validate`
 passed all 272 tests again (49 component).
 
+## Review repair 3, PR #18
+
+Copilot found that when `limits.operations` had already pruned an analysis from the operation
+map, eviction skipped it, and its retained completion event kept the full view. With default
+limits those events rotate out first; with smaller operation limits they do not. Eviction now
+rewrites retained history independently of the operation map. A test with
+`limits.operations: 2` failed before the fix (view replayed) and passes after. Pinned
+`pnpm validate` passed all 272 tests (49 component). This third push exceeded the default
+two-push babysit limit under Tony's standing instruction to reach a clean merge.
+
 ## Evidence artifacts
 
 - [Manifest](component-delivery-evidence/phase-3-manifest.json): commands, per-engine Vue counts,

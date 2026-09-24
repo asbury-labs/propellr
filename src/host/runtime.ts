@@ -775,16 +775,19 @@ export class SessionHost {
   // At most eight available views per session; older ones become explicit evictions.
   private retainView(record: RecordState, id: OperationId): void {
     record.views.push(id);
-    while (record.views.length > 8) {
-      const operation = record.operations.get(record.views.shift()!);
+    while (record.views.length > 8) this.evictView(record, record.views.shift()!);
+  }
+
+  private evictView(record: RecordState, id: OperationId): void {
+    const evict = (operation: Operation): Operation => {
       if (
-        operation?.kind !== "components" ||
+        operation.kind !== "components" ||
         operation.state !== "completed" ||
         operation.result.enrichment.state !== "available"
       )
-        continue;
+        return operation;
       const { view: _view, ...kept } = operation.result.enrichment;
-      const evicted: Operation = {
+      return {
         ...operation,
         result: {
           ...operation.result,
@@ -798,12 +801,14 @@ export class SessionHost {
           },
         },
       };
-      // Retained history must not replay an evicted view to a reconnecting subscriber.
-      for (const [index, event] of record.events.entries())
-        if (event.type === "operation" && event.operation.id === operation.id)
-          record.events[index] = { ...event, operation: evicted };
-      this.updateOperation(record, evicted);
-    }
+    };
+    // Rewrite retained history even when operation retention has already pruned the operation.
+    for (const [index, event] of record.events.entries())
+      if (event.type === "operation" && event.operation.id === id)
+        record.events[index] = { ...event, operation: evict(event.operation) };
+    const operation = record.operations.get(id);
+    const evicted = operation && evict(operation);
+    if (evicted && evicted !== operation) this.updateOperation(record, evicted);
   }
 
   private report(record: RecordState, scan: ScanResult): ScanResult {

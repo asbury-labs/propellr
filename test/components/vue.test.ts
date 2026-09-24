@@ -485,6 +485,33 @@ for (const engine of engines)
         await next.end({ ...meta(), sessionId: again.id });
       }, hostOptions(page));
 
+      // Operation pruning cannot leave an evicted view replayable from retained history.
+      await withHost(
+        async ({ client, reconnect }) => {
+          const session = await openVue(client);
+          const ids: string[] = [];
+          for (let index = 0; index < 9; index++)
+            ids.push((await analyze(client, session, ["button-name"])).accepted.id);
+          const replay = await reconnect();
+          const history = unwrap(
+            await replay.subscribe({ ...meta(), sessionId: session.id, after: `${session.id}.0` }),
+          );
+          const replayed: Operation[] = [];
+          for await (const delivery of history) {
+            if (delivery.type !== "event" || delivery.event.type !== "operation") continue;
+            if (delivery.event.operation.id === ids[0]) replayed.push(delivery.event.operation);
+            if (
+              delivery.event.operation.id === ids.at(-1) &&
+              delivery.event.operation.state === "completed"
+            )
+              break;
+          }
+          expect(replayed.some(({ state }) => state === "completed")).toBe(true);
+          expect(JSON.stringify(replayed)).not.toContain('"view"');
+        },
+        hostOptions(page, undefined, undefined, { limits: { operations: 2 } }),
+      );
+
       // A view over budget is unavailable while the exact raw scan is still delivered.
       await withHost(
         async ({ client }) => {
