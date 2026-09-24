@@ -7,6 +7,37 @@ import { canonical } from "../reporting/index.js";
 
 export const decisionModel = "jev-1.13.0";
 export const decisionRubric = { id: "component-attribution-questions", version: "1" } as const;
+export const decisionEndpoint = "https://api.typesafe.ai/v1/systemone";
+// Machine-checkable approval for a live lane. Every gate in the phase 2 protocol is a field:
+// provider, exact model and client, disclosure, terms review, and numeric ceilings.
+export const decisionApprovalSchema = z
+  .strictObject({
+    provider: z.literal("typesafe"),
+    model: z.literal(decisionModel),
+    client: z
+      .strictObject({
+        endpoint: z.literal(decisionEndpoint),
+        adapter: z.literal("propellr-component-decisions/1"),
+      })
+      .readonly(),
+    approvedBy: z.string().min(1).max(128),
+    date: z.iso.date(),
+    syntheticDisclosureOnly: z.literal(true),
+    termsReview: z
+      .strictObject({
+        reference: z.string().min(1).max(256),
+        reviewedBy: z.string().min(1).max(128),
+        date: z.iso.date(),
+        outputReuse: z.literal("evaluation-only"),
+        distillation: z.literal("prohibited"),
+        adversarialTesting: z.literal("not-permitted"),
+      })
+      .readonly(),
+    maxRequests: z.number().int().min(1).max(1000),
+    maxSpendUsd: z.number().positive().max(10),
+    pricePerMillionInputTokensUsd: z.number().positive().max(100),
+  })
+  .readonly();
 const sentinels = ["none", "insufficient-evidence"] as const;
 const REQUEST_BYTES = 65_536;
 const RESPONSE_BYTES = 262_144;

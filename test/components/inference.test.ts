@@ -525,6 +525,44 @@ describe("decision adapter without keys", () => {
   });
 });
 
+test("eval:components rejects incomplete approval records before any browser or network work", async () => {
+  const { mkdtemp, writeFile, rm } = await import("node:fs/promises");
+  const { join } = await import("node:path");
+  const directory = await mkdtemp("/tmp/pplr-approval-");
+  // Shaped like an approval but missing the client and terms-review gates.
+  const record = join(directory, "approval.json");
+  await writeFile(
+    record,
+    JSON.stringify({
+      provider: "typesafe",
+      model: decisionModel,
+      approvedBy: "someone",
+      date: "2026-09-24",
+      syntheticDisclosureOnly: true,
+      maxRequests: 1,
+      maxSpendUsd: 0.01,
+      pricePerMillionInputTokensUsd: 0.042,
+    }),
+  );
+  try {
+    const result = spawnSync(
+      process.execPath,
+      ["tools/evaluate-components.ts", "--provider", "jev"],
+      {
+        encoding: "utf8",
+        env: { ...process.env, PROPELLR_DECISION_APPROVAL: record, TYPESAFE_API_KEY: "not-a-key" },
+      },
+    );
+    expect(result.status).not.toBe(0);
+    const output = `${result.stdout}${result.stderr}`;
+    expect(output).toContain("approval record invalid");
+    expect(output).toContain("client");
+    expect(output).toContain("termsReview");
+  } finally {
+    await rm(directory, { recursive: true });
+  }
+}, 120_000);
+
 test("eval:components refuses provider arms without approval and keeps the holdout sealed", () => {
   const run = (...args: string[]) =>
     spawnSync(process.execPath, ["tools/evaluate-components.ts", ...args], {

@@ -102,6 +102,16 @@ Copilot raised four findings:
 Pinned `pnpm validate` then passed all 295 tests (72 component). Browser source is unchanged by
 this repair. The archive below describes the pre-review head `33a1215a`.
 
+## Review repair 2, PR #19
+
+Copilot found that the approval record did not encode the terms review or the exact
+endpoint and client, so a minimally shaped record could enable a live call while those gates were
+outstanding. The record now requires provider, model, exact endpoint and adapter, disclosure,
+a terms review and numeric ceilings. It is validated before any browser work or client
+construction. A test shows an incomplete record is refused with its missing fields named. No
+pre-fix run was made, because it would have sent a real request with a placeholder key.
+Pinned `pnpm validate` passed all 296 tests (73 component).
+
 ## Evidence artifacts
 
 - [Manifest](component-inference-evidence/phase-2-manifest.json): approval state, corpus split,

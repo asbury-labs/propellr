@@ -1,9 +1,13 @@
 // Evaluation lane, run only through tools/evaluate-components.ts. Never part of pnpm validate.
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { expect, test } from "vitest";
-import { z } from "zod";
 import { browserTypes } from "../src/host/browser.js";
-import { DecisionClient, decisionModel } from "../src/host/component-decisions.js";
+import {
+  DecisionClient,
+  decisionApprovalSchema,
+  decisionEndpoint,
+  decisionModel,
+} from "../src/host/component-decisions.js";
 import { decisionCase } from "../src/components/discovery.js";
 import { corpusFamilies } from "../test/fixtures/components/corpus.js";
 import { bootstrap, metrics, runFamily } from "../test/support/component-evaluation.js";
@@ -11,19 +15,20 @@ import { environment } from "../test/support/parity.js";
 
 const provider = process.env["PROPELLR_EVAL_PROVIDER"];
 const split = process.env["PROPELLR_EVAL_SPLIT"];
-const approvalSchema = z.strictObject({
-  provider: z.literal("typesafe"),
-  model: z.literal(decisionModel),
-  approvedBy: z.string().min(1),
-  date: z.iso.date(),
-  syntheticDisclosureOnly: z.literal(true),
-  maxRequests: z.number().int().min(1).max(1000),
-  maxSpendUsd: z.number().positive().max(10),
-  pricePerMillionInputTokensUsd: z.number().positive().max(100),
-});
-
 test("component attribution evaluation", { timeout: 600_000 }, async () => {
   if (!provider || split !== "dev") throw new Error("Run through pnpm eval:components");
+  // Validate every approval gate before any browser work or client construction.
+  let approval: ReturnType<typeof decisionApprovalSchema.parse> | undefined;
+  if (provider === "jev") {
+    const parsed = decisionApprovalSchema.safeParse(
+      JSON.parse(await readFile(process.env["PROPELLR_DECISION_APPROVAL"]!, "utf8")),
+    );
+    if (!parsed.success)
+      throw new Error(
+        `blocked: approval record invalid (${parsed.error.issues.map(({ path }) => path.join(".")).join(", ")})`,
+      );
+    approval = parsed.data;
+  }
   const browser = await browserTypes.chromium.launch();
   try {
     const families = corpusFamilies.filter((family) => family.split === split);
@@ -47,17 +52,18 @@ test("component attribution evaluation", { timeout: 600_000 }, async () => {
         },
       },
     };
-    if (provider === "jev") {
-      // Live lane: only reachable with an approval record and key; HTTPS only, bounded requests.
-      const approval = approvalSchema.parse(
-        JSON.parse(await readFile(process.env["PROPELLR_DECISION_APPROVAL"]!, "utf8")),
-      );
+    if (approval) {
+      // Live lane: only reachable with a complete approval record and key; HTTPS only.
       const client = new DecisionClient({
-        endpoint: "https://api.typesafe.ai/v1/systemone",
+        endpoint: decisionEndpoint,
         apiKey: process.env["TYPESAFE_API_KEY"]!,
         policy: { id: "component-eval", version: "1" },
         evidence: { id: "propellr-structure-capture", version: "1" },
-        budget: approval,
+        budget: {
+          maxRequests: approval.maxRequests,
+          maxSpendUsd: approval.maxSpendUsd,
+          pricePerMillionInputTokensUsd: approval.pricePerMillionInputTokensUsd,
+        },
       });
       const decisions = [];
       // The client enforces request and spend ceilings; exhaustion stops the lane.

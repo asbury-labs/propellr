@@ -17,6 +17,12 @@ becomes a supported scope, changes a gate, or is delivered over IPC.
 | Two independent human adjudicators for the 240-case corpus                | **Not available.** Labels unadjudicated. |
 | Native structured-output small LLM arm                                    | **Not approved**; no client added.       |
 
+A live lane requires a machine-checkable approval record (`decisionApprovalSchema`): provider,
+exact model, exact endpoint and adapter version, approver and date, synthetic-only disclosure,
+a terms review (reference, reviewer, date; evaluation-only output reuse, distillation prohibited,
+adversarial testing not permitted) and numeric request, spend and price ceilings. It is
+validated before any browser work or client construction.
+
 Consequences: no network call is made to any provider. `pnpm eval:components` refuses the
 `jev` and `llm` arms and exits nonzero when the approval record or key is missing. Nothing
 cached, mocked or synthetic can count as a live result. The holdout split stays sealed:
