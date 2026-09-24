@@ -29,7 +29,7 @@ Branch `feat/component-delivery` from `main@ae10343a`. Tony directed phase 3 bef
 
 ## Executed results
 
-**Pinned `pnpm validate` passed all 269 tests**: 68 contract, 44 host, 13 playbook,
+**Pre-review pinned `pnpm validate` (head `f73c44de`) passed all 269 tests**: 68 contract, 44 host, 13 playbook,
 80 parity/browser, 46 component and 18 reporting, plus build, six strict type scopes (new
 `tsconfig.fixtures.json` for the bridge, store and entry), lint and required Oxfmt. Browser
 analysis source is unchanged from `main`, so `bench:slice` was not rerun.
@@ -69,6 +69,21 @@ separate; an app without the plugin left unattributed. Delivered operations cont
   iterator closes by design.
 - Existing contract tests needed a sample and admission cases for the new command; one test
   looked up a request by array index and now finds it by command name.
+
+## Review repair 1, PR #18
+
+Copilot found that the bridge's `useId` prefix used only the application, so two builds of
+one application mounted in the same document produced colliding tokens, and their valid
+scopes became declaration conflicts. The prefix is now application, build and install
+order. A new `twin` scenario mounts storefront `vue-1` and `vue-2` together. It failed
+before the fix (both favorites `conflicting`) and passes after in all three engines, with
+one scope per build. **Latest pinned `pnpm validate` passed all 272 tests** (49 component).
+The archive below describes the pre-review head `f73c44de`.
+
+The first CI run of this PR timed out one existing WebKit host test (`native-form-naming`,
+30 s). Locally it takes about 960 ms on both this branch and `main` (5 runs each). Earlier
+CI runs took 3.3 s and 10.4 s, so this is Linux WebKit runtime variance, not a regression.
+The failed job was rerun once.
 
 ## Evidence artifacts
 

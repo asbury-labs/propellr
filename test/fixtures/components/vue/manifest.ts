@@ -122,5 +122,5 @@ export const vuePartner: ComponentManifestInput = {
   callsites: [],
 };
 // Page HTML for one scenario, with the compiled bundle inlined.
-export const vuePage = (scenario: "grid" | "controls" | "list", bundle: string) =>
+export const vuePage = (scenario: "grid" | "controls" | "list" | "twin", bundle: string) =>
   `<!doctype html><html lang="en"><meta charset="utf-8"><title>Vue fixture</title><style>body{margin:32px;font-family:Arial,sans-serif}img{width:32px;height:32px}button{display:block;box-sizing:border-box;width:180px;min-height:32px;margin:16px 0;padding:0;border:0}</style><body><div id="storefront"></div><div id="partner"></div><div id="plain"></div><script>globalThis.__propellrScenario=${JSON.stringify(scenario)}</script><script>${bundle.replaceAll("</script", "<\\/script")}</script></body></html>`;

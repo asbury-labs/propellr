@@ -252,6 +252,44 @@ for (const engine of engines)
   });
 
 for (const engine of engines)
+  test(`${engine}: two builds of one application in a document keep separate identities`, async () => {
+    const browser = await browserTypes[engine].launch();
+    const { context, page } = await vueTarget(browser, "twin");
+    const second = { ...vueStorefront, build: "vue-2" };
+    try {
+      await withHost(
+        async ({ client }) => {
+          const session = await openVue(client);
+          const { view: repair, scan } = view(
+            (await analyze(client, session, ["button-name"])).operation,
+          );
+          const ids = summarize(scan, repair);
+          expect(ids.unattributed).toEqual({});
+          expect(
+            repair.scopes.map(({ application, build, definition, members }) => [
+              application,
+              build,
+              definition,
+              members.length,
+            ]),
+          ).toEqual([
+            ["storefront", "vue-1", "ProductCard", 1],
+            ["storefront", "vue-2", "ProductCard", 1],
+          ]);
+        },
+        hostOptions(
+          page,
+          [vueStorefront, second],
+          [storefront, { application: "storefront", build: "vue-2" }],
+        ),
+      );
+    } finally {
+      await context.close();
+      await browser.close();
+    }
+  });
+
+for (const engine of engines)
   test(`${engine}: keyed rerender is re-observed, never reused`, async () => {
     const browser = await browserTypes[engine].launch();
     const { context, page } = await vueTarget(browser, "list");

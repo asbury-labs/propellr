@@ -9,7 +9,7 @@ export interface Product {
   readonly imageId: string;
   readonly imageAlt?: string | undefined;
 }
-export type Scenario = "grid" | "controls" | "list";
+export type Scenario = "grid" | "controls" | "list" | "twin";
 export const product = (id: string, number: number, extra: Partial<Product> = {}): Product => ({
   id,
   name: `Item ${number}`,

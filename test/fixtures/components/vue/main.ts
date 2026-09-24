@@ -20,6 +20,11 @@ page.__propellrFixture = {
 createApp(App)
   .use(propellrBridge, { application: "storefront", build: "vue-1" })
   .mount("#storefront");
+// A second build of the same application in one document.
+if (state.scenario === "twin")
+  createApp(PartnerApp)
+    .use(propellrBridge, { application: "storefront", build: "vue-2" })
+    .mount("#partner");
 if (state.scenario === "controls") {
   createApp(PartnerApp)
     .use(propellrBridge, { application: "partner", build: "p7" })

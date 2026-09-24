@@ -15,11 +15,13 @@ interface Declared {
 }
 const buildKey: InjectionKey<BuildIdentity> = Symbol("propellr-build");
 const parentKey: InjectionKey<string> = Symbol("propellr-parent");
+let installs = 0;
 
 export const propellrBridge = {
   install(app: App, build: BuildIdentity): void {
-    // Instance tokens are per app; a distinct prefix keeps two apps in one document apart.
-    app.config.idPrefix = build.application;
+    // useId() counts per app. Application, build and install order keep every mounted app
+    // distinct, including two builds of one application in the same document.
+    app.config.idPrefix = `${build.application}.${build.build}.${installs++}`;
     app.provide(buildKey, build);
   },
 };

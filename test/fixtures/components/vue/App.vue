@@ -19,6 +19,9 @@ const { root, part } = useComponentIdentity("StorefrontPage");
       <ProductCard v-for="item in state.grid" :key="item.id" :product="item" />
       <RecommendationTile v-for="tile in state.tiles" :key="tile.id" :tile="tile" />
     </template>
+    <template v-else-if="state.scenario === 'twin'">
+      <ProductCard :product="state.products[0]!" />
+    </template>
     <template v-else-if="state.scenario === 'list'">
       <ProductCard v-for="item in state.items" :key="item.id" :product="item" />
     </template>

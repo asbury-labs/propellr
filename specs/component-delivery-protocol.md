@@ -21,8 +21,8 @@ implemented here; this protocol adds one operation and does not change existing 
   `useId()` token as owner. `inject` gives the parent instance token. Slot content is owned by the
   template that wrote it (the caller). Teleported parts keep their component owner. Multiple root
   nodes bind the same root declaration (a fragment instance).
-- The plugin sets `app.config.idPrefix` to the application token so two apps in one document
-  cannot collide. Callsite and data-record tokens come from explicit props, never inferred.
+- The plugin sets `app.config.idPrefix` to application, build and install order, so two apps in
+  one document (including two builds of one application) cannot collide. Callsite and data-record tokens come from explicit props, never inferred.
 - The fixture is compiled with the real Vue SFC compiler in production mode, with no devtools
   hooks and minified output. Display names are not identity; two components share `name: "Card"`.
 - The expected manifest is hand-authored with relative source references. Source references stay
