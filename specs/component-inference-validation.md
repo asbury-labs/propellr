@@ -225,14 +225,30 @@ The first validate run for this repair timed out one existing Firefox naming par
 log is kept as `validate-review-10-failed.log`. The one rerun passed all 304 tests
 (81 component).
 
+## Review repair 11, PR #19
+
+Copilot found three evidence-integrity issues:
+
+- **Stale manifest (fixed):** the manifest's protocol and source hashes no longer matched the
+  checkout. The manifest and archive are now regenerated from the final source.
+- **Unpinned protocol (fixed):** the wrapper hashed any protocol path it was given. Only the
+  checked-in protocol at a pinned SHA-256 (`1d6f89a2…`) may now bind an evaluation, and a test
+  checks that the pin matches the file.
+- **Cached attempts (fixed):** cache hits re-reported their original attempts. They now report
+  zero.
+
+**Final pinned `pnpm validate` passed all 305 tests** (68 contract, 44 host, 13 playbook, 80
+parity/browser, 82 component, 18 reporting). The heuristic dev evaluation reran under the pinned
+protocol with unchanged metrics. The `jev`, `llm` and holdout lanes still exit 2.
+
 ## Evidence artifacts
 
 - [Manifest](component-inference-evidence/phase-2-manifest.json): approval state, corpus split,
   heuristic metrics, commands, source and archive hashes.
-- [Raw archive](component-inference-evidence/phase-2-results.tar.gz): the heuristic dev report
-  (all runs), validate, benchmark and evaluation logs including the refusals.
-- Source-tree SHA-256: `526825d8044907a613b62bd119369ca2edebcb410fe2173ad9d39c26174e0491`.
-- Archive SHA-256: `931dec1d8952118c7f5a8e4f916f2650dddc583514819be4fca99fedff5dc1d2`.
+- [Raw archive](component-inference-evidence/phase-2-results.tar.gz): the final heuristic dev
+  report, and all validate (including the failed run), benchmark and evaluation logs.
+- Source-tree SHA-256: `e37d3492e0b18ce7722e8e7ea96c1c73869c68cf960fec251726cf645e90f900`.
+- Archive SHA-256: `7dbbfa86f84ad8114e5522d1e3ae1a051bf1d0e21a608d6977e8e3c23b5efd9b`.
 
 To resume: approve a provider, exact model, spend and request caps, and synthetic disclosure.
 Complete the MCA review, provide two adjudicators and approve an LLM arm. Then run all arms on

@@ -329,7 +329,8 @@ export class DecisionClient {
       request,
     ]);
     const hit = this.cache.get(key);
-    if (hit) return { ...hit, cached: true };
+    // A cache hit made no attempt; only the original answer carried attempts.
+    if (hit) return { ...hit, cached: true, attempts: 0 };
     const deadline = AbortSignal.timeout(this.deadlineMs);
     const combined = AbortSignal.any([signal, deadline]);
     const stop = (): Failure => (signal.aborted ? "cancelled" : "timeout");

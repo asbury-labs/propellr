@@ -1,10 +1,10 @@
 {
   "state": "phase-2-blocked-at-approval-gates",
   "decision": "Jev not adopted; inference disabled",
-  "created": "2026-09-24T17:29:30.454144+00:00",
+  "created": "2026-09-24T19:59:31.757028+00:00",
   "plan": "specs/propellr-component-intelligence.html",
   "protocol": "specs/component-inference-protocol.md",
-  "protocolSha256": "6a01a28578f9d82ae559570ac5d75872dc794c8dd9e01bd63f8247933ece973c",
+  "protocolSha256": "1d6f89a24109cfd3bfaa4dbefa5844c00f13a5c4764e5301983ea120fd045aef",
   "baseCommit": "f76a991e60bbb9e3471dc57cfc045ca29db8f0fa",
   "branch": "feat/component-inference-eval",
   "agent": "claude-code / claude-opus-5-5",
@@ -98,20 +98,23 @@
         "overmerge": 0,
         "oversplit": 0
       }
-    }
+    },
+    "reportProtocolSha256": "1d6f89a24109cfd3bfaa4dbefa5844c00f13a5c4764e5301983ea120fd045aef"
   },
   "commands": {
     "pnpm validate": {
       "exitCode": 0,
-      "tests": 292,
+      "tests": 305,
       "suites": {
         "contracts": 68,
         "host": 44,
         "playbooks": 13,
         "parityAndBrowser": 80,
-        "components": 69,
+        "components": 82,
         "reporting": 18
-      }
+      },
+      "log": "artifacts/component-phase2/validate-final.log",
+      "note": "one earlier repair-10 run timed out an existing Firefox parity test; log archived as validate-review-10-failed.log"
     },
     "pnpm bench:slice": {
       "exitCode": 0,
@@ -144,24 +147,24 @@
     "package.json": "5c468812c7971ba1b372a73f632dac3f734211a5716c2ed68bfe4befe12ea4a6",
     "pnpm-lock.yaml": "c1ff99f5eb0c1829154da6021bf271d4f8d9425b00d013754b8a113dfb364254",
     "reference.json": "9d835429949f7972c192454d3494f255f9311009dd224c70e4fc97f5c93fe60b",
-    "src/analysis.ts": "9b47f6dcf0417b5e63309ead52e23783f249dcf9c24b93c317b559a9b5822cc2",
+    "src/analysis.ts": "254b84c57d72056d7ec35d8e00dcc6f391c462ec1da8f266007715a9e28024d4",
     "src/browser/components.ts": "0ad4a4ce8999e842bfda90327a424290e069e5ee8d2da210422dbcae7faf95a3",
     "src/browser/geometry.ts": "a088780e0a7f25a5e57bc84f0dc6c753db9e76b67504b74e45adff22e515557a",
     "src/browser/index.ts": "f68e5cef51d8b83e8195e1b116710448f7fda33339806927efaaa94d22f18641",
     "src/browser/naming-rules.ts": "f637527bd4e04bf68fc3bfc7c20131e01d76154ce8a484bb28ae7d9882c20832",
     "src/browser/naming.ts": "9ef039f985bae371e491dc4addf510321a339e024d7acb300b4ce31879486546",
-    "src/browser/structure.ts": "14699a12f0c8b359fbc3688244c57262f48ca8deff15035fe175c8d98b116e27",
+    "src/browser/structure.ts": "cd195eca8716714a4cc76596a441632c0e7e6c9bf764b4ce923a3c39fdafc21f",
     "src/catalog.json": "0135033840e650af72ab91e115838b805a61951e27eb093480f309c5af51770b",
     "src/components/attribution.ts": "4979d50278cf431a793ccaa41e55c7758495dff44755d97067a05329fcd8df25",
     "src/components/contracts.ts": "994ca2edd7b62fec5d19d3f1d036f4d116c705428022f7238e51fb7ad432a4a4",
-    "src/components/discovery.ts": "ec932bf07866e24abdc9b33c32573d9dc65e285106aafe10198099643af9f00b",
+    "src/components/discovery.ts": "f476383a0b23f2dfc0b9a7992133f3d84c7329f6145483aaaa42719da73ad0d2",
     "src/components/grouping.ts": "a9964c8e6cdb9a0a78bed732b10c990854a0113e0763af50bc3f862b25f20149",
-    "src/components/validation.ts": "74ddf59dcf4a9223f6c60a618b3ad6759bc15801bfe2cca0f7da682850008197",
+    "src/components/validation.ts": "26be08bfff0908484c9f90d2b0c035a945e1b1bc03408cdb4745030609ff4a09",
     "src/contracts.ts": "6e324d13d74ee0518db6ca96788bd8d129d0c0e1f6f3b195209ab1382a8b4aad",
     "src/host/browser.ts": "b555eba7d39088732ed8621d4af3444c9e18384682cbf9cfade23653291645c0",
     "src/host/cli.ts": "1f060195634a4adeb2d212992c83da3c20883ce477989fbd5bf6a4e934e7b857",
     "src/host/client.ts": "80d05d9819a21fa6a03bb8594c5ccbb7a7baa967285f0083c8daa245472fe376",
-    "src/host/component-decisions.ts": "da4159c7dbc67fe019fc572adcbabb86f5e08e2ee1faba7cc59552ae6f4823d4",
+    "src/host/component-decisions.ts": "48ab0c568a4f3bdeb76d8a874754cd991b57b037dd0a16ebfa2817ef2f1e564e",
     "src/host/components.ts": "38a897be3267b652803b8a547810d229aaa6075e6b2ac9c62d003a1cb796c2d2",
     "src/host/daemon.ts": "646894dd5d121392926ccc54b5b95f5a356f3173eba188c15a1226254f0942f0",
     "src/host/fixture.ts": "852a2354cfc706fd30f809f24c568fddb88f5a154b514d0225a598b9cf705543",
@@ -177,7 +180,7 @@
     "test/browser/reader.test.ts": "1fafe7ee40e4760f26b1cae9fc7451f69bf6b6b1a82e49801c39485172e21fae",
     "test/components/collection.test.ts": "05e56daa608254f82beb5ca9006a6469020113c07225fc078a4c12a91a8d1fb3",
     "test/components/contracts.test.ts": "a0ac0882c5f7a931515ab5634b2b494df3072fb76fbbe60f2ffd449caef4618b",
-    "test/components/inference.test.ts": "0a9274cb84b0052af21cef25d0fa7fbfc4e18539715acc7c691df6c2600d880a",
+    "test/components/inference.test.ts": "8fd496fe31099351a9cbb2a7c2cc7629c373eb5cb6b8945084e06a5b56eea1b0",
     "test/components/vue.test.ts": "a2a01b2a22cc8982ff85f3c502a84c0cbc7be0c42ddad7dd28019e298cc3faed",
     "test/contracts/requests.test.ts": "aa9f093e183d2d9ce7aeab24fafb294c05b8a8d7dddf8063e942f1ccfbdc6e38",
     "test/fixtures/components/cases.ts": "8d225ba6492a015bde44e0146749f60f701e8744a35a6af354b0954ffa38cedf",
@@ -219,7 +222,7 @@
     "test/playbooks/dialog.test.ts": "624f2f1e5d24a4b34737faa79bb15b9981b7046ac9bc2507d6fed4ded5adc9b0",
     "test/reporting/report.test.ts": "44d1a7550c10806dbdf45d6162804f790de926ff1456fb34f19e1da4078993ee",
     "test/support/component-corpus.ts": "b21d4b39bf387183053c6cdf15821d7e657c14eed3a452d113b858ef1502d0fb",
-    "test/support/component-evaluation.ts": "6ec9156ae07e56ed358ae2344b1fc0cd3dc0f79a1b7305fc9cb178145440ab38",
+    "test/support/component-evaluation.ts": "1e6c56083a9a8a1c4d4390175c807dfce2f33e919e1bb997e7b5c8a4ea3cb21d",
     "test/support/host.ts": "797ac1e25d45597f0831de10a295483aef84858ae43410ba05bd1242f9118daf",
     "test/support/parity.ts": "35b72e0993a4ab8fbfd63051810915681343e17e4fc74a02eb8d792931740e0b",
     "test/types/browser.typecheck.ts": "1828a728ba6ecbfe97535071244258152d6a102c911edb9aa184d13d25758301",
@@ -227,8 +230,8 @@
     "test/types/contracts.typecheck.ts": "3590fc40d62b77a66e5844baceb3e10b82c23464cc0f5e2b2fb97afe7454e3a2",
     "test/types/host.typecheck.ts": "b789602ad6b5ca4403758dd64b6a2a8860be3389cd6bd28012e21bdcc7b1c732",
     "test/types/portable.typecheck.ts": "7275a432cf5e2352e2972390a95ce51759c8a00204569966eed15fd263cc9eaf",
-    "tools/components.eval.ts": "aabd4ec5c55152b5b0bec58333085f7c547d6678370ea86213ae4e868b6a0d66",
-    "tools/evaluate-components.ts": "9f25eb84db80bddb6a822654099c6e203d3add9d2a3a1759b35fb9eb313f3e5a",
+    "tools/components.eval.ts": "f16143efaeecff6b6ff922cd069017baba99918e53e742f13ca4e0f7a412b76f",
+    "tools/evaluate-components.ts": "c59c95da5223553d95fde0413e20cab058cc1911f5cb2a8482a4aa8948b6b4fa",
     "tools/reference.ts": "96ebebcfdaf12b563cb4186391160ffc95c8f6254367be20106c82691459ee3d",
     "tsconfig.browser-test.json": "a43e0b89859662b923de23b7cefe51c0a61fc6ca1e5d50786d089b1f0721c279",
     "tsconfig.browser.json": "733cddda63eaacb80bc54b1406bfdd93de768cb9e60f58490e82d4a73315e8d0",
@@ -241,21 +244,33 @@
     "vite.config.ts": "da54831006846021c64dc8363265b27367de512eb528b26fe031a403288e1dbe",
     "vitest.config.ts": "73b08a6b7f4bb617936c46f14fa51b3aee63eaacc1083095d8918ec2eee8dcdc"
   },
-  "sourceTreeSha256": "526825d8044907a613b62bd119369ca2edebcb410fe2173ad9d39c26174e0491",
+  "sourceTreeSha256": "e37d3492e0b18ce7722e8e7ea96c1c73869c68cf960fec251726cf645e90f900",
   "sourceTreeHashAlgorithm": "SHA-256 of UTF-8 compact sorted-key JSON sourceHashes (src, test, bench, tools, root configs)",
-  "browserBundleSha256": "340d16d3c1413a95481e6c432ec10be67691b6e005843c98c0828926bbe8b312",
+  "browserBundleSha256": "5ee74d2fcc3e69b4c0acbbf50c6d19073906af694b883712afcc21f5981f15f7",
   "archive": {
     "path": "specs/component-inference-evidence/phase-2-results.tar.gz",
-    "sha256": "931dec1d8952118c7f5a8e4f916f2650dddc583514819be4fca99fedff5dc1d2",
-    "fileCount": 7
+    "sha256": "7dbbfa86f84ad8114e5522d1e3ae1a051bf1d0e21a608d6977e8e3c23b5efd9b",
+    "fileCount": 19
   },
   "archivedFiles": {
     "artifacts/component-phase2/bench-slice.log": "1cb2dbe290cce450d245b275214af569714b52d196e13202aa500faf94bf8c3f",
-    "artifacts/component-phase2/eval-heuristic-dev.log": "193c354811d5a097ab858a5597926f722499c29fd03ea56bded14361bcf46dd8",
-    "artifacts/component-phase2/eval-refused-holdout.log": "db0bd29a0797c346122fc47254b442490ba2af422a226648d1158a27163ff6db",
-    "artifacts/component-phase2/eval-refused-jev.log": "80bf871d17948bc35f74eefe2db1c9b0987413b33b159129eedbfd3afbf74ac1",
-    "artifacts/component-phase2/eval-refused-llm.log": "15d7eea5cabce665d5d37854fa55fa268bc4c7bb839c22b785e42976a1e7b494",
+    "artifacts/component-phase2/eval-heuristic-dev.log": "3471e9b2576be04ad9544e588ed4b73854dd5477d43f622e760e68b0bae39913",
+    "artifacts/component-phase2/eval-refused-holdout.log": "eb5358df80db142486f330a5e2931c0cf2dddcc8110689b338327d1866cf0dbb",
+    "artifacts/component-phase2/eval-refused-jev.log": "0cd3231ae9456b9c4918d35dace5c9fdbb7c2623b67c052c75c4d41ffcbc72ca",
+    "artifacts/component-phase2/eval-refused-llm.log": "6590dc7295e5044edd4b9aa38b2cd8c0894755d9bfb4effdb1646fd084bf6438",
+    "artifacts/component-phase2/validate-final.log": "2d5dc78f340a27a6006c594942db2b355e3d4e2d0a6c3b4dd8ae388f98c9e049",
+    "artifacts/component-phase2/validate-review-1.log": "734982186cf9ebab1497714c90f4e3bddb6932ba2458568d2cca766eb2fb5050",
+    "artifacts/component-phase2/validate-review-10-failed.log": "61f6827df47aa11d956f68d81356674f097409d0e1c4941dce83be28fc77e3d4",
+    "artifacts/component-phase2/validate-review-10.log": "d7943836aa92c0abd2be93dbfb730d7cd566be4a5e6a77d60a0f79872c0b3736",
+    "artifacts/component-phase2/validate-review-2.log": "fa57a2ab1432756a017ef7b723bcab92c3c12f31bfa1a96b0b0d87d7d4b10258",
+    "artifacts/component-phase2/validate-review-3.log": "3e188dfb6da215bf3865fda0da151d0014004588cc9f505a911fd2c6b2cde9e8",
+    "artifacts/component-phase2/validate-review-4.log": "1935dd98f15019c28adf9833b987c2f3e17d46ae43c9502ad0c91c26391c27e9",
+    "artifacts/component-phase2/validate-review-5.log": "d4725047e3c9eadcc8778daf28edc45d64338406848a4ed5afcec1bb5baca2a1",
+    "artifacts/component-phase2/validate-review-6.log": "6466245756eb2aab555d49d2d9f9f68bfeff703d30ec7d5f6d2ab1991c07902a",
+    "artifacts/component-phase2/validate-review-7.log": "1e9d5fc61aeffbfcca1d119b95f0801e25cdf153db79d91cfc89be0ad1d83f57",
+    "artifacts/component-phase2/validate-review-8.log": "5c09cb246b342dc9737f6b493cd5d2b6d233bab499e7ad5337b9284be39a68c6",
+    "artifacts/component-phase2/validate-review-9.log": "f5eb83e9050ed6944806b9e911ce13656b6e7438a35a53fe16c9942a7cd777a6",
     "artifacts/component-phase2/validate.log": "ee42d04c3bebfe6c950a41b0dfe8e7eefd74a97a245dbf70eb76ccce450e2ee4",
-    "artifacts/components/eval-heuristic-dev.json": "dcbca037687d031b2c5e95b5664e89495ca6ace56f3b37771d0a4dff63489da5"
+    "artifacts/components/eval-heuristic-dev.json": "125dc78955d39611944f0c3488116bcd036fff841f1af69d1164bd4d64008f7c"
   }
 }

@@ -78,7 +78,9 @@ are instrumented-oracle labels, **not** two-reviewer adjudications.
   attempts, failures by code and spend. They are scored by the same oracle and chains as the
   heuristic: `none` and `insufficient-evidence` abstain, and a part abstention forms no group.
   A part that is not the chain-derived path for the chosen member is a conflict and forms no
-  group. The evaluation entry point verifies the frozen protocol path and SHA-256 itself.
+  group. Only this checked-in protocol at its pinned SHA-256 can bind an evaluation; the digest
+  pin is updated together with any intentional revision, and the entry point re-verifies it.
+  Cached answers report zero attempts.
   Failed calls are undecided. Decisions are target-level: every (rule, path) case on a target
   shares that target's decision, and request, latency and attempt metrics count targets. The
   adoption check applies the frozen bar and is eligible only on the holdout.

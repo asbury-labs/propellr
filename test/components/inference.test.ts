@@ -457,6 +457,7 @@ describe("decision adapter without keys", () => {
     expect(await decisions.decide(input, signal())).toMatchObject({
       state: "answered",
       cached: true,
+      attempts: 0,
     });
     expect(hits()).toBe(1);
     // Any version that could change the answer is part of the cache key.
@@ -874,6 +875,17 @@ test("the evaluation entry point enforces providers, split and key when run dire
   }
 }, 120_000);
 
+test("the pinned protocol digest matches the checked-in frozen protocol", async () => {
+  const { createHash } = await import("node:crypto");
+  const { readFile } = await import("node:fs/promises");
+  const wrapper = await readFile("tools/evaluate-components.ts", "utf8");
+  const pinned = /FROZEN_PROTOCOL_SHA256 = "([0-9a-f]{64})"/.exec(wrapper)?.[1];
+  const actual = createHash("sha256")
+    .update(await readFile("specs/component-inference-protocol.md"))
+    .digest("hex");
+  expect(pinned).toBe(actual);
+});
+
 test("eval:components refuses provider arms without approval and keeps the holdout sealed", () => {
   const run = (...args: string[]) =>
     spawnSync(process.execPath, ["tools/evaluate-components.ts", ...args], {
@@ -885,6 +897,7 @@ test("eval:components refuses provider arms without approval and keeps the holdo
     [["--provider", "llm"], "no structured-output LLM client"],
     [["--split", "holdout"], "holdout is sealed"],
     [["--provider", "jev", "--split", "holdout"], "approval record missing"],
+    [["--protocol", "README.md"], "may bind an evaluation"],
     // pnpm eval:components -- ... forwards the separator.
     [["--", "--provider", "jev"], "approval record missing"],
   ] as const) {
