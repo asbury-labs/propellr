@@ -2,6 +2,8 @@ import { createServer } from "node:http";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { decisionCase, discoverTemplates } from "../../src/components/discovery.js";
 import { structureCollector } from "../../src/analysis.js";
@@ -861,6 +863,18 @@ test("the evaluation entry point enforces providers, split and key when run dire
       },
       "frozen protocol path and hash",
     ],
+    // A self-consistent hash of another file is not the pinned protocol.
+    [
+      {
+        PROPELLR_EVAL_PROVIDER: "heuristic",
+        PROPELLR_EVAL_SPLIT: "dev",
+        PROPELLR_EVAL_PROTOCOL: "README.md",
+        PROPELLR_EVAL_PROTOCOL_SHA256: createHash("sha256")
+          .update(readFileSync("README.md"))
+          .digest("hex"),
+      },
+      "frozen protocol path and hash",
+    ],
     [{ PROPELLR_EVAL_PROVIDER: "llm", PROPELLR_EVAL_SPLIT: "dev" }, "provider llm is not approved"],
     [
       { PROPELLR_EVAL_PROVIDER: "other", PROPELLR_EVAL_SPLIT: "dev" },
@@ -878,8 +892,9 @@ test("the evaluation entry point enforces providers, split and key when run dire
 test("the pinned protocol digest matches the checked-in frozen protocol", async () => {
   const { createHash } = await import("node:crypto");
   const { readFile } = await import("node:fs/promises");
-  const wrapper = await readFile("tools/evaluate-components.ts", "utf8");
-  const pinned = /FROZEN_PROTOCOL_SHA256 = "([0-9a-f]{64})"/.exec(wrapper)?.[1];
+  const pinned = (
+    JSON.parse(await readFile("tools/frozen-protocol.json", "utf8")) as { sha256: string }
+  ).sha256;
   const actual = createHash("sha256")
     .update(await readFile("specs/component-inference-protocol.md"))
     .digest("hex");

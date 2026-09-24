@@ -1,5 +1,6 @@
 // Evaluation lane, run only through tools/evaluate-components.ts. Never part of pnpm validate.
 import { createHash } from "node:crypto";
+import frozen from "./frozen-protocol.json" with { type: "json" };
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { test } from "vitest";
 import { browserTypes } from "../src/host/browser.js";
@@ -31,15 +32,13 @@ test("component attribution evaluation", { timeout: 600_000 }, async () => {
   if (split !== "dev") throw new Error("blocked: only the dev split may run; holdout is sealed");
   if (provider === "jev" && !process.env["TYPESAFE_API_KEY"])
     throw new Error("blocked: provider key missing (TYPESAFE_API_KEY)");
+  // The pinned digest is the authority; caller-supplied hashes are only cross-checked.
   const protocol = process.env["PROPELLR_EVAL_PROTOCOL"];
   const protocolSha256 = process.env["PROPELLR_EVAL_PROTOCOL_SHA256"];
-  if (
-    !protocol ||
-    !protocolSha256 ||
-    createHash("sha256")
-      .update(await readFile(protocol).catch(() => ""))
-      .digest("hex") !== protocolSha256
-  )
+  const actual = createHash("sha256")
+    .update(await readFile(frozen.path).catch(() => ""))
+    .digest("hex");
+  if (protocol !== frozen.path || protocolSha256 !== frozen.sha256 || actual !== frozen.sha256)
     throw new Error("blocked: frozen protocol path and hash are required and must match");
   // Validate every approval gate before any browser work or client construction.
   let approval: ReturnType<typeof decisionApprovalSchema.parse> | undefined;

@@ -23,10 +23,14 @@ const refuse = (message: string): never => {
 const { provider, split, protocol } = values;
 if (!["heuristic", "jev", "llm"].includes(provider)) refuse(`unknown provider ${provider}`);
 if (!["dev", "holdout"].includes(split)) refuse(`unknown split ${split}`);
-// Only the checked-in frozen protocol, at its pinned digest, may bind an evaluation.
-// Update FROZEN_PROTOCOL_SHA256 together with any intentional protocol revision.
-const FROZEN_PROTOCOL = "specs/component-inference-protocol.md";
-const FROZEN_PROTOCOL_SHA256 = "1d6f89a24109cfd3bfaa4dbefa5844c00f13a5c4764e5301983ea120fd045aef";
+// Only the checked-in frozen protocol, at its pinned digest (tools/frozen-protocol.json), may bind
+// an evaluation. Update the pin together with any intentional protocol revision.
+const frozen = JSON.parse(readFileSync("tools/frozen-protocol.json", "utf8")) as {
+  readonly path: string;
+  readonly sha256: string;
+};
+const FROZEN_PROTOCOL = frozen.path;
+const FROZEN_PROTOCOL_SHA256 = frozen.sha256;
 if (protocol !== FROZEN_PROTOCOL) refuse(`only ${FROZEN_PROTOCOL} may bind an evaluation`);
 if (!existsSync(protocol)) refuse(`protocol ${protocol} not found`);
 if (createHash("sha256").update(readFileSync(protocol)).digest("hex") !== FROZEN_PROTOCOL_SHA256)

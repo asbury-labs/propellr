@@ -237,6 +237,14 @@ Copilot found three evidence-integrity issues:
 - **Cached attempts (fixed):** cache hits re-reported their original attempts. They now report
   zero.
 
+Pinned `pnpm validate` then passed all 305 tests (82 component).
+
+## Review repair 12, PR #19
+
+Copilot found that the direct evaluation entry point trusted a caller-supplied digest. The pin now
+lives in `tools/frozen-protocol.json`, which both the wrapper and the entry point read. The entry
+point requires the pinned path and digest and hashes the pinned file itself, so a self-consistent
+hash of another or modified file is refused. A test checks the pin against the checked-in protocol.
 **Final pinned `pnpm validate` passed all 305 tests** (68 contract, 44 host, 13 playbook, 80
 parity/browser, 82 component, 18 reporting). The heuristic dev evaluation reran under the pinned
 protocol with unchanged metrics. The `jev`, `llm` and holdout lanes still exit 2.
@@ -247,8 +255,8 @@ protocol with unchanged metrics. The `jev`, `llm` and holdout lanes still exit 2
   heuristic metrics, commands, source and archive hashes.
 - [Raw archive](component-inference-evidence/phase-2-results.tar.gz): the final heuristic dev
   report, and all validate (including the failed run), benchmark and evaluation logs.
-- Source-tree SHA-256: `e37d3492e0b18ce7722e8e7ea96c1c73869c68cf960fec251726cf645e90f900`.
-- Archive SHA-256: `7dbbfa86f84ad8114e5522d1e3ae1a051bf1d0e21a608d6977e8e3c23b5efd9b`.
+- Source-tree SHA-256: `9cabda4855a0050b1b63f5900eb8bf978b7dd02b29ace72e64e34878b4cac78e`.
+- Archive SHA-256: `ae9a4b0e67a7cc7aa3d3570a0769d2859e535fb81e9c95eb81fdb92419ddf0f1`.
 
 To resume: approve a provider, exact model, spend and request caps, and synthetic disclosure.
 Complete the MCA review, provide two adjudicators and approve an LLM arm. Then run all arms on
