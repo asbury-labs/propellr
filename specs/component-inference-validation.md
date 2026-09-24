@@ -168,6 +168,14 @@ The three new tests failed before their fixes. The heuristic dev evaluation stil
 completeness gate. This sixth push also ran under Tony's standing instruction. Pinned
 `pnpm validate` passed all 301 tests (78 component).
 
+## Review repair 7, PR #19
+
+Copilot found that the vitest evaluation entry point relied on the wrapper's refusals. Run
+directly, it would score an unknown provider through the heuristic lane and did not check the Jev
+key. It now refuses unapproved providers, the holdout and a missing key itself, before any browser
+launch. The direct-run test failed before the fix. Pinned `pnpm validate` passed all 302 tests
+(79 component).
+
 ## Evidence artifacts
 
 - [Manifest](component-inference-evidence/phase-2-manifest.json): approval state, corpus split,

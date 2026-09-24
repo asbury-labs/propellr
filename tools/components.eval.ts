@@ -16,7 +16,12 @@ import { environment } from "../test/support/parity.js";
 const provider = process.env["PROPELLR_EVAL_PROVIDER"];
 const split = process.env["PROPELLR_EVAL_SPLIT"];
 test("component attribution evaluation", { timeout: 600_000 }, async () => {
-  if (!provider || split !== "dev") throw new Error("Run through pnpm eval:components");
+  // Enforced here too, so running this entry point directly cannot bypass the wrapper.
+  if (provider !== "heuristic" && provider !== "jev")
+    throw new Error(`blocked: provider ${provider ?? "(none)"} is not approved for phase 2`);
+  if (split !== "dev") throw new Error("blocked: only the dev split may run; holdout is sealed");
+  if (provider === "jev" && !process.env["TYPESAFE_API_KEY"])
+    throw new Error("blocked: provider key missing (TYPESAFE_API_KEY)");
   // Validate every approval gate before any browser work or client construction.
   let approval: ReturnType<typeof decisionApprovalSchema.parse> | undefined;
   if (provider === "jev") {

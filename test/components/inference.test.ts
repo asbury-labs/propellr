@@ -702,6 +702,31 @@ test("eval:components refuses an unreadable approval record with the blocked sta
   }
 });
 
+test("the evaluation entry point enforces providers, split and key when run directly", () => {
+  const direct = (env: Record<string, string>) =>
+    spawnSync(
+      process.execPath,
+      ["node_modules/vitest/vitest.mjs", "run", "--project", "evaluation"],
+      {
+        encoding: "utf8",
+        env: { ...process.env, TYPESAFE_API_KEY: "", PROPELLR_DECISION_APPROVAL: "", ...env },
+      },
+    );
+  for (const [env, message] of [
+    [{ PROPELLR_EVAL_PROVIDER: "llm", PROPELLR_EVAL_SPLIT: "dev" }, "provider llm is not approved"],
+    [
+      { PROPELLR_EVAL_PROVIDER: "other", PROPELLR_EVAL_SPLIT: "dev" },
+      "provider other is not approved",
+    ],
+    [{ PROPELLR_EVAL_PROVIDER: "heuristic", PROPELLR_EVAL_SPLIT: "holdout" }, "holdout is sealed"],
+    [{ PROPELLR_EVAL_PROVIDER: "jev", PROPELLR_EVAL_SPLIT: "dev" }, "provider key missing"],
+  ] as const) {
+    const result = direct(env);
+    expect(result.status, JSON.stringify(env)).not.toBe(0);
+    expect(`${result.stdout}${result.stderr}`, JSON.stringify(env)).toContain(message);
+  }
+}, 120_000);
+
 test("eval:components refuses provider arms without approval and keeps the holdout sealed", () => {
   const run = (...args: string[]) =>
     spawnSync(process.execPath, ["tools/evaluate-components.ts", ...args], {
