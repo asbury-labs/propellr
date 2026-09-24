@@ -205,6 +205,26 @@ The custom-name and scoring tests failed before their fixes. Only structure labe
 the browser, and the capture on/off tests still hold in three engines, so the benchmark was not
 rerun. Pinned `pnpm validate` passed all 304 tests (81 component).
 
+## Review repair 10, PR #19
+
+Copilot found three more issues:
+
+- **Silent target cap (fixed):** the structure capture could silently cap targets. It now
+  becomes `unavailable` instead; this was unreachable anyway, since raw scans cap occurrences at 96. The evaluator also requires a chain for every scored case.
+- **Mismatched part answers (fixed):** a part answer not matching the chosen member formed a
+  group. It is now a conflict and forms no group.
+- **Protocol provenance (fixed):** the direct entry point did not verify protocol provenance. It
+  now requires the protocol path and verifies its SHA-256.
+
+Both new tests failed before their fixes. The heuristic dev metrics are unchanged. The
+protocol's hash has changed since the first run because review repairs added clarifications.
+The adoption bar, thresholds, metrics and corpus split are unchanged.
+
+The first validate run for this repair timed out one existing Firefox naming parity test after
+371 s. That test does not exercise component code, and it passed alone twice in about 17 s. The
+log is kept as `validate-review-10-failed.log`. The one rerun passed all 304 tests
+(81 component).
+
 ## Evidence artifacts
 
 - [Manifest](component-inference-evidence/phase-2-manifest.json): approval state, corpus split,

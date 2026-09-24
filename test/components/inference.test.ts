@@ -169,9 +169,14 @@ test("chromium: provider decisions are scored against the same oracle and the fr
                       membership: { type: "choice", choice, probabilities: {}, confidence: 0.9 },
                       part: {
                         type: "choice",
-                        // One part abstention: membership still scores, but no repair group.
+                        // One part abstention and one mismatched part: membership still scores,
+                        // but neither forms a repair group.
                         choice:
-                          run.family === "favorites-grid" && index === 1 ? "none" : input.parts[0]!,
+                          run.family === "favorites-grid" && index === 1
+                            ? "none"
+                            : run.family === "favorites-grid" && index === 2
+                              ? "main>article>button"
+                              : input.parts[0]!,
                         probabilities: {},
                         confidence: 0.9,
                       },
@@ -193,7 +198,7 @@ test("chromium: provider decisions are scored against the same oracle and the fr
     const grouped = providerCases(runs, decisions).cases.filter(
       ({ family, group }) => family === "favorites-grid" && group !== null,
     );
-    expect(grouped).toHaveLength(18);
+    expect(grouped).toHaveLength(17);
     expect(report.perFamily["favorites-grid"]).toMatchObject({
       coverage: 0.95,
       decisionPrecision: 1,
@@ -842,6 +847,19 @@ test("the evaluation entry point enforces providers, split and key when run dire
       },
     );
   for (const [env, message] of [
+    [
+      { PROPELLR_EVAL_PROVIDER: "heuristic", PROPELLR_EVAL_SPLIT: "dev" },
+      "frozen protocol path and hash",
+    ],
+    [
+      {
+        PROPELLR_EVAL_PROVIDER: "heuristic",
+        PROPELLR_EVAL_SPLIT: "dev",
+        PROPELLR_EVAL_PROTOCOL: "specs/component-inference-protocol.md",
+        PROPELLR_EVAL_PROTOCOL_SHA256: "0".repeat(64),
+      },
+      "frozen protocol path and hash",
+    ],
     [{ PROPELLR_EVAL_PROVIDER: "llm", PROPELLR_EVAL_SPLIT: "dev" }, "provider llm is not approved"],
     [
       { PROPELLR_EVAL_PROVIDER: "other", PROPELLR_EVAL_SPLIT: "dev" },

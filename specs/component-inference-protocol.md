@@ -38,7 +38,7 @@ bridge capture and after raw rules are fixed. Raw results are unchanged with it 
   attribute values, IDs, classes, URLs or page-chosen names.
 - Shape: FNV-1a hash of the label and up to 16 child labels, recursively to depth 2, over light
   children and open shadow-root children. Counts of each depth-2 shape over reader-visited elements.
-- For each violation target (at most 96): the composed ancestor chain up to 8 levels, each with
+- For each violation target (at most 96; more makes the capture `unavailable`, never truncated): the composed ancestor chain up to 8 levels, each with
   distance, label, shape, repeat count and the ancestor's exact target path when the reader
   visited it. Target paths are the same ones raw results already carry; they exist only for
   host-side joining and are never sent to a provider.
@@ -77,6 +77,8 @@ are instrumented-oracle labels, **not** two-reviewer adjudications.
 - Provider arms add calibration (Brier score of membership confidence), latency p50/p95,
   attempts, failures by code and spend. They are scored by the same oracle and chains as the
   heuristic: `none` and `insufficient-evidence` abstain, and a part abstention forms no group.
+  A part that is not the chain-derived path for the chosen member is a conflict and forms no
+  group. The evaluation entry point verifies the frozen protocol path and SHA-256 itself.
   Failed calls are undecided. Decisions are target-level: every (rule, path) case on a target
   shares that target's decision, and request, latency and attempt metrics count targets. The
   adoption check applies the frozen bar and is eligible only on the holdout.

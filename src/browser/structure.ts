@@ -68,7 +68,9 @@ export function captureStructure(
   for (const target of violations) {
     const key = JSON.stringify(target.path);
     const node = nodes.get(key);
-    if (!node || seen.has(key) || entries.length >= 96) continue;
+    if (!node || seen.has(key)) continue;
+    // Never truncate silently: more targets than the bound makes the capture unavailable.
+    if (entries.length >= 96) return unavailable();
     seen.add(key);
     const chain: { -readonly [K in keyof Chain[number]]: Chain[number][K] }[] = [];
     let current: Element | null = node;

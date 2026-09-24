@@ -136,7 +136,11 @@ export async function runFamily(browser: Browser, family: CorpusFamily): Promise
         oracle.scan.coverage.state === "complete" &&
         capture.state === "available" &&
         oracle.truth.size === oracle.violations &&
-        cases.length === oracle.violations,
+        cases.length === oracle.violations &&
+        (capture.state !== "available" ||
+          cases.every(({ path }) =>
+            capture.targets.some(({ target: entry }) => pathKey(entry) === path),
+          )),
       structure: capture,
       discovery,
       cases,
@@ -260,7 +264,10 @@ export function providerCases(
         calibration.push({ confidence: decision.answers.membership.confidence, correct });
       // A part abstention keeps membership but never forms a repair group.
       const part = decision?.state === "answered" ? decision.answers.part.choice : undefined;
-      const partDecided = part !== undefined && part !== "none" && part !== "insufficient-evidence";
+      // The part must be the chain-derived path for the chosen member; otherwise it conflicts.
+      const expectedPart =
+        distance === undefined ? undefined : decisionCase(chain).parts[Number(distance) - 1];
+      const partDecided = part !== undefined && part === expectedPart;
       cases.push({
         ...entry,
         candidateHit: decisionCase(chain).candidates.some((_, index) => inRoots(index + 1)),
