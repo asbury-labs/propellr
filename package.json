@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.build.json && vite build",
-    "typecheck": "tsc -p tsconfig.portable.json && tsc -p tsconfig.browser.json && tsc -p tsconfig.host.json && tsc -p tsconfig.test.json && tsc -p tsconfig.browser-test.json",
+    "typecheck": "tsc -p tsconfig.portable.json && tsc -p tsconfig.browser.json && tsc -p tsconfig.host.json && tsc -p tsconfig.test.json && tsc -p tsconfig.browser-test.json && tsc -p tsconfig.fixtures.json",
     "lint": "oxlint --deny-warnings .",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
@@ -16,7 +16,8 @@
     "reference:prepare": "node tools/reference.ts",
     "test:parity": "pnpm build && PLAYWRIGHT_BROWSERS_PATH=\"${PLAYWRIGHT_BROWSERS_PATH:-$PWD/.tools/browsers}\" vitest run --project parity --project browser",
     "test:reporting": "vitest run --project reporting",
-    "test:components": "pnpm build && PLAYWRIGHT_BROWSERS_PATH=\"${PLAYWRIGHT_BROWSERS_PATH:-$PWD/.tools/browsers}\" vitest run --project components",
+    "build:fixtures": "vite build -c test/fixtures/components/vue/vite.config.ts",
+    "test:components": "pnpm build && pnpm build:fixtures && PLAYWRIGHT_BROWSERS_PATH=\"${PLAYWRIGHT_BROWSERS_PATH:-$PWD/.tools/browsers}\" vitest run --project components",
     "bench:slice": "pnpm build && PLAYWRIGHT_BROWSERS_PATH=\"${PLAYWRIGHT_BROWSERS_PATH:-$PWD/.tools/browsers}\" vitest run --project bench",
     "validate": "pnpm build && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test:contracts && pnpm test:host && pnpm test:playbooks && pnpm test:parity && pnpm test:components && pnpm test:reporting"
   },
@@ -26,12 +27,14 @@
   },
   "devDependencies": {
     "@types/node": "26.5.1",
+    "@vitejs/plugin-vue": "6.0.9",
     "@vitest/browser-playwright": "5.0.0",
     "oxfmt": "0.67.0",
     "oxlint": "1.82.0",
     "typescript": "7.0.2",
     "vite": "8.3.0",
-    "vitest": "5.0.0"
+    "vitest": "5.0.0",
+    "vue": "3.5.43"
   },
   "engines": {
     "node": "26.8.2",

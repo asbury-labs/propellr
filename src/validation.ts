@@ -100,6 +100,8 @@ export const commandSchemas = {
     .readonly(),
   inspect: z.strictObject({ ...sessionMeta, operationId: operationIdSchema.optional() }).readonly(),
   scan: z.strictObject({ ...sessionMeta, scan: scanRequestSchema }).readonly(),
+  // Opt-in capability component-analysis@1; same input shape and admission as scan.
+  analyzeComponents: z.strictObject({ ...sessionMeta, scan: scanRequestSchema }).readonly(),
   runPlaybook: z
     .strictObject({
       ...sessionMeta,
@@ -122,6 +124,12 @@ export const requestSchema = z.discriminatedUnion("command", [
   z.strictObject({ command: z.literal("open"), input: commandSchemas.open }).readonly(),
   z.strictObject({ command: z.literal("inspect"), input: commandSchemas.inspect }).readonly(),
   z.strictObject({ command: z.literal("scan"), input: commandSchemas.scan }).readonly(),
+  z
+    .strictObject({
+      command: z.literal("analyzeComponents"),
+      input: commandSchemas.analyzeComponents,
+    })
+    .readonly(),
   z
     .strictObject({ command: z.literal("runPlaybook"), input: commandSchemas.runPlaybook })
     .readonly(),

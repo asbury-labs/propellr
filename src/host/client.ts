@@ -162,6 +162,8 @@ export class LocalClient implements SessionClient {
   readonly open: SessionClient["open"] = (input) => this.call("open", input);
   readonly inspect: SessionClient["inspect"] = (input) => this.call("inspect", input);
   readonly scan: SessionClient["scan"] = (input) => this.call("scan", input);
+  readonly analyzeComponents: SessionClient["analyzeComponents"] = (input) =>
+    this.call("analyzeComponents", input);
   readonly runPlaybook: SessionClient["runPlaybook"] = (input) => this.call("runPlaybook", input);
   readonly subscribe: SessionClient["subscribe"] = (input) => this.call("subscribe", input);
   readonly cancel: SessionClient["cancel"] = (input) => this.call("cancel", input);

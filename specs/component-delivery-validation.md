@@ -1,0 +1,123 @@
+# Component delivery: phase 3 evidence
+
+## Checkpoint, September 24, 2026
+
+Phase 3 of the [component intelligence plan](propellr-component-intelligence.html): real
+component ownership with one opt-in Vue integration, and additive host/agent delivery.
+Branch `feat/component-delivery` from `main@ae10343a`. Tony directed phase 3 before phase 2
+(explicit no-Jev decision); no provider, model or inference is involved.
+[Protocol](component-delivery-protocol.md) was written before implementation.
+
+## What exists
+
+- `analyzeComponents` command and `components` operation kind, advertised as
+  `component-analysis@1` only when `SessionHost` receives `components` options. Same input
+  shape, admission, origin, document and one-active-operation rules as `scan`. The exact
+  reported scan commits first (`raw-scan` event); the operation then completes with
+  `{ scan, enrichment }`. Enrichment is `available`, `unavailable` or `evicted`, and carries
+  scan ID, document ID, epoch and generation. SDK `LocalClient.analyzeComponents` and the CLI
+  support it. Existing command inputs and outputs are unchanged.
+- Views are capped at 192 KiB (`limits.componentViewBytes`). At most eight available views per
+  session; older ones become `evicted` with an operation event. Session end releases the
+  build association without closing borrowed pages.
+- Fixture-scoped Vue bridge (`test/fixtures/components/vue/`): an opt-in plugin and composable
+  using `provide`/`inject`, `useId` and attribute binding only. SFCs are compiled by
+  `@vitejs/plugin-vue` in production mode (minified, no devtools). The manifest is
+  hand-authored with relative source references.
+- Dependencies: `vue@3.5.43`, `@vitejs/plugin-vue@6.0.9` as exact devDependency pins, with 19
+  transitive packages. None declares install lifecycle scripts; `.npmrc` still disables them.
+
+## Executed results
+
+**Pre-review pinned `pnpm validate` (head `f73c44de`) passed all 269 tests**: 68 contract, 44 host, 13 playbook,
+80 parity/browser, 46 component and 18 reporting, plus build, six strict type scopes (new
+`tsconfig.fixtures.json` for the bridge, store and entry), lint and required Oxfmt. Browser
+analysis source is unchanged from `main`, so `bench:slice` was not rerun.
+
+Identical in Chromium, Firefox and WebKit, through real Unix IPC:
+
+| Case                                      | Result                                                                              |
+| ----------------------------------------- | ----------------------------------------------------------------------------------- |
+| Vue grid, 70 ProductCard + 10 Tile        | 80 violations, 80 exact issues, **2 supported scopes**; also via the CLI (Chromium) |
+| Vue controls, matches hand-written oracle | 16 violations: 10 supported scopes (15 occurrences), 1 unattributed                 |
+| Raw scan vs plain `scan` command          | identical raw results; `raw-scan` event precedes completion                         |
+| Missing, stale and drifted manifests      | storefront favorites conflicting; partner app still supported                       |
+| Keyed reorder / removal / re-key          | reorder keeps the Vue instance token; re-key yields a new one; fresh scan IDs       |
+| Opt-in off                                | no capability; `capability-unavailable`                                             |
+| Mutation during transfer                  | `scan-stale`, no raw commit or enrichment                                           |
+| Cancellation while held                   | `cancelled`, `scan-cancelled`                                                       |
+| Reconnect with lease                      | original acknowledgment returned; no rerun                                          |
+| Nine analyses                             | first `evicted`, eight `available`                                                  |
+| View over a 1,024-byte limit              | `component-result-limit`; 16-violation raw scan still delivered                     |
+| Old cursor with 4-event retention         | explicit gap                                                                        |
+| Page closed mid-analysis                  | operation `lost`                                                                    |
+| Session end                               | borrowed page stays open and can be reopened                                        |
+
+Controls cover: different-DOM/same-cause desktop and mobile variants as one template scope;
+two data-record image defects as separate scopes (one split); IconButton blamed on its
+`cartrow-remove` caller, while the labelled `header-search` call passes; slot content owned
+by the calling page template, not `SlotPanel`; a teleported close button still owned by
+`QuickView`; a two-root fragment as one instance; `LegacyCard` and `PromoCard` both named
+`Card` but kept distinct; a partner app with the same `ProductCard` definition ID kept
+separate; an app without the plugin left unattributed. Delivered operations contain no
+`.vue` source references and no product text.
+
+## Failures and corrections
+
+- Two test bugs, fixed in the tests: nine concurrent inspects exceeded the SDK's 8-request
+  limit, and ending a session after breaking a subscription iterator hit the connection that
+  iterator closes by design.
+- Existing contract tests needed a sample and admission cases for the new command; one test
+  looked up a request by array index and now finds it by command name.
+
+## Review repair 1, PR #18
+
+Copilot found that the bridge's `useId` prefix used only the application, so two builds of
+one application mounted in the same document produced colliding tokens, and their valid
+scopes became declaration conflicts. The prefix is now application, build and install
+order. A new `twin` scenario mounts storefront `vue-1` and `vue-2` together. It failed
+before the fix (both favorites `conflicting`) and passes after in all three engines, with
+one scope per build. Pinned `pnpm validate` then passed all 272 tests (49 component).
+
+The first CI run of this PR timed out one existing WebKit host test (`native-form-naming`,
+30 s). Locally it takes about 960 ms on both this branch and `main` (5 runs each). Earlier
+CI runs took 3.3 s and 10.4 s, so this is Linux WebKit runtime variance, not a regression.
+The failed job was rerun once.
+
+## Review repair 2, PR #18
+
+Copilot's overview found that eviction rewrote only the retained operation, while earlier
+completion events in session history still carried the full view. An old cursor could replay
+every evicted view, defeating the eight-view bound. Eviction now rewrites that operation's
+retained events too. A replay test failed before the fix (`available` replayed) and passes
+after; no replayed event for the evicted operation contains a view. Views already queued to a
+live subscriber before eviction are not recalled; that queue is bounded by the stream limit.
+The README dependency sentence now says it refers to foundation phases. Pinned `pnpm validate`
+passed all 272 tests again (49 component).
+
+## Review repair 3, PR #18
+
+Copilot found that when `limits.operations` had already pruned an analysis from the operation
+map, eviction skipped it, and its retained completion event kept the full view. With default
+limits those events rotate out first; with smaller operation limits they do not. Eviction now
+rewrites retained history independently of the operation map. A test with
+`limits.operations: 2` failed before the fix (view replayed) and passes after. Pinned
+`pnpm validate` passed all 272 tests (49 component). This third push exceeded the default
+two-push babysit limit under Tony's standing instruction to reach a clean merge.
+
+## Evidence artifacts
+
+- [Manifest](component-delivery-evidence/phase-3-manifest.json): commands, per-engine Vue counts,
+  source, fixture-bundle and archived-file hashes.
+- [Raw archive](component-delivery-evidence/phase-3-results.tar.gz): per-engine Vue operation
+  records from the final source and all four validate logs (pre-review and three repairs).
+- Source-tree SHA-256: `d7369b03c84b95b9f82930e84c0dc98c8c4286f09d04a91f2482447ebb278852`.
+- Archive SHA-256: `7e11ab275acf0c1cff61a91385c5efb1fc51344aa8243edb326510ce4bea620d`.
+
+## Limits
+
+The Vue bridge is a fixture, not a shipped adapter, and `.vue` script blocks are not
+`tsc`-checked. There is no request coalescing or inference queue: concurrent requests are
+rejected with `operation-conflict`, as for every operation. That plan item is inference-specific
+and waits for phase 2 and the realtime scheduler. No cross-build lineage, matcher-revision
+supersession, dashboard, React adapter, automatic repair, performance or agent-usefulness claim.

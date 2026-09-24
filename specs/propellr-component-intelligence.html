@@ -235,13 +235,15 @@
             <dt>modified</dt>
             <dd>
               2026-09-23T12:27:53Z; 2026-09-23 (planning review: source-trust and benchmark bounds
-              clarified); 2026-09-23T21:08:29Z (phase 1 built and validated; stopped for review)
+              clarified); 2026-09-23T21:08:29Z (phase 1 built and validated; stopped for review);
+              2026-09-24T16:22:41Z (phase 3 built and validated before phase 2 by direction)
             </dd>
             <dt>commits</dt>
             <dd>
               42f7a47b927c1a5b40b3533f6666ad4d5c2e0312 (main; planning baseline). Jev brief and
               recommendations are existing uncommitted research documents. Phase 1 implementation is
-              uncommitted on <code>feat/component-intelligence</code> from that base.
+              uncommitted on <code>feat/component-intelligence</code> from that base. Phase 1 merged
+              as 4c2edf7c (#16); phase 3 on <code>feat/component-delivery</code> from ae10343a.
             </dd>
             <dt>agent name</dt>
             <dd>
@@ -266,7 +268,9 @@
               below do not exist yet. Every phase requires separate approval. Phase 1:
               <a href="component-intelligence-protocol.md">protocol</a>;
               <a href="component-intelligence-validation.md">evidence</a>;
-              <a href="component-intelligence-evidence/phase-1-manifest.json">manifest</a>.
+              <a href="component-intelligence-evidence/phase-1-manifest.json">manifest</a>. Phase 3:
+              <a href="component-delivery-protocol.md">protocol</a>;
+              <a href="component-delivery-validation.md">evidence</a>.
             </dd>
           </dl>
         </details>
@@ -813,7 +817,7 @@
           <strong
             >Execute only the separately approved phase, in order. Stop at every checkpoint.</strong
           >
-          Phase 1 is complete pending review; phases 2–4 are unstarted. The initial implementation
+          Phases 1 and 3 are complete; phases 2 and 4 are unstarted. The initial implementation
           request authorized phase 1 only. Provider access, source capture and dependency changes
           have additional gates.
         </p>
@@ -1031,7 +1035,7 @@
 
         <div class="phase">
           <h3>
-            <code class="status">[]</code> 3. Real component ownership and host/agent delivery
+            <code class="status">[x]</code> 3. Real component ownership and host/agent delivery
           </h3>
           <p>
             Make attribution useful through supported contracts, with one real framework integration
@@ -1041,20 +1045,20 @@
           <h4>3.1 Validate one opt-in Vue integration</h4>
           <ul class="checklist">
             <li>
-              <code class="status">[]</code> Review/pin Vue and any fixture build dependency
+              <code class="status">[x]</code> Review/pin Vue and any fixture build dependency
               separately; lifecycle scripts stay disabled. Use documented public registration/ref
               mechanisms and an explicit manifest. Do not promise transparent automatic extraction
               from arbitrary production apps.
             </li>
             <li>
-              <code class="status">[]</code> Build one real compiled Vue fixture with nested
+              <code class="status">[x]</code> Build one real compiled Vue fixture with nested
               primitives, caller-provided labels, slots, multiple roots, Teleport, conditional
               variants and keyed lists. Verify render ownership and content/caller responsibility
               against independently authored source mappings. A plain DOM fixture does not establish
               Vue support.
             </li>
             <li>
-              <code class="status">[]</code> Test missing, stale and conflicting manifests,
+              <code class="status">[x]</code> Test missing, stale and conflicting manifests,
               minified/reused display names and identical component names across applications.
               Preserve application/build identity. Capture relative source references locally; do
               not transmit source, props, input values or customer identifiers by default.
@@ -1063,33 +1067,33 @@
           <h4>3.2 Deliver additive enrichment without changing authoritative reports</h4>
           <ul class="checklist">
             <li>
-              <code class="status">[]</code> Freeze additive capability/version negotiation before
+              <code class="status">[x]</code> Freeze additive capability/version negotiation before
               touching wire unions. Add a schema-inferred opt-in component-analysis operation using
               existing admission, operation status, subscription and cancellation patterns; keep all
               seven existing commands compatible. Old clients must reject unsupported capability
               requests clearly, not misparse new results.
             </li>
             <li>
-              <code class="status">[]</code> Deliver raw scan completion first, then correlated
+              <code class="status">[x]</code> Deliver raw scan completion first, then correlated
               component enrichment with scan ID, document/epoch, evidence generation and
               availability. Bound enriched results to 192 KiB, retain at most eight result views per
               session and keep existing 1 MiB reply/65,536-byte request limits. Overflow has
               explicit component gaps, never omitted raw violations or unbounded attachments.
             </li>
             <li>
-              <code class="status">[]</code> Coordinate new work with the host's active-operation,
+              <code class="status">[f]</code> Coordinate new work with the host's active-operation,
               retention and replay policy. One in-flight inference and one coalesced pending request
               per session; revalidate evidence at completion. Subscription gaps, result eviction and
               unavailable provider remain explicit. Never replay browser actions on reconnect.
             </li>
             <li>
-              <code class="status">[]</code> Expose component membership, repair-scope hypotheses,
+              <code class="status">[x]</code> Expose component membership, repair-scope hypotheses,
               supporting/conflicting evidence, variant obligations and occurrence references through
               SDK/CLI and typed agent output. Report “candidate fixes” separately from exact issue
               counts. No dashboard/UI is in this phase.
             </li>
             <li>
-              <code class="status">[]</code> Keep raw counts, <code>applyGate</code>, owner/expiry
+              <code class="status">[x]</code> Keep raw counts, <code>applyGate</code>, owner/expiry
               exceptions and issue lifecycle unchanged. Matcher revisions create a new component
               view with split/supersession records. Cross-build links require an explicit reviewed
               lineage map; model confidence cannot establish continuity.
@@ -1098,20 +1102,20 @@
           <h4>3.3 Testing strategy</h4>
           <ul class="checklist">
             <li>
-              <code class="status">[]</code> Run real Vue fixture collection in
+              <code class="status">[x]</code> Run real Vue fixture collection in
               Chromium/Firefox/WebKit and host IPC cases for opt-in/off, stale inference, document
               loss, cancellation, reconnect, event gaps, byte limits and borrowed-resource cleanup.
               Observe targets after rerender instead of reusing stale handles.
             </li>
             <li>
-              <code class="status">[]</code> Exercise the full 80-occurrence/two-repair-scope
+              <code class="status">[x]</code> Exercise the full 80-occurrence/two-repair-scope
               example through SDK/CLI, plus same-definition/different-cause and
               different-DOM/same-cause controls. Every member must retain its real rule/check and
               occurrence evidence. Do not invent one common cause merely to match desired group
               counts.
             </li>
             <li>
-              <code class="status">[]</code> Run <code>pnpm validate</code> with all no-key
+              <code class="status">[x]</code> Run <code>pnpm validate</code> with all no-key
               component/host/reporting cases included. If shared evaluation changes, run original
               <code>pnpm bench:slice</code> once. Update README, contracts, provenance and
               improvements ledger only for executed support.
@@ -1377,6 +1381,13 @@
           files. One unreproduced existing host timing failure and oracle/fixture corrections are
           recorded in the <a href="component-intelligence-validation.md">evidence</a>. Phases 2–4
           remain unapproved.
+        </p>
+        <p>
+          2026-09-24, phase 3: Tony directed phase 3 before phase 2 (explicit no-Jev decision). Vue
+          3.5.43 and @vitejs/plugin-vue 6.0.9 were added as exact devDependency pins after a
+          lifecycle-script review. The bridge stays fixture-scoped. The inference-specific
+          coalesced-request task is marked [f]: concurrent requests are rejected as for every
+          operation, pending phase 2 and the realtime scheduler, to avoid a duplicate scheduler.
         </p>
       </section>
     </main>

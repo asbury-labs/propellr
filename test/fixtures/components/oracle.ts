@@ -258,3 +258,72 @@ export const exhaustionOracle: Readonly<Record<string, ExpectedExhaustion>> = {
     unattributed: 1,
   },
 };
+
+// Vue fixture expectations, hand-authored from the SFC sources and store data.
+const vueScope = (
+  definition: string,
+  part: string,
+  members: readonly string[],
+  extra: Partial<ExpectedScope> = {},
+): ExpectedScope => ({
+  status: "supported",
+  application: store,
+  definition,
+  part,
+  rule: "button-name",
+  owner: { kind: "template", definition },
+  members,
+  ...extra,
+});
+const odd = (from: number, to: number) =>
+  Array.from({ length: (to - from) / 2 + 1 }, (_, index) => `n${from + index * 2}`);
+const imageScope = (record: string, member: string, variant: string, other: string) =>
+  vueScope("ProductCard", "image", [member], {
+    rule: "image-alt",
+    owner: { kind: "data-record", definition: "ProductCard", record, field: "imageAlt" },
+    variants: { observed: [variant], unobserved: [other] },
+  });
+export const vueOracle: Readonly<Record<"grid" | "controls", ExpectedCase>> = {
+  // 80 occurrences, two candidate fixes through the SDK/CLI.
+  grid: {
+    scopes: [
+      vueScope("ProductCard", "favorite-control", odd(1, 139), {
+        variants: { observed: ["desktop"], unobserved: ["mobile"] },
+      }),
+      vueScope("RecommendationTile", "favorite-control", ids(141, 151)),
+    ],
+    unattributed: {},
+    splits: 0,
+  },
+  controls: {
+    scopes: [
+      // Different DOM per variant, one template cause.
+      vueScope("ProductCard", "favorite-control", ["n1", "n3", "n5", "n7"], {
+        variants: { observed: ["desktop", "mobile"], unobserved: [] },
+      }),
+      // Same definition, instance-level data causes.
+      imageScope("p2", "n4", "desktop", "mobile"),
+      imageScope("p4", "n8", "mobile", "desktop"),
+      vueScope("IconButton", "control", ["n9", "n10"], {
+        owner: { kind: "callsite", callsite: "cartrow-remove", caller: "CartRow" },
+      }),
+      // Slot content is owned by the caller's template, not SlotPanel.
+      vueScope("StorefrontPage", "panel-action", ["n12"]),
+      // Teleported to body, still owned by QuickView.
+      vueScope("QuickView", "close", ["n13"]),
+      vueScope("FragmentPair", "control", ["n14", "n15"]),
+      // Both display as "Card"; distinct definitions stay distinct.
+      vueScope("LegacyCard", "action", ["n16"]),
+      vueScope("PromoCard", "action", ["n17"]),
+      {
+        ...vueScope("ProductCard", "favorite-control", ["n21"], {
+          variants: { observed: ["desktop"], unobserved: ["mobile"] },
+        }),
+        application: "partner",
+      },
+    ],
+    // The app mounted without the bridge plugin.
+    unattributed: { n23: "unknown" },
+    splits: 1,
+  },
+};

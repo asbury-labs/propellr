@@ -1,0 +1,240 @@
+{
+  "state": "phase-3-complete-pending-review",
+  "created": "2026-09-24T17:03:33.274642+00:00",
+  "plan": "specs/propellr-component-intelligence.html",
+  "protocol": "specs/component-delivery-protocol.md",
+  "baseCommit": "ae10343acc211cc243143d7e3f3f67f1facd63d0",
+  "branch": "feat/component-delivery",
+  "agent": "claude-code / claude-opus-5-5",
+  "dependencies": {
+    "vue": "3.5.43",
+    "@vitejs/plugin-vue": "6.0.9",
+    "newTransitivePackages": 19,
+    "installLifecycleScripts": 0
+  },
+  "commands": {
+    "pnpm validate (pre-review, f73c44de)": {
+      "exitCode": 0,
+      "tests": 269,
+      "log": "artifacts/component-phase3/validate.log"
+    },
+    "pnpm validate (review repair 1)": {
+      "exitCode": 0,
+      "tests": 272,
+      "log": "artifacts/component-phase3/validate-review-1.log"
+    },
+    "pnpm validate (review repair 2)": {
+      "exitCode": 0,
+      "tests": 272,
+      "log": "artifacts/component-phase3/validate-review-2.log"
+    },
+    "pnpm validate (review repair 3, final source)": {
+      "exitCode": 0,
+      "tests": 272,
+      "suites": {
+        "contracts": 68,
+        "host": 44,
+        "playbooks": 13,
+        "parityAndBrowser": 80,
+        "components": 49,
+        "reporting": 18
+      },
+      "log": "artifacts/component-phase3/validate-review-3.log"
+    },
+    "pnpm bench:slice": {
+      "run": false,
+      "reason": "browser analysis source unchanged from main"
+    }
+  },
+  "vueCountsPerEngine": {
+    "chromium": {
+      "grid": {
+        "violationOccurrences": 80,
+        "exactViolationIssues": 80,
+        "excludedIncompleteOccurrences": 0,
+        "supportedRepairScopes": 2,
+        "suggestedRepairScopes": 0,
+        "supportedOccurrences": 80,
+        "suggestedOccurrences": 0,
+        "unattributedOccurrences": 0
+      },
+      "controls": {
+        "violationOccurrences": 16,
+        "exactViolationIssues": 16,
+        "excludedIncompleteOccurrences": 0,
+        "supportedRepairScopes": 10,
+        "suggestedRepairScopes": 0,
+        "supportedOccurrences": 15,
+        "suggestedOccurrences": 0,
+        "unattributedOccurrences": 1
+      }
+    },
+    "firefox": {
+      "grid": {
+        "violationOccurrences": 80,
+        "exactViolationIssues": 80,
+        "excludedIncompleteOccurrences": 0,
+        "supportedRepairScopes": 2,
+        "suggestedRepairScopes": 0,
+        "supportedOccurrences": 80,
+        "suggestedOccurrences": 0,
+        "unattributedOccurrences": 0
+      },
+      "controls": {
+        "violationOccurrences": 16,
+        "exactViolationIssues": 16,
+        "excludedIncompleteOccurrences": 0,
+        "supportedRepairScopes": 10,
+        "suggestedRepairScopes": 0,
+        "supportedOccurrences": 15,
+        "suggestedOccurrences": 0,
+        "unattributedOccurrences": 1
+      }
+    },
+    "webkit": {
+      "grid": {
+        "violationOccurrences": 80,
+        "exactViolationIssues": 80,
+        "excludedIncompleteOccurrences": 0,
+        "supportedRepairScopes": 2,
+        "suggestedRepairScopes": 0,
+        "supportedOccurrences": 80,
+        "suggestedOccurrences": 0,
+        "unattributedOccurrences": 0
+      },
+      "controls": {
+        "violationOccurrences": 16,
+        "exactViolationIssues": 16,
+        "excludedIncompleteOccurrences": 0,
+        "supportedRepairScopes": 10,
+        "suggestedRepairScopes": 0,
+        "supportedOccurrences": 15,
+        "suggestedOccurrences": 0,
+        "unattributedOccurrences": 1
+      }
+    }
+  },
+  "sourceHashes": {
+    ".node-version": "8f8e373d500f414f7435fdc1d2fe9dd697e60cfb03b69657cecb873ac31b84df",
+    ".npmrc": "c990f3fbba71e8c50b487ddc948fcc226d946783c8220992943b00b34ac41aaf",
+    ".oxlintrc.json": "51ea7e416b65cd69920eb44596339413999155f8ebd85fcb7b8f769a17b22e50",
+    "bench/slice.test.ts": "e777875eb53740346775525dbfd5d3ba4769bc618214fd8294ce728526b1a384",
+    "package.json": "25ad3568379b6b9c6a65110bfac893be3b7085b5515098d08c3b0ed6117dd104",
+    "pnpm-lock.yaml": "c1ff99f5eb0c1829154da6021bf271d4f8d9425b00d013754b8a113dfb364254",
+    "reference.json": "9d835429949f7972c192454d3494f255f9311009dd224c70e4fc97f5c93fe60b",
+    "src/analysis.ts": "53279dfb786c94b88e4cd6eca884e1989e68a479fd6879cb3208a425d0bda967",
+    "src/browser/components.ts": "0ad4a4ce8999e842bfda90327a424290e069e5ee8d2da210422dbcae7faf95a3",
+    "src/browser/geometry.ts": "a088780e0a7f25a5e57bc84f0dc6c753db9e76b67504b74e45adff22e515557a",
+    "src/browser/index.ts": "55fcb4de6bd2d541848c21007bc81a190e974982ac1e3ee1fdd4223c3088b465",
+    "src/browser/naming-rules.ts": "f637527bd4e04bf68fc3bfc7c20131e01d76154ce8a484bb28ae7d9882c20832",
+    "src/browser/naming.ts": "9ef039f985bae371e491dc4addf510321a339e024d7acb300b4ce31879486546",
+    "src/catalog.json": "0135033840e650af72ab91e115838b805a61951e27eb093480f309c5af51770b",
+    "src/components/attribution.ts": "4979d50278cf431a793ccaa41e55c7758495dff44755d97067a05329fcd8df25",
+    "src/components/contracts.ts": "243c9e4165cd2373aae04ba6bc94fd6a6e148d46ea62c356281a0eb8b0d004cf",
+    "src/components/grouping.ts": "01febfcfa9d481bd489316832c9419c916ff116da93851dcb514c0dd5072f1df",
+    "src/components/validation.ts": "e87dd593f9b5a79eff2d1f7cba8240d30e7230ffbcdb3851f273c42d99745d69",
+    "src/contracts.ts": "6e324d13d74ee0518db6ca96788bd8d129d0c0e1f6f3b195209ab1382a8b4aad",
+    "src/host/browser.ts": "b555eba7d39088732ed8621d4af3444c9e18384682cbf9cfade23653291645c0",
+    "src/host/cli.ts": "1f060195634a4adeb2d212992c83da3c20883ce477989fbd5bf6a4e934e7b857",
+    "src/host/client.ts": "80d05d9819a21fa6a03bb8594c5ccbb7a7baa967285f0083c8daa245472fe376",
+    "src/host/components.ts": "fe6bbcd66c1129d174e38e65c09b2a4ba77df994f22f9fa371b7b390d95adfd0",
+    "src/host/daemon.ts": "646894dd5d121392926ccc54b5b95f5a356f3173eba188c15a1226254f0942f0",
+    "src/host/fixture.ts": "852a2354cfc706fd30f809f24c568fddb88f5a154b514d0225a598b9cf705543",
+    "src/host/framing.ts": "888dc52cd4f93c8bf839e1d96a925b3a7ed99a84cc73eba0b806f0d1eca60b1b",
+    "src/host/playbook.ts": "333658af7cfd89dcbbff913276eff01350d22405a353342c889ab840e58ec8da",
+    "src/host/requests.ts": "43346cbc323a947fe349ee34f84e2fbb5aa711b0457089902a1978141fed739a",
+    "src/host/runtime.ts": "2995129b0454eb1e9e43b85aef0daebd148b2abdf8c1ab5fc1369c30eb01e3bb",
+    "src/host/scan.ts": "afd5b7c2b1838dbcd5841bd1d0b9bb5d70b56ad7fe8b97b0151e8e9a895dff5e",
+    "src/host/server.ts": "8005aefa63bd8f39e616bec6ad9012f94162ff4f054097a85699139d98a6e288",
+    "src/host/stream.ts": "cf68d6b57fa8d52dac9e829fb0eb5bdadad34e021c23dff5143ca4f8f198da1c",
+    "src/reporting/index.ts": "084d334d9c33a89641083d20e36b994cf513b3e2a36e1cd3161b51316e363b63",
+    "src/validation.ts": "c870ca3706fd2193e4ba0d1caf0a61494ebf657b6afa664e6948d3401d30a47a",
+    "test/browser/reader.test.ts": "1fafe7ee40e4760f26b1cae9fc7451f69bf6b6b1a82e49801c39485172e21fae",
+    "test/components/collection.test.ts": "05e56daa608254f82beb5ca9006a6469020113c07225fc078a4c12a91a8d1fb3",
+    "test/components/contracts.test.ts": "a0ac0882c5f7a931515ab5634b2b494df3072fb76fbbe60f2ffd449caef4618b",
+    "test/components/vue.test.ts": "a2a01b2a22cc8982ff85f3c502a84c0cbc7be0c42ddad7dd28019e298cc3faed",
+    "test/contracts/requests.test.ts": "aa9f093e183d2d9ce7aeab24fafb294c05b8a8d7dddf8063e942f1ccfbdc6e38",
+    "test/fixtures/components/cases.ts": "83b24bd8e273af3bad0f53ecdffd607224b22ebb0b9ba8398261e180e1f2f15f",
+    "test/fixtures/components/oracle.ts": "e77977ec1996bce6adf45b95815f5155013ee3cf70ae8b3024bad6fd89ae96f9",
+    "test/fixtures/components/vue/App.vue": "889f43bbd98ec5e534fdc3aee3c84438580c8a94f03807d5f29df947f3370112",
+    "test/fixtures/components/vue/PartnerApp.vue": "a1cd4fe2ca9cb4cf8f9ea689b08685a9a4fcde373677ba4905915d3f44efde16",
+    "test/fixtures/components/vue/PlainApp.vue": "2a18ecbcf4cb6897a246c4e85a636c9f7fc39e4583a94de56cc59a157289cb06",
+    "test/fixtures/components/vue/bridge.ts": "dee936d2da36c23102868d53b8a1081424234ea19f89eba5d92da5d0a40258cf",
+    "test/fixtures/components/vue/components/CartRow.vue": "4fd8ef1c712220cee98e96d80a7cf2a993e58d914c89e9251f5106add4235836",
+    "test/fixtures/components/vue/components/FragmentPair.vue": "d195813738a5e6d836fed3cb29978643cd3daa282e313c658177457bc6cf8c56",
+    "test/fixtures/components/vue/components/IconButton.vue": "95170e22f444a26f168d73b1a609cbf4806d7ed74da396498d7c604ce6f51c98",
+    "test/fixtures/components/vue/components/LegacyCard.vue": "ad2685c480103953c653737977effcf543be7467fe4dc05044deb4fca5af1653",
+    "test/fixtures/components/vue/components/ProductCard.vue": "a7b61dcc0f8733380231d8097284744a8585609ead7c79d5b872c4fd1fac8535",
+    "test/fixtures/components/vue/components/PromoCard.vue": "6f0bfa19ce697584a9683407a3549f4cfa41a5388ac3ab1bc4ee99a0e1f3b9c7",
+    "test/fixtures/components/vue/components/QuickView.vue": "4e41d1534538a95f43f8ef1df82d5a5d9873428f7e8778db0998a9cada381bb4",
+    "test/fixtures/components/vue/components/RecommendationTile.vue": "91adb9b1e96b6d40d437d74c8fd45745b5dfb83789c3d7f1c464bb612776ebe3",
+    "test/fixtures/components/vue/components/SiteHeader.vue": "5c7b0cd1ca1382ff7bc77d5da481df433327bf2f268b1347df4c5a4fb43f06fa",
+    "test/fixtures/components/vue/components/SlotPanel.vue": "17e635aa512d1c714e73e436314187616777b8c9337f6ce2654ad0ec11e25d5f",
+    "test/fixtures/components/vue/main.ts": "e7859de676f317891dddd9d40e91a84da48b61842672c19e8c470d143c3b2220",
+    "test/fixtures/components/vue/manifest.ts": "0ee3d7134e197e3b51876513ed1c8da6783f423c75607e2695b89ecac7c1e9b1",
+    "test/fixtures/components/vue/shims.d.ts": "8e6de57b1a2040cc309edb8f38d77f530ac8afc3a693848c0ddc2ff38ba265bf",
+    "test/fixtures/components/vue/store.ts": "970f85fc9fe383341ee968296f0180d25fe25f8939c8f9a0b50ccf9d62a79bc4",
+    "test/fixtures/components/vue/vite.config.ts": "6d82885495f07e4eebe020e91c4bf9e6955481546dffb7035be6ef025d0483f7",
+    "test/fixtures/naming.ts": "54991619f1ff05b3a1f9e64ac8ae87cfeea7b0c6ff4ef4c5d725dbfef83439f2",
+    "test/fixtures/native-form-naming.ts": "97fddb9248a0444139109187c78d469eba037cc3cea88309bbc5082f5d12bb49",
+    "test/fixtures/slice.ts": "24522a6318a57907a594cc3d65d3cdfe5f2c19bf5977faa1ee8125560cfa61bf",
+    "test/host/lifecycle.test.ts": "f098fb30caaa6728be23d1c4db459b06458096580ddcb89f010b05ed352be8c8",
+    "test/host/naming.test.ts": "6130d1db73665a1c826f9a7ff9d3084fadb5182de8b717c71dfa6381e99ba7b7",
+    "test/host/native-form-naming.test.ts": "5a6a4f12838e2be1f691ad81fdee2a07dc151d2baf523dec60f63b07b3b91e1f",
+    "test/host/session.test.ts": "62b5ca7e00d590c4557cabb85d07ec79564739fee28ad2d0aa37329796a47725",
+    "test/host/startup.test.ts": "d19c079481dd49d0fd4f1a3ea7660d5a94d21b6fd68c91b678f24fe76f0a93fd",
+    "test/host/transport.test.ts": "b1e9b1eafa2a5554586416cebe8aa6bf7097fa7cfb817a661ee3e80d036bacc7",
+    "test/parity/epochs.test.ts": "5bfe51002bad1c8e6c725ba4e49c0bd199c6cad1bf31974bb454c74cbfc07f7b",
+    "test/parity/naming.test.ts": "c3e5fc3da75c0ee440fa1527309186190263fb98d19e2cd97ee5739d6112ae73",
+    "test/parity/native-form-naming.test.ts": "73fed5bacf7c7d5ac5c20e54e49da75c809adfa88f3a9e1d6ee6fd0f111910b1",
+    "test/parity/reference.test.ts": "683b245cb2b996e7ac07d3967b18affd25028262eae701ebc2a99a7d8db48cd6",
+    "test/parity/slice.test.ts": "98ba4533e0e402116cd20a07772b865b94f4bee18df37191d35575aa2d1a323b",
+    "test/playbooks/dialog.test.ts": "624f2f1e5d24a4b34737faa79bb15b9981b7046ac9bc2507d6fed4ded5adc9b0",
+    "test/reporting/report.test.ts": "44d1a7550c10806dbdf45d6162804f790de926ff1456fb34f19e1da4078993ee",
+    "test/support/component-corpus.ts": "b21d4b39bf387183053c6cdf15821d7e657c14eed3a452d113b858ef1502d0fb",
+    "test/support/host.ts": "797ac1e25d45597f0831de10a295483aef84858ae43410ba05bd1242f9118daf",
+    "test/support/parity.ts": "35b72e0993a4ab8fbfd63051810915681343e17e4fc74a02eb8d792931740e0b",
+    "test/types/browser.typecheck.ts": "1828a728ba6ecbfe97535071244258152d6a102c911edb9aa184d13d25758301",
+    "test/types/components.typecheck.ts": "ea3dc254c84c4f7593e6ffe09c28f662dd15b6385825d77037810c187323f468",
+    "test/types/contracts.typecheck.ts": "3590fc40d62b77a66e5844baceb3e10b82c23464cc0f5e2b2fb97afe7454e3a2",
+    "test/types/host.typecheck.ts": "b789602ad6b5ca4403758dd64b6a2a8860be3389cd6bd28012e21bdcc7b1c732",
+    "test/types/portable.typecheck.ts": "7275a432cf5e2352e2972390a95ce51759c8a00204569966eed15fd263cc9eaf",
+    "tools/reference.ts": "96ebebcfdaf12b563cb4186391160ffc95c8f6254367be20106c82691459ee3d",
+    "tsconfig.browser-test.json": "a43e0b89859662b923de23b7cefe51c0a61fc6ca1e5d50786d089b1f0721c279",
+    "tsconfig.browser.json": "733cddda63eaacb80bc54b1406bfdd93de768cb9e60f58490e82d4a73315e8d0",
+    "tsconfig.build.json": "d62b3bc0ac47ddac82f53eb85ecf68ac38fc95de908fc71facd4d04928aa7197",
+    "tsconfig.fixtures.json": "b3909dbbb04fc75adceeea4c03b7acc8e8ee26af8bf9ee77211005d674ed3030",
+    "tsconfig.host.json": "a98ad06ca7cfb33c980d95d4ba0dda7ebb1a73d3cac29ee2c4fc74243e774c4e",
+    "tsconfig.json": "abf63f8676b0afc0ec7c919fbb0ea696f5fb8ce43d00de5bc5ce995426f98f91",
+    "tsconfig.portable.json": "11a52a4134685a5fc33102f41d280fa5383edf36053c5aa8d6580defe4648017",
+    "tsconfig.test.json": "313518077dbb1b7c91218148fcbea5867c054e991c1e7014f130aeea89ee2c65",
+    "vite.config.ts": "da54831006846021c64dc8363265b27367de512eb528b26fe031a403288e1dbe",
+    "vitest.config.ts": "e78a4565e39cc511d2727af3814040dc5ec1153b797dca68607efc5872d1b40f"
+  },
+  "sourceTreeSha256": "d7369b03c84b95b9f82930e84c0dc98c8c4286f09d04a91f2482447ebb278852",
+  "sourceTreeHashAlgorithm": "SHA-256 of UTF-8 compact sorted-key JSON sourceHashes (src, test, bench, tools, root configs)",
+  "fixtureBundleSha256": "f5f053308151052d92cfc6b25bf809634d899587376681ddc01aca01dd05fce3",
+  "browserBundleSha256": "cb5d9f42453ae9166fa0ebe2a139e31b46f8733cb2266ffba83c360e8119811b",
+  "archive": {
+    "path": "specs/component-delivery-evidence/phase-3-results.tar.gz",
+    "sha256": "7e11ab275acf0c1cff61a91385c5efb1fc51344aa8243edb326510ce4bea620d",
+    "fileCount": 7
+  },
+  "archivedFiles": {
+    "artifacts/component-phase3/validate-review-1.log": "fa1e7be653b674b66217cf163d0ef233b93cbaf42d66561c0052d3caa36d4803",
+    "artifacts/component-phase3/validate-review-2.log": "2ebecaad12a61c4419ce73e080d2c4182d78e69769e76d2fe6a58e7fc8b43586",
+    "artifacts/component-phase3/validate-review-3.log": "e4822681764c52ba7551c8fc27802110bcda75df4e2a6851b40b51d036b04e7d",
+    "artifacts/component-phase3/validate.log": "51c6992e255e7a92c1d8586b1703dcb189d07e5df334db6ed3c2556ee86c0919",
+    "artifacts/components/chromium-vue-oracle.json": "e3fdbc03a0867613ad3276c8166eff91cc105530ba8857216a2cb48a9679b07f",
+    "artifacts/components/firefox-vue-oracle.json": "c0ad01aa85f6213b2bdd60553818f3c5074967ff952f15a501bbc2ee4f87bbe0",
+    "artifacts/components/webkit-vue-oracle.json": "a675e92b7803a1609879e69e6eb201118f7fd90188a78275cf5094cca8b7c4fd"
+  },
+  "limits": [
+    "fixture-scoped Vue bridge, not a shipped adapter",
+    ".vue script blocks compiled but not tsc-checked",
+    "no inference, provider or coalesced request queue",
+    "no cross-build lineage or matcher supersession records",
+    "no performance or agent-usefulness claim"
+  ],
+  "head": "6ae4dbca077c9249a573073d8ccd2e477bc73edd"
+}

@@ -2,7 +2,7 @@ import { once } from "node:events";
 import { LocalClient } from "./client.js";
 import { decodeRequest, REQUEST_LIMITS } from "./requests.js";
 
-// One JSON command on stdin; all seven commands use the SDK, including event streaming.
+// One JSON command on stdin; every command uses the SDK, including event streaming.
 async function main(): Promise<void> {
   const path = process.argv[2];
   if (!path) throw new Error("Usage: node dist/host/cli.js SOCKET [LEASE] < request.json");
@@ -44,6 +44,8 @@ async function main(): Promise<void> {
             return client.inspect(request.input);
           case "scan":
             return client.scan(request.input);
+          case "analyzeComponents":
+            return client.analyzeComponents(request.input);
           case "runPlaybook":
             return client.runPlaybook(request.input);
           case "cancel":

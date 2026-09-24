@@ -1,6 +1,9 @@
 {
   "extends": "./tsconfig.json",
-  "compilerOptions": { "types": ["node"], "skipLibCheck": true },
+  "compilerOptions": {
+    "types": ["node"],
+    "skipLibCheck": true
+  },
   "include": [
     "test/contracts/**/*.ts",
     "test/host/**/*.ts",
@@ -12,6 +15,7 @@
     "bench/**/*.ts",
     "tools/**/*.ts",
     "vite.config.ts",
-    "vitest.config.ts"
+    "vitest.config.ts",
+    "test/fixtures/components/vue/vite.config.ts"
   ]
 }
