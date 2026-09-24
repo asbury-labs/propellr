@@ -144,3 +144,11 @@ membership, not common cause: supported scopes are candidate fixes backed by rev
 bindings, never confirmed defects. No scope closure, repair receipts, uninstrumented
 inference, real framework integration, SDK/CLI/wire delivery or overhead measurement.
 Deferred to later approved phases 2–4.
+
+## Follow-up: suite runtime, September 24
+
+The capture-inert parity check now scans a representative 25 of the 127 parity fixtures:
+the first two per source file and DOM boundary class (plain, frame, shadow, slot,
+dialog). A test asserts that every boundary class stays covered. The full 127-fixture
+comparison above remains the phase 1 record. Locally, the component suite dropped from
+about 62 s to 27 s.

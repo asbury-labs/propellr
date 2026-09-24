@@ -661,7 +661,19 @@ describe("local session host over real Unix IPC", () => {
           const other = await open();
           const input = playbookInput(borrowed, 2000);
           const operation = unwrap(await client.runPlaybook(input));
-          await page.locator("#dialog").waitFor({ state: "visible" });
+          // Re-enable only after the opened checkpoint scan commits; a DOM change during its
+          // transfer correctly stales that scan and would fail the journey.
+          const deliveries = unwrap(await client.subscribe({ ...meta(), sessionId: borrowed.id }));
+          for await (const delivery of deliveries)
+            if (
+              delivery.type === "event" &&
+              delivery.event.type === "checkpoint" &&
+              delivery.event.checkpoint.id === "opened"
+            ) {
+              expect(delivery.event.checkpoint.state).toBe("reached");
+              break;
+            }
+          expect(await page.locator("#dialog").isVisible()).toBe(true);
           client.close();
           await page.evaluate("document.querySelector('#close').disabled = false");
           const next = await reconnect(client.lease);
