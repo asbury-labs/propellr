@@ -784,7 +784,7 @@ export class SessionHost {
       )
         continue;
       const { view: _view, ...kept } = operation.result.enrichment;
-      this.updateOperation(record, {
+      const evicted: Operation = {
         ...operation,
         result: {
           ...operation.result,
@@ -797,7 +797,12 @@ export class SessionHost {
             },
           },
         },
-      });
+      };
+      // Retained history must not replay an evicted view to a reconnecting subscriber.
+      for (const [index, event] of record.events.entries())
+        if (event.type === "operation" && event.operation.id === operation.id)
+          record.events[index] = { ...event, operation: evicted };
+      this.updateOperation(record, evicted);
     }
   }
 

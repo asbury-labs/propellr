@@ -456,6 +456,26 @@ for (const engine of engines)
           states.push(completed(inspected).enrichment.state);
         }
         expect(states).toEqual(["evicted", ...Array(8).fill("available")]);
+        // Replay from the start of retained history never recovers the evicted view.
+        const replay = await reconnect();
+        const history = unwrap(
+          await replay.subscribe({ ...meta(), sessionId: session.id, after: `${session.id}.0` }),
+        );
+        let lastCompleted = false;
+        const replayed: Operation[] = [];
+        for await (const delivery of history) {
+          if (delivery.type !== "event" || delivery.event.type !== "operation") continue;
+          const { operation } = delivery.event;
+          if (operation.id === ids.at(-1) && operation.state === "completed") lastCompleted = true;
+          if (operation.id !== ids[0]) continue;
+          replayed.push(operation);
+          if (lastCompleted) break;
+        }
+        const completions = replayed.filter(({ state }) => state === "completed");
+        expect(completions.length).toBeGreaterThanOrEqual(2);
+        for (const operation of completions)
+          expect(completed(operation).enrichment.state).toBe("evicted");
+        expect(JSON.stringify(replayed)).not.toContain('"view"');
 
         // Session end releases the borrowed page without closing it.
         await next.end({ ...meta(), sessionId: session.id });

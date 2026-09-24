@@ -43,7 +43,7 @@ Chromium/Firefox/WebKit.
 Benchmarks run separately, not as a speed gate. `test:host`, `test:playbooks` and
 `test:parity` build first because they execute emitted host/browser code. `format` is `oxfmt .`;
 `format:check` is `oxfmt --check .`. Lifecycle scripts remain disabled by `.npmrc`.
-No dependency pins changed in phases 2 through 4. Component phase 3 added exact-pinned
+Foundation plan phases 2 through 4 changed no dependency pins. Component phase 3 added exact-pinned
 `vue@3.5.43` and `@vitejs/plugin-vue@6.0.9` devDependencies for its test fixture;
 `pnpm build:fixtures` compiles it and `test:components` runs that build first.
 

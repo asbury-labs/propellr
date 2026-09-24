@@ -53,7 +53,8 @@ implemented here; this protocol adds one operation and does not change existing 
 - Bounds: scan result 192 KiB (existing). Serialized view at most 192 KiB (host limit
   `componentViewBytes`, 1,024–196,608, default 196,608); a larger view is `unavailable`
   (`component-result-limit`), while the raw scan is still delivered. At most eight available views
-  per session; older ones are rewritten to `evicted` with an operation event. Replies stay at
+  per session; older ones are rewritten to `evicted`, including in retained event history, with
+  an operation event. Replies stay at
   1 MiB and requests at 65,536 bytes. Reconnect never replays browser actions.
 - Session end releases the association; borrowed pages, contexts and browsers stay open.
 

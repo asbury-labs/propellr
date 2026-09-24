@@ -77,13 +77,24 @@ one application mounted in the same document produced colliding tokens, and thei
 scopes became declaration conflicts. The prefix is now application, build and install
 order. A new `twin` scenario mounts storefront `vue-1` and `vue-2` together. It failed
 before the fix (both favorites `conflicting`) and passes after in all three engines, with
-one scope per build. **Latest pinned `pnpm validate` passed all 272 tests** (49 component).
+one scope per build. Pinned `pnpm validate` then passed all 272 tests (49 component).
 The archive below describes the pre-review head `f73c44de`.
 
 The first CI run of this PR timed out one existing WebKit host test (`native-form-naming`,
 30 s). Locally it takes about 960 ms on both this branch and `main` (5 runs each). Earlier
 CI runs took 3.3 s and 10.4 s, so this is Linux WebKit runtime variance, not a regression.
 The failed job was rerun once.
+
+## Review repair 2, PR #18
+
+Copilot's overview found that eviction rewrote only the retained operation, while earlier
+completion events in session history still carried the full view. An old cursor could replay
+every evicted view, defeating the eight-view bound. Eviction now rewrites that operation's
+retained events too. A replay test failed before the fix (`available` replayed) and passes
+after; no replayed event for the evicted operation contains a view. Views already queued to a
+live subscriber before eviction are not recalled; that queue is bounded by the stream limit.
+The README dependency sentence now says it refers to foundation phases. Pinned `pnpm validate`
+passed all 272 tests again (49 component).
 
 ## Evidence artifacts
 
