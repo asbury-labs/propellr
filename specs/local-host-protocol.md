@@ -128,3 +128,11 @@ Audit retains only command, decision code, session/operation IDs and timestamp,
 bounded to 128 entries. No payloads, URLs, selectors, browser error text, secrets
 or lease tokens. Playbook records only its validated timeout input. Host policy is
 copied on creation. No durable logs, remote identity or secret-store integration.
+
+## Addendum: component analysis (component phase 3)
+
+September 24, 2026. The opt-in `analyzeComponents` command and `components` operation kind
+are specified in [component delivery protocol](component-delivery-protocol.md). Framing,
+lease, idempotency, admission and one-active-operation rules above apply unchanged. Hosts
+without component options reply `capability-unavailable`. The new `raw-scan` event and
+operation kind appear only in sessions where a client requested analysis.

@@ -25,6 +25,14 @@ declare function acceptsPlaybook(result: PlaybookResult): void;
 if (operation.state === "completed") {
   if (operation.kind === "scan") {
     acceptsScan(operation.result);
+  } else if (operation.kind === "components") {
+    // Component analysis carries the exact scan beside separate enrichment.
+    acceptsScan(operation.result.scan);
+    // @ts-expect-error - enrichment is not a scan result
+    acceptsScan(operation.result.enrichment);
+    if (operation.result.enrichment.state === "available") void operation.result.enrichment.view;
+    // @ts-expect-error - views exist only on available enrichment
+    else void operation.result.enrichment.view;
   } else {
     acceptsPlaybook(operation.result);
   }

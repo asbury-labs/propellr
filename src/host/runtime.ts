@@ -31,6 +31,11 @@ import { FIXTURE_URL } from "./fixture.js";
 import { selectedRequest } from "../analysis.js";
 import { scanTarget } from "./scan.js";
 import { applyGate, reportScan } from "../reporting/index.js";
+import type { ComponentEnrichment } from "../contracts.js";
+import { buildRepairView } from "../components/grouping.js";
+import { buildRefSchema } from "../components/validation.js";
+import type { BuildRef } from "../components/contracts.js";
+import { ComponentRegistry, scanComponents } from "./components.js";
 
 export const LOCAL_POLICY = { id: "local-fixture", version: "1" } as const;
 const configuration = { id: "local-host", version: "1" } as const;
@@ -45,6 +50,7 @@ const limitsSchema = z.strictObject({
   sessions: z.number().int().min(1).max(8).default(8),
   operations: z.number().int().min(1).max(32).default(32),
   events: z.number().int().min(1).max(64).default(64),
+  componentViewBytes: z.number().int().min(1024).max(196_608).default(196_608),
 });
 export interface HostOptions {
   readonly policy?: VersionRef;
@@ -54,6 +60,11 @@ export interface HostOptions {
   readonly actions?: readonly string[];
   readonly commands?: readonly CommandName[];
   readonly limits?: z.input<typeof limitsSchema>;
+  // Opt-in component analysis: approved manifests and builds per attached target ID.
+  readonly components?: {
+    readonly manifests: readonly unknown[];
+    readonly builds?: Readonly<Record<string, readonly unknown[]>>;
+  };
 }
 interface ActiveOperation {
   readonly id: OperationId;
@@ -69,6 +80,8 @@ interface RecordState {
   readonly events: Event[];
   readonly streams: Set<BoundedStream<EventDelivery>>;
   sequence: number;
+  generation: number;
+  readonly views: OperationId[];
   active: ActiveOperation | undefined;
   ending: Promise<Session> | undefined;
 }
@@ -97,6 +110,9 @@ export class SessionHost {
   private readonly actions: readonly string[];
   private readonly commands: readonly CommandName[];
   private readonly limits: z.infer<typeof limitsSchema>;
+  private readonly components:
+    | { readonly registry: ComponentRegistry; readonly builds: ReadonlyMap<string, BuildRef[]> }
+    | undefined;
   private readonly auditEntries: AuditEntry[] = [];
   private readonly opening = new Set<Promise<void>>();
   private stopping = false;
@@ -114,6 +130,7 @@ export class SessionHost {
         "open",
         "inspect",
         "scan",
+        "analyzeComponents",
         "runPlaybook",
         "subscribe",
         "cancel",
@@ -121,6 +138,29 @@ export class SessionHost {
       ]),
     ];
     this.limits = limitsSchema.parse(options.limits ?? {});
+    if (options.components) {
+      const registry = new ComponentRegistry(options.components.manifests);
+      const builds = new Map(
+        Object.entries(options.components.builds ?? {}).map(([targetId, entries]) => [
+          targetId,
+          entries.map((entry) => buildRefSchema.parse(entry)),
+        ]),
+      );
+      for (const [targetId, entries] of builds)
+        if (
+          !this.borrowed.has(targetId) ||
+          entries.length > 16 ||
+          entries.some(
+            (build) =>
+              !registry.manifests.some(
+                (manifest) =>
+                  manifest.application === build.application && manifest.build === build.build,
+              ),
+          )
+        )
+          throw new Error("Component builds must be approved and name a registered target");
+      this.components = { registry, builds };
+    }
   }
 
   get audit(): readonly AuditEntry[] {
@@ -140,7 +180,8 @@ export class SessionHost {
     event:
       | Omit<Extract<Event, { type: "session" }>, "sessionId" | "cursor">
       | Omit<Extract<Event, { type: "operation" }>, "sessionId" | "cursor">
-      | Omit<Extract<Event, { type: "checkpoint" }>, "sessionId" | "cursor">,
+      | Omit<Extract<Event, { type: "checkpoint" }>, "sessionId" | "cursor">
+      | Omit<Extract<Event, { type: "raw-scan" }>, "sessionId" | "cursor">,
   ): void {
     const full: Event = {
       ...event,
@@ -283,6 +324,10 @@ export class SessionHost {
         record.active?.abort.abort();
         return { ok: true, value: { disposition: "requested", operation: cancelling } };
       }
+      case "analyzeComponents":
+        if (!this.components)
+          return denied("capability-unavailable", "Component analysis is not enabled on this host");
+        return this.start(record, request);
       case "scan":
       case "runPlaybook":
         return this.start(record, request);
@@ -358,6 +403,7 @@ export class SessionHost {
           "same-origin-frames",
           "closed-roots-unavailable",
           "bounded-replay",
+          ...(this.components ? ["component-analysis@1"] : []),
         ],
         policy: this.policy,
         configuration,
@@ -370,6 +416,8 @@ export class SessionHost {
         events: [],
         streams: new Set(),
         sequence: 0,
+        generation: 0,
+        views: [],
         active: undefined,
         ending: undefined,
       };
@@ -416,14 +464,14 @@ export class SessionHost {
 
   private start(
     record: RecordState,
-    request: Extract<Request, { command: "scan" | "runPlaybook" }>,
+    request: Extract<Request, { command: "scan" | "runPlaybook" | "analyzeComponents" }>,
   ): HostReply {
     if (record.session.state !== "active" || !record.target)
       return denied("session-inactive", "Session has no active browser");
     if (record.active)
       return denied("operation-conflict", "Another operation owns this session's page actions");
     if (
-      request.command === "scan" &&
+      request.command !== "runPlaybook" &&
       !this.origins.includes(new URL(record.target.page.url()).origin)
     )
       return denied("permission-denied", "Current scan origin is not authorized");
@@ -460,12 +508,14 @@ export class SessionHost {
     const operation: Operation =
       request.command === "scan"
         ? { ...base, kind: "scan", state: "queued" }
-        : {
-            ...base,
-            kind: "playbook",
-            state: "queued",
-            invocation: { playbook: dialogVersion, inputs: inputs! },
-          };
+        : request.command === "analyzeComponents"
+          ? { ...base, kind: "components", state: "queued" }
+          : {
+              ...base,
+              kind: "playbook",
+              state: "queued",
+              invocation: { playbook: dialogVersion, inputs: inputs! },
+            };
     const abort = new AbortController();
     const target = record.target;
     const documentId = target.documentId;
@@ -483,27 +533,64 @@ export class SessionHost {
             ...operation,
             state: abort.signal.aborted ? "cancelling" : "running",
           });
-          if (operation.kind === "scan" && request.command === "scan") {
+          if (operation.kind !== "playbook") {
             try {
-              const result = await scanTarget(
-                target,
-                request.input.scan,
-                {
-                  policy: operation.policy,
-                  configuration: operation.configuration,
-                  origin: { kind: "direct" },
-                },
-                abort.signal,
-                documentId,
-              );
-              guardScanCommit();
-              if (result.coverage.state === "stale") throw new Error("scan-stale");
-              if (!lost())
+              const context = {
+                policy: operation.policy,
+                configuration: operation.configuration,
+                origin: { kind: "direct" },
+              } as const;
+              if (operation.kind === "scan" && request.command === "scan") {
+                const result = await scanTarget(
+                  target,
+                  request.input.scan,
+                  context,
+                  abort.signal,
+                  documentId,
+                );
+                guardScanCommit();
+                if (result.coverage.state === "stale") throw new Error("scan-stale");
+                if (!lost())
+                  this.updateOperation(record, {
+                    ...operation,
+                    state: "completed",
+                    result: this.report(record, result),
+                  });
+              } else if (
+                operation.kind === "components" &&
+                request.command === "analyzeComponents" &&
+                this.components
+              ) {
+                const { registry, builds } = this.components;
+                // Host-owned grant, bound to this document generation only.
+                registry.associate(
+                  target,
+                  target.ownership === "borrowed"
+                    ? (builds.get(record.session.browser.targetId) ?? [])
+                    : [],
+                );
+                const { scan, evidence } = await scanComponents(
+                  target,
+                  request.input.scan,
+                  context,
+                  abort.signal,
+                  registry,
+                  documentId,
+                );
+                guardScanCommit();
+                if (scan.coverage.state === "stale") throw new Error("scan-stale");
+                if (lost()) return;
+                // Raw results commit and are delivered before enrichment is attached.
+                const reported = this.report(record, scan);
+                this.emit(record, { type: "raw-scan", operationId: operation.id, scan: reported });
+                const enrichment = this.enrich(record, reported, evidence);
                 this.updateOperation(record, {
                   ...operation,
                   state: "completed",
-                  result: this.report(record, result),
+                  result: { scan: reported, enrichment },
                 });
+                if (enrichment.state === "available") this.retainView(record, operation.id);
+              } else throw new Error("Operation kind mismatch");
             } catch (error) {
               const code = abort.signal.aborted
                 ? "scan-cancelled"
@@ -652,6 +739,68 @@ export class SessionHost {
     return { ok: true, value: operation };
   }
 
+  private enrich(
+    record: RecordState,
+    scan: ScanResult,
+    evidence: Parameters<typeof buildRepairView>[1],
+  ): ComponentEnrichment {
+    const base = {
+      scanId: scan.id,
+      documentId: scan.scope.include[0].documentId,
+      epoch: scan.epoch,
+      generation: ++record.generation,
+    };
+    let view;
+    try {
+      view = buildRepairView(scan, evidence);
+    } catch {
+      return {
+        ...base,
+        state: "unavailable",
+        reason: { code: "component-view-failed", message: "Evidence did not match the scan" },
+      };
+    }
+    return Buffer.byteLength(JSON.stringify(view), "utf8") > this.limits.componentViewBytes
+      ? {
+          ...base,
+          state: "unavailable",
+          reason: {
+            code: "component-result-limit",
+            message: "Repair view exceeds its byte budget; raw scan delivered without it",
+          },
+        }
+      : { ...base, state: "available", view };
+  }
+
+  // At most eight available views per session; older ones become explicit evictions.
+  private retainView(record: RecordState, id: OperationId): void {
+    record.views.push(id);
+    while (record.views.length > 8) {
+      const operation = record.operations.get(record.views.shift()!);
+      if (
+        operation?.kind !== "components" ||
+        operation.state !== "completed" ||
+        operation.result.enrichment.state !== "available"
+      )
+        continue;
+      const { view: _view, ...kept } = operation.result.enrichment;
+      this.updateOperation(record, {
+        ...operation,
+        result: {
+          ...operation.result,
+          enrichment: {
+            ...kept,
+            state: "evicted",
+            reason: {
+              code: "component-view-evicted",
+              message: "Only eight repair views are retained per session; rerun analysis",
+            },
+          },
+        },
+      });
+    }
+  }
+
   private report(record: RecordState, scan: ScanResult): ScanResult {
     const gate = (report: NonNullable<ScanResult["report"]>) =>
       applyGate(scan, report, { ...LOCAL_GATE, exceptions: [] }, new Date().toISOString());
@@ -726,6 +875,7 @@ export class SessionHost {
     record.active?.abort.abort();
     await record.active?.done;
     const target = record.target;
+    if (target) this.components?.registry.release(target);
     try {
       await target?.release();
       record.target = undefined;

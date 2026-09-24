@@ -133,3 +133,10 @@ adapted; no dependency was added. The `propellr-bridge/1` data-attribute bridge,
 manifest schema, resolver and repair grouping follow
 `specs/component-intelligence-protocol.md`. `test/fixtures/components/` holds
 original fixtures and a separately hand-authored oracle, not upstream or customer data.
+
+## Component delivery, phase 3
+
+`analyzeComponents`, its host/SDK/CLI wiring and the Vue fixture are original Propellr code.
+The fixture uses Vue 3.5.43 and @vitejs/plugin-vue 6.0.9 (MIT, exact devDependency pins,
+lifecycle scripts disabled). Only public Vue APIs are used; no Vue, DevTools or framework
+internals were read or adapted. The fixture manifest is hand-authored from the SFC sources.

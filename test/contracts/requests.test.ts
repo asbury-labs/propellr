@@ -32,6 +32,17 @@ const requests = [
     },
   },
   {
+    command: "analyzeComponents",
+    input: {
+      ...sessionMeta,
+      scan: {
+        mode: "full",
+        scope: { include: [target], exclude: [] },
+        rules: { kind: "explicit", rules: [{ id: "button-name", options: {} }] },
+      },
+    },
+  },
+  {
     command: "runPlaybook",
     input: {
       ...sessionMeta,
@@ -134,10 +145,9 @@ describe("request decoding", () => {
   });
 
   test("rejects non-finite JSON numbers without echoing inputs", () => {
-    const message = JSON.stringify(requests[3]).replace(
-      '"nested":',
-      '"private-value":1e400,"nested":',
-    );
+    const message = JSON.stringify(
+      requests.find(({ command }) => command === "runPlaybook"),
+    ).replace('"nested":', '"private-value":1e400,"nested":');
     expect(decodeRequest(message)).toEqual({
       ok: false,
       diagnostic: { code: "invalid-request", message: "Request does not match propellr/0.1" },
@@ -265,14 +275,18 @@ describe("host-owned admission", () => {
   test.each(["inspect", "cancel"])("denies unknown operation for %s", (command) => {
     expectDenied({ command, input: { ...sessionMeta, operationId: "operation_other" } });
   });
-  test.each(["include", "exclude"])("denies stale/foreign documents in %s", (part) => {
+  test.each(
+    ["scan", "analyzeComponents"].flatMap((command) =>
+      ["include", "exclude"].map((part) => ({ command, part })),
+    ),
+  )("denies stale/foreign documents: $command $part", ({ command, part }) => {
     const scope = {
       include: [target],
       exclude: [],
       [part]: [{ ...target, documentId: "document-stale" }],
     };
     expectDenied({
-      command: "scan",
+      command,
       input: { ...sessionMeta, scan: { mode: "full", scope, rules: { kind: "defaults" } } },
     });
   });

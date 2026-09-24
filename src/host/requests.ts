@@ -102,6 +102,7 @@ function permitted(request: Request, access: RequestAccess): boolean {
     case "cancel":
       return session.operations.includes(request.input.operationId);
     case "scan":
+    case "analyzeComponents":
       return [...request.input.scan.scope.include, ...request.input.scan.scope.exclude].every(
         hasTarget,
       );

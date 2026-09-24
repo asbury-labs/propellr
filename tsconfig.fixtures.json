@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"]
+  },
+  "include": [
+    "test/fixtures/components/vue/bridge.ts",
+    "test/fixtures/components/vue/store.ts",
+    "test/fixtures/components/vue/main.ts",
+    "test/fixtures/components/vue/shims.d.ts"
+  ]
+}

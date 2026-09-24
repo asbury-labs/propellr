@@ -43,7 +43,9 @@ Chromium/Firefox/WebKit.
 Benchmarks run separately, not as a speed gate. `test:host`, `test:playbooks` and
 `test:parity` build first because they execute emitted host/browser code. `format` is `oxfmt .`;
 `format:check` is `oxfmt --check .`. Lifecycle scripts remain disabled by `.npmrc`.
-No dependency pins changed in phases 2 through 4.
+No dependency pins changed in phases 2 through 4. Component phase 3 added exact-pinned
+`vue@3.5.43` and `@vitejs/plugin-vue@6.0.9` devDependencies for its test fixture;
+`pnpm build:fixtures` compiles it and `test:components` runs that build first.
 
 `reference:prepare` downloads only the approved tarball into
 `~/.cache/propellr-reference/axe-core-4.13.0` (override `PROPELLR_REFERENCE_CACHE`),
@@ -111,8 +113,9 @@ const accepted = await client.runPlaybook({
 client.close(); // does not end session or replay any command
 ```
 
-All seven methods share schema-inferred inputs: `open`, `inspect`, `scan`,
-`runPlaybook`, `subscribe`, `cancel`, `end`. Use a fresh request ID for each new
+All eight methods share schema-inferred inputs: `open`, `inspect`, `scan`,
+`analyzeComponents`, `runPlaybook`, `subscribe`, `cancel`, `end`. `analyzeComponents`
+is opt-in (capability `component-analysis@1`); see below. Use a fresh request ID for each new
 inspection. Reconnect with `LocalClient.connect(socketPath, savedLease)`; never
 blindly repeat an uncertain browser action. Same lease/request ID/content returns
 the original acknowledgment, not a fresh operation snapshot. Changed content is
@@ -215,11 +218,31 @@ definition, part, owner, rule and defect signature. It never edits reports or ga
 (`template`, `callsite` or `data-record`). `unreviewed` bindings are only `suggested`.
 Neither is a confirmed defect or fix. Page markers are untrusted declarations. Forged,
 unassociated, ambiguous, stale or exhausted evidence stays unattributed with a reason.
-No DOM-ancestry ownership, similarity clustering, model, text capture, source reading,
-framework adapter or wire command exists. Capture bounds: 128 KiB, 256 instances,
-64 relations per instance, 32 candidates per target, 2,000 additional visits. See the
+No DOM-ancestry ownership, similarity clustering, model, text capture or source reading
+exists. Capture bounds: 128 KiB, 256 instances, 64 relations per instance, 32 candidates
+per target, 2,000 additional visits. See the
 [protocol](specs/component-intelligence-protocol.md) and
 [evidence](specs/component-intelligence-validation.md).
+
+## Component analysis over IPC (phase 3)
+
+Construct `SessionHost` with `components: { manifests, builds: { [attachedTargetId]: [...] } }`
+to advertise `component-analysis@1`. `analyzeComponents` takes the `scan` input shape and the
+same admission, origin, document and one-operation rules. It commits the exact reported scan
+first (a `raw-scan` event), then completes a `components` operation with
+`{ scan, enrichment }`. Enrichment carries scan ID, document ID, epoch and generation, and is
+`available` (repair view), `unavailable` (for example `component-result-limit`) or `evicted`
+(more than eight views per session). Views are capped at 192 KiB (`limits.componentViewBytes`).
+Hosts without the option reply `capability-unavailable`; older hosts reject the command as
+`invalid-request`. Clients must ignore unknown operation kinds.
+
+A fixture-scoped, opt-in Vue bridge (`test/fixtures/components/vue/bridge.ts`) shows real
+framework ownership through public APIs only (`provide`/`inject`, `useId`): slot content
+belongs to its caller, teleported parts keep their component, fragments are one instance.
+It is not a shipped adapter. `vue` and `@vitejs/plugin-vue` are exact-pinned devDependencies
+for the compiled fixture; `.vue` script blocks are not `tsc`-checked. See the
+[delivery protocol](specs/component-delivery-protocol.md) and
+[evidence](specs/component-delivery-validation.md).
 
 ## Boundaries and limits
 
@@ -291,6 +314,8 @@ exceptions do not suppress project errors or change tool pins.
 - [Component intelligence plan](specs/propellr-component-intelligence.html)
 - [Component intelligence protocol](specs/component-intelligence-protocol.md)
 - [Component intelligence evidence](specs/component-intelligence-validation.md)
+- [Component delivery protocol](specs/component-delivery-protocol.md)
+- [Component delivery evidence](specs/component-delivery-validation.md)
 - [Provenance](PROVENANCE.md)
 
 Canonical axe-core remains independent and untouched, never a dependency or the

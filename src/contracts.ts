@@ -7,6 +7,7 @@ import type {
   ValidatedTarget,
   ValidatedVersionRef,
 } from "./validation.js";
+import type { ComponentRepairView } from "./components/contracts.js";
 
 declare const identity: unique symbol;
 type Id<Kind extends string> = string & { readonly [identity]: Kind };
@@ -186,7 +187,26 @@ export interface PlaybookResult {
   readonly diagnostics: readonly Diagnostic[];
 }
 
-type Results = { readonly scan: ScanResult; readonly playbook: PlaybookResult };
+// Enrichment is correlated to the exact committed scan; it never replaces raw results.
+export type ComponentEnrichment = {
+  readonly scanId: ScanId;
+  readonly documentId: string;
+  readonly epoch: number;
+  readonly generation: number;
+} & (
+  | { readonly state: "available"; readonly view: ComponentRepairView }
+  | { readonly state: "unavailable" | "evicted"; readonly reason: Diagnostic }
+);
+export interface ComponentAnalysis {
+  readonly scan: ScanResult;
+  readonly enrichment: ComponentEnrichment;
+}
+
+type Results = {
+  readonly scan: ScanResult;
+  readonly playbook: PlaybookResult;
+  readonly components: ComponentAnalysis;
+};
 
 // Mapping preserves kind/result correlation, including when K is the full union.
 export type Operation<K extends keyof Results = keyof Results> = {
@@ -224,6 +244,8 @@ export type Event = {
       readonly playbook: VersionRef;
       readonly checkpoint: Checkpoint;
     }
+  // Raw results commit and are delivered before component enrichment completes.
+  | { readonly type: "raw-scan"; readonly operationId: OperationId; readonly scan: ScanResult }
 );
 
 export type EventDelivery =
@@ -253,6 +275,10 @@ export interface Commands {
   readonly scan: {
     readonly input: CommandInputs["scan"];
     readonly output: Operation<"scan">;
+  };
+  readonly analyzeComponents: {
+    readonly input: CommandInputs["analyzeComponents"];
+    readonly output: Operation<"components">;
   };
   readonly runPlaybook: {
     readonly input: CommandInputs["runPlaybook"];
