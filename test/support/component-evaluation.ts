@@ -30,6 +30,17 @@ export interface FamilyRun {
 }
 // Arms load separate pages; identity across them is the target path, never page/document IDs.
 const pathKey = (target: { readonly path: unknown }) => canonical(target.path);
+// One element can violate several rules; each (rule, path) is its own decision case.
+const caseKey = (rule: string, target: { readonly path: unknown }) =>
+  canonical([rule, target.path]);
+const violationsByRule = (scan: ScanResult) =>
+  scan.rules.flatMap((result) =>
+    result.state === "evaluated"
+      ? result.occurrences
+          .filter(({ outcome }) => outcome === "violation")
+          .map((occurrence) => ({ rule: result.rule.id, occurrence }))
+      : [],
+  );
 const violations = (scan: ScanResult) =>
   scan.rules.flatMap((result) =>
     result.state === "evaluated"
@@ -44,7 +55,7 @@ export async function truthFor(browser: Browser, family: CorpusFamily) {
   for (const scope of view.scopes)
     for (const member of scope.members) scopeOf.set(member.occurrenceId, scope.id);
   const truth = new Map<string, { roots: readonly string[]; scope: string }>();
-  for (const occurrence of violations(scan)) {
+  for (const { rule, occurrence } of violationsByRule(scan)) {
     const attribution = evidence.attributions.find(
       (entry) => canonical(entry.target) === canonical(occurrence.target),
     );
@@ -54,7 +65,7 @@ export async function truthFor(browser: Browser, family: CorpusFamily) {
         : undefined;
     const scope = scopeOf.get(occurrence.id);
     if (instance?.status !== "supported" || !scope) continue;
-    truth.set(pathKey(occurrence.target), { roots: instance.roots.map(pathKey), scope });
+    truth.set(caseKey(rule, occurrence.target), { roots: instance.roots.map(pathKey), scope });
   }
   return { scan, truth, violations: violations(scan).length };
 }
@@ -84,8 +95,8 @@ export async function runFamily(browser: Browser, family: CorpusFamily): Promise
     if (discovery.state === "available")
       for (const group of discovery.groups)
         for (const member of group.members) groupOf.set(member, group.id);
-    const cases = violations(scan).map((occurrence): CaseOutcome => {
-      const key = pathKey(occurrence.target);
+    const cases = violationsByRule(scan).map(({ rule, occurrence }): CaseOutcome => {
+      const key = caseKey(rule, occurrence.target);
       const truth = oracle.truth.get(key);
       const decision = decisions.get(occurrence.id);
       const hit = (candidate?: TemplateCandidate | null) =>

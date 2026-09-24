@@ -15,6 +15,8 @@ import {
   decisionRequest,
 } from "../../src/host/component-decisions.js";
 import { corpusFamilies } from "../fixtures/components/corpus.js";
+import type { CorpusFamily } from "../fixtures/components/corpus.js";
+import { bridge, definition, manifest, page } from "../fixtures/components/cases.js";
 import { namingDocument } from "../fixtures/naming.js";
 import { leaks, request, scanContext } from "../support/component-corpus.js";
 import { metrics, runFamily, truthFor } from "../support/component-evaluation.js";
@@ -56,6 +58,48 @@ for (const engine of engines)
       await browser.close();
     }
   });
+
+test("chromium: the oracle keeps separate cases for several rules on one element", async () => {
+  // Small, adjacent, unlabeled buttons violate both button-name and target-size.
+  const store = { application: "storefront", build: "c1" } as const;
+  const family: CorpusFamily = {
+    id: "two-rules-one-element",
+    split: "dev",
+    rules: ["button-name", "target-size"],
+    manifests: [manifest(store, [definition("Chip", { control: { kind: "template" } })])],
+    associate: [store],
+    render: (arm) => {
+      const b = bridge(arm);
+      const chips = [0, 1]
+        .map(
+          (k) =>
+            `<button id="n${k}" style="width:20px;height:20px;min-height:0;margin:0"${b.root("Chip", `c${k}`, { build: "c1" })}${b.part("control", `c${k}`)}></button>`,
+        )
+        .join("");
+      return page("two-rules", `<main><div style="display:flex;gap:2px">${chips}</div></main>`);
+    },
+  };
+  const browser = await browserTypes.chromium.launch();
+  try {
+    const { scan, truth, violations } = await truthFor(browser, family);
+    const rules = scan.rules
+      .filter((result) => result.state === "evaluated")
+      .map((result) => [
+        result.rule.id,
+        result.state === "evaluated"
+          ? result.occurrences.filter(({ outcome }) => outcome === "violation").length
+          : 0,
+      ]);
+    expect(rules).toEqual([
+      ["button-name", 2],
+      ["target-size", 2],
+    ]);
+    expect(violations).toBe(4);
+    expect(truth.size).toBe(4);
+  } finally {
+    await browser.close();
+  }
+});
 
 test("chromium: dev-split heuristic behaves as the frozen protocol defines", async () => {
   const browser = await browserTypes.chromium.launch();
@@ -433,6 +477,31 @@ describe("decision adapter without keys", () => {
       code: "unavailable",
       attempts: 2,
     });
+  });
+
+  test("redirects are refused, never followed to another location", async () => {
+    let elsewhere = 0;
+    const other = createServer((_, response) => {
+      elsewhere++;
+      response.end();
+    });
+    await new Promise<void>((resolve) => other.listen(0, "127.0.0.1", resolve));
+    const location = `http://127.0.0.1:${(other.address() as AddressInfo).port}/v1/systemone`;
+    try {
+      const { client, hits } = await serve((_, response) => {
+        response.writeHead(307, { location });
+        response.end();
+      });
+      expect(await client().decide(input, signal())).toMatchObject({
+        state: "failed",
+        code: "redirect-refused",
+        attempts: 1,
+      });
+      expect(hits()).toBe(1);
+      expect(elsewhere).toBe(0);
+    } finally {
+      await new Promise<void>((resolve) => other.close(() => resolve()));
+    }
   });
 
   test("request and spend ceilings stop sending before the provider is called", async () => {

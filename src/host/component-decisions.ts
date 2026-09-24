@@ -107,7 +107,8 @@ export type DecisionResult =
         | "unavailable"
         | "invalid-response"
         | "request-limit"
-        | "budget-exhausted";
+        | "budget-exhausted"
+        | "redirect-refused";
       readonly attempts: number;
     };
 
@@ -287,12 +288,18 @@ export class DecisionClient {
           },
           body,
           signal: combined,
+          // Never follow redirects: a new location could drop HTTPS or change host.
+          redirect: "manual",
         });
       } catch {
         if (combined.aborted) return { state: "failed", code: stop(), attempts };
         last = "unavailable";
         if (!(await this.backoff(attempts, combined))) break;
         continue;
+      }
+      if (response.type === "opaqueredirect" || (response.status >= 300 && response.status < 400)) {
+        await response.body?.cancel().catch(() => {});
+        return { state: "failed", code: "redirect-refused", attempts };
       }
       if (response.status === 401) return { state: "failed", code: "unauthorized", attempts };
       if (response.status === 422) return { state: "failed", code: "rejected", attempts };

@@ -98,7 +98,8 @@ re-evaluation. This small study cannot certify rare-error rates.
 - Bounds: request at most 64 KiB; total deadline at most 10 s across all attempts; at most 3
   attempts; retry only 429, 529 and network errors, with backoff inside the deadline; 401 and 422
   are never retried. The caller's AbortSignal cancels immediately. Responses are read to at most
-  256 KiB before parsing. No request or response bodies are logged.
+  256 KiB before parsing. Redirects are never followed (`redirect-refused`), so the body cannot
+  move to another scheme or host. No request or response bodies are logged.
 - Budget (required): approved request count, spend cap and price per million input tokens.
   Every attempt counts. Before sending, the request's UTF-8 byte count is charged as an upper
   bound on input tokens; reported usage above that bound is charged in full. A call that would

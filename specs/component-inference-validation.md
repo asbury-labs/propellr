@@ -112,6 +112,23 @@ construction. A test shows an incomplete record is refused with its missing fiel
 pre-fix run was made, because it would have sent a real request with a placeholder key.
 Pinned `pnpm validate` passed all 296 tests (73 component).
 
+## Review repair 3, PR #19
+
+Copilot found two issues:
+
+- **Redirects bypassed the HTTPS boundary (fixed):** native `fetch` followed redirects, so the
+  request could move to another scheme or host. Redirects are now refused without being
+  followed. In the test, a 307 to a second loopback server is refused, and that server receives
+  nothing.
+- **Oracle collisions (fixed):** the oracle keyed cases by target path only, so a second rule on
+  the same element overwrote the first. Cases are now keyed by rule and path. A two-button
+  family violating both `button-name` and `target-size` yields 4 truth cases.
+
+Both tests failed before their fixes and pass after. The current corpus has one rule per element
+per family, so the dev metrics above are unchanged. This third push exceeded the default
+two-push babysit limit under Tony's standing instruction to reach a clean merge. Pinned
+`pnpm validate` passed all 298 tests (75 component).
+
 ## Evidence artifacts
 
 - [Manifest](component-inference-evidence/phase-2-manifest.json): approval state, corpus split,
