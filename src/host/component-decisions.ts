@@ -4,6 +4,7 @@ import { z } from "zod";
 import type { VersionRef } from "../contracts.js";
 import type { DecisionCase } from "../components/discovery.js";
 import { canonical } from "../reporting/index.js";
+import { isStructureLabel } from "../analysis.js";
 
 export const decisionModel = "jev-1.13.0";
 export const decisionRubric = { id: "component-attribution-questions", version: "1" } as const;
@@ -43,10 +44,7 @@ const REQUEST_BYTES = 65_536;
 const RESPONSE_BYTES = 262_144;
 type Failure = Extract<DecisionResult, { state: "failed" }>["code"];
 // Egress boundary: only text-free structural labels, opaque shapes and code-generated IDs.
-const label = z
-  .string()
-  .max(64)
-  .regex(/^[A-Za-z][A-Za-z0-9._-]*(\|[a-z]+)?$/);
+const label = z.string().refine(isStructureLabel, "Unknown structural label");
 const decisionCaseSchema = z
   .strictObject({
     target: label,
@@ -73,7 +71,10 @@ const decisionCaseSchema = z
         z
           .string()
           .max(640)
-          .regex(/^([A-Za-z][A-Za-z0-9._-]*(\|[a-z]+)?(>|$))*$/),
+          .refine(
+            (path) => path === "" || path.split(">").every(isStructureLabel),
+            "Unknown structural label in part path",
+          ),
       )
       .max(8)
       .readonly(),
@@ -343,8 +344,15 @@ export class DecisionClient {
         await response.body?.cancel().catch(() => {});
         return { state: "failed", code: "redirect-refused", attempts };
       }
-      if (response.status === 401) return { state: "failed", code: "unauthorized", attempts };
-      if (response.status === 422) return { state: "failed", code: "rejected", attempts };
+      // Terminal statuses release their bodies before returning.
+      if (response.status === 401 || response.status === 422) {
+        await response.body?.cancel().catch(() => {});
+        return {
+          state: "failed",
+          code: response.status === 401 ? "unauthorized" : "rejected",
+          attempts,
+        };
+      }
       if (response.status === 429 || response.status === 529) {
         last = response.status === 429 ? "rate-limited" : "overloaded";
         await response.body?.cancel().catch(() => {});
@@ -353,6 +361,7 @@ export class DecisionClient {
       }
       let value: unknown;
       try {
+        if (!response.ok) await response.body?.cancel().catch(() => {});
         const text = response.ok ? await readLimited(response) : undefined;
         value = text === undefined ? undefined : JSON.parse(text);
       } catch {

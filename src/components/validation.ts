@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { ScanId } from "../contracts.js";
 import { targetSchema, versionRefSchema } from "../validation.js";
+import { isStructureLabel } from "../analysis.js";
 
 // Boundary schemas for component evidence. Browser analysis imports only inferred types.
 export const bridgeToken = z
@@ -198,10 +199,7 @@ export const structureSchema = z
                     z
                       .strictObject({
                         distance: z.number().int().min(0).max(8),
-                        label: z
-                          .string()
-                          .max(64)
-                          .regex(/^[A-Za-z][A-Za-z0-9._-]*(\|[a-z]+)?$/),
+                        label: z.string().refine(isStructureLabel, "Unknown structural label"),
                         shape: shapeSchema,
                         repeats: z.number().int().min(0).max(2000),
                         target: targetSchema.optional(),

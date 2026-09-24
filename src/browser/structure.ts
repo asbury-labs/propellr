@@ -2,15 +2,11 @@
 // Labels carry only element names and allowlisted roles; page strings never leave the page.
 import type { Target } from "../contracts.js";
 import type { StructureCapture } from "../components/contracts.js";
-import { structureCollector } from "../analysis.js";
+import { structureCollector, structureRoles } from "../analysis.js";
 import { parent } from "./naming.js";
 
 type Chain = Extract<StructureCapture, { state: "available" }>["targets"][number]["chain"];
-const roles = new Set(
-  "alert alertdialog application article banner button cell checkbox columnheader combobox complementary contentinfo definition dialog directory document feed figure form grid gridcell group heading img link list listbox listitem log main marquee math menu menubar menuitem menuitemcheckbox menuitemradio navigation none note option presentation progressbar radio radiogroup region row rowgroup rowheader scrollbar search searchbox separator slider spinbutton status switch tab table tablist tabpanel term textbox timer toolbar tooltip tree treegrid treeitem".split(
-    " ",
-  ),
-);
+const roles = new Set<string>(structureRoles);
 function fnv(text: string): string {
   let hash = 0x811c9dc5;
   for (let index = 0; index < text.length; index++) {

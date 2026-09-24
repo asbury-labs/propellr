@@ -139,6 +139,16 @@ and is never sent. The test failed before the fix: seven bad shapes are refused,
 receives nothing, and a valid case still succeeds. This fourth push also ran under Tony's
 standing instruction. Pinned `pnpm validate` passed all 299 tests (76 component).
 
+## Review repair 5, PR #19
+
+Copilot found that the egress grammar accepted any lowercase role token (for example
+`button|ignore`), not just the allowlist. It also found that 401, 422 and other non-OK
+responses returned without releasing their bodies. The role allowlist now lives in shared
+constants: the browser labels with it, and the capture schema and decision-input schema both
+enforce it, including inside part paths. Terminal responses now cancel their bodies. The
+allowlist test failed before the fix. Body cancellation is resource hygiene and has no separate
+test. Pinned `pnpm validate` passed all 299 tests (76 component).
+
 ## Evidence artifacts
 
 - [Manifest](component-inference-evidence/phase-2-manifest.json): approval state, corpus split,

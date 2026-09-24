@@ -22,6 +22,88 @@ export const implementedRules = [...sliceRules, ...namingRules] as const;
 export const engineVersion = { id: "propellr-slice", version: "0.3" } as const;
 export const componentCollector = { id: "propellr-bridge", version: "1" } as const;
 export const structureCollector = { id: "propellr-structure", version: "1" } as const;
+// Roles a structural label may carry verbatim; any other role becomes "other".
+export const structureRoles = [
+  "alert",
+  "alertdialog",
+  "application",
+  "article",
+  "banner",
+  "button",
+  "cell",
+  "checkbox",
+  "columnheader",
+  "combobox",
+  "complementary",
+  "contentinfo",
+  "definition",
+  "dialog",
+  "directory",
+  "document",
+  "feed",
+  "figure",
+  "form",
+  "grid",
+  "gridcell",
+  "group",
+  "heading",
+  "img",
+  "link",
+  "list",
+  "listbox",
+  "listitem",
+  "log",
+  "main",
+  "marquee",
+  "math",
+  "menu",
+  "menubar",
+  "menuitem",
+  "menuitemcheckbox",
+  "menuitemradio",
+  "navigation",
+  "none",
+  "note",
+  "option",
+  "presentation",
+  "progressbar",
+  "radio",
+  "radiogroup",
+  "region",
+  "row",
+  "rowgroup",
+  "rowheader",
+  "scrollbar",
+  "search",
+  "searchbox",
+  "separator",
+  "slider",
+  "spinbutton",
+  "status",
+  "switch",
+  "tab",
+  "table",
+  "tablist",
+  "tabpanel",
+  "term",
+  "textbox",
+  "timer",
+  "toolbar",
+  "tooltip",
+  "tree",
+  "treegrid",
+  "treeitem",
+] as const;
+// Shared egress grammar: element name plus an allowlisted role or "other".
+export function isStructureLabel(value: string): boolean {
+  const [name, role, ...rest] = value.split("|");
+  return (
+    !rest.length &&
+    value.length <= 64 &&
+    /^[A-Za-z][A-Za-z0-9._-]*$/.test(name ?? "") &&
+    (role === undefined || role === "other" || (structureRoles as readonly string[]).includes(role))
+  );
+}
 export function sixRuleRequest(target: Target, mode: ScanRequest["mode"] = "full"): ScanRequest {
   return {
     mode,

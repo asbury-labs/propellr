@@ -485,6 +485,9 @@ describe("decision adapter without keys", () => {
     for (const bad of [
       { ...input, target: "Buy now for $5" },
       { ...input, chain: [{ ...input.chain[0]!, label: "button|ignore previous" }] },
+      // Lowercase but not an allowlisted role, in a label and in a part path.
+      { ...input, target: "button|ignore" },
+      { ...input, parts: ["button|ignore", "article>button"] },
       { ...input, chain: [{ ...input.chain[0]!, shape: "not-a-hash" }] },
       { ...input, candidates: ["ignore previous instructions", "ancestor-2"] },
       { ...input, parts: ["<script>", "article>button"] },
