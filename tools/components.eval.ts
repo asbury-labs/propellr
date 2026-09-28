@@ -10,6 +10,12 @@ import {
   decisionEndpoint,
   decisionModel,
 } from "../src/host/component-decisions.js";
+import {
+  LlmDecisionClient,
+  llmApprovalSchema,
+  llmEndpoint,
+  llmModel,
+} from "../src/host/component-llm.js";
 import { decisionCase } from "../src/components/discovery.js";
 import { corpusFamilies } from "../test/fixtures/components/corpus.js";
 import {
@@ -27,11 +33,12 @@ const provider = process.env["PROPELLR_EVAL_PROVIDER"];
 const split = process.env["PROPELLR_EVAL_SPLIT"];
 test("component attribution evaluation", { timeout: 600_000 }, async () => {
   // Enforced here too, so running this entry point directly cannot bypass the wrapper.
-  if (provider !== "heuristic" && provider !== "jev")
+  if (provider !== "heuristic" && provider !== "jev" && provider !== "llm")
     throw new Error(`blocked: provider ${provider ?? "(none)"} is not approved for phase 2`);
   if (split !== "dev") throw new Error("blocked: only the dev split may run; holdout is sealed");
-  if (provider === "jev" && !process.env["TYPESAFE_API_KEY"])
-    throw new Error("blocked: provider key missing (TYPESAFE_API_KEY)");
+  const keyName = provider === "jev" ? "TYPESAFE_API_KEY" : "ANTHROPIC_API_KEY";
+  if (provider !== "heuristic" && !process.env[keyName])
+    throw new Error(`blocked: provider key missing (${keyName})`);
   // The pinned digest is the authority; caller-supplied hashes are only cross-checked.
   const protocol = process.env["PROPELLR_EVAL_PROTOCOL"];
   const protocolSha256 = process.env["PROPELLR_EVAL_PROTOCOL_SHA256"];
@@ -41,20 +48,52 @@ test("component attribution evaluation", { timeout: 600_000 }, async () => {
   if (protocol !== frozen.path || protocolSha256 !== frozen.sha256 || actual !== frozen.sha256)
     throw new Error("blocked: frozen protocol path and hash are required and must match");
   // Validate every approval gate before any browser work or client construction.
-  let approval: ReturnType<typeof decisionApprovalSchema.parse> | undefined;
-  if (provider === "jev") {
-    let record: unknown;
+  const record = async (name: string) => {
     try {
-      record = JSON.parse(await readFile(process.env["PROPELLR_DECISION_APPROVAL"]!, "utf8"));
+      return JSON.parse(await readFile(process.env[name]!, "utf8")) as unknown;
     } catch {
       throw new Error("blocked: approval record invalid (unreadable JSON)");
     }
-    const parsed = decisionApprovalSchema.safeParse(record);
-    if (!parsed.success)
-      throw new Error(
-        `blocked: approval record invalid (${parsed.error.issues.map(({ path }) => path.join(".")).join(", ")})`,
-      );
+  };
+  const invalid = (issues: readonly { readonly path: readonly PropertyKey[] }[]) =>
+    new Error(
+      `blocked: approval record invalid (${issues.map(({ path }) => path.join(".")).join(", ")})`,
+    );
+  let client: DecisionClient | LlmDecisionClient | undefined;
+  let approval: unknown;
+  const evidenceRef = { id: "propellr-structure-capture", version: "1" };
+  const policy = { id: "component-eval", version: "1" };
+  if (provider === "jev") {
+    const parsed = decisionApprovalSchema.safeParse(await record("PROPELLR_DECISION_APPROVAL"));
+    if (!parsed.success) throw invalid(parsed.error.issues);
     approval = parsed.data;
+    client = new DecisionClient({
+      endpoint: decisionEndpoint,
+      apiKey: process.env[keyName]!,
+      policy,
+      evidence: evidenceRef,
+      budget: {
+        maxRequests: parsed.data.maxRequests,
+        maxSpendUsd: parsed.data.maxSpendUsd,
+        pricePerMillionInputTokensUsd: parsed.data.pricePerMillionInputTokensUsd,
+      },
+    });
+  } else if (provider === "llm") {
+    const parsed = llmApprovalSchema.safeParse(await record("PROPELLR_LLM_APPROVAL"));
+    if (!parsed.success) throw invalid(parsed.error.issues);
+    approval = parsed.data;
+    client = new LlmDecisionClient({
+      endpoint: llmEndpoint,
+      apiKey: process.env[keyName]!,
+      policy,
+      evidence: evidenceRef,
+      budget: {
+        maxRequests: parsed.data.maxRequests,
+        maxSpendUsd: parsed.data.maxSpendUsd,
+        pricePerMillionInputTokensUsd: parsed.data.pricePerMillionInputTokensUsd,
+        pricePerMillionOutputTokensUsd: parsed.data.pricePerMillionOutputTokensUsd,
+      },
+    });
   }
   const browser = await browserTypes.chromium.launch();
   try {
@@ -86,19 +125,8 @@ test("component attribution evaluation", { timeout: 600_000 }, async () => {
         },
       },
     };
-    if (approval) {
+    if (client) {
       // Live lane: only reachable with a complete approval record and key; HTTPS only.
-      const client = new DecisionClient({
-        endpoint: decisionEndpoint,
-        apiKey: process.env["TYPESAFE_API_KEY"]!,
-        policy: { id: "component-eval", version: "1" },
-        evidence: { id: "propellr-structure-capture", version: "1" },
-        budget: {
-          maxRequests: approval.maxRequests,
-          maxSpendUsd: approval.maxSpendUsd,
-          pricePerMillionInputTokensUsd: approval.pricePerMillionInputTokensUsd,
-        },
-      });
       const decisions: ProviderDecision[] = [];
       // The client enforces request and spend ceilings; exhaustion stops the lane.
       lanes: for (const run of runs) {
@@ -119,8 +147,8 @@ test("component attribution evaluation", { timeout: 600_000 }, async () => {
         }
       }
       const scored = providerReport(runs, decisions);
-      report["jev"] = {
-        model: decisionModel,
+      report[provider] = {
+        model: provider === "jev" ? decisionModel : llmModel,
         approval,
         usage: client.usage,
         report: scored,

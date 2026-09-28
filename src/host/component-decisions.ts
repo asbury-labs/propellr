@@ -1,10 +1,12 @@
 // Host-only, advisory decision adapter for the TypeSafe System One API (Jev). Not wired into
-// any operation. Phase 2 makes no live call: provider access, spend and terms are unapproved.
+// any operation. Live use requires the approval record below (protocol amendment 2026-09-28).
 import { z } from "zod";
 import type { VersionRef } from "../contracts.js";
 import type { DecisionCase } from "../components/discovery.js";
 import { canonical } from "../reporting/index.js";
 import { isStructureLabel } from "../analysis.js";
+import { BoundedTransport } from "./decision-transport.js";
+import type { TransportFailure } from "./decision-transport.js";
 
 export const decisionModel = "jev-1.13.0";
 export const decisionRubric = { id: "component-attribution-questions", version: "1" } as const;
@@ -39,13 +41,10 @@ export const decisionApprovalSchema = z
     pricePerMillionInputTokensUsd: z.number().positive().max(100),
   })
   .readonly();
-const sentinels = ["none", "insufficient-evidence"] as const;
-const REQUEST_BYTES = 65_536;
-const RESPONSE_BYTES = 262_144;
-type Failure = Extract<DecisionResult, { state: "failed" }>["code"];
+export const sentinels = ["none", "insufficient-evidence"] as const;
 // Egress boundary: only text-free structural labels, opaque shapes and code-generated IDs.
 const label = z.string().refine(isStructureLabel, "Unknown structural label");
-const decisionCaseSchema = z
+export const decisionCaseSchema = z
   .strictObject({
     target: label,
     chain: z
@@ -99,7 +98,7 @@ const decisionCaseSchema = z
       ),
     "Candidates must match the chain",
   );
-const CACHE_ENTRIES = 256;
+export const CACHE_ENTRIES = 256;
 
 export interface DecisionClientOptions {
   readonly endpoint: string;
@@ -148,25 +147,13 @@ export type DecisionResult =
       readonly state: "answered";
       readonly model: string;
       readonly answers: DecisionAnswers;
-      readonly usage: { readonly inputTokens: number };
+      readonly usage: { readonly inputTokens: number; readonly outputTokens: number };
       readonly attempts: number;
       readonly cached: boolean;
     }
   | {
       readonly state: "failed";
-      readonly code:
-        | "unauthorized"
-        | "rejected"
-        | "rate-limited"
-        | "overloaded"
-        | "timeout"
-        | "cancelled"
-        | "unavailable"
-        | "invalid-response"
-        | "request-limit"
-        | "budget-exhausted"
-        | "redirect-refused"
-        | "invalid-request";
+      readonly code: TransportFailure | "invalid-request";
       readonly attempts: number;
     };
 
@@ -241,72 +228,55 @@ function validateAnswers(
     : undefined;
 }
 
-function reportedTokens(value: unknown): number | undefined {
-  const tokens = z
-    .object({ usage: z.object({ input_tokens: z.number().int().min(0) }) })
-    .safeParse(value);
-  return tokens.success ? tokens.data.usage.input_tokens : undefined;
-}
-
-// Bounded body read: an oversized response is abandoned before parsing, never buffered whole.
-async function readLimited(response: Response): Promise<string | undefined> {
-  const reader = response.body?.getReader();
-  if (!reader) return "";
-  const chunks: Uint8Array[] = [];
-  let size = 0;
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    size += value.byteLength;
-    if (size > RESPONSE_BYTES) {
-      await reader.cancel().catch(() => {});
-      return undefined;
-    }
-    chunks.push(value);
-  }
-  return Buffer.concat(chunks).toString("utf8");
-}
-
 export class DecisionClient {
   private readonly cache = new Map<string, Extract<DecisionResult, { state: "answered" }>>();
-  private readonly endpoint: URL;
-  private readonly deadlineMs: number;
-  private readonly maxAttempts: number;
-  private readonly send: typeof fetch;
-  private requests = 0;
-  private spent = 0;
+  private readonly transport: BoundedTransport;
 
   constructor(private readonly options: DecisionClientOptions) {
-    const endpoint = new URL(options.endpoint);
-    const loopback = ["127.0.0.1", "[::1]", "localhost"].includes(endpoint.hostname);
-    if (
-      endpoint.protocol !== "https:" &&
-      !(options.allowLoopback && loopback && endpoint.protocol === "http:")
-    )
-      throw new Error("Decision endpoint must be HTTPS");
-    this.endpoint = endpoint;
-    this.deadlineMs = z
-      .number()
-      .int()
-      .min(100)
-      .max(10_000)
-      .parse(options.deadlineMs ?? 8000);
-    this.maxAttempts = z
-      .number()
-      .int()
-      .min(1)
-      .max(3)
-      .parse(options.maxAttempts ?? 3);
-    this.send = options.fetch ?? fetch;
-    z.strictObject({
-      maxRequests: z.number().int().min(1).max(1000),
-      maxSpendUsd: z.number().positive().max(10),
-      pricePerMillionInputTokensUsd: z.number().positive().max(100),
-    }).parse(options.budget);
+    const { maxRequests, maxSpendUsd, pricePerMillionInputTokensUsd } = z
+      .strictObject({
+        maxRequests: z.number().int().min(1).max(1000),
+        maxSpendUsd: z.number().positive().max(10),
+        pricePerMillionInputTokensUsd: z.number().positive().max(100),
+      })
+      .parse(options.budget);
+    this.transport = new BoundedTransport({
+      endpoint: options.endpoint,
+      headers: { authorization: `Bearer ${options.apiKey}` },
+      ...(options.deadlineMs === undefined ? {} : { deadlineMs: options.deadlineMs }),
+      ...(options.maxAttempts === undefined ? {} : { maxAttempts: options.maxAttempts }),
+      ...(options.allowLoopback === undefined ? {} : { allowLoopback: options.allowLoopback }),
+      ...(options.fetch === undefined ? {} : { fetch: options.fetch }),
+      budget: { maxRequests, maxSpendUsd },
+      // Jev output tokens are free.
+      pricing: {
+        inputPerMillionUsd: pricePerMillionInputTokensUsd,
+        outputPerMillionUsd: 0,
+        maxOutputTokens: 0,
+      },
+      status: (status) =>
+        status === 401
+          ? { fail: "unauthorized" }
+          : status === 422
+            ? { fail: "rejected" }
+            : status === 429
+              ? { retry: "rate-limited" }
+              : status === 529
+                ? { retry: "overloaded" }
+                : undefined,
+      usage: (value) => {
+        const reported = z
+          .object({ usage: z.object({ input_tokens: z.number().int().min(0) }) })
+          .safeParse(value);
+        return reported.success
+          ? { input: reported.data.usage.input_tokens, output: 0 }
+          : undefined;
+      },
+    });
   }
 
   get usage(): { readonly requests: number; readonly spentUsd: number } {
-    return { requests: this.requests, spentUsd: this.spent };
+    return this.transport.usage;
   }
 
   async decide(untrusted: DecisionCase, signal: AbortSignal): Promise<DecisionResult> {
@@ -316,9 +286,6 @@ export class DecisionClient {
     const request = decisionRequest(input);
     // Closed-set questions are capped at 255 options, sentinels included.
     if (Math.max(input.candidates.length, input.parts.length) + sentinels.length > 255)
-      return { state: "failed", code: "request-limit", attempts: 0 };
-    const body = JSON.stringify(request);
-    if (Buffer.byteLength(body, "utf8") > REQUEST_BYTES)
       return { state: "failed", code: "request-limit", attempts: 0 };
     // Exact permitted input plus every version that could change the answer.
     const key = canonical([
@@ -331,103 +298,20 @@ export class DecisionClient {
     const hit = this.cache.get(key);
     // A cache hit made no attempt; only the original answer carried attempts.
     if (hit) return { ...hit, cached: true, attempts: 0 };
-    const deadline = AbortSignal.timeout(this.deadlineMs);
-    const combined = AbortSignal.any([signal, deadline]);
-    const stop = (): Failure => (signal.aborted ? "cancelled" : "timeout");
-    let attempts = 0;
-    let last: Failure = "unavailable";
-    // Pre-send upper bound: byte-level tokens never outnumber the request's UTF-8 bytes, so a
-    // call that passes this check cannot push spend past the cap unless usage is over-reported.
-    const { maxRequests, maxSpendUsd, pricePerMillionInputTokensUsd: price } = this.options.budget;
-    const estimate = (Buffer.byteLength(body, "utf8") * price) / 1_000_000;
-    while (attempts < this.maxAttempts) {
-      if (combined.aborted) return { state: "failed", code: stop(), attempts };
-      if (this.requests >= maxRequests || this.spent + estimate > maxSpendUsd)
-        return { state: "failed", code: "budget-exhausted", attempts };
-      this.requests++;
-      this.spent += estimate;
-      attempts++;
-      let response: Response;
-      try {
-        response = await this.send(this.endpoint, {
-          method: "POST",
-          headers: {
-            authorization: `Bearer ${this.options.apiKey}`,
-            "content-type": "application/json",
-          },
-          body,
-          signal: combined,
-          // Never follow redirects: a new location could drop HTTPS or change host.
-          redirect: "manual",
-        });
-      } catch {
-        if (combined.aborted) return { state: "failed", code: stop(), attempts };
-        last = "unavailable";
-        if (!(await this.backoff(attempts, combined))) break;
-        continue;
-      }
-      if (response.type === "opaqueredirect" || (response.status >= 300 && response.status < 400)) {
-        await response.body?.cancel().catch(() => {});
-        return { state: "failed", code: "redirect-refused", attempts };
-      }
-      // Terminal statuses release their bodies before returning.
-      if (response.status === 401 || response.status === 422) {
-        await response.body?.cancel().catch(() => {});
-        return {
-          state: "failed",
-          code: response.status === 401 ? "unauthorized" : "rejected",
-          attempts,
-        };
-      }
-      if (response.status === 429 || response.status === 529) {
-        last = response.status === 429 ? "rate-limited" : "overloaded";
-        await response.body?.cancel().catch(() => {});
-        if (!(await this.backoff(attempts, combined))) break;
-        continue;
-      }
-      let value: unknown;
-      try {
-        if (!response.ok) await response.body?.cancel().catch(() => {});
-        const text = response.ok ? await readLimited(response) : undefined;
-        value = text === undefined ? undefined : JSON.parse(text);
-      } catch {
-        if (combined.aborted) return { state: "failed", code: stop(), attempts };
-        value = undefined;
-      }
-      // Reported usage is charged even when the answers are invalid; over-reporting stops later calls.
-      const tokens = reportedTokens(value);
-      if (tokens !== undefined) this.spent += Math.max(0, (tokens * price) / 1_000_000 - estimate);
-      const valid = validateAnswers(input, value);
-      if (!valid) return { state: "failed", code: "invalid-response", attempts };
-      const answered = {
-        state: "answered",
-        model: valid.model,
-        answers: valid.answers,
-        usage: { inputTokens: valid.usage.input_tokens },
-        attempts,
-        cached: false,
-      } as const;
-      this.cache.set(key, answered);
-      if (this.cache.size > CACHE_ENTRIES) this.cache.delete(this.cache.keys().next().value!);
-      return answered;
-    }
-    return { state: "failed", code: combined.aborted ? stop() : last, attempts };
-  }
-
-  // Backoff stays inside the total deadline; it never extends it.
-  private async backoff(attempt: number, signal: AbortSignal): Promise<boolean> {
-    if (attempt >= this.maxAttempts || signal.aborted) return false;
-    const delay = 100 * 2 ** (attempt - 1);
-    return new Promise((resolve) => {
-      const timer = setTimeout(() => {
-        signal.removeEventListener("abort", abort);
-        resolve(!signal.aborted);
-      }, delay);
-      const abort = () => {
-        clearTimeout(timer);
-        resolve(false);
-      };
-      signal.addEventListener("abort", abort, { once: true });
-    });
+    const sent = await this.transport.post(JSON.stringify(request), signal);
+    if (!sent.ok) return { state: "failed", code: sent.code, attempts: sent.attempts };
+    const valid = validateAnswers(input, sent.value);
+    if (!valid) return { state: "failed", code: "invalid-response", attempts: sent.attempts };
+    const answered = {
+      state: "answered",
+      model: valid.model,
+      answers: valid.answers,
+      usage: { inputTokens: valid.usage.input_tokens, outputTokens: valid.usage.output_tokens },
+      attempts: sent.attempts,
+      cached: false,
+    } as const;
+    this.cache.set(key, answered);
+    if (this.cache.size > CACHE_ENTRIES) this.cache.delete(this.cache.keys().next().value!);
+    return answered;
   }
 }

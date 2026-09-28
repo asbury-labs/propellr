@@ -35,21 +35,28 @@ if (protocol !== FROZEN_PROTOCOL) refuse(`only ${FROZEN_PROTOCOL} may bind an ev
 if (!existsSync(protocol)) refuse(`protocol ${protocol} not found`);
 if (createHash("sha256").update(readFileSync(protocol)).digest("hex") !== FROZEN_PROTOCOL_SHA256)
   refuse("protocol digest does not match the pinned frozen protocol");
-if (provider === "llm") refuse("no structured-output LLM client or approval exists for phase 2");
-if (provider === "jev") {
-  const approval = process.env["PROPELLR_DECISION_APPROVAL"];
+// Each provider arm needs its own approval record and key.
+const arms: Readonly<Record<string, { readonly approval: string; readonly key: string }>> = {
+  jev: { approval: "PROPELLR_DECISION_APPROVAL", key: "TYPESAFE_API_KEY" },
+  llm: { approval: "PROPELLR_LLM_APPROVAL", key: "ANTHROPIC_API_KEY" },
+};
+const arm = arms[provider];
+if (arm) {
+  const approval = process.env[arm.approval];
+  const label = provider === "jev" ? "provider" : "LLM";
   if (!approval || !existsSync(approval))
-    refuse("provider approval record missing (PROPELLR_DECISION_APPROVAL)");
-  if (!process.env["TYPESAFE_API_KEY"]) refuse("provider key missing (TYPESAFE_API_KEY)");
+    refuse(`${label} approval record missing (${arm.approval})`);
+  if (!process.env[arm.key])
+    refuse(`${label === "LLM" ? "LLM" : "provider"} key missing (${arm.key})`);
   try {
     JSON.parse(readFileSync(approval!, "utf8"));
   } catch {
     refuse("approval record invalid (unreadable JSON)");
   }
 }
-// Holdout opens only when every approved arm can run on it together.
+// Holdout opens once, after both adjudicators' labels exist, with every arm run together.
 if (split === "holdout")
-  refuse("holdout is sealed until heuristic, LLM and Jev arms are all approved");
+  refuse("holdout is sealed until both adjudicators' labels exist and all three arms run together");
 const run = spawnSync(
   process.execPath,
   ["node_modules/vitest/vitest.mjs", "run", "--project", "evaluation"],

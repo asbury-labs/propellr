@@ -251,6 +251,9 @@ protocol with unchanged metrics. The `jev`, `llm` and holdout lanes still exit 2
 
 ## Evidence artifacts
 
+These are the PR #19 checkpoint snapshot, from before the approvals. The live runs will add
+their own manifest.
+
 - [Manifest](component-inference-evidence/phase-2-manifest.json): approval state, corpus split,
   heuristic metrics, commands, source and archive hashes.
 - [Raw archive](component-inference-evidence/phase-2-results.tar.gz): the final heuristic dev
@@ -258,6 +261,36 @@ protocol with unchanged metrics. The `jev`, `llm` and holdout lanes still exit 2
 - Source-tree SHA-256: `9cabda4855a0050b1b63f5900eb8bf978b7dd02b29ace72e64e34878b4cac78e`.
 - Archive SHA-256: `ae9a4b0e67a7cc7aa3d3570a0769d2859e535fb81e9c95eb81fdb92419ddf0f1`.
 
-To resume: approve a provider, exact model, spend and request caps, and synthetic disclosure.
-Complete the MCA review, provide two adjudicators and approve an LLM arm. Then run all arms on
-dev, and on the sealed holdout exactly once, against the frozen adoption bar.
+## Approvals and the Haiku arm, September 28, 2026
+
+Tony approved the phase 2 gates (see the protocol amendment of the same date). Records, with no
+secrets, are in [approvals/](component-inference-evidence/approvals/): Jev `jev-1.13.0` and
+Claude Haiku 4.5 (`claude-haiku-4-5-20251001`), each capped at 300 requests and $1.00, dev and
+holdout, synthetic disclosure only, evaluation-only outputs. Adjudicators are Tony and one colleague.
+
+- **Shared transport** (`src/host/decision-transport.ts`): both adapters now use one bounded HTTPS
+  transport: HTTPS only, redirects refused, 64 KiB requests, 256 KiB responses read in a streaming,
+  bounded way, 10 s total deadline, at most 3 attempts, terminal bodies cancelled, no logging.
+- **Spend accounting (amended):** before each attempt, the transport reserves an upper bound:
+  request bytes at the input price plus the output-token ceiling at the output price. It refuses
+  the attempt if the bound would exceed the cap. Reported usage then replaces the reservation.
+  Every attempt counts toward the request cap.
+- **Haiku adapter** (`src/host/component-llm.ts`): raw Messages API with the pinned model,
+  temperature 0, 512 max tokens and no thinking. Structured output uses a JSON schema whose enums
+  are the offered options plus sentinels. The client checks the model, `end_turn`, offered choices
+  and unit-interval numbers; refusals and truncations are `invalid-response`. Statuses 401/403 are
+  `unauthorized` and 400/404/413/422 are `rejected`, neither retried; 429 and 5xx retry.
+- **Gates:** `pnpm eval:components` checks the approval record and key for each arm
+  (`PROPELLR_DECISION_APPROVAL` + `TYPESAFE_API_KEY`, `PROPELLR_LLM_APPROVAL` +
+  `ANTHROPIC_API_KEY`). The entry point validates the record against that arm's schema before any
+  browser work. The holdout stays sealed until both label sets exist.
+- **Tests:** 16 no-key loopback tests cover request shape, 10 invalid responses, status handling,
+  reservation and refund, grammar refusal, HTTPS and redirects, and the committed records.
+
+Pinned `pnpm validate` passed all 321 tests (68 contract, 44 host, 13 playbook, 80
+parity/browser, 98 component, 18 reporting). The heuristic dev lane reran under the re-pinned
+protocol (`c66d274e…`) with unchanged metrics. **No live provider call has been made yet**: the
+keys were not available to the evaluation shell. The live dev lanes are the next step.
+
+To resume: run the Jev and Haiku dev lanes with keys. Then collect both adjudicators' labels and run
+all three arms on the sealed holdout exactly once, against the frozen adoption bar.

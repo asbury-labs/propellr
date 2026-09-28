@@ -10,12 +10,12 @@ becomes a supported scope, changes a gate, or is delivered over IPC.
 
 ## Approval state (blocking)
 
-| Gate                                                                      | State                                    |
-| ------------------------------------------------------------------------- | ---------------------------------------- |
-| Provider, exact model, client, synthetic disclosure, numeric spend caps   | **Not approved.** No credentials exist.  |
-| TypeSafe MCA review (output reuse, distillation §2.3(b), testing §2.3(g)) | **Not done.** No adversarial live calls. |
-| Two independent human adjudicators for the 240-case corpus                | **Not available.** Labels unadjudicated. |
-| Native structured-output small LLM arm                                    | **Not approved**; no client added.       |
+| Gate                                                                      | State                                     |
+| ------------------------------------------------------------------------- | ----------------------------------------- |
+| Provider, exact model, client, synthetic disclosure, numeric spend caps   | **Approved 2026-09-28** (amendment below) |
+| TypeSafe MCA review (output reuse, distillation §2.3(b), testing §2.3(g)) | **Recorded 2026-09-28**, Tony, verbal     |
+| Two independent human adjudicators for the 240-case corpus                | **Planned:** Tony and one colleague       |
+| Native structured-output small LLM arm                                    | **Approved:** `claude-haiku-4-5-20251001` |
 
 A live lane requires a machine-checkable approval record (`decisionApprovalSchema`): provider,
 exact model, exact endpoint and adapter version, approver and date, synthetic-only disclosure,
@@ -27,6 +27,36 @@ Consequences: no network call is made to any provider. `pnpm eval:components` re
 `jev` and `llm` arms and exits nonzero when the approval record or key is missing. Nothing
 cached, mocked or synthetic can count as a live result. The holdout split stays sealed:
 no arm, including the heuristic, is run on it until all approved arms run together.
+
+## Amendment, September 28, 2026 (approvals and LLM arm)
+
+Tony approved, in the Claude Code session of September 28, 2026:
+
+- **Jev lane** on dev, then on the holdout once: `jev-1.13.0` at the pinned endpoint, text-free
+  synthetic structure only.
+- **Ceilings per arm:** 300 requests and $1.00. Jev input is priced at $0.042 per million
+  tokens; Claude Haiku 4.5 at $1 input and $5 output per million.
+- **Terms review:** reviewer Tony; reference "verbal approval in Claude Code session,
+  2026-09-28"; evaluation-only output reuse, distillation prohibited, adversarial testing not
+  permitted.
+- **LLM arm:** `claude-haiku-4-5-20251001`, a pinned dated snapshot, not an alias, via
+  `POST https://api.anthropic.com/v1/messages` (`anthropic-version: 2023-06-01`), native HTTPS
+  with no SDK dependency. Same text-free inputs, question wording and gates as the Jev adapter.
+  Temperature 0, `max_tokens` 512, no thinking, and structured output
+  (`output_config.format`, `json_schema`). The answer schema is membership `{choice,
+confidence}`, part `{choice, confidence}` and cause `{probability}`. Choices must be offered
+  options and numbers must be finite in [0,1], checked client-side, since schema numeric bounds
+  are unsupported. A `refusal` or `max_tokens` stop is `invalid-response`. 401, 403, 400, 404
+  and 422 are never retried; 429, 529, other 5xx and network errors are.
+- **Adjudication:** Tony and one colleague label the corpus independently; disagreements are
+  recorded, not averaged away. The holdout stays sealed until both label sets exist. Then the
+  heuristic, LLM and Jev arms run on it exactly once.
+
+Spend accounting, both adapters: before sending, the client reserves an upper bound (request
+UTF-8 bytes as input tokens at the input price, plus `max_tokens` at the output price) and
+refuses a call whose reservation would exceed the cap. When a response reports usage, the
+reservation is replaced by the reported cost, whether higher or lower. Over-reported usage is
+charged in full and stops later calls. The adoption bar, metrics, corpus and split are unchanged.
 
 ## Structural capture, `propellr-structure-capture/1`
 

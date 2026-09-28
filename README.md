@@ -248,11 +248,15 @@ for the compiled fixture; `.vue` script blocks are not `tsc`-checked. See the
 
 `scanComponents(..., { structure: true })` adds text-free structural fingerprints
 (`propellr-structure-capture/1`) and `discoverTemplates` offers structural suggestions
-(`structural-template/1`), never supported scopes. `src/host/component-decisions.ts` is a
-host-only, unwired adapter for TypeSafe's Jev (`jev-1.13.0`, native HTTPS, strict validation,
-bounded retries and deadline). **Jev is not adopted:** no provider, spend or terms approval
-exists and no live call has been made. `pnpm eval:components -- --provider heuristic --split dev`
-runs the heuristic baseline; `jev`, `llm` and the sealed holdout exit 2 without approval. See the
+(`structural-template/1`), never supported scopes. Two host-only, unwired advisory adapters share
+one bounded transport (`src/host/decision-transport.ts`): Jev (`jev-1.13.0`) and Claude Haiku 4.5
+(`claude-haiku-4-5-20251001`, structured output), both native HTTPS with no SDK. Tony approved live
+runs (dev, then the holdout once) on September 28, 2026, with 300 requests and $1.00 per arm (records under
+`specs/component-inference-evidence/approvals/`). Run a lane with the record path and key in the
+environment, for example
+`PROPELLR_DECISION_APPROVAL=... TYPESAFE_API_KEY=... pnpm eval:components -- --provider jev`, or
+`PROPELLR_LLM_APPROVAL=... ANTHROPIC_API_KEY=...` with `--provider llm`. The holdout stays sealed
+until two adjudicators' labels exist. **Jev is not adopted.** See the
 [inference protocol](specs/component-inference-protocol.md) and
 [evidence](specs/component-inference-validation.md).
 
