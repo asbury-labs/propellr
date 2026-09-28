@@ -251,8 +251,8 @@ protocol with unchanged metrics. The `jev`, `llm` and holdout lanes still exit 2
 
 ## Evidence artifacts
 
-These are the PR #19 checkpoint snapshot, from before the approvals. The live runs will add
-their own manifest.
+These are the PR #19 checkpoint snapshot, from before the approvals. The live dev runs have
+their own manifest (below).
 
 - [Manifest](component-inference-evidence/phase-2-manifest.json): approval state, corpus split,
   heuristic metrics, commands, source and archive hashes.
@@ -292,5 +292,36 @@ parity/browser, 98 component, 18 reporting). The heuristic dev lane reran under 
 protocol (`c66d274e…`) with unchanged metrics. **No live provider call has been made yet**: the
 keys were not available to the evaluation shell. The live dev lanes are the next step.
 
-To resume: run the Jev and Haiku dev lanes with keys. Then collect both adjudicators' labels and run
-all three arms on the sealed holdout exactly once, against the frozen adoption bar.
+## Live dev results, September 28, 2026
+
+Both approved arms ran once on the 80 dev cases, from `df7fc72b`, under the pinned protocol
+(`c66d274e…`). Keys were loaded from a 0600 file outside the repo, one key per run. No key value
+appears in any report or log. **Neither provider is adopted; inference stays disabled.** Dev
+results never count as an adoption test.
+
+| Arm                     | Requests | Spend    | Answered | Decision precision | Pairwise precision | Brier |
+| ----------------------- | -------- | -------- | -------- | ------------------ | ------------------ | ----- |
+| `structural-template/1` | 0        | $0       | 80       | 0.75               | 0.868              | n/a   |
+| Jev `jev-1.13.0`        | 3        | $0.00012 | 80       | 0.75               | 0.868              | 0.154 |
+| Haiku 4.5               | 3        | $0.0041  | 80       | 0.75               | none (no groups)   | 0.188 |
+
+- **All three arms made the same membership choice.** Every arm chose `ancestor-1`, the nearest
+  repeated ancestor, for every target. Each is right on 3 of 4 families and wrong on
+  `cart-callsites`. The providers add no coverage over the heuristic.
+- **The dev split has little signal.** The 80 targets reduce to 3 distinct structural inputs, so
+  each arm made 3 requests and its exact-input cache answered the other 77. Uncached latency was
+  about 0.3 s for Jev and 1.3–2.3 s for Haiku.
+- **Rubric ambiguity (not changed after the fact):** Haiku answered the part as `article>button`,
+  which includes the component root. The frozen scorer expects the chain path below the root
+  (`button`), so it counted every Haiku part as a conflict and formed no repair groups. The part
+  question says "label path from the component root to the target", which supports both readings.
+  Fixing it needs a protocol amendment and a new rubric version before the holdout, then a dev
+  rerun of both arms.
+
+Evidence: [manifest](component-inference-evidence/phase-2-dev-live-manifest.json) and
+[raw archive](component-inference-evidence/phase-2-dev-live-results.tar.gz) (the three dev
+reports, eval logs and the `pnpm validate` log), archive SHA-256
+`2dd9a6bf7e87294787354d1116bb812ead3c40a3750aac26ff904bfc9c3fd824`.
+
+To resume: decide on the part-rubric amendment. Then collect both adjudicators' labels and run all
+three arms on the sealed holdout exactly once, against the frozen adoption bar.
