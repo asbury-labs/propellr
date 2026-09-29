@@ -431,6 +431,22 @@ Tests cover each case, including a real Chromium run of the stale name and the r
   The labeling guide now says not to collect attribution labels until both are added or an
   amendment narrows the labels.
 
-To resume: send the sheet to both labelers. When both exports exist, run `pnpm labels:compare`.
-Then amend the protocol to say how human labels replace the oracle, and run all three arms on the
-sealed holdout exactly once under rubric 2.
+## Phase 2 stack settled, September 29, 2026
+
+- **Merged:** #20 (`3d4be9f6`), #21 (`745e9b87`), #22 (`324386de`) and #23 (`a6113d7d`). The
+  plan and brief followed in #25 (`94d0c5b2`).
+- **#24 closed unmerged** at Tony's request. Its draft amendment gated each provider on a single
+  membership-confidence threshold (Jev 0.80, Haiku ungated) and was never approved. The
+  [semantic review plan](propellr-jev-semantic-review.html) parks the attribution holdout and
+  specifies a floor/bar gate on per-question defect probability instead. The gate run's evidence
+  stays on the `feat/component-confidence-gate` branch: its manifest, archive (`d2e34807…`) and
+  Jev's run-to-run variation (wrong-family confidence 0.75, then 0.79, on identical requests).
+- **Ledger corrected.** The gate run made live calls (3 requests per arm: Jev $0.00014, Haiku
+  $0.0044), but its manifest never reached `main`. Both runs are now in `usage-ledger.json`
+  without an evidence path, so they count toward the cumulative caps. Totals: Jev 9 requests,
+  $0.0004; Haiku 9 requests, $0.013; each of 300 requests and $1.00.
+
+To resume: the attribution holdout is parked. Before any attribution labels are collected, the
+labeling sheet needs separate variant and part answers, or an approved amendment narrowing the
+labels. Then amend the protocol to say how human labels replace the oracle, and run all three arms
+on the sealed holdout exactly once under rubric 2.

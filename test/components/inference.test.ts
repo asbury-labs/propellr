@@ -967,14 +967,15 @@ test("the usage ledger records every live run and bounds the next client", () =>
   }
   const caps = { maxRequests: 300, maxSpendUsd: 1 };
   const jev = remainingBudget(ledger, `${evidence}/approvals/jev-2026-09-28.json`, caps);
-  expect(jev.used.requests).toBe(6);
-  expect(jev.maxRequests).toBe(294);
-  expect(jev.maxSpendUsd).toBeCloseTo(1 - 0.000259686, 9);
+  // Three dev runs per arm: rubric 1, rubric 2 and the #24 gate run (evidence on its branch).
+  expect(jev.used.requests).toBe(9);
+  expect(jev.maxRequests).toBe(291);
+  expect(jev.maxSpendUsd).toBeCloseTo(1 - 0.000397908, 9);
   // An unknown approval has used nothing; an exhausted one leaves nothing.
   expect(remainingBudget(ledger, "other.json", caps)).toMatchObject({ maxRequests: 300 });
   expect(
     remainingBudget(ledger, `${evidence}/approvals/llm-2026-09-28.json`, {
-      maxRequests: 6,
+      maxRequests: 9,
       maxSpendUsd: 1,
     }).maxRequests,
   ).toBe(0);
