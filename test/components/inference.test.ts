@@ -26,8 +26,10 @@ import {
   metrics,
   providerCases,
   providerReport,
+  remainingBudget,
   runFamily,
   truthFor,
+  usageLedgerSchema,
 } from "../support/component-evaluation.js";
 import type { ProviderDecision } from "../support/component-evaluation.js";
 import { canonical } from "../../src/reporting/index.js";
@@ -477,6 +479,10 @@ describe("decision adapter without keys", () => {
     // Rubric 2: each part option names its candidate and excludes the root's own label.
     expect(sent.questions.part.instructions).toContain(
       "root's own label is never part of the path",
+    );
+    // A membership abstention must be mirrored by the part answer.
+    expect(sent.questions.part.instructions).toContain(
+      "if membership is none or insufficient-evidence, give the same answer here",
     );
     expect(sent.questions.part.criteria).toMatchObject({
       button: expect.stringContaining("root is ancestor-1 (distance 1, label article)"),
@@ -935,4 +941,40 @@ test("eval:components refuses provider arms without approval and keeps the holdo
     expect(result.status, args.join(" ")).toBe(2);
     expect(result.stderr).toContain(message);
   }
+});
+
+test("the usage ledger records every live run and bounds the next client", () => {
+  const evidence = "specs/component-inference-evidence";
+  const ledger = usageLedgerSchema.parse(
+    JSON.parse(readFileSync(`${evidence}/usage-ledger.json`, "utf8")),
+  );
+  // Each recorded run matches its committed manifest.
+  for (const entry of ledger.entries) {
+    const manifest = JSON.parse(readFileSync(entry.evidence!, "utf8")) as Record<
+      string,
+      { requests: number; spentUsd: number; model: string }
+    > & { protocolSha256: string };
+    expect(manifest[entry.provider]).toMatchObject({
+      requests: entry.requests,
+      spentUsd: entry.spentUsd,
+      model: entry.model,
+    });
+    expect(manifest.protocolSha256).toBe(entry.protocolSha256);
+  }
+  const caps = { maxRequests: 300, maxSpendUsd: 1 };
+  const jev = remainingBudget(ledger, `${evidence}/approvals/jev-2026-09-28.json`, caps);
+  expect(jev.used.requests).toBe(6);
+  expect(jev.maxRequests).toBe(294);
+  expect(jev.maxSpendUsd).toBeCloseTo(1 - 0.000259686, 9);
+  // An unknown approval has used nothing; an exhausted one leaves nothing.
+  expect(remainingBudget(ledger, "other.json", caps)).toMatchObject({ maxRequests: 300 });
+  expect(
+    remainingBudget(ledger, `${evidence}/approvals/llm-2026-09-28.json`, {
+      maxRequests: 6,
+      maxSpendUsd: 1,
+    }).maxRequests,
+  ).toBe(0);
+  expect(() =>
+    usageLedgerSchema.parse({ ...ledger, entries: [{ ...ledger.entries[0], requests: -1 }] }),
+  ).toThrow();
 });

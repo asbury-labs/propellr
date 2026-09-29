@@ -357,12 +357,15 @@ arms reran on dev under the re-pinned protocol (`7b434a1e…`):
   neither provider adds coverage. **Neither is adopted.**
 - **Cumulative spend against the approved caps (300 requests, $1.00 per arm):** Jev 6 requests and
   $0.00026; Haiku 6 requests and $0.0085.
+- **Cumulative caps are enforced.** `usage-ledger.json` records every live run. The evaluation
+  starts each client with only the approval's remaining budget, refuses when it is exhausted, and
+  appends its own usage after every live run, including runs that fail part way.
 - Uncached latency: Jev 0.15–0.32 s; Haiku 1.2–2.1 s. Latency is reported, not an adoption
   criterion. The report's p50/p95 include cache hits.
 
 Evidence: [manifest](component-inference-evidence/phase-2-dev-rubric2-manifest.json) and
 [raw archive](component-inference-evidence/phase-2-dev-rubric2-results.tar.gz), archive SHA-256
-`bf9d6f6620696aa70fc23c43834c0f8bf846ac15a2f33f21b05697ccbc7395c9`.
+`95901605e8c9a7e6b5cc6ea1e5613b4671bd002f253a35ddd7e426c57f3d5df6`.
 
 To resume: collect both adjudicators' labels, then run all three arms on the sealed holdout
 exactly once under rubric 2, against the frozen adoption bar.

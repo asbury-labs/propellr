@@ -2,6 +2,7 @@
 import { createHash } from "node:crypto";
 import frozen from "./frozen-protocol.json" with { type: "json" };
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { relative, resolve } from "node:path";
 import { test } from "vitest";
 import { browserTypes } from "../src/host/browser.js";
 import {
@@ -22,6 +23,8 @@ import {
   adoption,
   bootstrap,
   metrics,
+  remainingBudget,
+  usageLedgerSchema,
   providerReport,
   runFamily,
 } from "../test/support/component-evaluation.js";
@@ -61,6 +64,29 @@ test("component attribution evaluation", { timeout: 600_000 }, async () => {
     );
   let client: DecisionClient | LlmDecisionClient | undefined;
   let approval: unknown;
+  // Cumulative caps: each client starts with only what earlier runs left of the approval.
+  const ledgerUrl = new URL(
+    "../specs/component-inference-evidence/usage-ledger.json",
+    import.meta.url,
+  );
+  const ledger = usageLedgerSchema.parse(JSON.parse(await readFile(ledgerUrl, "utf8")));
+  const approvalPath =
+    provider === "heuristic"
+      ? ""
+      : relative(
+          process.cwd(),
+          resolve(
+            process.env[
+              provider === "jev" ? "PROPELLR_DECISION_APPROVAL" : "PROPELLR_LLM_APPROVAL"
+            ]!,
+          ),
+        );
+  const remaining = (caps: { maxRequests: number; maxSpendUsd: number }) => {
+    const left = remainingBudget(ledger, approvalPath, caps);
+    if (left.maxRequests < 1 || left.maxSpendUsd <= 0)
+      throw new Error("blocked: the approval's cumulative request or spend cap is exhausted");
+    return { maxRequests: left.maxRequests, maxSpendUsd: left.maxSpendUsd };
+  };
   const evidenceRef = { id: "propellr-structure-capture", version: "1" };
   const policy = { id: "component-eval", version: "1" };
   if (provider === "jev") {
@@ -73,8 +99,7 @@ test("component attribution evaluation", { timeout: 600_000 }, async () => {
       policy,
       evidence: evidenceRef,
       budget: {
-        maxRequests: parsed.data.maxRequests,
-        maxSpendUsd: parsed.data.maxSpendUsd,
+        ...remaining(parsed.data),
         pricePerMillionInputTokensUsd: parsed.data.pricePerMillionInputTokensUsd,
       },
     });
@@ -88,8 +113,7 @@ test("component attribution evaluation", { timeout: 600_000 }, async () => {
       policy,
       evidence: evidenceRef,
       budget: {
-        maxRequests: parsed.data.maxRequests,
-        maxSpendUsd: parsed.data.maxSpendUsd,
+        ...remaining(parsed.data),
         pricePerMillionInputTokensUsd: parsed.data.pricePerMillionInputTokensUsd,
         pricePerMillionOutputTokensUsd: parsed.data.pricePerMillionOutputTokensUsd,
       },
@@ -129,22 +153,50 @@ test("component attribution evaluation", { timeout: 600_000 }, async () => {
       // Live lane: only reachable with a complete approval record and key; HTTPS only.
       const decisions: ProviderDecision[] = [];
       // The client enforces request and spend ceilings; exhaustion stops the lane.
-      lanes: for (const run of runs) {
-        if (run.structure.state !== "available") continue;
-        for (const entry of run.structure.targets) {
-          const started = performance.now();
-          const result = await client.decide(
-            decisionCase(entry.chain),
-            AbortSignal.timeout(10_000),
-          );
-          decisions.push({
-            family: run.family,
-            path: canonical(entry.target.path),
-            result,
-            latencyMs: performance.now() - started,
-          });
-          if (result.state === "failed" && result.code === "budget-exhausted") break lanes;
+      try {
+        lanes: for (const run of runs) {
+          if (run.structure.state !== "available") continue;
+          for (const entry of run.structure.targets) {
+            const started = performance.now();
+            const result = await client.decide(
+              decisionCase(entry.chain),
+              AbortSignal.timeout(10_000),
+            );
+            decisions.push({
+              family: run.family,
+              path: canonical(entry.target.path),
+              result,
+              latencyMs: performance.now() - started,
+            });
+            if (result.state === "failed" && result.code === "budget-exhausted") break lanes;
+          }
         }
+      } finally {
+        // Every attempt counts, including runs that fail part way; commit the ledger with evidence.
+        if (client.usage.requests > 0)
+          await writeFile(
+            ledgerUrl,
+            `${JSON.stringify(
+              {
+                ...ledger,
+                entries: [
+                  ...ledger.entries,
+                  {
+                    approval: approvalPath,
+                    provider,
+                    model: provider === "jev" ? decisionModel : llmModel,
+                    protocolSha256: frozen.sha256,
+                    split,
+                    requests: client.usage.requests,
+                    spentUsd: client.usage.spentUsd,
+                    recordedAt: new Date().toISOString(),
+                  },
+                ],
+              },
+              null,
+              2,
+            )}\n`,
+          );
       }
       const scored = providerReport(runs, decisions);
       report[provider] = {

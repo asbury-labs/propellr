@@ -124,7 +124,7 @@
   ],
   "archive": {
     "path": "specs/component-inference-evidence/phase-2-dev-rubric2-results.tar.gz",
-    "sha256": "bf9d6f6620696aa70fc23c43834c0f8bf846ac15a2f33f21b05697ccbc7395c9"
+    "sha256": "95901605e8c9a7e6b5cc6ea1e5613b4671bd002f253a35ddd7e426c57f3d5df6"
   },
   "archivedFiles": {
     "artifacts/components/eval-heuristic-dev.json": "e001bc5620a6eb66268577984dedd322e31b99131194c458d3b520d55b5855a1",
