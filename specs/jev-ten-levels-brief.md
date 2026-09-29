@@ -65,11 +65,12 @@ that gap:
 
 - link purpose (WCAG 2.4.4) and descriptive headings and labels (2.4.6);
 - generic or filename-like alt text (1.1.1, judged from text only; Jev cannot see images);
-- error messages that don't explain how to recover (3.3.3);
 - identically named controls that can't be told apart.
 
-For each element that passes a naming rule, ask these as one fan-out call. Keep the weights in
-code and apply a floor/bar confidence gate: auto-flag, review, or abstain. Results are **review
+For each element that passes a naming rule, ask these as one fan-out call. Error messages that
+don't explain how to recover (3.3.3) need capture beyond naming targets and come later. Keep the
+weights in code and gate each answer's defect probability with a floor and a bar: auto-flag,
+review, or abstain. Results are **review
 candidates**, kept outside `Occurrence` verdicts, report counts and gate policy, as AGENTS.md
 requires. The labeling sheet and comparison tooling from #23 carry over for adjudication.
 
@@ -112,6 +113,7 @@ Keep Jev out of:
    decision 5).
 2. **First pilot: semantic naming review** over the existing naming rules. It compares the
    heuristic, Jev and Haiku under a frozen floor/bar gate, with two-person adjudication.
-3. **The phase 2 PR stack:** land #20–#23, whose transport, approval gates, LLM comparison arm and
-   labeling tooling are reused. Park #24; if the attribution evaluation continues, replace its
-   single threshold with a floor/bar gate.
+3. **The phase 2 PR stack:** #20–#23 merged on September 29, 2026; their transport, approval
+   gates, usage ledger, LLM comparison arm and labeling tooling are the foundation this work
+   reuses. #24 stays parked; if the attribution evaluation continues, replace its single threshold
+   with a floor/bar gate.
