@@ -474,6 +474,14 @@ describe("decision adapter without keys", () => {
       "none",
       "insufficient-evidence",
     ]);
+    // Rubric 2: each part option names its candidate and excludes the root's own label.
+    expect(sent.questions.part.instructions).toContain(
+      "root's own label is never part of the path",
+    );
+    expect(sent.questions.part.criteria).toMatchObject({
+      button: expect.stringContaining("root is ancestor-1 (distance 1, label article)"),
+      "article>button": expect.stringContaining("root is ancestor-2 (distance 2, label main)"),
+    });
     for (const spy of logs) expect(spy).not.toHaveBeenCalled();
   });
 
