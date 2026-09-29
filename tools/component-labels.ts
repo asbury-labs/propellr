@@ -36,6 +36,44 @@ export const sheetId = (cases: readonly SheetCase[]) =>
     )
     .digest("hex");
 
+// The private sheet key written by the generator; parsed before any comparison.
+const sheetCaseSchema = z
+  .strictObject({
+    id: z.string().regex(/^c-[0-9a-f]{10}$/),
+    page: z.string().regex(/^[A-Z]$/),
+    rules: z.array(z.string().min(1).max(64)).min(1).max(16).readonly(),
+    chain: z
+      .array(
+        z
+          .strictObject({
+            distance: z.number().int().min(0).max(8),
+            label: z.string().min(1).max(64),
+            shape: z.string().regex(/^[0-9a-f]{8}$/),
+            repeats: z.number().int().min(0).max(2000),
+          })
+          .readonly(),
+      )
+      .min(1)
+      .max(9)
+      .readonly(),
+  })
+  .readonly();
+export const sheetKeySchema = z
+  .object({
+    sheet: z.string().regex(/^[0-9a-f]{64}$/),
+    cases: z
+      .array(sheetCaseSchema)
+      .min(1)
+      .max(1000)
+      .readonly()
+      .refine((cases) => new Set(cases.map(({ id }) => id)).size === cases.length, {
+        message: "Duplicate case IDs",
+      }),
+  })
+  .refine(({ sheet, cases }) => sheet === sheetId(cases), {
+    message: "Sheet ID does not match its cases",
+  });
+
 export const labelSetSchema = z
   .strictObject({
     schema: z.literal(labelSchemaId),
@@ -54,7 +92,13 @@ export const labelSetSchema = z
             // Set when the answer was copied from another case with the same structure.
             bulk: z.boolean(),
           })
-          .readonly(),
+          .readonly()
+          // A case outside any component carries no component name.
+          .refine(
+            ({ membership, component }) =>
+              !["none", "cannot-tell"].includes(membership) || component === "",
+            { message: "Component name given for a case outside any component" },
+          ),
       )
       .max(1000)
       .readonly()
@@ -89,16 +133,32 @@ function componentPairs(
   );
   let agree = 0;
   let total = 0;
+  // Every pair grouped differently, with both labelers' names for both cases.
+  const disagreements: {
+    page: string;
+    ids: [string, string];
+    answers: { sameComponent: boolean; components: [string, string] }[];
+  }[] = [];
   for (let i = 0; i < ids.length; i++)
     for (let j = i + 1; j < ids.length; j++) {
-      if (pageOf.get(ids[i]!) !== pageOf.get(ids[j]!)) continue;
-      const same = (labels: ReadonlyMap<string, Label>) =>
-        labels.get(ids[i]!)!.component.toLowerCase() ===
-        labels.get(ids[j]!)!.component.toLowerCase();
+      const [left, right] = [ids[i]!, ids[j]!];
+      if (pageOf.get(left) !== pageOf.get(right)) continue;
+      const view = (labels: ReadonlyMap<string, Label>) => {
+        const components: [string, string] = [
+          labels.get(left)!.component,
+          labels.get(right)!.component,
+        ];
+        return {
+          sameComponent: components[0].toLowerCase() === components[1].toLowerCase(),
+          components,
+        };
+      };
+      const answers = [view(a), view(b)];
       total++;
-      if (same(a) === same(b)) agree++;
+      if (answers[0]!.sameComponent === answers[1]!.sameComponent) agree++;
+      else disagreements.push({ page: pageOf.get(left)!, ids: [left, right], answers });
     }
-  return { pairs: total, agreement: total ? agree / total : null };
+  return { pairs: total, agreement: total ? agree / total : null, disagreements };
 }
 
 export function compareLabels(cases: readonly SheetCase[], first: LabelSet, second: LabelSet) {
@@ -173,7 +233,7 @@ if (import.meta.main) {
     );
     process.exit(2);
   }
-  const { cases } = JSON.parse(readFileSync(values.cases, "utf8")) as { cases: SheetCase[] };
+  const { cases } = sheetKeySchema.parse(JSON.parse(readFileSync(values.cases, "utf8")));
   const [first, second] = files.map((file) =>
     labelSetSchema.parse(JSON.parse(readFileSync(file!, "utf8"))),
   );

@@ -11,6 +11,7 @@ import {
   labelSchemaId,
   labelSetSchema,
   sheetId,
+  sheetKeySchema,
 } from "../../tools/component-labels.js";
 import type { PageCase } from "../../tools/labeling-page.js";
 import { renderSheet } from "../../tools/labeling-page.js";
@@ -93,7 +94,20 @@ describe("human label comparison", () => {
       membership: { agreement: 0.5 },
       cause: { agreement: 1, kappa: null },
       // Tony groups cases 1 and 2 together; the colleague separates them.
-      component: { pairs: 1, agreement: 0 },
+      component: {
+        pairs: 1,
+        agreement: 0,
+        disagreements: [
+          {
+            page: "A",
+            ids: ["c-0000000001", "c-0000000002"],
+            answers: [
+              { sameComponent: true, components: ["card", "card"] },
+              { sameComponent: false, components: ["Tile", "button"] },
+            ],
+          },
+        ],
+      },
       bulk: [0, 0],
       missing: [{ id: "c-0000000003", missingFrom: [false, true] }],
     });
@@ -136,6 +150,19 @@ describe("human label comparison", () => {
       false,
     );
     expect(labelSetSchema.safeParse({ ...valid, labeler: " ", labels: [] }).success).toBe(false);
+    // A case outside any component carries no component name.
+    expect(
+      labelSetSchema.safeParse({ ...valid, labels: [{ ...label, membership: "none" }] }).success,
+    ).toBe(false);
+    // The private sheet key is validated before any comparison.
+    expect(sheetKeySchema.safeParse({ sheet, cases }).success).toBe(true);
+    for (const key of [
+      { sheet: "0".repeat(64), cases },
+      { sheet: sheetId([...cases, cases[0]!]), cases: [...cases, cases[0]!] },
+      { sheet, cases: [{ ...cases[0]!, chain: [] }, ...cases.slice(1)] },
+      { sheet, cases: [{ ...cases[0]!, page: "page 1" }, ...cases.slice(1)] },
+    ])
+      expect(sheetKeySchema.safeParse(key).success).toBe(false);
   });
 
   test("the compare command reads the private sheet key and writes the report", async () => {
@@ -159,6 +186,9 @@ describe("human label comparison", () => {
         membership: { agreement: 1 },
       });
       expect(run("compare", files.a).status).toBe(2);
+      // A tampered key is refused, not compared.
+      await writeFile(files.cases, JSON.stringify({ sheet: "0".repeat(64), cases }));
+      expect(run("compare", files.a, files.b, "--cases", files.cases).status).not.toBe(0);
     } finally {
       await rm(dir, { recursive: true, force: true });
     }
@@ -209,6 +239,8 @@ describe("offline labeling page", () => {
       await tab.locator("nav.pages button", { hasText: "Page B" }).click();
       const other = tab.locator("#c-0000000003");
       expect(await other.textContent()).toContain("No screenshot could be taken");
+      // A name typed before choosing "none" is not exported.
+      await other.locator('input[type="text"]').fill("stale name");
       await other.locator('input[value="none"]').check();
       await other.locator('input[value="instance"]').check();
       await expect.poll(() => tab.locator("#progress").textContent()).toBe("3 of 3 complete");
@@ -222,6 +254,16 @@ describe("offline labeling page", () => {
         ["c-0000000002", "ancestor-1", true],
         ["c-0000000003", "none", false],
       ]);
+      expect(exported.labels.find(({ id }) => id === "c-0000000003")?.component).toBe("");
+      // Loading a file replaces this browser's answers instead of merging into them.
+      const partial = { ...exported, labeler: "Colleague", labels: exported.labels.slice(0, 1) };
+      await tab.locator("#file").setInputFiles({
+        name: "partial.json",
+        mimeType: "application/json",
+        buffer: Buffer.from(JSON.stringify(partial)),
+      });
+      await expect.poll(() => tab.locator("#progress").textContent()).toBe("1 of 3 complete");
+      expect(await tab.locator("#labeler").inputValue()).toBe("Colleague");
       expect(await tab.evaluate("window.pwned")).toBeUndefined();
       expect(errors).toEqual([]);
     } finally {

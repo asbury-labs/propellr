@@ -264,7 +264,9 @@ document.getElementById("export").addEventListener("click", () => {
   if (!labeler) { alert("Enter your name first."); document.getElementById("labeler").focus(); return; }
   const labels = cases.filter((c) => complete(state.labels[c.id])).map((c) => {
     const l = state.labels[c.id];
-    return { id: c.id, membership: l.membership, component: l.component.trim(), cause: l.cause, notes: l.notes, bulk: Boolean(l.bulk) };
+    // A case outside any component carries no component name, even if one was typed earlier.
+    const outside = l.membership === "none" || l.membership === "cannot-tell";
+    return { id: c.id, membership: l.membership, component: outside ? "" : l.component.trim(), cause: l.cause, notes: l.notes, bulk: Boolean(l.bulk) };
   });
   if (labels.length < cases.length && !confirm(labels.length + " of " + cases.length + " cases are complete. Export anyway?")) return;
   const body = JSON.stringify({ schema: config.labelSchemaId, sheet, labeler, exportedAt: new Date().toISOString(), labels }, null, 2);
@@ -281,10 +283,15 @@ document.getElementById("file").addEventListener("change", async (event) => {
     const set = JSON.parse(await file.text());
     if (set.schema !== config.labelSchemaId || set.sheet !== sheet) throw new Error("This file belongs to a different sheet.");
     const ids = new Set(cases.map((c) => c.id));
+    // Validate the whole file first, then replace this browser's answers with it: answers saved
+    // here from another session must never be exported under the loaded labeler's name.
+    const loaded = {};
     for (const l of set.labels) {
-      if (!ids.has(l.id) || !config.memberships.includes(l.membership) || !config.causes.includes(l.cause)) throw new Error("Unexpected case or answer in file.");
-      state.labels[l.id] = { membership: l.membership, component: String(l.component), cause: l.cause, notes: String(l.notes), bulk: Boolean(l.bulk) };
+      if (!ids.has(l.id) || loaded[l.id] || !config.memberships.includes(l.membership) || !config.causes.includes(l.cause)) throw new Error("Unexpected case or answer in file.");
+      loaded[l.id] = { membership: l.membership, component: String(l.component), cause: l.cause, notes: String(l.notes), bulk: Boolean(l.bulk) };
     }
+    if (!confirm("Replace the answers saved in this browser with the " + set.labels.length + " answers in this file?")) return;
+    state.labels = loaded;
     state.labeler = String(set.labeler);
     save(); render();
   } catch (error) { alert("Could not load: " + error.message); }

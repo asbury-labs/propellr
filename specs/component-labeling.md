@@ -42,8 +42,10 @@ The labeler answers three questions:
 3. **Cause:** a template defect, an instance defect, or _can't tell_.
 
 Answers autosave in that browser. **Export labels** downloads
-`labels-<name>-<sheet>.json` (`propellr-component-labels/1`), and **Load saved file** resumes
-from an export. **Copy to identical cases** fills unanswered cases on the same page that have the
+`labels-<name>-<sheet>.json` (`propellr-component-labels/1`). **Load saved file** checks a whole
+export first, then replaces this browser's answers with it, so answers from another session are
+never exported under the loaded name. A case marked outside any component (none, or can't tell)
+exports no component name. **Copy to identical cases** fills unanswered cases on the same page that have the
 same structure. Copied answers are marked in the export, and editing a case clears the mark.
 Pages are checked for this: bridge attributes never appear, fixture markup is shown only as text,
 and a content security policy blocks all network access.
@@ -54,14 +56,16 @@ and a content security policy blocks all network access.
 pnpm labels:compare labels-tony-….json labels-colleague-….json --out artifacts/labeling/comparison.json
 ```
 
-The command refuses label sets that belong to a different sheet, come from the same labeler
-twice, or name unknown cases. It reports:
+The command refuses a sheet key that fails validation (for example duplicate IDs, or a sheet ID
+that doesn't match its cases). It also refuses label sets that belong to a different sheet, come
+from the same labeler twice, or name unknown cases. It reports:
 
 - coverage;
 - agreement and Cohen's kappa for membership and cause;
-- pairwise agreement on the component grouping within each page;
+- pairwise agreement on the component grouping within each page, with every pair grouped
+  differently and both labelers' names;
 - the number of copied answers per labeler;
-- every disagreement, with both answers.
+- every membership or cause disagreement, with both answers.
 
 **Disagreements are recorded, not resolved or averaged.** The protocol decides how human labels
 replace the oracle in scoring. That needs an amendment before the holdout run.

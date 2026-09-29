@@ -401,6 +401,23 @@ regenerations.
   candidates don't include. In all 20 dev cart-callsites cases, the oracle's root is the target
   itself, which is why every arm scores 0 there.
 
+### Review repair 1, PR #23
+
+Copilot found four defects, all fixed:
+
+- **Grouping disagreements.** The comparison now lists every pair of cases the labelers grouped
+  differently, with both labelers' names for both cases. Before, only the agreement rate showed
+  them.
+- **Private key.** `sheet-cases.json` is schema-checked before any comparison: unique IDs, valid
+  pages and chains, and a sheet ID that matches its cases.
+- **Stale names.** A name typed before choosing "none" or "can't tell" is not exported, and the
+  label schema refuses a component name on such a case.
+- **Loading merged into saved answers.** Loading a file now validates the whole file, then
+  replaces this browser's answers, so another session's answers can never be exported under the
+  loaded labeler's name.
+
+Tests cover each case, including a real Chromium run of the stale name and the replacing load.
+
 To resume: send the sheet to both labelers. When both exports exist, run `pnpm labels:compare`.
 Then amend the protocol to say how human labels replace the oracle, and run all three arms on the
 sealed holdout exactly once under rubric 2.
