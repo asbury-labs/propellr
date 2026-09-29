@@ -382,5 +382,55 @@ Evidence: [manifest](component-inference-evidence/phase-2-dev-rubric2-manifest.j
   80 parity/browser, 101 component, 18 reporting). The rubric 2 manifest keeps the validation
   record of its own run (321 tests); evidence is not rewritten after the fact.
 
-To resume: collect both adjudicators' labels, then run all three arms on the sealed holdout
-exactly once under rubric 2, against the frozen adoption bar.
+## Labeling sheet, September 29, 2026
+
+`pnpm labeling:sheet` builds the offline page for the two adjudicators
+([guide](component-labeling.md)). It renders only the uninstrumented version of each family, so
+no oracle data or bridge attribute reaches the page. It covers all 240 cases on 12 opaque pages
+(16 distinct structures) and took 18 s. The sheet ID is `a49d7e6c0306…`, stable across
+regenerations.
+
+- **Browser check:** two simulated labelers answered and exported every case (224 copied answers
+  each), with no page errors, and `pnpm labels:compare` read both exports. Screenshots of an
+  iframe case and a shadow-DOM case were inspected. That check led to three changes: a close-up
+  view, markup rooted in the element's own tree, and staggered ancestor badges.
+- **Tests:** 6 new tests cover Cohen's kappa, comparison refusals and reporting, the compare
+  command, the page's self-containment, and a real Chromium run. The Chromium run labels, copies
+  and exports a validated set; hostile fixture markup never executes.
+- **The element itself as root:** the sheet offers "the element itself", which the protocol's
+  candidates don't include. In all 20 dev cart-callsites cases, the oracle's root is the target
+  itself, which is why every arm scores 0 there.
+
+### Review repair 1, PR #23
+
+Copilot found four defects, all fixed:
+
+- **Grouping disagreements.** The comparison now lists every pair of cases the labelers grouped
+  differently, with both labelers' names for both cases. Before, only the agreement rate showed
+  them.
+- **Private key.** `sheet-cases.json` is schema-checked before any comparison: unique IDs, valid
+  pages and chains, and a sheet ID that matches its cases.
+- **Stale names.** A name typed before choosing "none" or "can't tell" is not exported, and the
+  label schema refuses a component name on such a case.
+- **Loading merged into saved answers.** Loading a file now validates the whole file, then
+  replaces this browser's answers, so another session's answers can never be exported under the
+  loaded labeler's name.
+
+Tests cover each case, including a real Chromium run of the stale name and the replacing load.
+
+### Review repair 2, PR #23
+
+- **Name rule both ways.** The label schema now requires a component name for a chosen root, as
+  the page does, so grouping coverage can't be overstated.
+- **Ancestor answers checked.** The comparison refuses an `ancestor-N` answer the case's chain
+  doesn't have.
+- **Full check on load.** Loading a file applies every label-set rule plus the chain check
+  before replacing anything; a Chromium test loads an invalid file and sees nothing change.
+- **Variant and part (deferred, flagged).** The phase 2 plan asks reviewers to adjudicate part
+  and variant separately. This sheet derives the part from membership and has no variant answer.
+  The labeling guide now says not to collect attribution labels until both are added or an
+  amendment narrows the labels.
+
+To resume: send the sheet to both labelers. When both exports exist, run `pnpm labels:compare`.
+Then amend the protocol to say how human labels replace the oracle, and run all three arms on the
+sealed holdout exactly once under rubric 2.
