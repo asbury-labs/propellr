@@ -256,7 +256,7 @@ runs (dev, then the holdout once) on September 28, 2026, with 300 requests and $
 environment, for example
 `PROPELLR_DECISION_APPROVAL=... TYPESAFE_API_KEY=... pnpm eval:components -- --provider jev`, or
 `PROPELLR_LLM_APPROVAL=... ANTHROPIC_API_KEY=...` with `--provider llm`. The holdout stays sealed
-until two adjudicators' labels exist. On dev, both arms matched the heuristic's choices
+until two adjudicators' labels exist. On dev, both arms matched the heuristic's membership choices
 (decision precision 0.75); **neither is adopted.** See the
 [inference protocol](specs/component-inference-protocol.md) and
 [evidence](specs/component-inference-validation.md).

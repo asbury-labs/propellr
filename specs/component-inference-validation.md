@@ -320,7 +320,7 @@ results never count as an adoption test.
   repeated ancestor, for every target. Each is right on 3 of 4 families and wrong on
   `cart-callsites`. The providers add no coverage over the heuristic.
 - **The dev split has little signal.** The 80 targets reduce to 3 distinct structural inputs, so
-  each arm made 3 requests and its exact-input cache answered the other 77. Uncached latency was
+  each provider arm made 3 requests and its exact-input cache answered the other 77. Uncached latency was
   about 0.3 s for Jev and 1.3–2.3 s for Haiku.
 - **Rubric ambiguity (not changed after the fact):** Haiku answered the part as `article>button`,
   which includes the component root. The frozen scorer expects the chain path below the root
@@ -332,7 +332,7 @@ results never count as an adoption test.
 Evidence: [manifest](component-inference-evidence/phase-2-dev-live-manifest.json) and
 [raw archive](component-inference-evidence/phase-2-dev-live-results.tar.gz) (the three dev
 reports, eval logs and the `pnpm validate` log), archive SHA-256
-`2dd9a6bf7e87294787354d1116bb812ead3c40a3750aac26ff904bfc9c3fd824`.
+`04ba16413c4d8a61e9ca6910999d868e9c79e6578e445163e71822bfcef39e28`.
 
 To resume: decide on the part-rubric amendment. Then collect both adjudicators' labels and run all
 three arms on the sealed holdout exactly once, against the frozen adoption bar.

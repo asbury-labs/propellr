@@ -99,12 +99,12 @@
   },
   "findings": [
     "All three arms chose ancestor-1 for every target; decision precision 0.75 each (cart-callsites 0).",
-    "The 80 dev targets reduce to 3 distinct structural inputs; the exact-input cache answered 77 per arm.",
+    "The 80 dev targets reduce to 3 distinct structural inputs; the exact-input cache answered 77 per provider arm.",
     "Haiku answered part article>button (root-inclusive); the frozen scorer expects the root-exclusive chain path (button), so Haiku formed no repair groups. The rubric wording is ambiguous; not changed post hoc."
   ],
   "archive": {
     "path": "specs/component-inference-evidence/phase-2-dev-live-results.tar.gz",
-    "sha256": "2dd9a6bf7e87294787354d1116bb812ead3c40a3750aac26ff904bfc9c3fd824"
+    "sha256": "04ba16413c4d8a61e9ca6910999d868e9c79e6578e445163e71822bfcef39e28"
   },
   "archivedFiles": {
     "artifacts/components/eval-heuristic-dev.json": "673be53ec18907b36bcea79b3c60155b5c75567003d6c69368986de1880c04c0",
