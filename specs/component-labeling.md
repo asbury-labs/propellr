@@ -50,15 +50,28 @@ same structure. Copied answers are marked in the export, and editing a case clea
 Pages are checked for this: bridge attributes never appear, fixture markup is shown only as text,
 and a content security policy blocks all network access.
 
+**Not yet sufficient for the attribution holdout.** The phase 2 plan
+([component intelligence](propellr-component-intelligence.html), 2.1) asks both reviewers to
+adjudicate membership, part, **variant** and repair cause separately. This sheet asks for
+membership, a component name and cause, and derives the part from membership. Don't collect
+attribution labels until a variant answer and a separately adjudicated part are added, or an
+approved protocol amendment narrows the labels.
+
 ## Compare
 
 ```sh
 pnpm labels:compare labels-tony-….json labels-colleague-….json --out artifacts/labeling/comparison.json
 ```
 
-The command refuses a sheet key that fails validation (for example duplicate IDs, or a sheet ID
-that doesn't match its cases). It also refuses label sets that belong to a different sheet, come
-from the same labeler twice, or name unknown cases. It reports:
+The command refuses:
+
+- a sheet key that fails validation, for example duplicate IDs or a sheet ID that doesn't match
+  its cases;
+- label sets that belong to a different sheet, come from the same labeler twice, or name unknown
+  cases;
+- an answer naming an ancestor the case doesn't have.
+
+It reports:
 
 - coverage;
 - agreement and Cohen's kappa for membership and cause;

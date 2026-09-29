@@ -150,6 +150,18 @@ describe("human label comparison", () => {
       false,
     );
     expect(labelSetSchema.safeParse({ ...valid, labeler: " ", labels: [] }).success).toBe(false);
+    // A chosen root always has a component name.
+    expect(
+      labelSetSchema.safeParse({ ...valid, labels: [{ ...label, component: "" }] }).success,
+    ).toBe(false);
+    // An ancestor the case does not have is refused before any report.
+    expect(() =>
+      compareLabels(
+        cases,
+        tony,
+        set("Colleague", { "c-0000000001": { ...card, membership: "ancestor-3" } }),
+      ),
+    ).toThrow("no such ancestor");
     // A case outside any component carries no component name.
     expect(
       labelSetSchema.safeParse({ ...valid, labels: [{ ...label, membership: "none" }] }).success,
@@ -255,6 +267,18 @@ describe("offline labeling page", () => {
         ["c-0000000003", "none", false],
       ]);
       expect(exported.labels.find(({ id }) => id === "c-0000000003")?.component).toBe("");
+      // A file that breaks the label-set rules is refused whole and changes nothing.
+      const invalid = {
+        ...exported,
+        labels: [{ ...exported.labels[0]!, membership: "ancestor-8" }],
+      };
+      await tab.locator("#file").setInputFiles({
+        name: "invalid.json",
+        mimeType: "application/json",
+        buffer: Buffer.from(JSON.stringify(invalid)),
+      });
+      await expect.poll(() => tab.locator("#progress").textContent()).toBe("3 of 3 complete");
+      expect(await tab.locator("#labeler").inputValue()).toBe("Tony");
       // Loading a file replaces this browser's answers instead of merging into them.
       const partial = { ...exported, labeler: "Colleague", labels: exported.labels.slice(0, 1) };
       await tab.locator("#file").setInputFiles({

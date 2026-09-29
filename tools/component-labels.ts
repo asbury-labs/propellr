@@ -93,11 +93,11 @@ export const labelSetSchema = z
             bulk: z.boolean(),
           })
           .readonly()
-          // A case outside any component carries no component name.
+          // A case outside any component carries no component name; a chosen root always has one.
           .refine(
             ({ membership, component }) =>
-              !["none", "cannot-tell"].includes(membership) || component === "",
-            { message: "Component name given for a case outside any component" },
+              ["none", "cannot-tell"].includes(membership) ? component === "" : component !== "",
+            { message: "Component name must be empty outside a component and present for a root" },
           ),
       )
       .max(1000)
@@ -168,10 +168,18 @@ export function compareLabels(cases: readonly SheetCase[], first: LabelSet, seco
       throw new Error(`Label set from ${set.labeler} was made for a different sheet`);
   if (first.labeler.toLowerCase() === second.labeler.toLowerCase())
     throw new Error("Both label sets have the same labeler; adjudication needs two people");
-  const known = new Set(cases.map(({ id }) => id));
+  const byId = new Map(cases.map((entry) => [entry.id, entry]));
   for (const set of [first, second])
-    for (const { id } of set.labels)
-      if (!known.has(id)) throw new Error(`Label set from ${set.labeler} has unknown case ${id}`);
+    for (const { id, membership } of set.labels) {
+      const entry = byId.get(id);
+      if (!entry) throw new Error(`Label set from ${set.labeler} has unknown case ${id}`);
+      // An ancestor answer must name an ancestor this case actually has.
+      const distance = /^ancestor-(\d)$/.exec(membership)?.[1];
+      if (distance && !entry.chain.some((link) => link.distance === Number(distance)))
+        throw new Error(
+          `Label set from ${set.labeler} answers ${membership} for case ${id}, which has no such ancestor`,
+        );
+    }
   const a = new Map(first.labels.map((label) => [label.id, label]));
   const b = new Map(second.labels.map((label) => [label.id, label]));
   const pageOf = new Map(cases.map(({ id, page }) => [id, page]));

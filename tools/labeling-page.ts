@@ -282,13 +282,23 @@ document.getElementById("file").addEventListener("change", async (event) => {
   try {
     const set = JSON.parse(await file.text());
     if (set.schema !== config.labelSchemaId || set.sheet !== sheet) throw new Error("This file belongs to a different sheet.");
-    const ids = new Set(cases.map((c) => c.id));
-    // Validate the whole file first, then replace this browser's answers with it: answers saved
-    // here from another session must never be exported under the loaded labeler's name.
+    const byId = new Map(cases.map((c) => [c.id, c]));
+    // Validate the whole file against the label-set rules first, then replace this browser's
+    // answers with it: answers saved here from another session must never be exported under the
+    // loaded labeler's name, and nothing loaded may produce an export the schema would refuse.
+    const text = (value, max) => typeof value === "string" && value.trim().length <= max;
+    if (!text(set.labeler, 64) || !set.labeler.trim() || !Array.isArray(set.labels)) throw new Error("Malformed label set.");
     const loaded = {};
     for (const l of set.labels) {
-      if (!ids.has(l.id) || loaded[l.id] || !config.memberships.includes(l.membership) || !config.causes.includes(l.cause)) throw new Error("Unexpected case or answer in file.");
-      loaded[l.id] = { membership: l.membership, component: String(l.component), cause: l.cause, notes: String(l.notes), bulk: Boolean(l.bulk) };
+      const c = byId.get(l && l.id);
+      const distance = /^ancestor-(\\d)$/.exec(l && l.membership || "");
+      const outside = l && (l.membership === "none" || l.membership === "cannot-tell");
+      if (!c || loaded[l.id] || !config.memberships.includes(l.membership) || !config.causes.includes(l.cause)
+        || (distance && !c.chain.some((link) => link.distance === Number(distance[1])))
+        || !text(l.component, 64) || typeof l.notes !== "string" || l.notes.length > 500 || typeof l.bulk !== "boolean"
+        || (outside ? l.component.trim() !== "" : !l.component.trim()))
+        throw new Error("Unexpected case or answer in file.");
+      loaded[l.id] = { membership: l.membership, component: l.component.trim(), cause: l.cause, notes: l.notes, bulk: l.bulk };
     }
     if (!confirm("Replace the answers saved in this browser with the " + set.labels.length + " answers in this file?")) return;
     state.labels = loaded;

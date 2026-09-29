@@ -418,6 +418,19 @@ Copilot found four defects, all fixed:
 
 Tests cover each case, including a real Chromium run of the stale name and the replacing load.
 
+### Review repair 2, PR #23
+
+- **Name rule both ways.** The label schema now requires a component name for a chosen root, as
+  the page does, so grouping coverage can't be overstated.
+- **Ancestor answers checked.** The comparison refuses an `ancestor-N` answer the case's chain
+  doesn't have.
+- **Full check on load.** Loading a file applies every label-set rule plus the chain check
+  before replacing anything; a Chromium test loads an invalid file and sees nothing change.
+- **Variant and part (deferred, flagged).** The phase 2 plan asks reviewers to adjudicate part
+  and variant separately. This sheet derives the part from membership and has no variant answer.
+  The labeling guide now says not to collect attribution labels until both are added or an
+  amendment narrows the labels.
+
 To resume: send the sheet to both labelers. When both exports exist, run `pnpm labels:compare`.
 Then amend the protocol to say how human labels replace the oracle, and run all three arms on the
 sealed holdout exactly once under rubric 2.
