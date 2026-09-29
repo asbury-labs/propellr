@@ -258,7 +258,9 @@ environment, for example
 `PROPELLR_LLM_APPROVAL=... ANTHROPIC_API_KEY=...` with `--provider llm`. The holdout stays sealed
 until two adjudicators' labels exist. On dev (part rubric 2), both arms matched the heuristic's
 membership choices (decision precision 0.75) and its repair groups (pairwise precision 0.868);
-**neither is adopted.** See the
+**neither is adopted.** `pnpm labeling:sheet` builds the offline page for the two human labelers,
+and `pnpm labels:compare` compares their exports ([labeling guide](specs/component-labeling.md)).
+See the
 [inference protocol](specs/component-inference-protocol.md) and
 [evidence](specs/component-inference-validation.md).
 
