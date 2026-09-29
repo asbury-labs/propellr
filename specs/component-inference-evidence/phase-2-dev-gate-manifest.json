@@ -1,0 +1,276 @@
+{
+  "state": "phase-2-dev-confidence-gate-draft",
+  "decision": "Neither provider adopted; inference disabled; holdout sealed; gate amendment is a draft pending approval",
+  "created": "2026-09-29T05:01:28.194Z",
+  "protocol": "specs/component-inference-protocol.md",
+  "runProtocolSha256": "ceb2bb01daf9218e687f0e3e7afd163eeb97e4c6609dfca400ff15b97a182c15",
+  "finalProtocolSha256": "159297e2ac818ed10cbbf2575d9411e88bb2bd5b3ec85819b7efa0bc30567088",
+  "protocolNote": "The run used an earlier draft of the gate amendment; later edits changed only the amendment's wording, caveats and the pooling rule, and the derived thresholds are unchanged (a test re-derives them).",
+  "rubric": "component-attribution-questions@2",
+  "split": "dev",
+  "labels": "instrumented-oracle, not adjudicated",
+  "heuristic": {
+    "pooled": {
+      "cases": 80,
+      "candidateRecall": 0.75,
+      "coverage": 1,
+      "decisionPrecision": 0.75,
+      "decisionRecall": 0.75,
+      "pairwisePrecision": 0.868421052631579,
+      "pairwiseRecall": 1,
+      "overmerge": 100,
+      "oversplit": 0
+    }
+  },
+  "jev": {
+    "model": "jev-1.13.0",
+    "gate": 0.8,
+    "requests": 3,
+    "spentUsd": 0.00013822200000000002,
+    "cumulative": {
+      "requests": 9,
+      "spentUsd": 0.00039790800000000004,
+      "cap": {
+        "requests": 300,
+        "spendUsd": 1
+      }
+    },
+    "gated": {
+      "cases": 80,
+      "candidateRecall": 0.75,
+      "coverage": 0.75,
+      "decisionPrecision": 1,
+      "decisionRecall": 0.75,
+      "pairwisePrecision": 1,
+      "pairwiseRecall": 0.2878787878787879,
+      "overmerge": 0,
+      "oversplit": 470
+    },
+    "ungated": {
+      "cases": 80,
+      "candidateRecall": 0.75,
+      "coverage": 1,
+      "decisionPrecision": 0.75,
+      "decisionRecall": 0.75,
+      "pairwisePrecision": 1,
+      "pairwiseRecall": 0.5757575757575758,
+      "overmerge": 0,
+      "oversplit": 280
+    },
+    "curve": [
+      {
+        "threshold": 0,
+        "coverage": 1,
+        "decisionPrecision": 0.75,
+        "pairwisePrecision": 1
+      },
+      {
+        "threshold": 0.5,
+        "coverage": 1,
+        "decisionPrecision": 0.75,
+        "pairwisePrecision": 1
+      },
+      {
+        "threshold": 0.55,
+        "coverage": 1,
+        "decisionPrecision": 0.75,
+        "pairwisePrecision": 1
+      },
+      {
+        "threshold": 0.6,
+        "coverage": 1,
+        "decisionPrecision": 0.75,
+        "pairwisePrecision": 1
+      },
+      {
+        "threshold": 0.65,
+        "coverage": 1,
+        "decisionPrecision": 0.75,
+        "pairwisePrecision": 1
+      },
+      {
+        "threshold": 0.7,
+        "coverage": 1,
+        "decisionPrecision": 0.75,
+        "pairwisePrecision": 1
+      },
+      {
+        "threshold": 0.75,
+        "coverage": 1,
+        "decisionPrecision": 0.75,
+        "pairwisePrecision": 1
+      },
+      {
+        "threshold": 0.8,
+        "coverage": 0.75,
+        "decisionPrecision": 1,
+        "pairwisePrecision": 1
+      },
+      {
+        "threshold": 0.85,
+        "coverage": 0.75,
+        "decisionPrecision": 1,
+        "pairwisePrecision": 1
+      },
+      {
+        "threshold": 0.9,
+        "coverage": 0.75,
+        "decisionPrecision": 1,
+        "pairwisePrecision": 1
+      },
+      {
+        "threshold": 0.95,
+        "coverage": 0,
+        "decisionPrecision": null,
+        "pairwisePrecision": null
+      }
+    ],
+    "calibration": {
+      "decided": 80,
+      "brier": 0.16050000000000003
+    },
+    "adoption": {
+      "eligible": false,
+      "checks": {
+        "precision": true,
+        "coverage": true,
+        "pairwisePrecision": true,
+        "causePromotions": true,
+        "incrementalCoverage": false
+      },
+      "adopted": false
+    }
+  },
+  "llm": {
+    "model": "claude-haiku-4-5-20251001",
+    "gate": 0,
+    "requests": 3,
+    "spentUsd": 0.004445000000000001,
+    "cumulative": {
+      "requests": 9,
+      "spentUsd": 0.012954000000000004,
+      "cap": {
+        "requests": 300,
+        "spendUsd": 1
+      }
+    },
+    "gated": {
+      "cases": 80,
+      "candidateRecall": 0.75,
+      "coverage": 1,
+      "decisionPrecision": 0.75,
+      "decisionRecall": 0.75,
+      "pairwisePrecision": 0.868421052631579,
+      "pairwiseRecall": 1,
+      "overmerge": 100,
+      "oversplit": 0
+    },
+    "ungated": {
+      "cases": 80,
+      "candidateRecall": 0.75,
+      "coverage": 1,
+      "decisionPrecision": 0.75,
+      "decisionRecall": 0.75,
+      "pairwisePrecision": 0.868421052631579,
+      "pairwiseRecall": 1,
+      "overmerge": 100,
+      "oversplit": 0
+    },
+    "curve": [
+      {
+        "threshold": 0,
+        "coverage": 1,
+        "decisionPrecision": 0.75,
+        "pairwisePrecision": 0.868421052631579
+      },
+      {
+        "threshold": 0.5,
+        "coverage": 1,
+        "decisionPrecision": 0.75,
+        "pairwisePrecision": 0.868421052631579
+      },
+      {
+        "threshold": 0.55,
+        "coverage": 1,
+        "decisionPrecision": 0.75,
+        "pairwisePrecision": 0.868421052631579
+      },
+      {
+        "threshold": 0.6,
+        "coverage": 1,
+        "decisionPrecision": 0.75,
+        "pairwisePrecision": 0.868421052631579
+      },
+      {
+        "threshold": 0.65,
+        "coverage": 1,
+        "decisionPrecision": 0.75,
+        "pairwisePrecision": 0.868421052631579
+      },
+      {
+        "threshold": 0.7,
+        "coverage": 1,
+        "decisionPrecision": 0.75,
+        "pairwisePrecision": 0.868421052631579
+      },
+      {
+        "threshold": 0.75,
+        "coverage": 1,
+        "decisionPrecision": 0.75,
+        "pairwisePrecision": 0.868421052631579
+      },
+      {
+        "threshold": 0.8,
+        "coverage": 1,
+        "decisionPrecision": 0.75,
+        "pairwisePrecision": 0.868421052631579
+      },
+      {
+        "threshold": 0.85,
+        "coverage": 1,
+        "decisionPrecision": 0.75,
+        "pairwisePrecision": 0.868421052631579
+      },
+      {
+        "threshold": 0.9,
+        "coverage": 0.5,
+        "decisionPrecision": 1,
+        "pairwisePrecision": 0.7368421052631579
+      },
+      {
+        "threshold": 0.95,
+        "coverage": 0.5,
+        "decisionPrecision": 1,
+        "pairwisePrecision": 0.7368421052631579
+      }
+    ],
+    "calibration": {
+      "decided": 80,
+      "brier": 0.1875000000000001
+    },
+    "adoption": {
+      "eligible": false,
+      "checks": {
+        "precision": false,
+        "coverage": true,
+        "pairwisePrecision": false,
+        "causePromotions": true,
+        "incrementalCoverage": false
+      },
+      "adopted": false
+    }
+  },
+  "gateEvidence": "specs/component-inference-evidence/confidence-gate-dev.json",
+  "archive": {
+    "path": "specs/component-inference-evidence/phase-2-dev-gate-results.tar.gz",
+    "sha256": "d2e348078366bd8fa5847bd9df2f9c6ed39ae16ab4d2c363f672bd7456d6270b"
+  },
+  "archivedFiles": {
+    "artifacts/components/eval-heuristic-dev.json": "c5d4badc366f34b15229b5619955eff7c67f942e133101f54dbd579b11216bf4",
+    "artifacts/components/eval-jev-dev.json": "e94f69d41f1f1826e7c31900332fdf6267deed578ae14a23ad94e56fde74df4e",
+    "artifacts/components/eval-llm-dev.json": "5ffe85b838af01b9e873a8e83cac68bf670bd4a5e762728eb59f5bc58e072598",
+    "artifacts/component-live-gate/eval-heuristic-dev.log": "eefa24f0a562d2fea01d696fac27aa3dd7b03440e35a963a8d1fd5557bf2a920",
+    "artifacts/component-live-gate/eval-jev-dev.log": "d2dea3e9ef3c7816e9d2d5f4178d04c0966f1792ea17ec6874114ef6109a692c",
+    "artifacts/component-live-gate/eval-llm-dev.log": "d56948f5e6d090dc91cee0131f88fe345feb208aeee94d968533785177809300"
+  }
+}

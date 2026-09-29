@@ -236,9 +236,38 @@ export interface ProviderDecision {
   readonly result: DecisionResult;
   readonly latencyMs: number;
 }
+// Confidence gate (protocol amendment 2026-09-29): a membership answer whose confidence is below
+// the arm's frozen threshold abstains. Thresholds are chosen on dev by selectGate over this grid.
+export const confidenceGrid = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95].map((step) => step / 100);
+export interface GatePoint {
+  readonly confidence: number;
+  readonly correct: boolean;
+  readonly cases: number;
+}
+// The smallest grid threshold whose accepted decisions reach the adoption bar's precision (>= 98%)
+// at its coverage (>= 60%); if none does, the arm is ungated (0).
+export function selectGate(points: readonly GatePoint[]): number {
+  const total = points.reduce((sum, { cases }) => sum + cases, 0);
+  for (const threshold of confidenceGrid) {
+    const accepted = points.filter(({ confidence }) => confidence >= threshold);
+    const count = accepted.reduce((sum, { cases }) => sum + cases, 0);
+    const right = accepted
+      .filter(({ correct }) => correct)
+      .reduce((sum, { cases }) => sum + cases, 0);
+    if (total && count && right / count >= 0.98 && count / total >= 0.6) return threshold;
+  }
+  return 0;
+}
+// Frozen by the amendment for rubric 2 and derived from
+// specs/component-inference-evidence/confidence-gate-dev.json by selectGate (a test checks this).
+export const confidenceGates: Readonly<Record<string, number>> = {
+  "jev-1.13.0": 0.8,
+  "claude-haiku-4-5-20251001": 0,
+};
 export function providerCases(
   runs: readonly FamilyRun[],
   decisions: readonly ProviderDecision[],
+  threshold = 0,
 ): { cases: CaseOutcome[]; calibration: { confidence: number; correct: boolean }[] } {
   const byCase = new Map(decisions.map((entry) => [canonical([entry.family, entry.path]), entry]));
   const cases: CaseOutcome[] = [];
@@ -260,8 +289,11 @@ export function providerCases(
         decision?.state === "answered" ? decision.answers.membership.choice : undefined;
       const distance = choice ? /^ancestor-([1-8])$/.exec(choice)?.[1] : undefined;
       const correct = distance !== undefined && inRoots(Number(distance));
+      // Calibration covers every answer, before the gate.
       if (decision?.state === "answered" && distance !== undefined)
         calibration.push({ confidence: decision.answers.membership.confidence, correct });
+      const gated =
+        decision?.state === "answered" && decision.answers.membership.confidence < threshold;
       // A part abstention keeps membership but never forms a repair group.
       const part = decision?.state === "answered" ? decision.answers.part.choice : undefined;
       // The part must be the chain-derived path for the chosen member; otherwise it conflicts.
@@ -271,10 +303,10 @@ export function providerCases(
       cases.push({
         ...entry,
         candidateHit: decisionCase(chain).candidates.some((_, index) => inRoots(index + 1)),
-        decided: distance !== undefined,
-        correct,
+        decided: distance !== undefined && !gated,
+        correct: correct && !gated,
         group:
-          decision?.state === "answered" && distance !== undefined && partDecided
+          decision?.state === "answered" && distance !== undefined && partDecided && !gated
             ? canonical([
                 "provider",
                 chain[Number(distance)]?.shape,
@@ -294,8 +326,12 @@ const percentile = (values: readonly number[], fraction: number) => {
     ? sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * fraction))]!
     : null;
 };
-export function providerReport(runs: readonly FamilyRun[], decisions: readonly ProviderDecision[]) {
-  const { cases, calibration } = providerCases(runs, decisions);
+export function providerReport(
+  runs: readonly FamilyRun[],
+  decisions: readonly ProviderDecision[],
+  threshold = 0,
+) {
+  const { cases, calibration } = providerCases(runs, decisions, threshold);
   const failures: Record<string, number> = {};
   for (const { result } of decisions)
     if (result.state === "failed") failures[result.code] = (failures[result.code] ?? 0) + 1;
@@ -305,7 +341,20 @@ export function providerReport(runs: readonly FamilyRun[], decisions: readonly P
   return {
     // Requests, latency and attempts are per target; scored cases are per (rule, path).
     decisionUnit: "target" as const,
+    // Pooled, per-family and interval metrics apply the frozen gate; the others are reported too.
+    gate: threshold,
     pooled: metrics(cases),
+    ungated: metrics(providerCases(runs, decisions).cases),
+    // Every grid point is reported; only the frozen gate counts toward adoption.
+    curve: [0, ...confidenceGrid].map((point) => {
+      const value = metrics(providerCases(runs, decisions, point).cases);
+      return {
+        threshold: point,
+        coverage: value.coverage,
+        decisionPrecision: value.decisionPrecision,
+        pairwisePrecision: value.pairwisePrecision,
+      };
+    }),
     perFamily: Object.fromEntries(
       scored.map((entry, index) => [runs[index]!.family, metrics(entry.cases)]),
     ),

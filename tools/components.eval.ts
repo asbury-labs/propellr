@@ -9,6 +9,7 @@ import {
   decisionApprovalSchema,
   decisionEndpoint,
   decisionModel,
+  decisionRubric,
 } from "../src/host/component-decisions.js";
 import {
   LlmDecisionClient,
@@ -21,6 +22,7 @@ import { corpusFamilies } from "../test/fixtures/components/corpus.js";
 import {
   adoption,
   bootstrap,
+  confidenceGates,
   metrics,
   providerReport,
   runFamily,
@@ -95,6 +97,11 @@ test("component attribution evaluation", { timeout: 600_000 }, async () => {
       },
     });
   }
+  // The frozen confidence gate is rubric-specific (amendment 2026-09-29).
+  const gate =
+    provider === "heuristic" ? 0 : confidenceGates[provider === "jev" ? decisionModel : llmModel];
+  if (gate === undefined || decisionRubric.version !== "2")
+    throw new Error("blocked: no frozen confidence gate for this model and rubric");
   const browser = await browserTypes.chromium.launch();
   try {
     const families = corpusFamilies.filter((family) => family.split === split);
@@ -146,9 +153,11 @@ test("component attribution evaluation", { timeout: 600_000 }, async () => {
           if (result.state === "failed" && result.code === "budget-exhausted") break lanes;
         }
       }
-      const scored = providerReport(runs, decisions);
+      const model = provider === "jev" ? decisionModel : llmModel;
+      const scored = providerReport(runs, decisions, gate);
       report[provider] = {
-        model: provider === "jev" ? decisionModel : llmModel,
+        model,
+        rubric: decisionRubric,
         approval,
         usage: client.usage,
         report: scored,

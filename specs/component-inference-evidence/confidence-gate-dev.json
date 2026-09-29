@@ -1,0 +1,142 @@
+{
+  "schema": "propellr-confidence-gate-evidence/2",
+  "split": "dev",
+  "rubric": "component-attribution-questions@2",
+  "note": "Every rubric 2 dev run, pooled. The first run is archived in the rubric 2 dev archive; the second in the confidence-gate dev archive.",
+  "arms": {
+    "jev": {
+      "model": "jev-1.13.0",
+      "runs": [
+        {
+          "protocolSha256": "7b434a1ec9d6477cbeec0ecc5b18bce40d39d344d2d9e1f2c1d2ea1b2e04a168",
+          "archive": "specs/component-inference-evidence/phase-2-dev-rubric2-results.tar.gz",
+          "archiveSha256": "bf9d6f6620696aa70fc23c43834c0f8bf846ac15a2f33f21b05697ccbc7395c9",
+          "decisions": [
+            {
+              "family": "favorites-grid",
+              "confidence": 0.93,
+              "correct": true,
+              "cases": 20
+            },
+            {
+              "family": "cart-callsites",
+              "confidence": 0.75,
+              "correct": false,
+              "cases": 20
+            },
+            {
+              "family": "lookalikes",
+              "confidence": 0.93,
+              "correct": true,
+              "cases": 20
+            },
+            {
+              "family": "fragments",
+              "confidence": 0.91,
+              "correct": true,
+              "cases": 20
+            }
+          ]
+        },
+        {
+          "protocolSha256": "ceb2bb01daf9218e687f0e3e7afd163eeb97e4c6609dfca400ff15b97a182c15",
+          "archive": "specs/component-inference-evidence/phase-2-dev-gate-results.tar.gz",
+          "decisions": [
+            {
+              "family": "favorites-grid",
+              "confidence": 0.93,
+              "correct": true,
+              "cases": 20
+            },
+            {
+              "family": "cart-callsites",
+              "confidence": 0.79,
+              "correct": false,
+              "cases": 20
+            },
+            {
+              "family": "lookalikes",
+              "confidence": 0.93,
+              "correct": true,
+              "cases": 20
+            },
+            {
+              "family": "fragments",
+              "confidence": 0.91,
+              "correct": true,
+              "cases": 20
+            }
+          ],
+          "archiveSha256": "d2e348078366bd8fa5847bd9df2f9c6ed39ae16ab4d2c363f672bd7456d6270b"
+        }
+      ]
+    },
+    "llm": {
+      "model": "claude-haiku-4-5-20251001",
+      "runs": [
+        {
+          "protocolSha256": "7b434a1ec9d6477cbeec0ecc5b18bce40d39d344d2d9e1f2c1d2ea1b2e04a168",
+          "archive": "specs/component-inference-evidence/phase-2-dev-rubric2-results.tar.gz",
+          "archiveSha256": "bf9d6f6620696aa70fc23c43834c0f8bf846ac15a2f33f21b05697ccbc7395c9",
+          "decisions": [
+            {
+              "family": "favorites-grid",
+              "confidence": 0.95,
+              "correct": true,
+              "cases": 20
+            },
+            {
+              "family": "cart-callsites",
+              "confidence": 0.85,
+              "correct": false,
+              "cases": 20
+            },
+            {
+              "family": "lookalikes",
+              "confidence": 0.95,
+              "correct": true,
+              "cases": 20
+            },
+            {
+              "family": "fragments",
+              "confidence": 0.85,
+              "correct": true,
+              "cases": 20
+            }
+          ]
+        },
+        {
+          "protocolSha256": "ceb2bb01daf9218e687f0e3e7afd163eeb97e4c6609dfca400ff15b97a182c15",
+          "archive": "specs/component-inference-evidence/phase-2-dev-gate-results.tar.gz",
+          "decisions": [
+            {
+              "family": "favorites-grid",
+              "confidence": 0.95,
+              "correct": true,
+              "cases": 20
+            },
+            {
+              "family": "cart-callsites",
+              "confidence": 0.85,
+              "correct": false,
+              "cases": 20
+            },
+            {
+              "family": "lookalikes",
+              "confidence": 0.95,
+              "correct": true,
+              "cases": 20
+            },
+            {
+              "family": "fragments",
+              "confidence": 0.85,
+              "correct": true,
+              "cases": 20
+            }
+          ],
+          "archiveSha256": "d2e348078366bd8fa5847bd9df2f9c6ed39ae16ab4d2c363f672bd7456d6270b"
+        }
+      ]
+    }
+  }
+}

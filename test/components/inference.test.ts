@@ -15,6 +15,7 @@ import {
   DecisionClient,
   decisionModel,
   decisionRequest,
+  decisionRubric,
 } from "../../src/host/component-decisions.js";
 import { corpusFamilies } from "../fixtures/components/corpus.js";
 import type { CorpusFamily } from "../fixtures/components/corpus.js";
@@ -23,13 +24,15 @@ import { namingDocument } from "../fixtures/naming.js";
 import { leaks, request, scanContext } from "../support/component-corpus.js";
 import {
   adoption,
+  confidenceGates,
   metrics,
   providerCases,
   providerReport,
   runFamily,
+  selectGate,
   truthFor,
 } from "../support/component-evaluation.js";
-import type { ProviderDecision } from "../support/component-evaluation.js";
+import type { GatePoint, ProviderDecision } from "../support/component-evaluation.js";
 import { canonical } from "../../src/reporting/index.js";
 import { fixturePage } from "../support/parity.js";
 
@@ -227,6 +230,21 @@ test("chromium: provider decisions are scored against the same oracle and the fr
       pairwisePrecision: false,
       incrementalCoverage: false,
     });
+    // Gate: answers below the threshold abstain and form no group; calibration is pre-gate.
+    expect(report.gate).toBe(0);
+    expect(report.ungated).toEqual(report.pooled);
+    const gated = providerReport(runs, decisions, 0.95);
+    expect(gated.gate).toBe(0.95);
+    expect(gated.pooled).toMatchObject({ coverage: 0, decisionPrecision: null });
+    expect(gated.ungated).toEqual(report.pooled);
+    expect(gated.calibration).toEqual(report.calibration);
+    expect(
+      providerCases(runs, decisions, 0.95).cases.filter(({ group }) => group !== null),
+    ).toHaveLength(0);
+    expect(gated.curve.find(({ threshold }) => threshold === 0.9)).toMatchObject({
+      coverage: report.pooled.coverage,
+    });
+    expect(gated.curve.find(({ threshold }) => threshold === 0.95)).toMatchObject({ coverage: 0 });
   } finally {
     await browser.close();
   }
@@ -935,4 +953,34 @@ test("eval:components refuses provider arms without approval and keeps the holdo
     expect(result.status, args.join(" ")).toBe(2);
     expect(result.stderr).toContain(message);
   }
+});
+
+test("the frozen confidence gates follow from the committed dev evidence", () => {
+  const evidence = JSON.parse(
+    readFileSync("specs/component-inference-evidence/confidence-gate-dev.json", "utf8"),
+  ) as {
+    rubric: string;
+    arms: Record<string, { model: string; runs: { decisions: GatePoint[] }[] }>;
+  };
+  expect(evidence.rubric).toBe(`${decisionRubric.id}@${decisionRubric.version}`);
+  // Every rubric 2 dev run is pooled: repeated identical requests do not return identical answers.
+  const derived = Object.fromEntries(
+    Object.values(evidence.arms).map(({ model, runs }) => [
+      model,
+      selectGate(runs.flatMap(({ decisions }) => decisions)),
+    ]),
+  );
+  expect(Object.values(evidence.arms).map(({ runs }) => runs.length)).toEqual([2, 2]);
+  expect(derived).toEqual(confidenceGates);
+  expect(confidenceGates).toEqual({ "jev-1.13.0": 0.8, "claude-haiku-4-5-20251001": 0 });
+  // Smallest passing threshold; ungated when no grid point reaches 98% precision at 60% coverage.
+  const point = (confidence: number, correct: boolean, cases = 10) => ({
+    confidence,
+    correct,
+    cases,
+  });
+  expect(selectGate([point(0.99, true, 70), point(0.72, false, 30)])).toBe(0.75);
+  expect(selectGate([point(0.99, true, 50), point(0.72, false, 50)])).toBe(0);
+  expect(selectGate([point(0.6, true, 100)])).toBe(0.5);
+  expect(selectGate([])).toBe(0);
 });

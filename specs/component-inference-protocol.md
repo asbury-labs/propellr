@@ -76,6 +76,47 @@ Because the rubric changed, both provider arms rerun on dev under rubric 2. The 
 September 28 (rubric 1) stay on record and are not replaced. The holdout remains sealed and runs
 once, with all three arms, under rubric 2. The approved caps are cumulative per arm across runs.
 
+## Amendment, September 29, 2026 (confidence gate, before any holdout use)
+
+**Status: draft, pending Tony's approval.** The holdout may not run until this amendment is either
+approved or withdrawn.
+
+Both providers return a calibrated membership confidence, and TypeSafe positions Jev for
+confidence-gated use (accept above a threshold, otherwise fall back). Rubric 2 still scored every
+answer as a decision whatever its confidence. This amendment gates each provider arm on its
+membership confidence.
+
+- **Gate.** A provider's membership answer counts as a decision only if its confidence is at
+  least the arm's frozen threshold. Below the threshold the case abstains: it is undecided and
+  forms no repair group. The heuristic has no confidence and is not gated. Calibration (Brier)
+  stays computed over every answer, before the gate.
+- **Selection rule, fixed before selection.** Candidate thresholds are 0.50, 0.55, …, 0.95. The
+  threshold is the smallest candidate whose accepted decisions, pooled over every rubric 2 dev
+  run, reach decision precision of at least 98% at coverage of at least 60%, the adoption bar's
+  own values. If no candidate does, the arm is ungated (threshold 0).
+- **Frozen thresholds (rubric 2):** Jev `jev-1.13.0` **0.80**; Claude Haiku 4.5
+  `claude-haiku-4-5-20251001` **0 (ungated)**. They come from both rubric 2 dev runs in
+  `specs/component-inference-evidence/confidence-gate-dev.json`, and a test re-derives them from
+  that file. Across the two runs, Jev answered 0.75 and 0.79 on the one family it got wrong and at
+  least 0.91 on the three it got right. Haiku answered 0.85 on both a wrong and a right family, so
+  no candidate separates them.
+- **Caveats.** The 80 dev cases reduce to 3 distinct structural inputs per arm, so these thresholds
+  rest on very little evidence. **Jev does not answer identical requests identically:** between the
+  two runs, its wrong-family confidence moved from 0.75 to 0.79, only 0.01 below the gate, and two
+  families' part answers changed from `button` to `insufficient-evidence` (part confidence
+  0.20–0.36). Haiku's answers were identical across runs. The holdout runs once, so run-to-run
+  variation is part of what it measures. The sealed holdout is the only real test of these
+  thresholds.
+- **Reporting.** Gated pooled, per-family and interval metrics are primary and feed the adoption
+  check. Ungated metrics and the precision/coverage curve over threshold 0 and every candidate
+  are always reported too. Only the frozen threshold counts toward adoption.
+- **Unchanged:** the adoption bar, the options, the answer schemas, the part rule, the corpus and
+  the approvals. Gating lowers coverage, and the bar's incremental-coverage criterion (10 points
+  over the heuristic at matched precision) is unchanged, so if the heuristic decides every case,
+  a gated arm cannot meet it. A changed model or rubric needs a newly derived threshold on dev
+  before any holdout use. The evaluation refuses to run without a frozen threshold for the model
+  and rubric.
+
 ## Structural capture, `propellr-structure-capture/1`
 
 Optional browser capture for uninstrumented attribution, in the same guarded scan call as the

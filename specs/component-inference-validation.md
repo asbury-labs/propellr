@@ -372,6 +372,44 @@ regenerations.
   candidates don't include. In all 20 dev cart-callsites cases, the oracle's root is the target
   itself, which is why every arm scores 0 there.
 
-To resume: send the sheet to both labelers. When both exports exist, run `pnpm labels:compare`.
-Then amend the protocol to say how human labels replace the oracle, and run all three arms on the
-sealed holdout exactly once under rubric 2.
+## Confidence gate (draft amendment), September 29, 2026
+
+A draft protocol amendment gates each provider arm on its membership confidence. The threshold is
+the smallest of 0.50, 0.55, …, 0.95 at which accepted decisions, pooled over every rubric 2 dev
+run, reach 98% precision at 60% coverage; if none does, the arm is ungated. A test re-derives the
+frozen thresholds from
+[confidence-gate-dev.json](component-inference-evidence/confidence-gate-dev.json): **Jev 0.80,
+Haiku ungated**. The evaluation now reports gated metrics (which feed adoption), ungated metrics
+and the precision/coverage curve. It refuses to run without a frozen threshold for the model and
+rubric.
+
+Both providers reran on dev once more to exercise the gated path live (3 requests each):
+
+| Arm                     | Threshold | Coverage | Decision precision | Pairwise precision |
+| ----------------------- | --------- | -------- | ------------------ | ------------------ |
+| `structural-template/1` | n/a       | 1.00     | 0.75               | 0.868              |
+| Jev, gated              | 0.80      | 0.75     | **1.00**           | 1.00               |
+| Jev, ungated            | 0         | 1.00     | 0.75               | 1.00               |
+| Haiku 4.5               | 0         | 1.00     | 0.75               | 0.868              |
+
+- **In-sample.** The gate was chosen on these same dev inputs (3 distinct structures), so gated
+  dev precision is not evidence. Dev results are never an adoption test.
+- **Jev varies between identical requests.** Its wrong-family confidence moved from 0.75 to 0.79,
+  only 0.01 below the gate. Two families' part answers flipped from `button` to
+  `insufficient-evidence` (part confidence 0.20–0.36), which is why Jev's pairwise precision is now
+  1.00 with fewer groups. Haiku's answers were identical across runs.
+- **Incremental coverage** is still failed: gating lowers coverage below the heuristic's 1.00.
+- **Cumulative use against the caps (300 requests, $1.00):** Jev 9 requests, $0.0004; Haiku 9
+  requests, $0.013.
+- **Protocol digest.** The run used an earlier draft of the amendment (`ceb2bb01…`). Later edits
+  changed only the wording, the caveats and the rule for pooling runs. The thresholds are
+  unchanged, and the final pin is `159297e2…`.
+
+Evidence: [manifest](component-inference-evidence/phase-2-dev-gate-manifest.json) and
+[raw archive](component-inference-evidence/phase-2-dev-gate-results.tar.gz), archive SHA-256
+`d2e348078366bd8fa5847bd9df2f9c6ed39ae16ab4d2c363f672bd7456d6270b`.
+
+To resume: approve or withdraw the confidence-gate amendment. Send the labeling sheet to both
+labelers, and when both exports exist, run `pnpm labels:compare`. Then amend the protocol to say
+how human labels replace the oracle, and run all three arms on the sealed holdout exactly once
+under rubric 2.
