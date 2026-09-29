@@ -12,6 +12,7 @@ import { ComponentRegistry, scanComponents } from "../../src/host/components.js"
 import type { CorpusFamily } from "../fixtures/components/corpus.js";
 import { raw, request, runArm, scanContext } from "./component-corpus.js";
 import { fixturePage } from "./parity.js";
+import { open, rm } from "node:fs/promises";
 import { z } from "zod";
 
 export interface CaseOutcome {
@@ -409,4 +410,22 @@ export function remainingBudget(
     maxRequests: caps.maxRequests - used.requests,
     maxSpendUsd: caps.maxSpendUsd - used.spentUsd,
   };
+}
+
+// One live run at a time per checkout: the lock is held from reading the ledger until the run's
+// usage is written, so overlapping runs can neither share a budget nor drop each other's entry.
+export async function acquireLedgerLock(lock: URL): Promise<() => Promise<void>> {
+  let handle;
+  try {
+    handle = await open(lock, "wx");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "EEXIST")
+      throw new Error(
+        `blocked: another live run holds ${lock.pathname}; remove it only if no run is active`,
+      );
+    throw error;
+  }
+  await handle.writeFile(`${process.pid}\n`);
+  await handle.close();
+  return () => rm(lock, { force: true });
 }

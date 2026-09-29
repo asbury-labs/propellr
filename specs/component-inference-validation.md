@@ -367,5 +367,20 @@ Evidence: [manifest](component-inference-evidence/phase-2-dev-rubric2-manifest.j
 [raw archive](component-inference-evidence/phase-2-dev-rubric2-results.tar.gz), archive SHA-256
 `95901605e8c9a7e6b5cc6ea1e5613b4671bd002f253a35ddd7e426c57f3d5df6`.
 
+### Review repairs, PR #22
+
+- **Cumulative caps (repair 1).** A committed usage ledger records every live run. Each client
+  starts with only the approval's remaining budget, and the evaluation refuses when it is
+  exhausted.
+- **One live run at a time (repair 2).** A lock file under `artifacts/components/` is held from
+  reading the ledger until the run's usage is appended, so overlapping runs can neither share a
+  budget nor drop each other's entry. With the lock held, a keyed Jev run was refused before any
+  provider call and the ledger was unchanged.
+- **Pending entries (repair 2).** A fresh run's entry has no evidence path until its manifest is
+  committed. It still counts toward the budget, and validation no longer fails on it.
+- **Validation.** Pinned `pnpm validate` passed all 324 tests (68 contract, 44 host, 13 playbook,
+  80 parity/browser, 101 component, 18 reporting). The rubric 2 manifest keeps the validation
+  record of its own run (321 tests); evidence is not rewritten after the fact.
+
 To resume: collect both adjudicators' labels, then run all three arms on the sealed holdout
 exactly once under rubric 2, against the frozen adoption bar.

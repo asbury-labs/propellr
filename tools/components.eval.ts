@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import frozen from "./frozen-protocol.json" with { type: "json" };
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { relative, resolve } from "node:path";
-import { test } from "vitest";
+import { onTestFinished, test } from "vitest";
 import { browserTypes } from "../src/host/browser.js";
 import {
   DecisionClient,
@@ -21,6 +21,7 @@ import { decisionCase } from "../src/components/discovery.js";
 import { corpusFamilies } from "../test/fixtures/components/corpus.js";
 import {
   adoption,
+  acquireLedgerLock,
   bootstrap,
   metrics,
   remainingBudget,
@@ -69,6 +70,14 @@ test("component attribution evaluation", { timeout: 600_000 }, async () => {
     "../specs/component-inference-evidence/usage-ledger.json",
     import.meta.url,
   );
+  // Provider runs hold the ledger lock from this read until their usage is appended.
+  if (provider !== "heuristic") {
+    await mkdir(new URL("../artifacts/components/", import.meta.url), { recursive: true });
+    const release = await acquireLedgerLock(
+      new URL("../artifacts/components/usage-ledger.lock", import.meta.url),
+    );
+    onTestFinished(release);
+  }
   const ledger = usageLedgerSchema.parse(JSON.parse(await readFile(ledgerUrl, "utf8")));
   const approvalPath =
     provider === "heuristic"

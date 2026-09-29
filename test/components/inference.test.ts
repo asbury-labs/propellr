@@ -4,6 +4,7 @@ import type { AddressInfo } from "node:net";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { decisionCase, discoverTemplates } from "../../src/components/discovery.js";
 import { structureCollector } from "../../src/analysis.js";
@@ -25,6 +26,7 @@ import {
   adoption,
   metrics,
   providerCases,
+  acquireLedgerLock,
   providerReport,
   remainingBudget,
   runFamily,
@@ -948,9 +950,11 @@ test("the usage ledger records every live run and bounds the next client", () =>
   const ledger = usageLedgerSchema.parse(
     JSON.parse(readFileSync(`${evidence}/usage-ledger.json`, "utf8")),
   );
-  // Each recorded run matches its committed manifest.
+  // Each run with committed evidence matches its manifest. A fresh run's entry has no evidence
+  // until its manifest is committed; it still counts toward the budget.
   for (const entry of ledger.entries) {
-    const manifest = JSON.parse(readFileSync(entry.evidence!, "utf8")) as Record<
+    if (entry.evidence === undefined) continue;
+    const manifest = JSON.parse(readFileSync(entry.evidence, "utf8")) as Record<
       string,
       { requests: number; spentUsd: number; model: string }
     > & { protocolSha256: string };
@@ -977,4 +981,33 @@ test("the usage ledger records every live run and bounds the next client", () =>
   expect(() =>
     usageLedgerSchema.parse({ ...ledger, entries: [{ ...ledger.entries[0], requests: -1 }] }),
   ).toThrow();
+});
+
+test("the ledger lock admits one live run at a time", async () => {
+  const lock = new URL(`file://${tmpdir()}/propellr-ledger-${process.pid}.lock`);
+  const release = await acquireLedgerLock(lock);
+  await expect(acquireLedgerLock(lock)).rejects.toThrow("another live run holds");
+  await release();
+  const again = await acquireLedgerLock(lock);
+  await again();
+  // An entry without evidence (a run not yet packaged) still counts toward the budget.
+  const pending = usageLedgerSchema.parse({
+    schema: "propellr-provider-usage-ledger/1",
+    entries: [
+      {
+        approval: "a.json",
+        provider: "jev",
+        model: "jev-1.13.0",
+        protocolSha256: "0".repeat(64),
+        split: "dev",
+        requests: 5,
+        spentUsd: 0.5,
+        recordedAt: "2026-09-29T12:00:00.000Z",
+      },
+    ],
+  });
+  expect(remainingBudget(pending, "a.json", { maxRequests: 300, maxSpendUsd: 1 })).toMatchObject({
+    maxRequests: 295,
+    maxSpendUsd: 0.5,
+  });
 });
