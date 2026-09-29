@@ -44,6 +44,26 @@
       "spentUsd": 0.004445000000000001,
       "recordedAt": "2026-09-29T04:32:22.049Z",
       "evidence": "specs/component-inference-evidence/phase-2-dev-rubric2-manifest.json"
+    },
+    {
+      "approval": "specs/component-inference-evidence/approvals/jev-2026-09-28.json",
+      "provider": "jev",
+      "model": "jev-1.13.0",
+      "protocolSha256": "ceb2bb01daf9218e687f0e3e7afd163eeb97e4c6609dfca400ff15b97a182c15",
+      "split": "dev",
+      "recordedAt": "2026-09-29T05:01:28.194Z",
+      "requests": 3,
+      "spentUsd": 0.00013822200000000002
+    },
+    {
+      "approval": "specs/component-inference-evidence/approvals/llm-2026-09-28.json",
+      "provider": "llm",
+      "model": "claude-haiku-4-5-20251001",
+      "protocolSha256": "ceb2bb01daf9218e687f0e3e7afd163eeb97e4c6609dfca400ff15b97a182c15",
+      "split": "dev",
+      "recordedAt": "2026-09-29T05:01:28.194Z",
+      "requests": 3,
+      "spentUsd": 0.004445000000000001
     }
   ]
 }
