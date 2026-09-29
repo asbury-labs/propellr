@@ -9,7 +9,9 @@ import { BoundedTransport } from "./decision-transport.js";
 import type { TransportFailure } from "./decision-transport.js";
 
 export const decisionModel = "jev-1.13.0";
-export const decisionRubric = { id: "component-attribution-questions", version: "1" } as const;
+// Version 2 (amendment 2026-09-29): the part question names each option's candidate and excludes
+// the root's own label.
+export const decisionRubric = { id: "component-attribution-questions", version: "2" } as const;
 export const decisionEndpoint = "https://api.typesafe.ai/v1/systemone";
 // Machine-checkable approval for a live lane. Every gate in the phase 2 protocol is a field:
 // provider, exact model and client, disclosure, terms review, and numeric ceilings.
@@ -189,8 +191,11 @@ export function decisionRequest(input: DecisionCase) {
       part: {
         type: "choice",
         instructions:
-          "Within the chosen component instance, which label path from the component root to the target element describes the target's part?",
-        criteria: options(input.parts, (value) => `Label path ${value || "(root)"}.`),
+          "Which part of the component instance chosen in the membership question is the target element? Each option is a label path joined by '>': it starts at the element directly below that instance's root and ends at the target. The root's own label is never part of the path. Choose the option paired with your membership choice; if membership is none or insufficient-evidence, give the same answer here.",
+        criteria: options(input.parts, (value, index) => {
+          const { distance, label } = link(index);
+          return `Use when the root is ${input.candidates[index]} (distance ${distance}, label ${label}): path ${value}, excluding ${label} itself.`;
+        }),
       },
       cause: {
         type: "noul",

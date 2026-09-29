@@ -58,6 +58,24 @@ refuses a call whose reservation would exceed the cap. When a response reports u
 reservation is replaced by the reported cost, whether higher or lower. Over-reported usage is
 charged in full and stops later calls. The adoption bar, metrics, corpus and split are unchanged.
 
+## Amendment, September 29, 2026 (part rubric 2, before any holdout use)
+
+Approved by Tony on September 29, 2026, after the dev runs of September 28. The rubric-1 part
+question asked for the "label path from the component root to the target", which also permits
+a root-inclusive reading. On dev, Haiku took that reading (`article>button`), while the options
+and scorer use the path below the root (`button`), so every Haiku part was a conflict.
+
+Rubric `component-attribution-questions@2` changes only the question text. Each part option
+starts directly below the chosen instance's root, never includes the root's own label, and ends
+at the target. Each option's criterion names the candidate it pairs with (ID, distance and root
+label). If membership abstains, the part abstains too. The options, answer schemas, scoring
+(a part must equal the chain-derived path for the chosen member), corpus and adoption bar are
+unchanged. The rubric version is part of every cache key.
+
+Because the rubric changed, both provider arms rerun on dev under rubric 2. The dev results of
+September 28 (rubric 1) stay on record and are not replaced. The holdout remains sealed and runs
+once, with all three arms, under rubric 2. The approved caps are cumulative per arm across runs.
+
 ## Structural capture, `propellr-structure-capture/1`
 
 Optional browser capture for uninstrumented attribution, in the same guarded scan call as the

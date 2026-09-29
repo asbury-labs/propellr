@@ -12,6 +12,8 @@ import { ComponentRegistry, scanComponents } from "../../src/host/components.js"
 import type { CorpusFamily } from "../fixtures/components/corpus.js";
 import { raw, request, runArm, scanContext } from "./component-corpus.js";
 import { fixturePage } from "./parity.js";
+import { open, rm } from "node:fs/promises";
+import { z } from "zod";
 
 export interface CaseOutcome {
   readonly family: string;
@@ -362,4 +364,68 @@ export function adoption(
     checks,
     adopted: split === "holdout" && Object.values(checks).every(Boolean),
   };
+}
+
+// Approved caps are cumulative per approval record across runs (protocol amendment 2026-09-28).
+// Every live run appends its usage here; each new client starts with only what remains.
+export const usageLedgerSchema = z
+  .strictObject({
+    schema: z.literal("propellr-provider-usage-ledger/1"),
+    entries: z
+      .array(
+        z
+          .strictObject({
+            approval: z.string().min(1),
+            provider: z.enum(["jev", "llm"]),
+            model: z.string().min(1),
+            protocolSha256: z.string().regex(/^[0-9a-f]{64}$/),
+            split: z.enum(["dev", "holdout"]),
+            requests: z.number().int().min(0),
+            spentUsd: z.number().finite().min(0),
+            recordedAt: z.iso.datetime(),
+            evidence: z.string().min(1).optional(),
+          })
+          .readonly(),
+      )
+      .readonly(),
+  })
+  .readonly();
+export type UsageLedger = z.infer<typeof usageLedgerSchema>;
+export function remainingBudget(
+  ledger: UsageLedger,
+  approval: string,
+  caps: { readonly maxRequests: number; readonly maxSpendUsd: number },
+) {
+  const used = ledger.entries
+    .filter((entry) => entry.approval === approval)
+    .reduce(
+      (sum, entry) => ({
+        requests: sum.requests + entry.requests,
+        spentUsd: sum.spentUsd + entry.spentUsd,
+      }),
+      { requests: 0, spentUsd: 0 },
+    );
+  return {
+    used,
+    maxRequests: caps.maxRequests - used.requests,
+    maxSpendUsd: caps.maxSpendUsd - used.spentUsd,
+  };
+}
+
+// One live run at a time per checkout: the lock is held from reading the ledger until the run's
+// usage is written, so overlapping runs can neither share a budget nor drop each other's entry.
+export async function acquireLedgerLock(lock: URL): Promise<() => Promise<void>> {
+  let handle;
+  try {
+    handle = await open(lock, "wx");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "EEXIST")
+      throw new Error(
+        `blocked: another live run holds ${lock.pathname}; remove it only if no run is active`,
+      );
+    throw error;
+  }
+  await handle.writeFile(`${process.pid}\n`);
+  await handle.close();
+  return () => rm(lock, { force: true });
 }
