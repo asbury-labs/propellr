@@ -292,5 +292,16 @@ parity/browser, 98 component, 18 reporting). The heuristic dev lane reran under 
 protocol (`c66d274e…`) with unchanged metrics. **No live provider call has been made yet**: the
 keys were not available to the evaluation shell. The live dev lanes are the next step.
 
+### Review repair 1, PR #20
+
+Copilot found that the approval schemas accepted up to 1,000 requests, $10 and any price, wider
+than the approved 300 requests and $1.00. Both schemas now cap the ceilings at the approved values;
+a record may lower them but never raise them. Provider prices are pinned literals (Jev $0.042 input;
+Haiku $1 input and $5 output), because an understated price would weaken the spend guard. The
+Haiku approval now requires the amendment's usage policy: evaluation-only output reuse,
+distillation prohibited, adversarial testing not permitted. It records no review of Anthropic's own
+terms, because none is on record; the recorded terms review covers the TypeSafe MCA. Regression
+tests refuse raised ceilings, understated prices and a missing or altered usage policy.
+
 To resume: run the Jev and Haiku dev lanes with keys. Then collect both adjudicators' labels and run
 all three arms on the sealed holdout exactly once, against the frozen adoption bar.

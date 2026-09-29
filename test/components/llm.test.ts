@@ -255,3 +255,42 @@ test("the committed approval records satisfy both live-lane schemas", async () =
     maxSpendUsd: 1,
   });
 });
+
+test("approval schemas refuse raised ceilings, understated prices and missing usage policy", async () => {
+  const load = async (name: string) =>
+    JSON.parse(
+      await readFile(`specs/component-inference-evidence/approvals/${name}`, "utf8"),
+    ) as Record<string, unknown>;
+  const jev = await load("jev-2026-09-28.json");
+  const llm = await load("llm-2026-09-28.json");
+  for (const change of [
+    { maxRequests: 301 },
+    { maxSpendUsd: 1.01 },
+    { pricePerMillionInputTokensUsd: 0.01 },
+  ])
+    expect(
+      decisionApprovalSchema.safeParse({ ...jev, ...change }).success,
+      JSON.stringify(change),
+    ).toBe(false);
+  for (const change of [
+    { maxRequests: 1000 },
+    { maxSpendUsd: 10 },
+    { pricePerMillionInputTokensUsd: 0.5 },
+    { pricePerMillionOutputTokensUsd: 1 },
+    { usagePolicy: undefined },
+    {
+      usagePolicy: {
+        outputReuse: "any",
+        distillation: "prohibited",
+        adversarialTesting: "not-permitted",
+      },
+    },
+  ])
+    expect(llmApprovalSchema.safeParse({ ...llm, ...change }).success, JSON.stringify(change)).toBe(
+      false,
+    );
+  // Lower ceilings stay valid.
+  expect(llmApprovalSchema.safeParse({ ...llm, maxRequests: 10, maxSpendUsd: 0.1 }).success).toBe(
+    true,
+  );
+});

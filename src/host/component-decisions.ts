@@ -36,9 +36,11 @@ export const decisionApprovalSchema = z
         adversarialTesting: z.literal("not-permitted"),
       })
       .readonly(),
-    maxRequests: z.number().int().min(1).max(1000),
-    maxSpendUsd: z.number().positive().max(10),
-    pricePerMillionInputTokensUsd: z.number().positive().max(100),
+    // Ceilings approved on 2026-09-28; a record may lower them, never raise them.
+    maxRequests: z.number().int().min(1).max(300),
+    maxSpendUsd: z.number().positive().max(1),
+    // The provider's price is a fact, not a choice: understating it would weaken the spend guard.
+    pricePerMillionInputTokensUsd: z.literal(0.042),
   })
   .readonly();
 export const sentinels = ["none", "insufficient-evidence"] as const;

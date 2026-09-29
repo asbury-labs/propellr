@@ -32,10 +32,21 @@ export const llmApprovalSchema = z
     date: z.iso.date(),
     reference: z.string().min(1).max(256),
     syntheticDisclosureOnly: z.literal(true),
-    maxRequests: z.number().int().min(1).max(1000),
-    maxSpendUsd: z.number().positive().max(10),
-    pricePerMillionInputTokensUsd: z.number().positive().max(100),
-    pricePerMillionOutputTokensUsd: z.number().positive().max(500),
+    // The evaluation's usage constraints (amendment 2026-09-28). This records no review of the
+    // provider's own terms.
+    usagePolicy: z
+      .strictObject({
+        outputReuse: z.literal("evaluation-only"),
+        distillation: z.literal("prohibited"),
+        adversarialTesting: z.literal("not-permitted"),
+      })
+      .readonly(),
+    // Ceilings approved on 2026-09-28; a record may lower them, never raise them.
+    maxRequests: z.number().int().min(1).max(300),
+    maxSpendUsd: z.number().positive().max(1),
+    // Published Claude Haiku 4.5 prices; understating them would weaken the spend guard.
+    pricePerMillionInputTokensUsd: z.literal(1),
+    pricePerMillionOutputTokensUsd: z.literal(5),
   })
   .readonly();
 export interface LlmClientOptions {
