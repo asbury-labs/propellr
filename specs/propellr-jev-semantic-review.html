@@ -314,13 +314,13 @@
             <dt>created</dt>
             <dd>2026-09-29T14:02:53Z</dd>
             <dt>modified</dt>
-            <dd>2026-09-29T14:02:53Z</dd>
+            <dd>2026-09-29T14:02:53Z; 2026-09-29T14:23:20Z</dd>
             <dt>commits</dt>
-            <dd>0f8c6897 (planning base, branch docs/jev-integration-plan)</dd>
+            <dd>0f8c6897 (planning base, branch docs/jev-integration-plan); 4bbb2223 (PR #25)</dd>
             <dt>agent name</dt>
-            <dd>claude-code / claude-opus-5-5</dd>
+            <dd>claude-code / claude-opus-5-5; claude-code / claude-opus-5-5</dd>
             <dt>session id</dt>
-            <dd>e090228a-8284-4f44-814f-782d9c7da67b</dd>
+            <dd>e090228a-8284-4f44-814f-782d9c7da67b; e090228a-8284-4f44-814f-782d9c7da67b</dd>
             <dt>back refs</dt>
             <dd>
               specs/jev-ten-levels-brief.md; specs/jev-brief.md;
@@ -611,9 +611,9 @@
         <p>
           First, add an opt-in, bounded, redacted
           <strong>text-capture contract</strong> (<code>propellr-text-capture/1</code>), separate
-          from occurrence evidence. It reuses the name string the bounded naming code already
-          computes and then discards. Then build a <strong>semantic naming review</strong> lane on
-          top of it:
+          from occurrence evidence. It records the text of the check that passed each naming rule,
+          computed once during rule evaluation and shared with the capture. Then build a
+          <strong>semantic naming review</strong> lane on top of it:
         </p>
         <ul>
           <li>
@@ -782,8 +782,9 @@
         <ul>
           <li>
             <span class="tag existing">existing</span> <code>src/browser/naming.ts</code> —
-            <code>name()</code> already returns <code>{ value, source, unsupported }</code>; text
-            capture reuses it under the same budget.
+            <code>name()</code> returns <code>{ value, source, unsupported }</code> but only reads
+            associated labels for buttons. It is not a canonical name for every passing naming
+            target.
           </li>
           <li>
             <span class="tag existing">existing</span> <code>src/browser/naming-rules.ts</code> —
@@ -939,11 +940,12 @@
           <h4>2. Repair the evidence archives, then merge #21–#23 in order</h4>
           <ul class="checklist">
             <li>
-              <code class="status">[]</code> Rebuild every archive created on macOS
+              <code class="status">[]</code> Repack every archive created on macOS
               (<code>phase-2-dev-live</code>, <code>phase-2-dev-rubric2</code>,
-              <code>phase-2-dev-gate</code>) with <code>COPYFILE_DISABLE=1</code>, so no AppleDouble
-              <code>._*</code> entries remain. Update manifests, docs and
-              <code>confidence-gate-dev.json</code> hashes.
+              <code>phase-2-dev-gate</code>) without AppleDouble <code>._*</code> entries or
+              extended attributes. Verify each file against its manifest hash. macOS
+              <code>tar</code> hides these entries, so check with Python's <code>tarfile</code>.
+              Update manifests, docs and <code>confidence-gate-dev.json</code> hashes.
             </li>
             <li>
               <code class="status">[]</code> Apply #21's three wording fixes ("membership choices",
@@ -982,10 +984,12 @@
             <li>
               <code class="status">[]</code>
               <code
-                >for f in specs/component-inference-evidence/*.tar.gz; do tar tzf "$f" | grep -c
-                '/\._' ; done</code
+                >python3 -c 'import glob,sys,tarfile; bad=[(f,n) for f in
+                glob.glob("specs/component-inference-evidence/*.tar.gz") for n in
+                tarfile.open(f).getnames() if n.split("/")[-1].startswith("._")]; print(bad);
+                sys.exit(1 if bad else 0)'</code
               >
-              — every count is 0.
+              — prints <code>[]</code> and exits 0 when no archive has OS metadata.
             </li>
             <li>
               <code class="status">[]</code>
@@ -1019,10 +1023,15 @@
                   <code>label</code> and <code>image-alt</code> with outcome <code>pass</code>.
                 </li>
                 <li>
-                  Fields per target: the computed name (<code>name().value</code>) and its
-                  <code>source</code>; the role; the nearest preceding heading text; a short
-                  enclosing-container text excerpt; the same-name count on the page; for
-                  <code>image-alt</code>, the alt string and image file basename.
+                  Fields per target: the canonical name of the rule's own passing check (the text
+                  behind <code>aria-label</code>, <code>aria-labelledby</code>, implicit or explicit
+                  label, <code>title</code>, placeholder or content) and which check it was. It is
+                  computed once during rule evaluation under the same budget and shared with the
+                  capture, never recomputed by a separate helper. A pass without a text-bearing
+                  check (for example a presentational role) is <code>name-unavailable</code>. Also
+                  the role; the nearest preceding heading text; a short enclosing-container text
+                  excerpt; the same-name count on the page; for <code>image-alt</code>, the alt
+                  string and image file basename.
                 </li>
                 <li>
                   Never captured: control values, password or hidden inputs,
@@ -1054,9 +1063,10 @@
           <ul class="checklist">
             <li>
               <code class="status">[]</code> <code>src/browser/text-capture.ts</code>: collect the
-              approved fields in the same guarded scan call as naming, reusing
-              <code>name()</code> and <code>compact</code>. No Node imports and no runtime schemas
-              in the browser.
+              approved fields in the same guarded scan call as naming. Extend each passing check in
+              <code>naming-rules.ts</code> to yield its text, bounded by <code>compact</code>, so
+              the capture shares the rule's own result. Tests cover every passing check of every
+              naming rule. No Node imports and no runtime schemas in the browser.
             </li>
             <li>
               <code class="status">[]</code> <code>src/review/validation.ts</code>: host schema for
@@ -1233,16 +1243,25 @@
               <code class="status">[]</code> Floor/bar rule, fixed before selection:
               <ul>
                 <li>
-                  The <em>bar</em> is the smallest grid threshold (0.50–0.95) at which dev flags
-                  reach at least 98% precision.
+                  <em>Support:</em> a threshold is eligible only if the set it defines holds at
+                  least 10 dev cases from at least 2 families. An empty or smaller set has no
+                  precision and never qualifies.
                 </li>
                 <li>
-                  The <em>floor</em> is the largest threshold below the bar at which review-band
-                  precision stays at least 50%.
+                  The <em>bar</em> is the smallest eligible grid threshold (0.50–0.95) at which dev
+                  flags reach at least 98% precision.
+                </li>
+                <li>
+                  The <em>floor</em> is the largest eligible threshold below the bar at which the
+                  review band (floor ≤ confidence &lt; bar) reaches at least 50% precision.
+                </li>
+                <li>
+                  With no bar, the arm never flags. With a floor, answers at or above it go to
+                  review and the rest abstain. With neither, the arm abstains on every case.
                 </li>
                 <li>
                   Thresholds are pooled over at least 3 repeated dev runs, because Jev varied
-                  between identical requests. If no bar qualifies, the arm only ever reviews.
+                  between identical requests.
                 </li>
               </ul>
             </li>
@@ -1340,20 +1359,7 @@
             adjudication, then the sealed holdout exactly once for all three arms.
           </p>
 
-          <h4>1. Dev runs and gate derivation</h4>
-          <ul class="checklist">
-            <li>
-              <code class="status">[]</code> Run Jev and Haiku on dev at least 3 times each, keys
-              loaded per run from the 0600 env file. Scan every output for key values.
-            </li>
-            <li>
-              <code class="status">[]</code> Derive each arm's floor and bar from the pooled dev
-              runs. Commit the derivation evidence and a re-derivation test. Amend the protocol to
-              record the thresholds, then re-pin.
-            </li>
-          </ul>
-
-          <h4>2. Adjudication</h4>
+          <h4>1. Adjudication and truth policy (before any gate derivation)</h4>
           <ul class="checklist">
             <li>
               <code class="status">[]</code> Generate the semantic labeling sheet. Tony and one
@@ -1361,8 +1367,27 @@
             </li>
             <li>
               <code class="status">[]</code> <code>pnpm labels:compare</code>: record agreement,
-              kappa and every disagreement. Amend the protocol to state how adjudicated labels
-              become truth (disagreements are excluded or kept as their own category, not averaged).
+              kappa and every disagreement.
+            </li>
+            <li>
+              <code class="status">[]</code> Amend the protocol with the truth policy, then re-pin.
+              The policy states how adjudicated labels become truth: disagreements are excluded or
+              kept as their own category, never averaged. The corpus has no structural oracle, so no
+              threshold may be derived before this is frozen.
+            </li>
+          </ul>
+
+          <h4>2. Dev runs and gate derivation</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> Run Jev and Haiku on dev at least 3 times each, keys
+              loaded per run from the 0600 env file. Record every run in the usage ledger and scan
+              every output for key values.
+            </li>
+            <li>
+              <code class="status">[]</code> Derive each arm's floor and bar from the pooled dev
+              runs against the frozen dev truth. Commit the derivation evidence and a re-derivation
+              test. Amend the protocol to record the thresholds, then re-pin.
             </li>
           </ul>
 
@@ -1393,10 +1418,12 @@
             <li>
               <code class="status">[]</code>
               <code
-                >for f in specs/semantic-review-evidence/*.tar.gz; do tar tzf "$f" | grep -c '/\._';
-                done</code
+                >python3 -c 'import glob,sys,tarfile; bad=[(f,n) for f in
+                glob.glob("specs/semantic-review-evidence/*.tar.gz") for n in
+                tarfile.open(f).getnames() if n.split("/")[-1].startswith("._")]; print(bad);
+                sys.exit(1 if bad else 0)'</code
               >
-              — no OS metadata in any archive.
+              — prints <code>[]</code> and exits 0 when no archive has OS metadata.
             </li>
           </ul>
           <div class="loop">
@@ -1722,7 +1749,20 @@
 
       <section id="amendments">
         <h2>Amendments</h2>
-        <p>None yet. Amendments are appended here after the plan is first executed.</p>
+        <details>
+          <summary>2026-09-29T14:23:20Z — Review repair for PR #25 (four Copilot findings)</summary>
+          <p>
+            <strong>Archive checks.</strong> They used <code>grep -c</code>, which exits 1 on a
+            clean archive, and macOS <code>tar</code>, which hides AppleDouble entries. Both are
+            replaced with a Python <code>tarfile</code> check that exits 0 when clean.
+            <strong>Name source.</strong> Text capture now shares each naming rule's own
+            passing-check text instead of <code>name()</code>, which only reads associated labels
+            for buttons. <strong>Gate rule.</strong> It gains a minimum-support rule (10 cases from
+            2 families; empty sets never qualify) and exact fallbacks when no bar or floor
+            qualifies. <strong>Order.</strong> Phase 3 now freezes the truth policy from adjudicated
+            labels before any threshold is derived. The plan has not been executed.
+          </p>
+        </details>
       </section>
     </main>
   </body>
