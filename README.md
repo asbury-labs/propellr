@@ -257,7 +257,9 @@ environment, for example
 `PROPELLR_DECISION_APPROVAL=... TYPESAFE_API_KEY=... pnpm eval:components -- --provider jev`, or
 `PROPELLR_LLM_APPROVAL=... ANTHROPIC_API_KEY=...` with `--provider llm`. The holdout stays sealed
 until two adjudicators' labels exist. On dev (part rubric 2), both arms matched the
-heuristic's choices (decision precision 0.75, pairwise 0.868); **neither is adopted.** See the
+heuristic's choices (decision precision 0.75, pairwise 0.868); **neither is adopted.** `pnpm labeling:sheet`
+builds the offline page for the two human labelers, and `pnpm labels:compare` compares their
+exports ([labeling guide](specs/component-labeling.md)). See the
 [inference protocol](specs/component-inference-protocol.md) and
 [evidence](specs/component-inference-validation.md).
 

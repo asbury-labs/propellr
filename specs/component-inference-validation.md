@@ -353,5 +353,25 @@ Evidence: [manifest](component-inference-evidence/phase-2-dev-rubric2-manifest.j
 [raw archive](component-inference-evidence/phase-2-dev-rubric2-results.tar.gz), archive SHA-256
 `bf9d6f6620696aa70fc23c43834c0f8bf846ac15a2f33f21b05697ccbc7395c9`.
 
-To resume: collect both adjudicators' labels, then run all three arms on the sealed holdout
-exactly once under rubric 2, against the frozen adoption bar.
+## Labeling sheet, September 29, 2026
+
+`pnpm labeling:sheet` builds the offline page for the two adjudicators
+([guide](component-labeling.md)). It renders only the uninstrumented version of each family, so
+no oracle data or bridge attribute reaches the page. It covers all 240 cases on 12 opaque pages
+(16 distinct structures) and took 18 s. The sheet ID is `a49d7e6c0306…`, stable across
+regenerations.
+
+- **Browser check:** two simulated labelers answered and exported every case (224 copied answers
+  each), with no page errors, and `pnpm labels:compare` read both exports. Screenshots of an
+  iframe case and a shadow-DOM case were inspected. That check led to three changes: a close-up
+  view, markup rooted in the element's own tree, and staggered ancestor badges.
+- **Tests:** 6 new tests cover Cohen's kappa, comparison refusals and reporting, the compare
+  command, the page's self-containment, and a real Chromium run. The Chromium run labels, copies
+  and exports a validated set; hostile fixture markup never executes.
+- **The element itself as root:** the sheet offers "the element itself", which the protocol's
+  candidates don't include. In all 20 dev cart-callsites cases, the oracle's root is the target
+  itself, which is why every arm scores 0 there.
+
+To resume: send the sheet to both labelers. When both exports exist, run `pnpm labels:compare`.
+Then amend the protocol to say how human labels replace the oracle, and run all three arms on the
+sealed holdout exactly once under rubric 2.

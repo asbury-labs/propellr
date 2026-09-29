@@ -29,6 +29,16 @@ export default defineConfig({
         },
       },
       {
+        // Human labeling sheet generator; explicit only, never selected by pnpm validate.
+        test: {
+          name: "labeling",
+          environment: "node",
+          include: ["tools/**/*.labeling.ts"],
+          testTimeout: 600_000,
+          fileParallelism: false,
+        },
+      },
+      {
         test: {
           name: "components",
           environment: "node",
