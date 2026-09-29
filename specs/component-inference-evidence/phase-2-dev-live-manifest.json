@@ -1,0 +1,118 @@
+{
+  "state": "phase-2-dev-live-complete",
+  "decision": "Neither provider adopted; inference disabled; holdout sealed",
+  "created": "2026-09-28T22:43:00.542Z",
+  "protocol": "specs/component-inference-protocol.md",
+  "protocolSha256": "c66d274ee0f0e2ce64fe75b50d185168374ebda8288e89806a25280dcd9f0dff",
+  "baseCommit": "df7fc72b0c7e74cd5fa7133f37e2e99f77823dd7",
+  "branch": "feat/component-eval-dev-results",
+  "agent": "claude-code / claude-opus-5-5",
+  "split": "dev",
+  "labels": "instrumented-oracle, not adjudicated",
+  "heuristic": {
+    "version": "structural-template/1",
+    "pooled": {
+      "cases": 80,
+      "candidateRecall": 0.75,
+      "coverage": 1,
+      "decisionPrecision": 0.75,
+      "decisionRecall": 0.75,
+      "pairwisePrecision": 0.868421052631579,
+      "pairwiseRecall": 1,
+      "overmerge": 100,
+      "oversplit": 0
+    }
+  },
+  "jev": {
+    "model": "jev-1.13.0",
+    "approval": "specs/component-inference-evidence/approvals/jev-2026-09-28.json",
+    "requests": 3,
+    "spentUsd": 0.000121464,
+    "decisions": 80,
+    "answered": 80,
+    "cached": 77,
+    "distinctInputs": 3,
+    "uncachedLatencyMs": [313, 149, 149],
+    "pooled": {
+      "cases": 80,
+      "candidateRecall": 0.75,
+      "coverage": 1,
+      "decisionPrecision": 0.75,
+      "decisionRecall": 0.75,
+      "pairwisePrecision": 0.868421052631579,
+      "pairwiseRecall": 1,
+      "overmerge": 100,
+      "oversplit": 0
+    },
+    "calibration": {
+      "decided": 80,
+      "brier": 0.1536999999999999
+    },
+    "adoption": {
+      "eligible": false,
+      "checks": {
+        "precision": false,
+        "coverage": true,
+        "pairwisePrecision": false,
+        "causePromotions": true,
+        "incrementalCoverage": false
+      },
+      "adopted": false
+    }
+  },
+  "llm": {
+    "model": "claude-haiku-4-5-20251001",
+    "approval": "specs/component-inference-evidence/approvals/llm-2026-09-28.json",
+    "requests": 3,
+    "spentUsd": 0.004064000000000001,
+    "decisions": 80,
+    "answered": 80,
+    "cached": 77,
+    "distinctInputs": 3,
+    "uncachedLatencyMs": [2300, 1716, 1328],
+    "pooled": {
+      "cases": 80,
+      "candidateRecall": 0.75,
+      "coverage": 1,
+      "decisionPrecision": 0.75,
+      "decisionRecall": 0.75,
+      "pairwisePrecision": null,
+      "pairwiseRecall": 0,
+      "overmerge": 0,
+      "oversplit": 660
+    },
+    "calibration": {
+      "decided": 80,
+      "brier": 0.1875000000000001
+    },
+    "adoption": {
+      "eligible": false,
+      "checks": {
+        "precision": false,
+        "coverage": true,
+        "pairwisePrecision": false,
+        "causePromotions": true,
+        "incrementalCoverage": false
+      },
+      "adopted": false
+    }
+  },
+  "findings": [
+    "All three arms chose ancestor-1 for every target; decision precision 0.75 each (cart-callsites 0).",
+    "The 80 dev targets reduce to 3 distinct structural inputs; the exact-input cache answered 77 per provider arm.",
+    "Haiku answered part article>button (root-inclusive); the frozen scorer expects the root-exclusive chain path (button), so Haiku formed no repair groups. The rubric wording is ambiguous; not changed post hoc."
+  ],
+  "archive": {
+    "path": "specs/component-inference-evidence/phase-2-dev-live-results.tar.gz",
+    "sha256": "04ba16413c4d8a61e9ca6910999d868e9c79e6578e445163e71822bfcef39e28"
+  },
+  "archivedFiles": {
+    "artifacts/components/eval-heuristic-dev.json": "673be53ec18907b36bcea79b3c60155b5c75567003d6c69368986de1880c04c0",
+    "artifacts/components/eval-jev-dev.json": "8826906e7bdedb2bb816567f1e849a3e0641c61beeec2bd0eca913e86381411e",
+    "artifacts/components/eval-llm-dev.json": "6809e768996889524031ee0052ca411fda6b262e3716f408a74d48c76c480041",
+    "artifacts/component-live/eval-heuristic-dev.log": "857b2fd38ae40825880a444575b8deaf0b11e99a9d20fac967f5cdf118c0955d",
+    "artifacts/component-live/eval-jev-dev.log": "8b80f671f8b874cac61c071dd678c1fdd0e91793f6b0eb1ab395dcd6051fe3d7",
+    "artifacts/component-live/eval-llm-dev.log": "97ebb2e61f4146fdd67f23254c5216bc78f0f70a3b480332498398787062271b",
+    "artifacts/component-live/validate.log": "dd17a9739dab07c610926409201815f33e38c6b924a3f0ceddab6cab7bdab940"
+  }
+}
