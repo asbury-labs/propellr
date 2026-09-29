@@ -1,0 +1,1729 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plan: Jev semantic review and scale integration</title>
+    <style>
+      /* ===== VISUAL IDENTITY =====
+     Source of truth for this page AND every image embedded in it. Inline SVG
+     resolves var() against this page, so diagrams reference these roles
+     (never hardcoded hex) and the identity stays synced.
+
+     The structure is fixed — --bg, --paper-2, --ink, --muted, --soft, --rule,
+     --accent and --accent-tint must all exist, because an undeclared custom
+     property renders as no fill and fails silently. The values are a starting
+     point: re-tune the hues per plan to suit its subject. */
+      :root {
+        --bg: #f6f7f5;
+        --paper-2: #ffffff;
+        --ink: #16211f;
+        --muted: #52605c;
+        --soft: #86928e;
+        --rule: rgba(22, 33, 31, 0.12);
+        --rule-solid: #dbe1de;
+        --accent: #1f7a6b;
+        --accent-tint: rgba(31, 122, 107, 0.1);
+
+        --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+        --serif: ui-serif, "Iowan Old Style", Georgia, "Times New Roman", serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 4rem 1.5rem 6rem;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      main {
+        max-width: 60rem;
+        margin: 0 auto;
+      }
+
+      h1 {
+        font-family: var(--serif);
+        font-size: 2.5rem;
+        font-weight: 400;
+        line-height: 1.15;
+        letter-spacing: -0.01em;
+        margin: 0 0 1rem;
+      }
+      h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        letter-spacing: -0.005em;
+        margin: 3.5rem 0 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--rule);
+      }
+      h3 {
+        font-size: 1.0625rem;
+        font-weight: 600;
+        margin: 2rem 0 0.5rem;
+      }
+      h4 {
+        font-family: var(--mono);
+        font-size: 0.8125rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin: 1.5rem 0 0.5rem;
+      }
+      p {
+        margin: 0 0 1rem;
+        max-width: 46rem;
+      }
+      a {
+        color: var(--accent);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 2px;
+      }
+
+      code {
+        font-family: var(--mono);
+        font-size: 0.85em;
+        background: rgba(22, 33, 31, 0.05);
+        border-radius: 4px;
+        padding: 0.1em 0.35em;
+      }
+      pre {
+        background: var(--paper-2);
+        border: 1px solid var(--rule);
+        border-radius: 6px;
+        padding: 1rem 1.25rem;
+        overflow-x: auto;
+        font-size: 0.8125rem;
+        line-height: 1.6;
+      }
+      pre code {
+        background: none;
+        padding: 0;
+        font-size: inherit;
+      }
+
+      /* --- header + metadata --- */
+      header {
+        margin-bottom: 2.5rem;
+      }
+      details.meta {
+        border: 1px solid var(--rule);
+        border-radius: 6px;
+        background: var(--paper-2);
+        padding: 0.625rem 1rem;
+        font-size: 0.8125rem;
+      }
+      details.meta summary {
+        cursor: pointer;
+        font-family: var(--mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      details.meta dl {
+        display: grid;
+        grid-template-columns: 8rem 1fr;
+        gap: 0.25rem 1rem;
+        margin: 0.875rem 0 0.25rem;
+      }
+      details.meta dt {
+        font-family: var(--mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--soft);
+        padding-top: 0.15rem;
+      }
+      details.meta dd {
+        margin: 0;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        word-break: break-word;
+      }
+
+      /* --- figures --- */
+      figure {
+        margin: 2rem auto;
+        padding: 0;
+        text-align: center;
+      }
+      figure svg,
+      figure img {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        margin: 0 auto;
+      }
+      figcaption {
+        margin-top: 0.875rem;
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        line-height: 1.5;
+        color: var(--soft);
+        max-width: 40rem;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      /* --- tables (the Notes canvas invites them) --- */
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.875rem;
+        margin: 0 0 1rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.5rem 0.75rem;
+        border-bottom: 1px solid var(--rule);
+        vertical-align: top;
+      }
+      th {
+        font-family: var(--mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--soft);
+        font-weight: 500;
+      }
+      td code {
+        white-space: nowrap;
+      }
+
+      /* --- relevant files --- */
+      .files ul {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 1rem;
+      }
+      .files li {
+        padding: 0.375rem 0;
+        border-bottom: 1px solid var(--rule);
+        font-size: 0.9375rem;
+      }
+      .tag {
+        display: inline-block;
+        font-family: var(--mono);
+        font-size: 0.625rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border-radius: 2px;
+        padding: 0.1rem 0.35rem;
+        margin-right: 0.4rem;
+        border: 1px solid;
+      }
+      .tag.existing {
+        color: var(--muted);
+        border-color: var(--rule-solid);
+      }
+      .tag.new {
+        color: var(--accent);
+        border-color: var(--accent);
+        background: var(--accent-tint);
+      }
+
+      /* --- phases --- */
+      .phase {
+        background: var(--paper-2);
+        border: 1px solid var(--rule);
+        border-radius: 6px;
+        padding: 1.25rem 1.5rem 1.5rem;
+        margin: 1.5rem 0;
+      }
+      .phase h3 {
+        margin-top: 0.25rem;
+      }
+      ul.checklist {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 1rem;
+      }
+      ul.checklist li {
+        padding: 0.25rem 0;
+        font-size: 0.9375rem;
+        line-height: 1.55;
+      }
+      code.status {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--soft);
+        background: none;
+        padding: 0;
+        margin-right: 0.4rem;
+      }
+      .loop {
+        border-left: 2px solid var(--accent);
+        background: var(--accent-tint);
+        border-radius: 0 4px 4px 0;
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+        color: var(--muted);
+      }
+      .loop strong {
+        color: var(--ink);
+      }
+
+      /* --- questionables / notes / amendments --- */
+      #questionables details,
+      #notes details,
+      #amendments details {
+        border-bottom: 1px solid var(--rule);
+        padding: 0.625rem 0;
+      }
+      #questionables summary,
+      #notes summary,
+      #amendments summary {
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9375rem;
+      }
+      .qa-answer,
+      #amendments details p {
+        margin: 0.5rem 0 0;
+        color: var(--muted);
+        font-size: 0.9375rem;
+      }
+      /* long commands wrap on narrow screens instead of widening the page */
+      ul.checklist code,
+      li code {
+        overflow-wrap: anywhere;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Plan: Jev semantic review and scale integration</h1>
+        <details class="meta">
+          <summary>Metadata</summary>
+          <dl>
+            <dt>created</dt>
+            <dd>2026-09-29T14:02:53Z</dd>
+            <dt>modified</dt>
+            <dd>2026-09-29T14:02:53Z</dd>
+            <dt>commits</dt>
+            <dd>0f8c6897 (planning base, branch docs/jev-integration-plan)</dd>
+            <dt>agent name</dt>
+            <dd>claude-code / claude-opus-5-5</dd>
+            <dt>session id</dt>
+            <dd>e090228a-8284-4f44-814f-782d9c7da67b</dd>
+            <dt>back refs</dt>
+            <dd>
+              specs/jev-ten-levels-brief.md; specs/jev-brief.md;
+              specs/propellr-jev-recommendations.md; specs/propellr-component-intelligence.html;
+              specs/component-inference-protocol.md; specs/component-labeling.md; PRs #20–#24
+            </dd>
+            <dt>forward refs</dt>
+            <dd>none yet</dd>
+          </dl>
+        </details>
+      </header>
+
+      <figure>
+        <svg
+          viewBox="0 0 860 300"
+          role="img"
+          aria-labelledby="hero-t hero-d"
+          xmlns="http://www.w3.org/2000/svg"
+          font-family="ui-sans-serif, system-ui, sans-serif"
+        >
+          <title id="hero-t">Plan at a glance</title>
+          <desc id="hero-d">
+            Six stages left to right: settle the phase 2 stack, a text-capture contract, the
+            semantic naming review pilot built offline, the pilot evaluation, then an opt-in
+            capability. Two later tracks, triage at scale and the agent-loop guard, branch from the
+            capability. Every stage ends at an approval gate.
+          </desc>
+          <rect x="0" y="0" width="860" height="300" fill="var(--bg)" />
+          <g font-size="13" fill="var(--ink)">
+            <rect
+              x="16"
+              y="40"
+              width="120"
+              height="64"
+              rx="6"
+              fill="var(--paper-2)"
+              stroke="var(--rule-solid)"
+            />
+            <text x="76" y="66" text-anchor="middle" font-weight="600">0 · Settle</text>
+            <text x="76" y="86" text-anchor="middle" fill="var(--muted)" font-size="11">
+              PRs #20–#24
+            </text>
+            <rect
+              x="156"
+              y="40"
+              width="130"
+              height="64"
+              rx="6"
+              fill="var(--accent-tint)"
+              stroke="var(--accent)"
+            />
+            <text x="221" y="66" text-anchor="middle" font-weight="600">1 · Text capture</text>
+            <text x="221" y="86" text-anchor="middle" fill="var(--muted)" font-size="11">
+              redacted, opt-in
+            </text>
+            <rect
+              x="306"
+              y="40"
+              width="130"
+              height="64"
+              rx="6"
+              fill="var(--paper-2)"
+              stroke="var(--rule-solid)"
+            />
+            <text x="371" y="66" text-anchor="middle" font-weight="600">2 · Pilot build</text>
+            <text x="371" y="86" text-anchor="middle" fill="var(--muted)" font-size="11">
+              corpus, 3 arms
+            </text>
+            <rect
+              x="456"
+              y="40"
+              width="130"
+              height="64"
+              rx="6"
+              fill="var(--paper-2)"
+              stroke="var(--rule-solid)"
+            />
+            <text x="521" y="66" text-anchor="middle" font-weight="600">3 · Pilot run</text>
+            <text x="521" y="86" text-anchor="middle" fill="var(--muted)" font-size="11">
+              gate, labels, holdout
+            </text>
+            <rect
+              x="606"
+              y="40"
+              width="130"
+              height="64"
+              rx="6"
+              fill="var(--paper-2)"
+              stroke="var(--rule-solid)"
+            />
+            <text x="671" y="66" text-anchor="middle" font-weight="600">4 · Capability</text>
+            <text x="671" y="86" text-anchor="middle" fill="var(--muted)" font-size="11">
+              only if adopted
+            </text>
+            <rect
+              x="606"
+              y="170"
+              width="236"
+              height="50"
+              rx="6"
+              fill="var(--paper-2)"
+              stroke="var(--rule-solid)"
+            />
+            <text x="724" y="200" text-anchor="middle" font-weight="600">5 · Triage at scale</text>
+            <rect
+              x="606"
+              y="232"
+              width="236"
+              height="50"
+              rx="6"
+              fill="var(--paper-2)"
+              stroke="var(--rule-solid)"
+            />
+            <text x="724" y="262" text-anchor="middle" font-weight="600">6 · Agent-loop guard</text>
+          </g>
+          <g stroke="var(--soft)" stroke-width="1.5" fill="none">
+            <path d="M136 72 H156" />
+            <path d="M286 72 H306" />
+            <path d="M436 72 H456" />
+            <path d="M586 72 H606" />
+            <path d="M671 104 V170" />
+            <path d="M671 104 V150 H590 V257 H606" />
+          </g>
+          <g fill="var(--accent)">
+            <circle cx="146" cy="120" r="5" />
+            <circle cx="296" cy="120" r="5" />
+            <circle cx="446" cy="120" r="5" />
+            <circle cx="596" cy="120" r="5" />
+            <circle cx="746" cy="120" r="5" />
+          </g>
+          <text x="16" y="140" font-size="11" fill="var(--muted)">
+            ● approval gate: stop, show evidence, wait for Tony
+          </text>
+        </svg>
+        <figcaption>
+          Six gated stages. Only the text-capture contract and the pilot are designed in detail;
+          phases 4–6 start only after the pilot adopts something.
+        </figcaption>
+      </figure>
+
+      <section id="purpose">
+        <h2>Purpose</h2>
+        <p>
+          Put Jev where it can add value in Propellr: judgments about <em>meaning</em> that
+          deterministic accessibility rules cannot make, at a volume and price where model review is
+          affordable, without ever touching verdicts, report counts or gate policy. The work follows
+          the ranked recommendations in <a href="jev-ten-levels-brief.md">the ten-levels brief</a>.
+          It reuses the phase 2 infrastructure (bounded transport, approval gates, the LLM
+          comparison arm, the labeling sheet) and applies what the attribution evaluation taught us.
+        </p>
+      </section>
+
+      <section id="problem">
+        <h2>Problem</h2>
+        <p>
+          The phase 2 evaluation sent Jev text-free structural fingerprints and asked a structural
+          question: which ancestor is the component? That was the heuristic's own signal, so Jev,
+          Haiku and <code>structural-template/1</code> made the same choice on every dev case
+          (decision precision 0.75 each). Meanwhile the naming rules (<code>button-name</code>,
+          <code>link-name</code>, <code>label</code>, <code>image-alt</code>) only prove that a name
+          <em>exists</em>. A button named "button", a link named "click here", alt text of
+          <code>IMG_2041.jpg</code>, or ten identical "Remove" buttons all pass. Those judgments
+          need text. Today it is deliberately dropped: naming evidence says "no name strings or
+          control values retained".
+        </p>
+        <figure>
+          <svg
+            viewBox="0 0 860 160"
+            role="img"
+            aria-labelledby="prob-t prob-d"
+            xmlns="http://www.w3.org/2000/svg"
+            font-family="ui-sans-serif, system-ui, sans-serif"
+          >
+            <title id="prob-t">Starved state versus meaningful state</title>
+            <desc id="prob-d">
+              Left: a text-free fingerprint (element names, shape hashes, repeat counts) goes to the
+              heuristic, Jev and Haiku, and all three return the same answer. Right: a passing link
+              named click here gets a pass verdict from the rule, while the useful judgment, that
+              the name is generic, needs the text the rule discarded.
+            </desc>
+            <rect width="860" height="160" fill="var(--bg)" />
+            <g font-size="12" fill="var(--ink)">
+              <rect
+                x="16"
+                y="24"
+                width="190"
+                height="80"
+                rx="6"
+                fill="var(--paper-2)"
+                stroke="var(--rule-solid)"
+              />
+              <text x="28" y="48" font-weight="600">Phase 2 state</text>
+              <text
+                x="28"
+                y="68"
+                fill="var(--muted)"
+                font-family="ui-monospace, Menlo, monospace"
+                font-size="11"
+              >
+                button · 00000001 · ×20
+              </text>
+              <text
+                x="28"
+                y="86"
+                fill="var(--muted)"
+                font-family="ui-monospace, Menlo, monospace"
+                font-size="11"
+              >
+                article · 00000002 · ×20
+              </text>
+              <rect
+                x="250"
+                y="16"
+                width="150"
+                height="28"
+                rx="4"
+                fill="var(--paper-2)"
+                stroke="var(--rule-solid)"
+              />
+              <text x="262" y="35">heuristic → A1</text>
+              <rect
+                x="250"
+                y="50"
+                width="150"
+                height="28"
+                rx="4"
+                fill="var(--paper-2)"
+                stroke="var(--rule-solid)"
+              />
+              <text x="262" y="69">Jev → A1</text>
+              <rect
+                x="250"
+                y="84"
+                width="150"
+                height="28"
+                rx="4"
+                fill="var(--paper-2)"
+                stroke="var(--rule-solid)"
+              />
+              <text x="262" y="103">Haiku → A1</text>
+              <text x="28" y="140" fill="var(--muted)">
+                Same signal in, same answer out: no value added.
+              </text>
+              <rect
+                x="460"
+                y="24"
+                width="180"
+                height="80"
+                rx="6"
+                fill="var(--paper-2)"
+                stroke="var(--rule-solid)"
+              />
+              <text x="472" y="48" font-weight="600">&lt;a&gt; "click here"</text>
+              <text x="472" y="68" fill="var(--muted)">link-name: pass</text>
+              <text x="472" y="86" fill="var(--muted)">text discarded</text>
+              <rect
+                x="672"
+                y="24"
+                width="172"
+                height="80"
+                rx="6"
+                fill="var(--accent-tint)"
+                stroke="var(--accent)"
+              />
+              <text x="684" y="48" font-weight="600">Needs meaning</text>
+              <text x="684" y="68" fill="var(--muted)">generic? 2.4.4</text>
+              <text x="684" y="86" fill="var(--muted)">distinguishable?</text>
+              <text x="460" y="140" fill="var(--muted)">
+                Where Jev could help, the input it needs is missing.
+              </text>
+            </g>
+            <g stroke="var(--soft)" stroke-width="1.5" fill="none">
+              <path d="M206 64 H228 V30 H250" />
+              <path d="M228 64 H250" />
+              <path d="M228 64 V98 H250" />
+              <path d="M640 64 H672" />
+            </g>
+          </svg>
+          <figcaption>
+            Left: the attribution evaluation gave every arm the same text-free signal. Right: the
+            naming gap Jev could close requires text that Propellr discards today.
+          </figcaption>
+        </figure>
+      </section>
+
+      <section id="solution">
+        <h2>Solution</h2>
+        <p>
+          First, add an opt-in, bounded, redacted
+          <strong>text-capture contract</strong> (<code>propellr-text-capture/1</code>), separate
+          from occurrence evidence. It reuses the name string the bounded naming code already
+          computes and then discards. Then build a <strong>semantic naming review</strong> lane on
+          top of it:
+        </p>
+        <ul>
+          <li>
+            For every element that passes a naming rule, one fan-out request asks whether the name
+            is descriptive in context, generic, or filename-like, and whether it can be
+            distinguished from same-named controls.
+          </li>
+          <li>Three arms get identical state: a deterministic heuristic, Jev and Haiku.</li>
+          <li>
+            Each provider arm gets a frozen <strong>floor/bar</strong> confidence gate, chosen on
+            dev only. Above the bar a case is flagged, between floor and bar it goes to review, and
+            below the floor the arm abstains.
+          </li>
+          <li>
+            Two people adjudicate labels with the generalized labeling sheet, and a sealed holdout
+            runs exactly once.
+          </li>
+        </ul>
+        <p>
+          Results are <code>SemanticReviewCandidate</code> records that never enter
+          <code>Occurrence</code> verdicts, <code>Report</code> counts or <code>applyGate</code>.
+          Only if an arm is adopted does the review become an opt-in host capability. Only after
+          that do the triage-at-scale and agent-loop guard tracks start, each with its own frozen
+          protocol.
+        </p>
+        <figure>
+          <svg
+            viewBox="0 0 860 280"
+            role="img"
+            aria-labelledby="sol-t sol-d"
+            xmlns="http://www.w3.org/2000/svg"
+            font-family="ui-sans-serif, system-ui, sans-serif"
+          >
+            <title id="sol-t">Semantic review data flow</title>
+            <desc id="sol-d">
+              In the browser, the existing rule evaluation produces raw scans that flow to reporting
+              and gates, unchanged. An opt-in text capture beside it passes bounded strings to the
+              host, which redacts them. The host sends minimal state to the review adapter with
+              three arms. Answers pass the floor and bar gate and become review candidates, a
+              separate output that never feeds reports or gates.
+            </desc>
+            <rect width="860" height="280" fill="var(--bg)" />
+            <g font-size="12" fill="var(--ink)">
+              <text x="16" y="22" font-weight="600" fill="var(--muted)">BROWSER</text>
+              <text x="300" y="22" font-weight="600" fill="var(--muted)">HOST</text>
+              <rect
+                x="16"
+                y="36"
+                width="200"
+                height="44"
+                rx="6"
+                fill="var(--paper-2)"
+                stroke="var(--rule-solid)"
+              />
+              <text x="28" y="63">rules + naming (exact)</text>
+              <rect
+                x="300"
+                y="36"
+                width="190"
+                height="44"
+                rx="6"
+                fill="var(--paper-2)"
+                stroke="var(--rule-solid)"
+              />
+              <text x="312" y="63">raw scan → report</text>
+              <rect
+                x="560"
+                y="36"
+                width="170"
+                height="44"
+                rx="6"
+                fill="var(--paper-2)"
+                stroke="var(--rule-solid)"
+              />
+              <text x="572" y="63">applyGate (unchanged)</text>
+              <rect
+                x="16"
+                y="130"
+                width="200"
+                height="44"
+                rx="6"
+                fill="var(--accent-tint)"
+                stroke="var(--accent)"
+              />
+              <text x="28" y="150">text capture (opt-in)</text>
+              <text x="28" y="166" fill="var(--muted)" font-size="11">bounded strings</text>
+              <rect
+                x="300"
+                y="130"
+                width="120"
+                height="44"
+                rx="6"
+                fill="var(--accent-tint)"
+                stroke="var(--accent)"
+              />
+              <text x="312" y="157">redaction</text>
+              <rect
+                x="450"
+                y="118"
+                width="150"
+                height="68"
+                rx="6"
+                fill="var(--paper-2)"
+                stroke="var(--rule-solid)"
+              />
+              <text x="462" y="138">review adapter</text>
+              <text x="462" y="156" fill="var(--muted)" font-size="11">
+                heuristic · Jev · Haiku
+              </text>
+              <text x="462" y="172" fill="var(--muted)" font-size="11">bounded transport</text>
+              <rect
+                x="630"
+                y="130"
+                width="100"
+                height="44"
+                rx="6"
+                fill="var(--paper-2)"
+                stroke="var(--rule-solid)"
+              />
+              <text x="642" y="157">floor / bar</text>
+              <rect
+                x="630"
+                y="210"
+                width="214"
+                height="44"
+                rx="6"
+                fill="var(--accent-tint)"
+                stroke="var(--accent)"
+              />
+              <text x="642" y="230">SemanticReviewCandidate</text>
+              <text x="642" y="246" fill="var(--muted)" font-size="11">separate output</text>
+            </g>
+            <g stroke="var(--soft)" stroke-width="1.5" fill="none">
+              <path d="M216 58 H300" />
+              <path d="M490 58 H560" />
+              <path d="M216 152 H300" />
+              <path d="M420 152 H450" />
+              <path d="M600 152 H630" />
+              <path d="M680 174 V210" />
+            </g>
+            <g stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 4" fill="none">
+              <path d="M737 210 V80" />
+            </g>
+            <text
+              x="746"
+              y="150"
+              font-size="11"
+              fill="var(--accent)"
+              font-family="ui-sans-serif, system-ui, sans-serif"
+            >
+              never
+            </text>
+          </svg>
+          <figcaption>
+            The exact pipeline (top) is untouched. The review lane (bottom) is opt-in, redacted
+            before egress, gated, and emits a separate record that cannot reach reports or gates
+            (dashed: forbidden path, enforced by test).
+          </figcaption>
+        </figure>
+      </section>
+
+      <section id="files" class="files">
+        <h2>Relevant Files</h2>
+
+        <h3>Existing Files</h3>
+        <ul>
+          <li>
+            <span class="tag existing">existing</span> <code>src/browser/naming.ts</code> —
+            <code>name()</code> already returns <code>{ value, source, unsupported }</code>; text
+            capture reuses it under the same budget.
+          </li>
+          <li>
+            <span class="tag existing">existing</span> <code>src/browser/naming-rules.ts</code> —
+            the four naming rules whose passing targets define the review population. Its evidence
+            must keep "no name strings".
+          </li>
+          <li>
+            <span class="tag existing">existing</span> <code>src/browser/structure.ts</code> — the
+            pattern for an optional, bounded capture in the same guarded scan call.
+          </li>
+          <li>
+            <span class="tag existing">existing</span> <code>src/components/validation.ts</code> —
+            <code>structureSchema</code> is the host-side validation pattern for the new capture.
+          </li>
+          <li>
+            <span class="tag existing">existing</span> <code>src/host/decision-transport.ts</code> —
+            shared bounded HTTPS transport (reservation spend accounting, deadlines, no logging),
+            reused as is.
+          </li>
+          <li>
+            <span class="tag existing">existing</span> <code>src/host/component-decisions.ts</code>,
+            <code>src/host/component-llm.ts</code> — the Jev and Haiku adapter patterns and approval
+            schemas to mirror.
+          </li>
+          <li>
+            <span class="tag existing">existing</span> <code>src/host/runtime.ts</code> — session
+            capabilities and IPC ops (phase 4 only: <code>semantic-review@1</code>).
+          </li>
+          <li>
+            <span class="tag existing">existing</span> <code>src/reporting/index.ts</code> —
+            <code>reportScan</code> and <code>applyGate</code>, which must be byte-identical with
+            review on or off.
+          </li>
+          <li>
+            <span class="tag existing">existing</span> <code>tools/labeling-page.ts</code>,
+            <code>tools/component-labels.ts</code>, <code>tools/labeling-sheet.labeling.ts</code> —
+            the labeling sheet and comparison, to generalize to a question set.
+          </li>
+          <li>
+            <span class="tag existing">existing</span>
+            <code>test/support/component-evaluation.ts</code> — <code>selectGate</code>,
+            <code>bootstrap</code> and metrics patterns reused for the review evaluator.
+          </li>
+          <li>
+            <span class="tag existing">existing</span> <code>vitest.config.ts</code>,
+            <code>package.json</code> — explicit evaluation lanes that never run in
+            <code>pnpm validate</code>.
+          </li>
+          <li>
+            <span class="tag existing">existing</span> <code>specs/jev-ten-levels-brief.md</code>,
+            <code>specs/propellr-jev-recommendations.md</code> — the recommendations this plan
+            implements.
+          </li>
+        </ul>
+
+        <h3>New Files</h3>
+        <ul>
+          <li>
+            <span class="tag new">new</span> <code>specs/semantic-text-capture-protocol.md</code> —
+            fields, bounds, redaction rules, egress policy; frozen and approved before code.
+          </li>
+          <li>
+            <span class="tag new">new</span> <code>src/browser/text-capture.ts</code> — browser
+            collector for <code>propellr-text-capture/1</code> (no Node imports, no runtime
+            schemas).
+          </li>
+          <li>
+            <span class="tag new">new</span> <code>src/review/contracts.ts</code>,
+            <code>src/review/validation.ts</code> — capture and
+            <code>SemanticReviewCandidate</code> types and host-side schemas.
+          </li>
+          <li>
+            <span class="tag new">new</span> <code>src/host/redaction.ts</code> — deterministic
+            redaction to typed placeholders; essential-meaning loss becomes an evidence gap.
+          </li>
+          <li>
+            <span class="tag new">new</span> <code>specs/semantic-review-protocol.md</code> —
+            questions (rubric <code>semantic-naming@1</code>), arms, the floor/bar rule, metrics,
+            adoption bar; frozen before any provider call.
+          </li>
+          <li>
+            <span class="tag new">new</span> <code>test/fixtures/semantic/corpus.ts</code> —
+            original synthetic corpus: 12 families × 20 cases, 4 dev and 8 sealed holdout families.
+          </li>
+          <li>
+            <span class="tag new">new</span> <code>src/review/heuristic.ts</code> — deterministic
+            arm: generic-name list, filename-like alt, duplicate names; abstains otherwise.
+          </li>
+          <li>
+            <span class="tag new">new</span> <code>src/host/semantic-review.ts</code> — host-only
+            Jev and Haiku review adapters over the shared transport.
+          </li>
+          <li>
+            <span class="tag new">new</span> <code>tools/evaluate-semantic.ts</code>,
+            <code>tools/semantic.eval.ts</code> — gated evaluation wrapper and lane (<code
+              >pnpm eval:semantic</code
+            >).
+          </li>
+          <li>
+            <span class="tag new">new</span> <code>specs/semantic-review-evidence/</code> — approval
+            records, gate derivation, manifests and archives.
+          </li>
+          <li>
+            <span class="tag new">new</span> <code>specs/semantic-review-validation.md</code> —
+            executed evidence per phase.
+          </li>
+          <li>
+            <span class="tag new">new</span> <code>test/components/text-capture.test.ts</code>,
+            <code>test/components/semantic-review.test.ts</code> — leak, bounds, redaction,
+            isolation, scoring and gate tests in <code>pnpm validate</code>.
+          </li>
+        </ul>
+      </section>
+
+      <section id="phases">
+        <h2>Implementation Phases</h2>
+        <p>
+          <strong>IMPORTANT:</strong> Execute every phase and task step by step, in order, top to
+          bottom.
+        </p>
+        <p>
+          Status markers: <code>[]</code> idle · <code>[wip]</code> in progress ·
+          <code>[x]</code> complete · <code>[f]</code> failed. All start as <code>[]</code>; the
+          Build Plan workflow updates them as it works.
+        </p>
+        <p>
+          Every phase is its own feature branch and PR. Each ends at an approval boundary
+          (AGENTS.md: "Stop at each approved phase boundary"). No provider call, spend or text
+          egress happens without an approval record for that phase.
+        </p>
+
+        <div class="phase">
+          <h3><code class="status">[]</code> Phase 0: Settle the phase 2 stack (PRs #20–#24)</h3>
+          <p>
+            Land the reusable infrastructure, fix the known evidence defects, and park the
+            attribution gate. The stack is #20 → #21 → #22 → #23 → #24, each based on the previous
+            branch.
+          </p>
+
+          <h4>1. Review and merge #20 (Haiku arm, shared transport, approvals)</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> Re-request the Copilot review (its first attempt
+              errored) and complete Tony's manual review of <code>decision-transport.ts</code>,
+              <code>component-llm.ts</code>, the eval gates and the approval records.
+            </li>
+            <li>
+              <code class="status">[]</code> Address review findings within the two-repair-push
+              limit; squash-merge with <code>--match-head-commit</code> after approval.
+            </li>
+          </ul>
+
+          <h4>2. Repair the evidence archives, then merge #21–#23 in order</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> Rebuild every archive created on macOS
+              (<code>phase-2-dev-live</code>, <code>phase-2-dev-rubric2</code>,
+              <code>phase-2-dev-gate</code>) with <code>COPYFILE_DISABLE=1</code>, so no AppleDouble
+              <code>._*</code> entries remain. Update manifests, docs and
+              <code>confidence-gate-dev.json</code> hashes.
+            </li>
+            <li>
+              <code class="status">[]</code> Apply #21's three wording fixes ("membership choices",
+              "each provider arm", "77 cached answers per provider arm").
+            </li>
+            <li>
+              <code class="status">[]</code> After each merge, retarget the next PR to
+              <code>main</code>, rebase, rerun pinned validate, babysit, and merge.
+            </li>
+          </ul>
+
+          <h4>3. Park #24 (attribution confidence gate)</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> Tony decides whether to close #24 or keep it as a
+              draft. If the attribution holdout will still run, replace its single threshold with
+              the floor/bar rule defined in phase 2 before any approval.
+            </li>
+            <li>
+              <code class="status">[]</code> Record the disposition in
+              <code>specs/component-inference-validation.md</code>.
+            </li>
+          </ul>
+
+          <h4>4. Testing Strategy</h4>
+          <p>
+            Merged state is verified from GitHub and a clean pinned validate on <code>main</code>.
+            The archives are checked for OS metadata entries.
+          </p>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code>
+              <code>for n in 20 21 22 23; do gh pr view $n --json state -q .state; done</code> —
+              prints MERGED four times.
+            </li>
+            <li>
+              <code class="status">[]</code>
+              <code
+                >for f in specs/component-inference-evidence/*.tar.gz; do tar tzf "$f" | grep -c
+                '/\._' ; done</code
+              >
+              — every count is 0.
+            </li>
+            <li>
+              <code class="status">[]</code>
+              <code>npm exec --yes --package=pnpm@12.4.1 -- pnpm validate</code> — main is green
+              after the merges.
+            </li>
+          </ul>
+          <div class="loop">
+            🔁 <strong>Do not exit this phase until every box above is checked.</strong>
+            If any command fails, fix the cause and re-run — loop until all pass.
+          </div>
+        </div>
+
+        <div class="phase">
+          <h3><code class="status">[]</code> Phase 1: Text-capture contract (prerequisite)</h3>
+          <p>
+            An opt-in capture of the minimum text needed to judge a name, bounded like structure
+            capture, redacted on the host before any egress, and kept out of occurrence evidence.
+            <strong>Gate:</strong> Tony approves the protocol (fields, bounds, redaction,
+            synthetic-only egress) before any code.
+          </p>
+
+          <h4>1. Write and freeze the protocol</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> Draft
+              <code>specs/semantic-text-capture-protocol.md</code>.
+              <ul>
+                <li>
+                  Population: targets of <code>button-name</code>, <code>link-name</code>,
+                  <code>label</code> and <code>image-alt</code> with outcome <code>pass</code>.
+                </li>
+                <li>
+                  Fields per target: the computed name (<code>name().value</code>) and its
+                  <code>source</code>; the role; the nearest preceding heading text; a short
+                  enclosing-container text excerpt; the same-name count on the page; for
+                  <code>image-alt</code>, the alt string and image file basename.
+                </li>
+                <li>
+                  Never captured: control values, password or hidden inputs,
+                  <code>aria-hidden</code> content, or anything in closed roots or inaccessible
+                  frames.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <code class="status">[]</code> Bounds: 160 characters per string (the existing
+              <code>compact</code> limit), 1 KiB per target, 64 KiB per scan, shared naming budget.
+              Exhaustion makes the capture <code>unavailable</code> and never drops raw findings.
+            </li>
+            <li>
+              <code class="status">[]</code> Redaction rules: email, phone, long digit runs, URL
+              query strings and high-entropy tokens become typed placeholders such as
+              <code>[email]</code>. Redaction that removes the text a question needs marks the
+              target <code>redacted-unavailable</code> and is never guessed.
+            </li>
+            <li>
+              <code class="status">[]</code> Egress policy: synthetic fixtures only, recorded as
+              <code>textDisclosure: "synthetic-only"</code> in each approval record. No customer
+              pages.
+            </li>
+            <li><code class="status">[]</code> Stop for approval.</li>
+          </ul>
+
+          <h4>2. Implement the capture and redaction</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> <code>src/browser/text-capture.ts</code>: collect the
+              approved fields in the same guarded scan call as naming, reusing
+              <code>name()</code> and <code>compact</code>. No Node imports and no runtime schemas
+              in the browser.
+            </li>
+            <li>
+              <code class="status">[]</code> <code>src/review/validation.ts</code>: host schema for
+              <code>propellr-text-capture/1</code> (available or unavailable with a diagnostic),
+              validated like <code>structureSchema</code>.
+            </li>
+            <li>
+              <code class="status">[]</code> <code>src/host/redaction.ts</code>: deterministic,
+              versioned (<code>propellr-redaction/1</code>), applied before any adapter sees text.
+            </li>
+            <li>
+              <code class="status">[]</code> Opt-in flag on <code>scanComponents</code> or the scan
+              request (<code>{ text: true }</code>). Default off, with no change to the scan result
+              shape when off.
+            </li>
+          </ul>
+
+          <h4>3. Testing Strategy</h4>
+          <p>
+            Vitest in the components project, against real Chromium fixtures covering light DOM,
+            open shadow roots and same-origin frames:
+          </p>
+          <ul>
+            <li>
+              Leak tests: planted control values, passwords, hidden inputs and
+              <code>aria-hidden</code> text never appear.
+            </li>
+            <li>
+              Bounds tests: exhaustion is <code>unavailable</code>, and raw findings are unchanged.
+            </li>
+            <li>
+              Redaction tests: each pattern, plus a case that becomes
+              <code>redacted-unavailable</code>.
+            </li>
+            <li>
+              Isolation: raw scan, <code>reportScan</code> and <code>applyGate</code> outputs are
+              byte-identical with capture on and off.
+            </li>
+            <li>Naming evidence still contains no name strings.</li>
+          </ul>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code>
+              <code
+                >npm exec --yes --package=pnpm@12.4.1 -- pnpm build &amp;&amp;
+                PLAYWRIGHT_BROWSERS_PATH=$PWD/.tools/browsers node node_modules/vitest/vitest.mjs
+                run test/components/text-capture.test.ts</code
+              >
+              — capture, leak, bounds, redaction and isolation cases pass.
+            </li>
+            <li>
+              <code class="status">[]</code>
+              <code>npm exec --yes --package=pnpm@12.4.1 -- pnpm validate</code> — the whole suite,
+              types, lint and Oxfmt pass under pinned tools.
+            </li>
+          </ul>
+          <div class="loop">
+            🔁 <strong>Do not exit this phase until every box above is checked.</strong>
+            If any command fails, fix the cause and re-run — loop until all pass.
+          </div>
+        </div>
+
+        <div class="phase">
+          <h3>
+            <code class="status">[]</code> Phase 2: Semantic naming review pilot: corpus, arms and
+            frozen protocol
+          </h3>
+          <p>
+            Everything needed to evaluate, built and tested with no provider calls. The protocol is
+            frozen, digest-pinned and approved before phase 3 spends anything.
+          </p>
+
+          <figure>
+            <svg
+              viewBox="0 0 860 150"
+              role="img"
+              aria-labelledby="gate-t gate-d"
+              xmlns="http://www.w3.org/2000/svg"
+              font-family="ui-sans-serif, system-ui, sans-serif"
+            >
+              <title id="gate-t">Floor and bar confidence gate</title>
+              <desc id="gate-d">
+                A confidence axis from 0 to 1 split into three bands. Below the floor the arm
+                abstains. Between floor and bar the case goes to human review. At or above the bar
+                the case is flagged automatically. Both thresholds are chosen on dev by a fixed rule
+                and frozen before the holdout.
+              </desc>
+              <rect width="860" height="150" fill="var(--bg)" />
+              <rect
+                x="40"
+                y="40"
+                width="300"
+                height="40"
+                fill="var(--paper-2)"
+                stroke="var(--rule-solid)"
+              />
+              <rect
+                x="340"
+                y="40"
+                width="260"
+                height="40"
+                fill="var(--accent-tint)"
+                stroke="var(--rule-solid)"
+              />
+              <rect
+                x="600"
+                y="40"
+                width="220"
+                height="40"
+                fill="var(--accent)"
+                fill-opacity="0.35"
+                stroke="var(--rule-solid)"
+              />
+              <g font-size="13" fill="var(--ink)" text-anchor="middle">
+                <text x="190" y="65">abstain</text>
+                <text x="470" y="65">review queue</text>
+                <text x="710" y="65">flag</text>
+              </g>
+              <g stroke="var(--ink)" stroke-width="2">
+                <path d="M340 30 V92" />
+                <path d="M600 30 V92" />
+              </g>
+              <g font-size="12" fill="var(--muted)" text-anchor="middle">
+                <text x="340" y="110">floor</text>
+                <text x="600" y="110">bar</text>
+                <text x="40" y="110">0</text>
+                <text x="820" y="110">1</text>
+              </g>
+              <text x="40" y="138" font-size="12" fill="var(--muted)">
+                Chosen on dev by a pre-fixed rule, pooled over repeated runs; frozen by the protocol
+                digest before the holdout.
+              </text>
+            </svg>
+            <figcaption>
+              The two-threshold gate (ten-levels level 4) replaces #24's single threshold:
+              confidence decides whether a judgment is acted on, reviewed or dropped.
+            </figcaption>
+          </figure>
+
+          <h4>1. Build the synthetic corpus</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> <code>test/fixtures/semantic/corpus.ts</code>: 12
+              original families × 20 cases. Splits are by family (4 dev, 8 sealed holdout). Cover
+              descriptive names, generic names ("button", "click here", "more"), filename-like alt,
+              duplicates that context can and cannot distinguish, misleading names, and non-English
+              names.
+            </li>
+            <li>
+              <code class="status">[]</code> No deliberately adversarial or injection cases: the
+              terms review records <code>adversarialTesting: "not-permitted"</code>.
+            </li>
+          </ul>
+
+          <h4>2. Freeze the review protocol</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> <code>specs/semantic-review-protocol.md</code>, rubric
+              <code>semantic-naming@1</code>. Questions for one target in one request:
+              <ul>
+                <li>
+                  descriptive in context: a <code>score</code> with situation-described levels;
+                </li>
+                <li>generic: a <code>noul</code>;</li>
+                <li>filename-like alt: a <code>noul</code>, for <code>image-alt</code> only;</li>
+                <li>
+                  distinguishable from same-named controls: a <code>noul</code>, only when the
+                  same-name count is 2 or more.
+                </li>
+              </ul>
+              Every question has an explicit exit (<code>insufficient-evidence</code>).
+            </li>
+            <li>
+              <code class="status">[]</code> Floor/bar rule, fixed before selection:
+              <ul>
+                <li>
+                  The <em>bar</em> is the smallest grid threshold (0.50–0.95) at which dev flags
+                  reach at least 98% precision.
+                </li>
+                <li>
+                  The <em>floor</em> is the largest threshold below the bar at which review-band
+                  precision stays at least 50%.
+                </li>
+                <li>
+                  Thresholds are pooled over at least 3 repeated dev runs, because Jev varied
+                  between identical requests. If no bar qualifies, the arm only ever reviews.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <code class="status">[]</code> Metrics: flag precision and recall, review-queue size,
+              abstention, Brier, uncached latency p50/p95, cost per 1,000 targets, and run-to-run
+              agreement. Adoption bar, fixed now: flag precision ≥ 98% at flag coverage ≥ 20% of
+              true positives, and at least 10 points more recall than the heuristic at matched
+              precision.
+            </li>
+            <li>
+              <code class="status">[]</code> Pin the protocol digest (a
+              <code>tools/frozen-protocol.json</code>-style pin for this protocol) and refuse
+              evaluation otherwise.
+            </li>
+          </ul>
+
+          <h4>3. Implement the arms and the evaluator</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> <code>src/review/heuristic.ts</code>: generic-name
+              list, filename regex for alt and duplicate-name detection; abstains otherwise.
+            </li>
+            <li>
+              <code class="status">[]</code> <code>src/host/semantic-review.ts</code>: Jev and Haiku
+              adapters over <code>BoundedTransport</code>, with strict answer validation,
+              exact-input cache keyed by rubric, redaction and capture versions, and no logging.
+            </li>
+            <li>
+              <code class="status">[]</code> <code>SemanticReviewCandidate</code> in
+              <code>src/review/contracts.ts</code>: target, question, disposition
+              (<code>flag</code>, <code>review</code> or <code>abstain</code>), probabilities,
+              rubric, model and gate versions, and state digest. Stored beside the scan, never
+              inside it.
+            </li>
+            <li>
+              <code class="status">[]</code> <code>tools/evaluate-semantic.ts</code> +
+              <code>tools/semantic.eval.ts</code> in a new vitest project <code>semantic</code>,
+              scripted as <code>pnpm eval:semantic</code>. Per-arm approval records
+              (<code>PROPELLR_SEMANTIC_*_APPROVAL</code>), the holdout sealed, the pinned protocol
+              verified.
+            </li>
+            <li>
+              <code class="status">[]</code> Generalize the labeling sheet and comparison to take a
+              question set (<code>--corpus semantic</code>), keeping the opaque pages, the private
+              key and blind export.
+            </li>
+            <li>
+              <code class="status">[]</code> Stop for approval: protocol, arms, spend caps per arm,
+              text disclosure and labeler time.
+            </li>
+          </ul>
+
+          <h4>4. Testing Strategy</h4>
+          <p>
+            No-key loopback tests mirror phase 2's adapter tests: request shape, invalid responses,
+            status handling and spend reservation. Pure tests cover the heuristic, the floor/bar
+            selection (edge cases and re-derivation from committed evidence) and scoring. An
+            isolation test proves candidates never change <code>reportScan</code> or
+            <code>applyGate</code>. A real Chromium run checks the generalized labeling sheet.
+          </p>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code>
+              <code>npm exec --yes --package=pnpm@12.4.1 -- pnpm validate</code> — all suites pass,
+              including <code>test/components/semantic-review.test.ts</code>.
+            </li>
+            <li>
+              <code class="status">[]</code>
+              <code
+                >npm exec --yes --package=pnpm@12.4.1 -- pnpm eval:semantic -- --arm heuristic
+                --split dev</code
+              >
+              — the heuristic lane scores all 80 dev cases with no provider call.
+            </li>
+            <li>
+              <code class="status">[]</code>
+              <code
+                >npm exec --yes --package=pnpm@12.4.1 -- pnpm eval:semantic -- --arm jev --split
+                dev; test $? -eq 2</code
+              >
+              — refused without an approval record and key.
+            </li>
+          </ul>
+          <div class="loop">
+            🔁 <strong>Do not exit this phase until every box above is checked.</strong>
+            If any command fails, fix the cause and re-run — loop until all pass.
+          </div>
+        </div>
+
+        <div class="phase">
+          <h3><code class="status">[]</code> Phase 3: Pilot evaluation</h3>
+          <p>
+            Live dev runs within the approved caps, the gate frozen from dev, two-person
+            adjudication, then the sealed holdout exactly once for all three arms.
+          </p>
+
+          <h4>1. Dev runs and gate derivation</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> Run Jev and Haiku on dev at least 3 times each, keys
+              loaded per run from the 0600 env file. Scan every output for key values.
+            </li>
+            <li>
+              <code class="status">[]</code> Derive each arm's floor and bar from the pooled dev
+              runs. Commit the derivation evidence and a re-derivation test. Amend the protocol to
+              record the thresholds, then re-pin.
+            </li>
+          </ul>
+
+          <h4>2. Adjudication</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> Generate the semantic labeling sheet. Tony and one
+              colleague label all 240 cases independently.
+            </li>
+            <li>
+              <code class="status">[]</code> <code>pnpm labels:compare</code>: record agreement,
+              kappa and every disagreement. Amend the protocol to state how adjudicated labels
+              become truth (disagreements are excluded or kept as their own category, not averaged).
+            </li>
+          </ul>
+
+          <h4>3. Holdout, once</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> Run all three arms on the holdout exactly once under
+              the frozen protocol. Archive the results without OS metadata and write
+              <code>specs/semantic-review-validation.md</code>.
+            </li>
+            <li>
+              <code class="status">[]</code> Adoption decision per arm against the frozen bar.
+              Report everything, including failures. Stop for Tony's decision.
+            </li>
+          </ul>
+
+          <h4>4. Testing Strategy</h4>
+          <p>
+            Evidence integrity rather than new code: manifests hash every archived file, a test
+            re-derives the gates, and the holdout runs under the pinned digest.
+          </p>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code>
+              <code>npm exec --yes --package=pnpm@12.4.1 -- pnpm validate</code> — the re-derivation
+              test and all suites pass on the evidence commit.
+            </li>
+            <li>
+              <code class="status">[]</code>
+              <code
+                >for f in specs/semantic-review-evidence/*.tar.gz; do tar tzf "$f" | grep -c '/\._';
+                done</code
+              >
+              — no OS metadata in any archive.
+            </li>
+          </ul>
+          <div class="loop">
+            🔁 <strong>Do not exit this phase until every box above is checked.</strong>
+            If any command fails, fix the cause and re-run — loop until all pass.
+          </div>
+        </div>
+
+        <div class="phase">
+          <h3>
+            <code class="status">[]</code> Phase 4: Opt-in <code>semantic-review@1</code> capability
+            (only if an arm is adopted)
+          </h3>
+          <p>
+            Expose adopted review to agents and clients as advisory output. The baseline scan never
+            waits for it and never depends on the network.
+          </p>
+
+          <h4>1. Host capability</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> Advertise <code>semantic-review@1</code> in
+              <code>src/host/runtime.ts</code> only when configured. Add an IPC op
+              <code>reviewSemantics</code> over a completed scan with text capture.
+            </li>
+            <li>
+              <code class="status">[]</code> States: <code>advised</code>, <code>abstained</code>,
+              <code>unavailable</code> and <code>stale</code>, all distinct. Bounded queue, total
+              deadline, spend ceilings, circuit breaker, exact-input cache; late replies are
+              historical only.
+            </li>
+            <li>
+              <code class="status">[]</code> Synthetic-only disclosure is enforced until a separate
+              customer-data approval (retention, ZDR, residency) exists.
+            </li>
+          </ul>
+
+          <h4>2. Testing Strategy</h4>
+          <p>
+            Host IPC tests with a loopback provider: capability advertisement, every state,
+            cancellation, eviction, spend exhaustion, and baseline scan and gate results identical
+            with review off, unavailable or slow.
+          </p>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code>
+              <code>npm exec --yes --package=pnpm@12.4.1 -- pnpm validate</code> — host, component
+              and isolation suites pass.
+            </li>
+          </ul>
+          <div class="loop">
+            🔁 <strong>Do not exit this phase until every box above is checked.</strong>
+            If any command fails, fix the cause and re-run — loop until all pass.
+          </div>
+        </div>
+
+        <div class="phase">
+          <h3>
+            <code class="status">[]</code> Phase 5: Triage at scale (outline; each item needs its
+            own protocol)
+          </h3>
+          <p>
+            These are ten-levels levels 3, 5 and 9 applied to findings. Each item follows the phase
+            2–3 pattern: freeze, dev, adjudicate, run the holdout once.
+          </p>
+
+          <h4>1. Impact scoring</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> Factor <code>score</code>s per finding (task
+              criticality, reach, user impact), with weights in code and never sent to Jev. Output
+              is an ordered queue that is advisory, beside the unchanged <code>impact</code> field.
+            </li>
+          </ul>
+          <h4>2. Routing</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> A <code>choice</code> among fix recipe, coding agent,
+              vision model or human, with an exit option. Measured by wrong-route cost, not accuracy
+              alone.
+            </li>
+          </ul>
+          <h4>3. Source localization for uninstrumented apps</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> A per-file question block over repository globs, capped
+              at 255 in code and run in parallel, then one <code>choice</code> keyed by path. Truth
+              comes from the bridge-instrumented Vue fixture (<code>sourceRef</code>). Source code
+              is customer data, so this needs its own disclosure approval.
+            </li>
+          </ul>
+          <h4>4. Testing Strategy</h4>
+          <p>
+            Each item gets pure tests for its code-side combiner, loopback adapter tests, and its
+            own gated evaluation lane.
+          </p>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code>
+              <code>npm exec --yes --package=pnpm@12.4.1 -- pnpm validate</code> — all suites pass
+              after each item lands.
+            </li>
+          </ul>
+          <div class="loop">
+            🔁 <strong>Do not exit this phase until every box above is checked.</strong>
+            If any command fails, fix the cause and re-run — loop until all pass.
+          </div>
+        </div>
+
+        <div class="phase">
+          <h3><code class="status">[]</code> Phase 6: Agent-loop guard (outline)</h3>
+          <p>
+            Ten-levels levels 6, 8 and 10 applied to Propellr's IPC delivery to agents. These are
+            signals, never controls.
+          </p>
+
+          <h4>1. Result screen</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> Screen page-derived text in repair views sent to
+              agents, and flag instruction-like content with a banner. This is blocked until
+              TypeSafe clarifies in writing whether injection-screen evaluation counts as
+              adversarial testing.
+            </li>
+          </ul>
+          <h4>2. Cheap reads</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> An IPC op where the agent asks closed questions (choice
+              with 255 or fewer options, noul, score) about host-assembled, redacted page state,
+              instead of loading DOM dumps into its context.
+            </li>
+          </ul>
+          <h4>3. Claim checks</h4>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code> Typed agent claims ("fixed", "tested") checked against
+              scan and checkpoint evidence. Exact checks come first in code; Jev only judges whether
+              the wording overstates the evidence.
+            </li>
+          </ul>
+          <h4>4. Testing Strategy</h4>
+          <p>
+            IPC tests for each op, covering permission, freshness and staleness. A guard failure
+            never blocks or alters baseline results.
+          </p>
+          <ul class="checklist">
+            <li>
+              <code class="status">[]</code>
+              <code>npm exec --yes --package=pnpm@12.4.1 -- pnpm validate</code> — all suites pass
+              after each item lands.
+            </li>
+          </ul>
+          <div class="loop">
+            🔁 <strong>Do not exit this phase until every box above is checked.</strong>
+            If any command fails, fix the cause and re-run — loop until all pass.
+          </div>
+        </div>
+      </section>
+
+      <section id="validation">
+        <h2>Validation Commands</h2>
+        <p>Execute these commands to validate the entire plan is complete:</p>
+        <ul class="checklist">
+          <li>
+            <code class="status">[]</code>
+            <code>npm exec --yes --package=pnpm@12.4.1 -- pnpm validate</code> — full pinned
+            validation on <code>main</code>.
+          </li>
+          <li>
+            <code class="status">[]</code>
+            <code
+              >npm exec --yes --package=pnpm@12.4.1 -- pnpm eval:semantic -- --arm heuristic --split
+              dev</code
+            >
+            — the review lane runs end to end without providers.
+          </li>
+          <li>
+            <code class="status">[]</code>
+            <code
+              >node -e 'const c=require("crypto"),f=require("fs");const
+              p=JSON.parse(f.readFileSync("tools/frozen-protocol.json","utf8"));process.exit(c.createHash("sha256").update(f.readFileSync(p.path)).digest("hex")===p.sha256?0:1)'</code
+            >
+            — the phase 2 protocol pin still matches (the semantic protocol pin is checked by its
+            own test).
+          </li>
+          <li>
+            <code class="status">[]</code>
+            <code
+              >python3 /Users/tk/.claude/skills/planf3/scripts/validate_plan.py
+              specs/propellr-jev-semantic-review.html</code
+            >
+            — this plan stays structurally valid after status updates.
+          </li>
+        </ul>
+        <div class="loop">
+          🔁
+          <strong
+            >The plan is not complete until every box is checked and every command passes. If for
+            some reason a step is not possible to complete, mark it with [f] and move on if
+            possible.</strong
+          >
+        </div>
+      </section>
+
+      <section id="notes">
+        <h2>Notes</h2>
+
+        <h3>Decisions needed from Tony</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Phase</th>
+              <th>Decision</th>
+              <th>Default if unanswered</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0</td>
+              <td>Close or keep #24; whether the attribution holdout still runs</td>
+              <td>Keep #24 as a draft; no attribution holdout</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Approve the text-capture fields, bounds, redaction and synthetic-only egress</td>
+              <td>Blocked: no text leaves the browser</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>New per-arm spend caps and approval records for the semantic lane</td>
+              <td>Blocked: heuristic lane only</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Labeler time for 240 cases (Tony plus one colleague)</td>
+              <td>Blocked: no holdout run</td>
+            </tr>
+            <tr>
+              <td>4+</td>
+              <td>Customer-data disclosure terms (retention, ZDR, residency)</td>
+              <td>Synthetic only</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>Written TypeSafe clarification on injection-screen evaluation</td>
+              <td>Result screen not built</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Why this order</h3>
+        <ul>
+          <li>
+            <strong>Text first.</strong> Every recommended use needs meaningful state. Without phase
+            1, a Jev evaluation repeats phase 2's result: the same signal as the heuristic, so no
+            added value.
+          </li>
+          <li>
+            <strong>Naming review first among uses.</strong> Its population, the targets of existing
+            naming rules, already exists. Its questions are narrow snap judgments (the ten-levels
+            rules), and its output fits the recommended review-candidate lane without touching
+            verdicts.
+          </li>
+          <li>
+            <strong>Scale and agent tracks later.</strong> They need either customer data (source
+            files, real pages) or terms clarification, and they depend on the review lane's
+            plumbing.
+          </li>
+        </ul>
+
+        <h3>Capacity arithmetic (illustrative, not measured)</h3>
+        <p>
+          At about 300 input tokens per target, a million targets cost about $13 at $0.042 per
+          million tokens. The published limits (1,200 requests a minute, 250,000 tokens a second,
+          subject to change) bind first. Batching about 20 targets per page request gives about
+          50,000 requests, roughly 40 minutes per million targets. Batching conflicts with the
+          "isolate the state" rule, so the pilot tests both per-target and per-page requests on dev
+          before freezing one.
+        </p>
+
+        <h3>Risks</h3>
+        <ul>
+          <li>
+            <strong>Nondeterminism.</strong> Jev's confidence moved 0.75 → 0.79 on identical
+            requests in phase 2. Mitigations: pooled repeated dev runs, run-to-run agreement
+            reported, and a margin disclosed next to every threshold.
+          </li>
+          <li>
+            <strong>Privacy.</strong> Name strings can carry personal data. Mitigations: redaction
+            before egress, synthetic-only disclosure, capture off by default, and leak tests in
+            validate.
+          </li>
+          <li>
+            <strong>Label cost.</strong> 240 cases × 2 people; the sheet's copy-to-identical feature
+            reduces effort but is flagged in exports.
+          </li>
+          <li>
+            <strong>Scope creep.</strong> Error-message recovery (3.3.3) and consistent
+            identification across pages (3.2.4) need captures beyond naming targets. They are
+            deferred to a later protocol, not added to the pilot.
+          </li>
+        </ul>
+
+        <h3>Rejected alternatives</h3>
+        <ul>
+          <li>
+            Continuing to tune Jev for component attribution: it is a structural question that code
+            answers for free.
+          </li>
+          <li>
+            Jev in the rule verdict path, gate waivers or scan skipping: this violates the
+            separation of verdicts and gates in AGENTS.md.
+          </li>
+          <li>
+            Image judgments: Jev is text-only. A vision provider would be a separate evidence
+            channel with its own costs.
+          </li>
+          <li>Per-node or per-mutation calls: the rate limits cannot sustain them.</li>
+          <li>Distilling Jev's outputs into a local model: the MCA restricts it.</li>
+        </ul>
+      </section>
+
+      <section id="amendments">
+        <h2>Amendments</h2>
+        <p>None yet. Amendments are appended here after the plan is first executed.</p>
+      </section>
+    </main>
+  </body>
+</html>
