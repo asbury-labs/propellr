@@ -1,0 +1,21 @@
+{
+  "provider": "anthropic",
+  "model": "claude-haiku-4-5-20251001",
+  "client": {
+    "endpoint": "https://api.anthropic.com/v1/messages",
+    "adapter": "propellr-component-llm/1"
+  },
+  "approvedBy": "Tony",
+  "date": "2026-09-28",
+  "reference": "verbal approval in Claude Code session, 2026-09-28",
+  "syntheticDisclosureOnly": true,
+  "usagePolicy": {
+    "outputReuse": "evaluation-only",
+    "distillation": "prohibited",
+    "adversarialTesting": "not-permitted"
+  },
+  "maxRequests": 300,
+  "maxSpendUsd": 1,
+  "pricePerMillionInputTokensUsd": 1,
+  "pricePerMillionOutputTokensUsd": 5
+}

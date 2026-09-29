@@ -184,7 +184,7 @@ test("chromium: provider decisions are scored against the same oracle and the fr
                       },
                       cause: { type: "noul", noul: 0.5 },
                     },
-                    usage: { inputTokens: 100 },
+                    usage: { inputTokens: 100, outputTokens: 0 },
                     attempts: 1,
                     cached: false,
                   } as const);
@@ -690,20 +690,24 @@ describe("decision adapter without keys", () => {
   });
 
   test("request and spend ceilings stop sending before the provider is called", async () => {
+    const bytes = Buffer.byteLength(JSON.stringify(decisionRequest(input)), "utf8");
+    const bound = (bytes * 0.042) / 1_000_000;
+    // Hit 1 reports usage equal to the byte bound; hit 3 over-reports; others report little.
     const { client, hits } = await serve((_, response, hit) =>
       json(
         response,
         200,
-        valid(hit === 3 ? { usage: { input_tokens: 500_000, output_tokens: 0 } } : {}),
+        valid({
+          usage: { input_tokens: hit === 1 ? bytes : hit === 3 ? 500_000 : 10, output_tokens: 0 },
+        }),
       ),
     );
-    const bytes = Buffer.byteLength(JSON.stringify(decisionRequest(input)), "utf8");
-    const bound = (bytes * 0.042) / 1_000_000;
-    // Room for one request-byte upper bound, not two.
+    // Room for one reservation once the first call's reported cost replaces its own.
     const spend = client({
       budget: { maxRequests: 100, maxSpendUsd: bound * 1.5, pricePerMillionInputTokensUsd: 0.042 },
     });
     expect(await spend.decide(input, signal())).toMatchObject({ state: "answered" });
+    expect(spend.usage.spentUsd).toBeCloseTo(bound, 12);
     expect(await spend.decide({ ...input, target: "span" }, signal())).toMatchObject({
       state: "failed",
       code: "budget-exhausted",
@@ -875,7 +879,10 @@ test("the evaluation entry point enforces providers, split and key when run dire
       },
       "frozen protocol path and hash",
     ],
-    [{ PROPELLR_EVAL_PROVIDER: "llm", PROPELLR_EVAL_SPLIT: "dev" }, "provider llm is not approved"],
+    [
+      { PROPELLR_EVAL_PROVIDER: "llm", PROPELLR_EVAL_SPLIT: "dev" },
+      "provider key missing (ANTHROPIC_API_KEY)",
+    ],
     [
       { PROPELLR_EVAL_PROVIDER: "other", PROPELLR_EVAL_SPLIT: "dev" },
       "provider other is not approved",
@@ -909,7 +916,7 @@ test("eval:components refuses provider arms without approval and keeps the holdo
     });
   for (const [args, message] of [
     [["--provider", "jev"], "approval record missing"],
-    [["--provider", "llm"], "no structured-output LLM client"],
+    [["--provider", "llm"], "LLM approval record missing"],
     [["--split", "holdout"], "holdout is sealed"],
     [["--provider", "jev", "--split", "holdout"], "approval record missing"],
     [["--protocol", "README.md"], "may bind an evaluation"],

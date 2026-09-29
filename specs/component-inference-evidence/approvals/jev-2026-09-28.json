@@ -1,0 +1,22 @@
+{
+  "provider": "typesafe",
+  "model": "jev-1.13.0",
+  "client": {
+    "endpoint": "https://api.typesafe.ai/v1/systemone",
+    "adapter": "propellr-component-decisions/1"
+  },
+  "approvedBy": "Tony",
+  "date": "2026-09-28",
+  "syntheticDisclosureOnly": true,
+  "termsReview": {
+    "reference": "verbal approval in Claude Code session, 2026-09-28",
+    "reviewedBy": "Tony",
+    "date": "2026-09-28",
+    "outputReuse": "evaluation-only",
+    "distillation": "prohibited",
+    "adversarialTesting": "not-permitted"
+  },
+  "maxRequests": 300,
+  "maxSpendUsd": 1,
+  "pricePerMillionInputTokensUsd": 0.042
+}
