@@ -1,0 +1,138 @@
+{
+  "state": "phase-2-dev-rubric2-complete",
+  "decision": "Neither provider adopted; inference disabled; holdout sealed",
+  "created": "2026-09-29T04:32:22.049Z",
+  "protocol": "specs/component-inference-protocol.md",
+  "protocolSha256": "7b434a1ec9d6477cbeec0ecc5b18bce40d39d344d2d9e1f2c1d2ea1b2e04a168",
+  "rubric": "component-attribution-questions@2",
+  "previousResults": "rubric-1 results remain in phase-2-dev-live-manifest.json",
+  "branch": "feat/component-part-rubric",
+  "agent": "claude-code / claude-opus-5-5",
+  "split": "dev",
+  "labels": "instrumented-oracle, not adjudicated",
+  "validate": {
+    "exitCode": 0,
+    "tests": 321,
+    "log": "artifacts/component-live-r2/validate.log"
+  },
+  "heuristic": {
+    "version": "structural-template/1",
+    "pooled": {
+      "cases": 80,
+      "candidateRecall": 0.75,
+      "coverage": 1,
+      "decisionPrecision": 0.75,
+      "decisionRecall": 0.75,
+      "pairwisePrecision": 0.868421052631579,
+      "pairwiseRecall": 1,
+      "overmerge": 100,
+      "oversplit": 0
+    }
+  },
+  "jev": {
+    "model": "jev-1.13.0",
+    "requests": 3,
+    "spentUsd": 0.00013822200000000002,
+    "cumulative": {
+      "requests": 6,
+      "spentUsd": 0.000259686,
+      "cap": {
+        "requests": 300,
+        "spendUsd": 1
+      }
+    },
+    "decisions": 80,
+    "answered": 80,
+    "cached": 77,
+    "distinctInputs": 3,
+    "uncachedLatencyMs": [319, 176, 152],
+    "pooled": {
+      "cases": 80,
+      "candidateRecall": 0.75,
+      "coverage": 1,
+      "decisionPrecision": 0.75,
+      "decisionRecall": 0.75,
+      "pairwisePrecision": 0.868421052631579,
+      "pairwiseRecall": 1,
+      "overmerge": 100,
+      "oversplit": 0
+    },
+    "calibration": {
+      "decided": 80,
+      "brier": 0.14509999999999995
+    },
+    "adoption": {
+      "eligible": false,
+      "checks": {
+        "precision": false,
+        "coverage": true,
+        "pairwisePrecision": false,
+        "causePromotions": true,
+        "incrementalCoverage": false
+      },
+      "adopted": false
+    }
+  },
+  "llm": {
+    "model": "claude-haiku-4-5-20251001",
+    "requests": 3,
+    "spentUsd": 0.004445000000000001,
+    "cumulative": {
+      "requests": 6,
+      "spentUsd": 0.008509000000000003,
+      "cap": {
+        "requests": 300,
+        "spendUsd": 1
+      }
+    },
+    "decisions": 80,
+    "answered": 80,
+    "cached": 77,
+    "distinctInputs": 3,
+    "uncachedLatencyMs": [2149, 1758, 1189],
+    "pooled": {
+      "cases": 80,
+      "candidateRecall": 0.75,
+      "coverage": 1,
+      "decisionPrecision": 0.75,
+      "decisionRecall": 0.75,
+      "pairwisePrecision": 0.868421052631579,
+      "pairwiseRecall": 1,
+      "overmerge": 100,
+      "oversplit": 0
+    },
+    "calibration": {
+      "decided": 80,
+      "brier": 0.1875000000000001
+    },
+    "adoption": {
+      "eligible": false,
+      "checks": {
+        "precision": false,
+        "coverage": true,
+        "pairwisePrecision": false,
+        "causePromotions": true,
+        "incrementalCoverage": false
+      },
+      "adopted": false
+    }
+  },
+  "findings": [
+    "Under rubric 2 both providers answer the root-exclusive part (button); Haiku now forms groups (pairwise precision 0.868, as Jev and the heuristic).",
+    "All three arms still choose ancestor-1 for every target; decision precision 0.75 each (cart-callsites 0). No incremental coverage.",
+    "The 80 dev targets reduce to 3 distinct structural inputs; dev carries little signal."
+  ],
+  "archive": {
+    "path": "specs/component-inference-evidence/phase-2-dev-rubric2-results.tar.gz",
+    "sha256": "bf9d6f6620696aa70fc23c43834c0f8bf846ac15a2f33f21b05697ccbc7395c9"
+  },
+  "archivedFiles": {
+    "artifacts/components/eval-heuristic-dev.json": "e001bc5620a6eb66268577984dedd322e31b99131194c458d3b520d55b5855a1",
+    "artifacts/components/eval-jev-dev.json": "c9e71547628522810e9584c506b4478dcc5199ca7dd3f929f5f6559585d0332c",
+    "artifacts/components/eval-llm-dev.json": "ef0decc668eb0daadc7f5837335d36676979c3e59d9a8f2907a46d7dcb1adcef",
+    "artifacts/component-live-r2/eval-heuristic-dev.log": "6843727ebbd100d094b8d48d6374f753129b3d126c7db33c3fe510068d9d2c12",
+    "artifacts/component-live-r2/eval-jev-dev.log": "82aed7a8bf5bd18cdc13247ee5cec37d346669fd6750a289082373b5e8ad0d23",
+    "artifacts/component-live-r2/eval-llm-dev.log": "e1266240247906e5a1ffc0b3189a2932874c2f67edf00f3bf3064b796775089a",
+    "artifacts/component-live-r2/validate.log": "c1dd6312a6235ed7d1b8ad645883add0ee77bf25da0611df701c32a0d16fbd56"
+  }
+}

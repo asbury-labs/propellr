@@ -323,5 +323,35 @@ Evidence: [manifest](component-inference-evidence/phase-2-dev-live-manifest.json
 reports, eval logs and the `pnpm validate` log), archive SHA-256
 `2dd9a6bf7e87294787354d1116bb812ead3c40a3750aac26ff904bfc9c3fd824`.
 
-To resume: decide on the part-rubric amendment. Then collect both adjudicators' labels and run all
-three arms on the sealed holdout exactly once, against the frozen adoption bar.
+## Part rubric 2 and dev rerun, September 29, 2026
+
+The part question was reworded before any holdout use (protocol amendment of September 29,
+rubric `component-attribution-questions@2`). Each option now names the candidate it pairs with,
+starts directly below that candidate's root and excludes the root's own label. Scoring, options,
+corpus and adoption bar are unchanged. The rubric 1 results above stay on record.
+
+Pinned `pnpm validate` passed all 321 tests (68 contract, 44 host, 13 playbook, 80
+parity/browser, 98 component, 18 reporting). A new test checks the rubric 2 wording. All three
+arms reran on dev under the re-pinned protocol (`7b434a1e…`):
+
+| Arm                     | Requests | Spend    | Decision precision | Pairwise precision | Brier |
+| ----------------------- | -------- | -------- | ------------------ | ------------------ | ----- |
+| `structural-template/1` | 0        | $0       | 0.75               | 0.868              | n/a   |
+| Jev `jev-1.13.0`        | 3        | $0.00014 | 0.75               | 0.868              | 0.145 |
+| Haiku 4.5               | 3        | $0.0044  | 0.75               | 0.868              | 0.188 |
+
+- **The ambiguity is resolved.** Both providers now answer the root-exclusive part (`button`), and
+  Haiku forms the same repair groups as Jev and the heuristic.
+- **Membership is unchanged.** All three arms still choose `ancestor-1` for every target, so
+  neither provider adds coverage. **Neither is adopted.**
+- **Cumulative spend against the approved caps (300 requests, $1.00 per arm):** Jev 6 requests and
+  $0.00026; Haiku 6 requests and $0.0085.
+- Uncached latency: Jev 0.15–0.32 s; Haiku 1.2–2.1 s. Latency is reported, not an adoption
+  criterion. The report's p50/p95 include cache hits.
+
+Evidence: [manifest](component-inference-evidence/phase-2-dev-rubric2-manifest.json) and
+[raw archive](component-inference-evidence/phase-2-dev-rubric2-results.tar.gz), archive SHA-256
+`bf9d6f6620696aa70fc23c43834c0f8bf846ac15a2f33f21b05697ccbc7395c9`.
+
+To resume: collect both adjudicators' labels, then run all three arms on the sealed holdout
+exactly once under rubric 2, against the frozen adoption bar.
