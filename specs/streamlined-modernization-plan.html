@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan: The next accessibility engine</title>
+<style>
+  
+  :root {
+    --bg:            #000000;
+    --paper-2:       #080808;
+    --ink:           #ffffff;
+    --muted:         #c0c0c0;
+    --soft:          #a0a0a0;
+    --rule:          rgba(255, 255, 255, 0.2);
+    --rule-solid:    #333333;
+    --accent:        #88e0c0;
+    --accent-tint:   rgba(136, 224, 192, 0.08);
+
+    --sans:  ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono:  ui-monospace, SFMono-Regular, Menlo, monospace;
+    --serif: ui-serif, 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 4rem 1.5rem 6rem;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  main { max-width: 60rem; margin: 0 auto; }
+
+  h1 {
+    font-family: var(--sans);
+    font-size: 2.5rem;
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin: 0 0 1rem;
+  }
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    margin: 3.5rem 0 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  h3 { font-size: 1.0625rem; font-weight: 600; margin: 2rem 0 0.5rem; }
+  h4 {
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 1.5rem 0 0.5rem;
+  }
+  p  { margin: 0 0 1rem; max-width: 46rem; }
+  a  { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.85em;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 0;
+    padding: 0.1em 0.35em;
+  }
+  pre {
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; }
+
+  
+  header { margin-bottom: 2.5rem; }
+  details.meta {
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    background: var(--paper-2);
+    padding: 0.625rem 1rem;
+    font-size: 0.8125rem;
+  }
+  details.meta summary {
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  details.meta dl {
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    gap: 0.25rem 1rem;
+    margin: 0.875rem 0 0.25rem;
+  }
+  details.meta dt {
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--soft);
+    padding-top: 0.15rem;
+  }
+  details.meta dd { margin: 0; color: var(--muted); font-family: var(--mono); font-size: 0.75rem; word-break: break-word; }
+
+  
+  figure {
+    margin: 2rem auto;
+    padding: 0;
+    text-align: center;
+  }
+  figure svg, figure img { display: block; width: 100%; max-width: 100%; height: auto; margin: 0 auto; }
+  figcaption {
+    margin-top: 0.875rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--soft);
+    max-width: 40rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  
+  table { border-collapse: collapse; width: 100%; font-size: 0.875rem; margin: 0 0 1rem; }
+  th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th {
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--soft);
+    font-weight: 500;
+  }
+  td code { white-space: nowrap; }
+
+  
+  .files ul { list-style: none; padding: 0; margin: 0 0 1rem; }
+  .files li { padding: 0.375rem 0; border-bottom: 1px solid var(--rule); font-size: 0.9375rem; }
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 2px;
+    padding: 0.1rem 0.35rem;
+    margin-right: 0.4rem;
+    border: 1px solid;
+  }
+  .tag.existing { color: var(--muted); border-color: var(--rule-solid); }
+  .tag.new      { color: var(--accent); border-color: var(--accent); background: var(--accent-tint); }
+
+  
+  .phase {
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    padding: 1.25rem 1.5rem 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .phase h3 { margin-top: 0.25rem; }
+  ul.checklist { list-style: none; padding: 0; margin: 0 0 1rem; }
+  ul.checklist li { padding: 0.25rem 0; font-size: 0.9375rem; line-height: 1.55; }
+  code.status {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--soft);
+    background: none;
+    padding: 0;
+    margin-right: 0.4rem;
+  }
+  .loop {
+    border-left: 2px solid var(--accent);
+    background: var(--accent-tint);
+    border-radius: 0 4px 4px 0;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+  .loop strong { color: var(--ink); }
+
+  
+  #questionables details, #notes details, #amendments details {
+    border-bottom: 1px solid var(--rule);
+    padding: 0.625rem 0;
+  }
+  #questionables summary, #notes summary, #amendments summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9375rem;
+  }
+  .qa-answer, #amendments details p { margin: 0.5rem 0 0; color: var(--muted); font-size: 0.9375rem; }
+
+  .phase { background: none; border: 0; border-top: 1px solid var(--rule); padding: 1.25rem 0; }
+  .table-scroll, .figure-scroll { overflow-x: auto; }
+  .table-scroll table { min-width: 40rem; }
+  .figure-scroll svg { min-width: 42rem; }
+  td code { white-space: normal; overflow-wrap: anywhere; }
+  li { margin-bottom: 0.35rem; }
+  nav { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; margin-top: 1.5rem; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  @media (max-width: 600px) {
+    body { padding: 2rem 1rem 4rem; }
+    h1 { font-size: 2rem; }
+    details.meta dl { grid-template-columns: 1fr; }
+    details.meta dd { margin-bottom: 0.5rem; }
+    th, td { padding: 0.5rem; }
+  }
+</style>
+</head>
+<body><main>
+<header>
+<h1>The next accessibility engine</h1>
+<p><strong>Turn accessibility expertise into executable enterprise policy.</strong> Modern tooling is the foundation. The opportunity is a faster, configurable engine where humans and AI agents can author trustworthy rules without learning axe's internals.</p>
+<details class="meta"><summary>Metadata</summary><dl>
+<dt>created</dt><dd>2026-09-11T14:07:41Z</dd>
+<dt>modified</dt><dd>2026-09-11T14:07:41Z; 2026-09-11T14:20:14Z</dd>
+<dt>commits</dt><dd>eb2ef403c4d1d12aed9e7cc711af37c1bfcc9f32</dd>
+<dt>agent name</dt><dd>pi / gpt-6-astra; pi / gpt-6-astra</dd>
+<dt>session id</dt><dd>01a090bd-8100-73bd-8d08-58611da5e584; 01a090bd-8100-73bd-8d08-58611da5e584</dd>
+<dt>back refs</dt><dd><a href="PRD-00-axe-core-modernization-overview.md">Master PRD</a>; <a href="PRD-01-type-system-modernization.md">Types PRD</a>; <a href="PRD-02-build-system-modernization.md">Build PRD</a>; <a href="PRD-03-test-infrastructure-modernization.md">Tests PRD</a>; <a href="PRD-04-rules-checks-optimization.md">Rules PRD</a>; <a href="plan-phase-03-test-infrastructure-modernization.md">Phase 3 plan</a></dd>
+<dt>forward refs</dt><dd>None. Proposed successor; implementation not started.</dd>
+</dl></details>
+<nav aria-label="Plan sections"><a href="#platform">Platform vision</a><a href="#problem">Evidence</a><a href="#recommendations">Recommendations</a><a href="#toolchain">Toolchain</a><a href="#phases">Execution</a><a href="#validation">Validation</a></nav>
+</header>
+
+<section id="purpose"><h2>Purpose</h2>
+<p>Build beyond a modernized axe-core: a programmable accessibility and design-system policy engine. Organizations should turn their component contracts, accessibility requirements and design decisions into versioned, testable rules. AI agents should help author and maintain those rules; deterministic execution and review should make them trustworthy.</p>
+<p><strong>Scope:</strong> modern tooling, engine architecture, rule-logic innovation, configurable policy packs, a typed rule-authoring SDK, an agent-facing contract and measured runtime acceleration. Preserve existing APIs through a compatibility facade while incubating a better engine underneath. Rule behavior can improve through explicitly reviewed changes; compatibility is a migration constraint, not a ban on invention.</p>
+<p><strong>Delivery:</strong> six slices cover foundation, tooling, core boundaries, a working policy/SDK pilot, acceleration and agent authoring, then retirement of old paths. Prototype the platform contract as soon as focused correctness gates exist; do not make a formatter migration or total legacy cleanup a prerequisite to learning. No automated publishing, live channels, customer-data ingestion or downstream-repo edits without separate authorization.</p>
+</section>
+
+<section id="problem"><h2>Problem: the current branch is between systems</h2>
+<p>Audit of <code>chore/modernize-phase-03</code> at <code>eb2ef403</code>, September 11, 2026. Specs and <code>CLAUDE.md</code> describe earlier states. Vite, Vitest and TypeScript files already exist. Treat them as migrated code needing verification, not completed phases.</p>
+<div class="table-scroll"><table><thead><tr><th>Finding</th><th>Evidence</th><th>Consequence</th></tr></thead><tbody>
+<tr><td>Engine typecheck is not wired.</td><td><code>packages/axe-core/package.json</code> has no <code>typecheck</code>. Direct <code>tsc --noEmit</code> returned 18 diagnostics: 16 constant reassignments in <code>uuid.ts</code>, two implicit parameters in generated config.</td><td>Root validation can omit the engine compiler entirely.</td></tr>
+<tr><td>Conformance suites are undiscovered.</td><td><code>vitest list test/act-rules/</code> and <code>vitest list test/aria-practices/</code> each returned no output, exit 0. Neither directory matches current project includes.</td><td>Test discovery success is not test execution. Add nonempty-suite checks.</td></tr>
+<tr><td>CI still speaks Karma/WebDriver.</td><td><code>.github/workflows/test.yml</code> and <code>nightly-tests.yml</code> pass <code>--browsers Chrome/Firefox</code>. Modern browser projects configure Chromium only. Root <code>validate</code> omits browser/integration tasks.</td><td>New runner and old CI do not describe the same test system.</td></tr>
+<tr><td>Build output gets rewritten after emission.</td><td><code>vite.config.ts</code> injects globals, mutates <code>globalThis.window/document</code> and regex-replaces a UMD return in <code>writeBundle</code>. <code>lib/index.ts</code> exports a second object.</td><td>Object identity, initialization, minification and source-map correctness are fragile.</td></tr>
+<tr><td>Tests mix fresh and stale artifacts.</td><td>Browser setup uses <code>dist/axe.js</code>; ACT/APG read package-root <code>axe.js</code>. Rule runner silently skips missing fixtures and unknown rules.</td><td>A green subset does not prove the current release artifact or fixture corpus.</td></tr>
+<tr><td>TypeScript conversion left weak boundaries.</td><td>Static text audit: 608 occurrences of <code>: any</code> in engine TS, 412 in tests; 354 test files declare ambient <code>axe</code>. Tests are excluded from engine tsconfig.</td><td>Extension changes are not a type-safety metric. Counts are approximate text indicators, not semantic type coverage.</td></tr>
+<tr><td>Infrastructure claims exceed implementation.</td><td>Build-tools build/test and schemas test are echo placeholders. Schemas exports CJS files its <code>tsc</code> build does not emit. Custom lint restrictions are listed in <code>oxlint-gaps.md</code>, but CI runs only Oxlint.</td><td>No-op checks and missing export targets can survive a nominal validation run.</td></tr>
+</tbody></table></div>
+<p><strong>Executed control:</strong> existing locale test passed 19 tests against the already-present bundle. No fresh build, full suite, browser run, CI run or performance benchmark was executed during planning.</p>
+</section>
+
+<section id="solution"><h2>Solution: a small engine with a powerful rule surface</h2>
+<p>Separate analysis, policy and execution so new rule logic no longer depends on ambient engine state or build-time string wiring. Keep existing checks usable through adapters; prove new contracts on real enterprise cases before migrating the full corpus. Lean code means fewer hidden dependencies, not fewer capabilities.</p>
+<p>PNPM, Vite, Vitest, Playwright, TypeScript and Oxc support this work. They are infrastructure choices, not the product strategy.</p>
+<figure><div class="figure-scroll"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 140" role="img" aria-labelledby="flow-title flow-desc">
+<title id="flow-title">From trusted engine to enterprise rule platform</title><desc id="flow-desc">Establish reliable evidence, expose a composable engine, prove enterprise policy packs, then enable agent authoring and incremental execution. These are four milestones across six delivery slices.</desc>
+<path d="M20 70H850" stroke="var(--rule)" stroke-width="2" fill="none"/>
+<g fill="var(--bg)" stroke="var(--accent)" stroke-width="2"><circle cx="70" cy="70" r="19"/><circle cx="310" cy="70" r="19"/><circle cx="550" cy="70" r="19"/><circle cx="790" cy="70" r="19"/></g>
+<g fill="var(--ink)" text-anchor="middle" font-family="var(--sans)" font-size="16"><text x="70" y="76">1</text><text x="310" y="76">2</text><text x="550" y="76">3</text><text x="790" y="76">4</text><text x="70" y="30">Trust evidence</text><text x="310" y="30">Compose rules</text><text x="550" y="30">Enforce policy</text><text x="790" y="30">Author with AI</text></g>
+<g fill="var(--muted)" text-anchor="middle" font-family="var(--sans)" font-size="14"><text x="70" y="118">Reliable baseline</text><text x="310" y="118">Explicit facts and scope</text><text x="550" y="118">Enterprise rule packs</text><text x="790" y="118">Fast, verified feedback</text></g>
+</svg></div><figcaption>Tooling enables the platform; it does not define its ceiling. Prove one end-to-end enterprise rule pack before broad migration.</figcaption></figure>
+
+<h3 id="recommendations">Pointed recommendations</h3>
+<div class="table-scroll"><table><thead><tr><th>Decision</th><th>Recommendation</th><th>Why</th></tr></thead><tbody>
+<tr><td><strong>Invest</strong></td><td>Make rule-logic innovation a primary workstream. Build a typed authoring contract, reusable analysis capabilities and enterprise policy packs. Keep legacy JSON behind an adapter while proving the new surface.</td><td>Renaming files is not innovation. Removing internal knowledge required to write a reliable rule is a product breakthrough worth pursuing.</td></tr>
+<tr><td><strong>Experiment</strong></td><td>Improve focus, contrast, relationship and geometry analysis through isolated, benchmarked experiments with expert-reviewed outcomes.</td><td>Modern APIs are candidates, not proofs: <code>:focus-visible</code> is still not focusability. Explicitly test new semantics rather than smuggling them into tooling changes.</td></tr>
+<tr><td><strong>Expose deliberately</strong></td><td>Incubate a public-facing rule SDK, machine-readable manifests and policy-pack composition. Separate a minimal engine entry from default built-in registration so genuine selective loading is possible.</td><td>Start with a real consumer and measured import graph. No catalog of WCAG exports or standalone schema product before the underlying contract works.</td></tr>
+<tr><td><strong>Keep</strong></td><td>Real-browser tests for DOM, layout, shadow DOM and rules. Node for pure utilities/build helpers. Retain a small jsdom consumer-compatibility suite.</td><td>Changing the test environment does not authorize dropping jsdom support for consumers. Remove proposed user-agent warnings from the future roadmap.</td></tr>
+<tr><td><strong>Converge</strong></td><td>Use Vitest for both browser tests and Node-hosted conformance orchestration; use Playwright library for full-page ACT/APG/navigation tests.</td><td>One runner, one browser download manager. Full HTML documents, scripts, styles, frames and origins must not be flattened into <code>innerHTML</code>.</td></tr>
+<tr><td><strong>Simplify</strong></td><td>Remove Turbo by default after baseline measurement. Use PNPM topological workspace builds and explicit root scripts. Retain Turbo only if correct caching saves at least 20% of measured end-to-end CI time.</td><td>Three packages, two largely helper packages, do not automatically justify another task graph. PNPM does support dependency-ordered recursive scripts. No remote cache service in scope.</td></tr>
+<tr><td><strong>Validate boundaries</strong></td><td>Use versioned schemas for agent-authored manifests, policy configuration and result evidence. Use inferred TS contracts internally; keep validation out of per-node hot loops.</td><td>Agent and enterprise inputs create a real schema use case. Validate data, not arbitrary code safety; expose schema documents without requiring Zod in consumer bundles.</td></tr>
+<tr><td><strong>Decouple</strong></td><td>Keep one source-owned default instance for compatibility, then introduce isolated engine instances with immutable effective policy and scan-scoped state.</td><td>Independent organizations, packs and tests must not share mutable configuration or caches. Explicit ownership replaces globals without inventing a dependency-injection framework.</td></tr>
+<tr><td><strong>Keep the contract</strong></td><td>Retain hand-written <code>axe.d.ts</code> until generated declarations pass real consumer tests. Then replace, not duplicate.</td><td>Generating declarations from <code>Record&lt;string, any&gt;</code> is a downgrade. Overloads, namespace exports and module resolution are public API.</td></tr>
+<tr><td><strong>Finish lint migration</strong></td><td>Port shadow-DOM and import-layer restrictions to supported Oxlint rules/plugins. Keep a narrowly scoped ESLint fallback only if required.</td><td>Dropping correctness rules to achieve one linter is not simplification. No generic lint framework or regex AST substitute.</td></tr>
+<tr><td><strong>One formatter</strong></td><td>Evaluate current Oxfmt on this corpus. Promote only after a reviewed, idempotent format-only diff; otherwise keep Prettier as sole hard gate.</td><td>Remove permanent dual-format checking. Package maturity and corpus behavior matter more than a version-name trigger. Existing Prettier gate stays until approval.</td></tr>
+<tr><td><strong>Measure</strong></td><td>Replace invented build, bundle and coverage targets with a reproducible baseline and explicit regression budgets.</td><td>No promised “10×” speedup or 40–50% size reduction without this repo's measurements.</td></tr>
+</tbody></table></div>
+
+<h3 id="platform">Platform architecture and enterprise wedge</h3>
+<p><strong>Existing axe already supports custom checks, rules and options through <code>axe.configure()</code>.</strong> The opportunity is to make that capability discoverable, composable, isolated, explainable and safe to extend. Inspection shows ambient scan state in <code>run-rules.ts</code>, selector gathering and per-check queues in <code>rule.ts</code>, and a module-owned string-keyed cache. These are candidate boundaries to improve, not proof that every current path is slow.</p>
+<div class="table-scroll"><table><thead><tr><th>Layer</th><th>Proposed contract</th><th>Architectural payoff</th></tr></thead><tbody>
+<tr><td>Analysis capabilities</td><td>Typed providers for accessible names, semantic roles, relationships, visibility, computed styles, geometry and component identity. Declare dependencies, scope and invalidation.</td><td>Rules request facts instead of importing engine internals or implementing accessibility algorithms repeatedly. Share work only when inputs and semantics match.</td></tr>
+<tr><td>Rule SDK</td><td>Namespaced/versioned identity; applicability; typed options; required capabilities; evaluator; evidence; standards or policy references; positive, negative and inconclusive fixtures.</td><td>Explicit context replaces ambient globals and dynamic <code>this</code> for new rules. Legacy adapters preserve <code>any/all/none</code>, after-functions, frame aggregation and custom-rule behavior.</td></tr>
+<tr><td>Policy compiler</td><td>Immutable resolved policy from pinned packs, organization requirements, project settings and component/state scopes. Reject ambiguous precedence, missing capabilities, conflicting versions and dependency cycles.</td><td>Configuration becomes explainable input with a stable digest, not a sequence of mutations whose order is hidden.</td></tr>
+<tr><td>Execution kernel</td><td>Plan selected rules and required facts; own scan state per instance; return evidence-bearing outcomes. Default entry preserves existing API; minimal entry imports no built-in pack by side effect.</td><td>Enables selective loading, reuse and incremental evaluation without requiring consumers to install a second engine.</td></tr>
+<tr><td>Agent surface</td><td>Machine-readable schemas, capability catalog, examples and structured CLI diagnostics. Author → validate → test → explain → propose a versioned pack.</td><td>Any capable coding agent can use the same supported contract. Start with CLI/library APIs; add a thin MCP adapter only for a demonstrated integration need.</td></tr>
+</tbody></table></div>
+<p><strong>Two authoring paths:</strong> a small declarative composition format for existing facts and predicates, plus a typed evaluator escape hatch for novel logic. Both produce one normalized rule contract. Do not build a general-purpose language or wrap arbitrary JavaScript in JSON. Add predicates because pilot rules need them, not to pre-design every future rule.</p>
+
+<h3>Enterprise configuration is a product surface</h3>
+<ul>
+<li><strong>Rule packs:</strong> package a versioned set of rules, option schemas, fixtures, documentation references and compatible engine/capability ranges. Namespaces prevent an enterprise rule from silently replacing a built-in rule. Resolve and pin dependencies before a scan; never fetch or execute a remote pack during evaluation.</li>
+<li><strong>Policy layers:</strong> define precedence as pack defaults → organization → project → component/state. Organization-locked requirements cannot be weakened by lower layers. Duplicate same-level selectors with conflicting settings fail resolution instead of depending on array order.</li>
+<li><strong>Explainability:</strong> show the effective value, its source, matched scope, pack/rule version and policy digest. Exceptions need a bounded target, owner, rationale and expiry; retain the original finding and exception status rather than hiding it.</li>
+<li><strong>Separate claims:</strong> accessibility findings and design-system policy findings are distinct categories. Enterprise severity is not WCAG impact. A brand-token mismatch must not become a claimed WCAG failure, and an enterprise override must not relabel a known accessibility violation as a pass.</li>
+<li><strong>Component contracts:</strong> begin with explicit component identity, state and version supplied by a reviewed manifest or test instrumentation. Framework adapters can follow. DOM inspection alone cannot reliably infer source components, prove token provenance or inspect every closed shadow root.</li>
+</ul>
+
+<h3>First vertical slice: one design-system pack, three real rules</h3>
+<p>Use synthetic or explicitly approved fixtures from a single design-system pilot. Support light/dark themes, disabled/invalid states, nested components and version changes. No customer data is required to build the prototype.</p>
+<div class="table-scroll"><table><thead><tr><th>Pilot rule</th><th>What it proves</th><th>Required evidence</th></tr></thead><tbody>
+<tr><td>Icon-action label contract</td><td>An icon-only action has an accessible name consistent with the design system's declared action/label contract. Reuse accessible-name analysis, not a new <code>aria-label</code>-only shortcut.</td><td>Component/action identity, computed name, approved contract and matched state. Name adequacy outside an explicit contract remains reviewable, not guessed.</td></tr>
+<tr><td>Invalid-field error relationship</td><td>An invalid form-field component exposes its error through the policy's approved relationship and message contract.</td><td>State, referenced elements, message availability and selected relationship. Test valid alternate patterns and transition states to avoid false positives.</td></tr>
+<tr><td>Focus-indicator design contract</td><td>A focused interactive component uses the approved indicator behavior and theme-specific styling contract.</td><td>Controlled keyboard interaction in the test host, style/geometry facts and a component/token manifest when provenance matters. Missing interaction or provenance capabilities yields inconclusive, not a pass.</td></tr>
+</tbody></table></div>
+<p><strong>Demo:</strong> give an agent a design-system requirement and the SDK contract; have it propose a rule with fixtures; independently challenge it with unseen compliant and noncompliant cases; review the pack; scan a component gallery; explain each finding; change one component and show the correctly scoped re-evaluation. No engine-source modification should be needed to add the rule.</p>
+
+<h3>Runtime speed is an architectural workstream</h3>
+<ul>
+<li><strong>Measure first:</strong> instrument candidate selection, fact computation, evaluator work, frame transport and result construction. Reuse existing performance hooks; distinguish full-scan CPU, wall time, memory and local edit-to-result latency.</li>
+<li><strong>Share expensive facts:</strong> memoize within a scan using node identity, root/frame, options, policy digest and relevant environment inputs. Batch read-only style/geometry work where safe. Do not cache arbitrary legacy evaluator results unless purity and dependencies are known.</li>
+<li><strong>Compile selected work:</strong> build a validated capability/dependency plan for the selected pack set. An enterprise-only scan should not load or initialize every built-in rule. Preserve outcome evidence; short-circuit only when rule semantics permit it.</li>
+<li><strong>Incremental execution:</strong> track affected nodes and rule dependencies between explicit scan epochs. Cover ancestor/sibling relations, stylesheet/theme changes, fonts, resize, focus, frames and document-wide constraints. MutationObserver alone is insufficient. Unknown dependencies, opaque legacy rules or unstable pages fall back to a full scan; cancellation/timeout/staleness is never a pass.</li>
+<li><strong>Concurrency:</strong> DOM/layout reads remain on the owning page thread. Consider workers only for measured pure computations over serializable facts. No blanket Promise parallelism over mutable DOM or shared engine state.</li>
+<li><strong>Stretch hypotheses:</strong> target 2× faster full scans on representative enterprise pages and 10× faster rechecks after a small component edit, compared with a pinned full-scan baseline on the same environment. Include extraction, invalidation, serialization and memory cost. These are experiments, not promises or substitutes for accuracy.</li>
+</ul>
+
+<h3>AI authors rules; the engine establishes evidence</h3>
+<ul>
+<li><strong>Structured contract:</strong> publish schemas for manifests, configuration, fixtures and diagnostics. Outcomes distinguish pass, fail, inapplicable and inconclusive; operational errors remain explicit. Evidence includes rule/policy versions, expected/observed values, target, scope and reproduction context. A numeric model confidence is not a correctness guarantee.</li>
+<li><strong>Independent verification:</strong> agents may scaffold code, fixtures and proposed fixes, but their own tests cannot certify their rule. Require maintainer-owned holdouts, counterexamples and an accessibility/design-system owner review before promotion. Scan execution requires no model calls.</li>
+<li><strong>Trust boundary:</strong> generated code, package dependencies and text from pages/docs are untrusted. Run candidate evaluators in disposable test processes/browser contexts with blocked egress, no credentials and sanitized fixtures. Enforce wall-clock termination at the host; a synchronous infinite loop cannot be stopped by an in-page timeout. TypeScript, schema validation and a same-page JavaScript wrapper are not sandboxes.</li>
+<li><strong>Runtime tiers:</strong> declarative packs execute only approved primitives; arbitrary evaluator code must be reviewed and trusted before in-page execution. Capabilities document requirements but do not restrict arbitrary JavaScript by themselves. Never auto-enable a newly generated pack in enterprise enforcement.</li>
+<li><strong>Governance:</strong> record author/model provenance, requirement references, reviewed tests, compatible versions and content digest. Roll out draft → advisory → enforcing, compare rule/policy version diffs and support a pinned rollback. Redact DOM snippets and client identifiers in diagnostics by default; do not send enterprise fixtures to model providers without authorization.</li>
+<li><strong>Fixes:</strong> remediation suggestions are separate artifacts, validated against fixtures and existing accessibility checks. No automatic page mutation or production fix application during a scan.</li>
+</ul>
+
+<h3 id="toolchain">Current stable tooling, not February assumptions</h3>
+<p>Read-only npm registry check on September 11, 2026. Versions below are adoption candidates, not installed upgrades or verified compatibility. Read each major's migration guide and plugin requirements before changing the lockfile.</p>
+<div class="table-scroll"><table><thead><tr><th>Tool</th><th>Observed latest</th><th>Adoption rule</th></tr></thead><tbody>
+<tr><td><a href="https://registry.npmjs.org/vite">Vite</a></td><td>8.3.0</td><td>Replace <code>rolldown-vite</code> 7.3.1 and duplicate Vite resolution. Review output/minifier APIs and custom plugins; not a one-line swap.</td></tr>
+<tr><td><a href="https://registry.npmjs.org/vitest">Vitest</a> + <a href="https://registry.npmjs.org/%40vitest%2Fbrowser-playwright">browser provider</a> + <a href="https://registry.npmjs.org/@vitest/coverage-v8">coverage provider</a></td><td>5.0.0</td><td>Upgrade the suite together with exact matching provider versions. Vitest 5 requires Node <code>^22.12.0 || ^24.0.0 || &gt;=26.0.0</code>.</td></tr>
+<tr><td><a href="https://registry.npmjs.org/playwright">Playwright</a></td><td>1.63.0</td><td>Pin matching browser binaries. Chromium, Firefox, WebKit correctness; separate any actual Safari qualification requirement.</td></tr>
+<tr><td><a href="https://registry.npmjs.org/typescript">TypeScript</a></td><td>7.0.2</td><td>Separate compiler-upgrade PR. Fix diagnostics without weakening strictness; verify source, test configs and published declarations.</td></tr>
+<tr><td><a href="https://registry.npmjs.org/oxlint">Oxlint</a> / <a href="https://registry.npmjs.org/oxfmt">Oxfmt</a></td><td>1.82.0 / 0.67.0</td><td>Re-evaluate old gap list and formatter maturity. No blind rule removal or unreviewed mass autofix.</td></tr>
+<tr><td><a href="https://registry.npmjs.org/pnpm">PNPM</a></td><td>12.3.4</td><td>Separate package-manager bump from runner/compiler changes. Review lockfile, lifecycle permissions, patch support and frozen clean install.</td></tr>
+<tr><td><a href="https://registry.npmjs.org/turbo">Turbo</a> / <a href="https://registry.npmjs.org/vite-plus">Vite+</a></td><td>2.10.12 / 0.3.1</td><td>Do not install two orchestration layers. Vite+ exists now; reserve an isolated evaluation only if it replaces tools and preserves axe's custom library build and browser setup. Not a prerequisite.</td></tr>
+<tr><td><a href="https://registry.npmjs.org/zod">Zod</a></td><td>4.6.2</td><td>Choose one compatible version for retained validators and new manifest/policy boundaries. Review JSON Schema export and inference before upgrading; no schema validation in per-node hot loops.</td></tr>
+</tbody></table></div>
+<p><strong>Node policy:</strong> propose Node 24 for contributors/CI, matching the planning host's <code>v24.20.0</code>. Obtain approval to revise the current Node 20 development constraint before adopting Vitest 5. Keep the published engine's declared Node 20 consumer contract until a separately approved compatibility decision. Tool Node requirements and library runtime support are different policies; test the packed artifact on the declared floor without installing the development toolchain there.</p>
+<p><strong>Fallback:</strong> if the development floor cannot change, stay on a compatible Vitest 4 release and exact providers; Vite 8 itself needs at least Node 20.19 or 22.12. Do not claim “latest” and silently violate the support policy.</p>
+
+<h3>Testing and contributor workflow</h3>
+<ul>
+<li><strong>Fast loop:</strong> pure source tests in Node; DOM source tests in Chromium with the same metadata plugin as the build. Watch mode must notice rule/check JSON, templates and locale edits, not only TS files. No rebuilding all four bundles on every edit.</li>
+<li><strong>Artifact lane:</strong> run rule integration, ACT/APG and API compatibility against fresh <code>dist</code> output. Keep source tests and artifact tests distinct so fast imports cannot hide packaging bugs.</li>
+<li><strong>Browser policy:</strong> Chromium-focused local watch; Chromium, Firefox and WebKit correctness on PRs. Start with deterministic bounded workers; shard only after measuring file durations. Do not share mutable axe/page state concurrently.</li>
+<li><strong>Conformance:</strong> serve whole documents, assets and iframe origins through one test-owned server. Fresh page/context state per case; inject the freshly built engine, including child frames as required. Keep existing expected outcomes and documented exclusions.</li>
+<li><strong>Useful evidence:</strong> focused failures, trace/screenshot attachments only on browser failures, zero automatic retries initially. Any quarantine needs owner, reason and expiry.</li>
+<li><strong>Coverage:</strong> establish source-mapped Node and Chromium coverage first. V8/CDP coverage is not a Firefox/WebKit coverage strategy. Gate correctness in all three; use coverage to identify missing behaviors, not force hundreds of low-value tests to reach an invented 85%.</li>
+</ul>
+</section>
+
+<section id="files" class="files"><h2>Relevant Files</h2>
+<h3>Existing files to change during implementation</h3>
+<ul>
+<li><code>package.json</code>, <code>pnpm-lock.yaml</code>, <code>pnpm-workspace.yaml</code>, <code>.nvmrc</code>, <code>.npmrc</code>, <code>turbo.json</code>: versions, scripts, scheduling and installation policy.</li>
+<li><code>packages/axe-core/package.json</code>, <code>vitest.config.ts</code>, <code>vitest.workspace.ts</code>, <code>vite.config.ts</code>, <code>tsconfig.json</code> within that package: executable checks, project discovery and build behavior.</li>
+<li><code>tsconfig.base.json</code>, <code>oxlint.json</code>, <code>oxfmt.json</code>, <code>oxlint-gaps.md</code>: shared correctness gates.</li>
+<li><code>packages/axe-core/lib/index.ts</code>, <code>lib/core/public/load.ts</code>, <code>lib/core/utils/uuid.ts</code> within that package: runtime ownership and known compiler blocker.</li>
+<li><code>packages/axe-core/lib/core/base/rule.ts</code>, <code>check.ts</code>, <code>audit.ts</code>, <code>cache.ts</code> in that directory, <code>packages/axe-core/lib/core/public/run-rules.ts</code>, <code>configure.ts</code> in that directory, and <code>packages/axe-core/doc/check-options.md</code>: existing extension semantics, selection, scheduling, configuration and cache boundaries to adapt rather than discard.</li>
+<li><code>packages/axe-core/test/browser-setup.ts</code>, <code>test/testutils.ts</code>, <code>test/integration/rules/vitest-rule-runner.test.ts</code>, <code>test/act-rules/act-runner.ts</code>, <code>test/aria-practices/apg.spec.ts</code> within that package: fixtures, state and conformance migration.</li>
+<li><code>packages/build-tools/src/vite-plugin-axe-metadata.ts</code>, <code>vite-plugin-axe-aria.ts</code>, <code>validate-definitions.ts</code>, <code>build-locales.ts</code> in the same directory: deterministic generation and shared validation.</li>
+<li><code>packages/schemas/package.json</code>, <code>packages/schemas/src/</code>, <code>packages/axe-core/axe.d.ts</code>, <code>packages/axe-core/typings/axe-core/axe-core-tests.ts</code>: private/public boundary and consumer types.</li>
+<li><code>.github/workflows/test.yml</code>, <code>nightly-tests.yml</code> in that directory, <code>.github/actions/install-deps/action.yml</code>, <code>.husky/</code>, <code>packages/axe-core/CONTRIBUTING.md</code>, <code>CLAUDE.md</code>, existing <code>specs/*.md</code>: keep documented and automated workflows aligned.</li>
+<li><code>.github/workflows/deploy.yml</code>, <code>release.yml</code>, <code>update-generated-files.yaml</code> in that directory: audit output consumers now; edit only with explicit release-channel authorization. Never run publishing during this plan.</li>
+</ul>
+<h3>Proposed new files</h3>
+<ul>
+<li><code>packages/axe-core/tsconfig.test.json</code>, <code>tsconfig.typings.json</code> in that package: no-emit test/tool checks and separate public declaration fixtures.</li>
+<li><code>packages/axe-core/lib/core/runtime.ts</code>: explicit typed state ownership; compatibility facade owns its default instance, new engines own separate scan/configuration state.</li>
+<li><code>packages/axe-core/test/conformance/setup.ts</code>: test-owned server/browser lifecycle shared by existing ACT/APG suites. Keep fixture files in place.</li>
+<li><code>packages/axe-core/test/package/exports.test.ts</code>: one focused tarball contract suite covering published entry points, globals, source injection and declarations.</li>
+<li><code>packages/build-tools/test/metadata.test.ts</code>, <code>packages/schemas/test/definitions.test.ts</code>: actual tests for retained build/validation logic; no echo placeholders.</li>
+<li><code>specs/modernization-baseline.json</code>: small reviewed record of suite inventory, allowed skips, artifact measurements, commands and environment. Not a new dashboard.</li>
+<li><code>packages/axe-core/lib/core/policy/</code>, <code>lib/core/analysis/</code>, <code>lib/core/execution/</code> within that package: policy resolution, shared facts and work planning. Add only modules exercised by the pilot; no new workspace split yet.</li>
+<li><code>packages/axe-core/lib/rule-sdk/</code>, <code>packages/schemas/src/rule-pack.schema.ts</code>, <code>policy.schema.ts</code> in that directory: typed authoring entry and externally serializable contracts.</li>
+<li><code>packages/axe-core/test/policy/</code>, <code>test/rule-sdk/</code>, <code>test/incremental/</code>, <code>test/agent-authoring/</code> within that package: independent contract, isolation, counterexample and invalidation tests.</li>
+<li><code>packages/axe-core/examples/enterprise-rule-pack/</code>, <code>packages/axe-core/doc/rule-sdk.md</code>: runnable three-rule pack, reviewed synthetic component fixtures and agent-readable authoring guide. No production UI changes.</li>
+<li><code>packages/build-tools/src/rule-cli.ts</code>, <code>packages/axe-core/bench/enterprise-scan.ts</code>: thin local authoring commands and browser-hosted full/incremental measurement, reusing the test runner.</li>
+</ul>
+</section>
+
+<section id="phases"><h2>Implementation Phases</h2>
+<p>Integrate slices in the order below. Slice 4's requirement discovery and disposable SDK prototype may start after slice 1's focused gates, alongside tooling/core work; shipping the prototype requires the slice 3 boundary. Do not wait for total cleanup to test the product thesis. Each slice can contain focused PRs; separate tool upgrades, formatting and semantic changes. All implementation tasks remain unexecuted. Markers: <code>[]</code> idle, <code>[wip]</code> active, <code>[x]</code> verified, <code>[f]</code> blocked.</p>
+
+<div class="phase"><h3><code class="status">[]</code> 1. Restore trustworthy gates on current versions</h3>
+<p>First priority. No dependency upgrades and no rule rewrites. Preserve the last known-good reference artifact separately from the working build; do not bless current broken output as the semantic baseline.</p>
+<h4>1.1 Make checks real</h4><ul class="checklist">
+<li><code class="status">[]</code>Inventory discovered files, cases and fixture IDs across unit, browser, integration, ACT/APG and consumer-type suites. Compare deleted legacy tests in history by behavior, not file count; record justified exclusions. Fail on missing fixtures, unknown rule IDs and empty expected suites.</li>
+<li><code class="status">[]</code>Add no-emit engine and helper typecheck scripts; replace the emitting <code>test:tsc</code> contract with dedicated consumer fixtures. Fix the 18 observed compiler diagnostics at their source, including the generator rather than its generated output.</li>
+<li><code class="status">[]</code>Repair migration-induced semantics: arrow callbacks using check-helper <code>this</code>, promise callbacks that cannot propagate assertion failures, shared state and shallow assertions. Start with existing <code>test/browser/core/public/run.test.ts</code>, not a new smoke suite.</li>
+<li><code class="status">[]</code>Register ACT/APG as Node-hosted conformance projects and replace WebDriver orchestration with Playwright, preserving document navigation and expected results. Point all artifact tests to one fresh build. Do not delete old adapters until replacement cases pass.</li>
+<li><code class="status">[]</code>Route CI to current Vitest project commands; remove Karma flags in test/nightly jobs. Add root <code>test:conformance</code>, <code>test:inventory</code> and baseline <code>validate</code>; extend it as platform tests land in slices 4–5. Keep this first CI repair minimal; no publish jobs touched.</li>
+</ul>
+<h4>1.2 Testing Strategy</h4>
+<p>New scripts are implementation deliverables, not claims that these commands work today. Inventory must read actual discovered cases/fixture IDs and reject zero counts; <code>vitest list</code> exit status alone is insufficient.</p>
+<ul class="checklist">
+<li><code class="status">[]</code><code>pnpm typecheck</code> and <code>pnpm test:tsc</code>: engine/helpers and consumer contract checked without emission.</li>
+<li><code class="status">[]</code><code>pnpm test:inventory</code>: every expected corpus is discovered, with reviewed skips.</li>
+<li><code class="status">[]</code><code>pnpm build &amp;&amp; pnpm test &amp;&amp; pnpm test:browser &amp;&amp; pnpm test:integration &amp;&amp; pnpm test:conformance</code>: execute replacements against fresh artifacts; repair actual failures before proceeding.</li>
+</ul><div class="loop"><strong>Exit:</strong> no omitted suites or no-op gates. Keep blocked tasks marked failed, never silently skipped. Re-run each failing command after repair.</div>
+</div>
+
+<div class="phase"><h3><code class="status">[]</code> 2. Adopt current tools, one change at a time</h3>
+<p>Depends on slice 1. Capture a reproducible performance baseline before upgrades. Approval required for changing development Node policy and promoting Oxfmt beyond the current advisory constraint.</p>
+<h4>2.1 Pin a compatible toolchain</h4><ul class="checklist">
+<li><code class="status">[]</code>Approve development/runtime Node split. Update setup instructions and CI bootstrap so PNPM installation does not depend on an unavailable bundled Corepack. Upgrade PNPM separately; frozen install must work in a clean disposable checkout with required lifecycle scripts explicitly reviewed.</li>
+<li><code class="status">[]</code>Move to Vite 8 and matching Vitest 5 providers in a dedicated PR after plugin migration review. Remove <code>rolldown-vite</code> only after all formats, locales and tests pass. Update compiler and Node types in a separate PR.</li>
+<li><code class="status">[]</code>Configure Chromium, Firefox and WebKit headless execution with pinned Playwright. Keep jsdom only for targeted compatibility tests. Add source-watch <code>dev</code>, <code>test:watch</code> and single-file examples to contributor docs.</li>
+<li><code class="status">[]</code>Update Oxlint and re-audit unsupported restrictions. Trial Oxfmt outside real source first; review formatter-only changes and idempotence before replacing Prettier. Retain narrow ESLint only for proven unmatched correctness rules.</li>
+<li><code class="status">[]</code>Measure current Turbo versus direct PNPM scripts in isolated runs. Default to removing Turbo if the 20% end-to-end savings gate is not met. If retained, include config, generated inputs, helper source, fixtures and inherited tsconfig changes in cache invalidation; disable environment-sensitive browser-result caching initially.</li>
+</ul>
+<h4>2.2 Testing Strategy</h4><ul class="checklist">
+<li><code class="status">[]</code><code>pnpm install --frozen-lockfile</code>: fresh disposable checkout, not warm developer modules.</li>
+<li><code class="status">[]</code><code>pnpm --filter axe-core exec playwright install --with-deps chromium firefox webkit</code>: provision CI/test environment only, not a daily-driver preview.</li>
+<li><code class="status">[]</code><code>pnpm validate</code>: full slice-1 gate after each upgrade, with all configured browser engines.</li>
+<li><code class="status">[]</code><code>pnpm dev</code>: manually change one TS source, rule JSON and locale in an isolated checkout; record correct invalidation and edit-to-test latency. Revert those probe edits afterwards.</li>
+</ul><div class="loop"><strong>Exit:</strong> stable versions are pinned, every retained tool has one purpose, and measured feedback improves without changing runtime support.</div>
+</div>
+
+<div class="phase"><h3><code class="status">[]</code> 3. Simplify source ownership and artifact contracts</h3>
+<p>Integrates on slice 2's supported toolchain. Concentrate type work at runtime, check-helper and public API boundaries that unlock the platform. Do not chase every <code>any</code> or convert all metadata files first. Use the slice 4 pilot to challenge these boundaries before stabilizing them.</p>
+<h4>3.1 Remove workarounds, not behavior</h4><ul class="checklist">
+<li><code class="status">[]</code>Replace ambient-state access with explicit owners, starting with load/configure/run. Preserve default-instance registration, reset and import-cycle semantics. Define scan-state and immutable-policy boundaries so the experimental engine can create isolated instances without sharing tree, cache or configuration state.</li>
+<li><code class="status">[]</code>Export the same initialized object within each UMD/CJS/ESM artifact. Remove post-write regex/byte edits and global window/document mutations; use supported bundler banner hooks. Test browser-free import before supplying a DOM and ensure <code>axe.source</code> remains a complete injectable engine.</li>
+<li><code class="status">[]</code>Keep legacy JSON metadata behind an adapter while the new SDK is proven. Consolidate boundary validation without conflating on-disk references and runtime evaluators. Validate IDs, evaluator links, locales and tags once. Make generation deterministic, watch-aware and write-only-if-changed; ordinary builds must not rewrite docs or tracked source.</li>
+<li><code class="status">[]</code>Check tests and config with dedicated TS scopes. Replace ambient <code>axe: any</code> through one accurate internal test type and typed check-helper callbacks; use inferred signatures and <code>satisfies</code>, not cast-wrapper functions. Keep remaining debt explicit and prevent new public-boundary escape hatches.</li>
+<li><code class="status">[]</code>Resolve schema packaging without adding a release obligation prematurely. Fix/remove nonexistent schema CJS exports according to real consumers; plan machine-readable rule/policy schemas as SDK artifacts. Keep declaration dependencies until consumers no longer need them, and keep <code>axe.d.ts</code> until generated replacements preserve overloads and resolution.</li>
+<li><code class="status">[]</code>Add local packed-package checks for import/require, global script injection, <code>axe.source</code>, locale access and documented deep paths. Compare against the approved pre-migration API; tightening exports is not automatically backward compatible. Verify license banners, maps, minified output and SRI inputs.</li>
+</ul>
+<h4>3.2 Testing Strategy</h4><ul class="checklist">
+<li><code class="status">[]</code><code>pnpm --filter @axe-core/build-tools test &amp;&amp; pnpm --filter @axe-core/schemas test</code>: real generator/validator assertions, including missing references and invalid data.</li>
+<li><code class="status">[]</code><code>pnpm build &amp;&amp; pnpm build:locales &amp;&amp; pnpm test:package &amp;&amp; pnpm test:tsc</code>: local packed artifact and declarations work without workspace fallbacks. Add pinned <code>@arethetypeswrong/cli</code> and <code>publint</code> to this package gate if they catch checks not covered by fixtures.</li>
+<li><code class="status">[]</code><code>pnpm validate</code>: compare rule outcomes against approved baseline; normalize only documented nondeterminism such as timestamps, not violations or selectors.</li>
+<li><code class="status">[]</code><code>pnpm build &amp;&amp; pnpm build &amp;&amp; git diff --exit-code -- packages/axe-core/lib packages/axe-core/doc</code>: after committing intended changes in the implementation checkout, repeated builds do not dirty tracked source/docs. Compare emitted hashes in the same environment.</li>
+</ul><div class="loop"><strong>Exit:</strong> the bundler no longer patches engine semantics; fresh packed artifacts and typed consumers pass. A faster broken artifact does not pass.</div>
+</div>
+
+<div class="phase"><h3><code class="status">[]</code> 4. Prove the rule platform with an enterprise pack</h3>
+<p>Primary product milestone, not optional cleanup. Begin contract discovery after focused slice 1 gates; integrate on slice 3. Incubate locally under an experimental API; no public package publication is implied.</p>
+<h4>4.1 Build the smallest complete authoring surface</h4><ul class="checklist">
+<li><code class="status">[]</code>Select one design-system pilot and write explicit acceptance/counterexample fixtures for the three proposed rules. Document what cannot be established from DOM alone. Define success with an accessibility expert and design-system owner; use synthetic fixtures unless data use is authorized.</li>
+<li><code class="status">[]</code>Prototype a typed rule contract with explicit evaluation context, option inference, capability requirements, result evidence and lifecycle. Support small declarative compositions and trusted custom evaluators through one normalized contract. Agent-readable schema and TypeScript authoring must agree.</li>
+<li><code class="status">[]</code>Build only the analysis providers needed by the pilot, reusing existing algorithms where correct. Adapt a representative existing rule/check composition, including asynchronous/after behavior, to verify old semantics can cross the new boundary. No mass conversion.</li>
+<li><code class="status">[]</code>Implement namespaced packs and deterministic policy resolution: precedence, organization locks, scoped overrides, version conflicts, explained effective configuration and expiring exceptions. Validate inputs once; compile immutable policies with stable digests.</li>
+<li><code class="status">[]</code>Separate minimal engine creation from built-in registration. Run two differently configured instances in one host with no policy/cache leakage; retain the default API facade. Test actual import graphs for an enterprise-only pack rather than asserting tree-shakeability from source syntax.</li>
+<li><code class="status">[]</code>Ship a runnable local pack with the icon-action, invalid-field and focus-indicator contracts. Report policy findings separately from normative accessibility findings; surface missing evidence as inconclusive. New rules must require no core-source edits.</li>
+</ul>
+<h4>4.2 Testing Strategy</h4><ul class="checklist">
+<li><code class="status">[]</code><code>pnpm test:policy &amp;&amp; pnpm test:rule-sdk</code>: new scripts covering option inference, schema agreement, locks/conflicts, exception expiry, missing capabilities and independent instances. Add these suites to inventory and merge validation.</li>
+<li><code class="status">[]</code><code>pnpm test:enterprise</code>: execute the three-rule pack across supported browsers, themes and states, with compliant, failing, inapplicable and inconclusive examples. Test unsupported component versions and inaccessible frame/shadow boundaries explicitly.</li>
+<li><code class="status">[]</code><code>pnpm test:package &amp;&amp; pnpm validate</code>: default API still passes; minimal entry loads no built-ins by side effect; custom pack and schemas work outside workspace resolution.</li>
+</ul><div class="loop"><strong>Exit:</strong> a domain expert can express and test an organization-specific requirement without knowing engine internals. If the pilot requires invasive core edits per rule, revise the contract before expanding the catalog.</div>
+</div>
+
+<div class="phase"><h3><code class="status">[]</code> 5. Make execution faster and authoring agent-ready</h3>
+<p>Depends on the working slice 4 pack and baseline evidence. Performance, rule quality and authoring effort are three separate outcomes; no benchmark win excuses a missed violation.</p>
+<h4>5.1 Execute the platform thesis</h4><ul class="checklist">
+<li><code class="status">[]</code>Profile full scans on fixed small, large, component-dense and multi-frame fixtures. Implement the highest-value measured optimization first: shared candidate/fact work, read batching or dependency-plan pruning. Compare rule outcomes and peak memory as well as speed.</li>
+<li><code class="status">[]</code>Prototype incremental rechecks for the pilot's declared dependencies. Define epoch consistency, invalidation, cancellation and full-scan fallback. Differential-test every supported mutation against a fresh full scan, including ancestor effects, stylesheet/theme changes, focus, resize and cross-frame limitations.</li>
+<li><code class="status">[]</code>Implement thin <code>rule:scaffold</code>, <code>rule:validate</code>, <code>rule:test</code>, <code>rule:explain</code> and <code>rule:pack</code> commands with versioned JSON diagnostics, predictable exit codes and offline schema/capability discovery. Do not require a particular agent harness, hosted model or MCP server.</li>
+<li><code class="status">[]</code>Run candidate code only in credential-free disposable test hosts with egress blocked and host-enforced termination. Add adversarial fixtures for malformed manifests, dependency conflicts, code hangs and prompt-like instructions embedded in docs/pages. Never interpret those instructions as execution authority.</li>
+<li><code class="status">[]</code>Evaluate an agent on at least three previously unseen policy requirements. Separate authoring fixtures from expert-owned holdouts; record intervention time, invalid drafts, accepted rules and false positives/negatives. No self-authored test suite can approve its own rule.</li>
+<li><code class="status">[]</code>Build local draft/advisory/enforcing policy modes, auditable version diffs, pinned rollback and redacted evidence. An expert approves promotion; the executor uses no inference calls. Test policy-version upgrades against existing findings and exceptions before adoption.</li>
+<li><code class="status">[]</code>Review the SDK with real rule authors before stabilizing names or exports. Promote only validated contracts; keep speculative predicates, automatic fix application, remote catalogs and framework adapters out until a concrete use case demands them.</li>
+</ul>
+<h4>5.2 Testing Strategy</h4><ul class="checklist">
+<li><code class="status">[]</code><code>pnpm test:incremental</code>: full-versus-incremental outcome/evidence equivalence, deterministic invalidation and explicit fallback for unsupported or opaque dependencies.</li>
+<li><code class="status">[]</code><code>pnpm test:agent-authoring</code>: deterministic CLI/schema, isolation and holdout checks with committed candidate artifacts, no paid model/network calls in normal CI. Live authoring evaluation is a separately authorized experiment, reported with model/version and inputs.</li>
+<li><code class="status">[]</code><code>pnpm bench:enterprise</code>: report full/incremental p50/p95, repeated-run spread, memory, selected rules, data-collection overhead and whether the 2×/10× hypotheses held. Dedicated controlled benchmark job, not noisy PR timing assertions.</li>
+<li><code class="status">[]</code><code>pnpm validate</code>: includes new deterministic platform suites. Review holdout results and repeat the end-to-end authoring demo before proposing API stabilization.</li>
+</ul><div class="loop"><strong>Exit:</strong> independent evidence supports useful agent-authored rules and at least one measured runtime improvement without outcome drift or hidden omissions. Publish misses as well as wins; if incremental correctness fails, keep full scanning and revise the experiment rather than weaken the gate.</div>
+</div>
+
+<div class="phase"><h3><code class="status">[]</code> 6. Delete retired paths and document the platform</h3>
+<p>Depends on verified replacements. Retire tooling as its replacement becomes proven; do not delay the SDK pilot for cleanup. Preserve tests, public contracts and necessary legacy adapters. No release/channel operations.</p>
+<h4>6.1 Remove the migration tax</h4><ul class="checklist">
+<li><code class="status">[]</code>Trace callers before removing Grunt/Babel/stubs, duplicate ACT JS files, migration scripts and obsolete <code>vitest.workspace.ts</code>. Delete WebDriver, ChromeDriver, server wrappers and build helpers only when no fixture, example, SRI or release consumer needs them.</li>
+<li><code class="status">[]</code>Replace postinstall <code>npx patch-package</code> with a reviewed PNPM-native patch for <code>colorjs.io</code> if still necessary. Do not silently drop the color patch. Remove duplicate Husky/lint-staged setup and retired dependencies only after caller audit.</li>
+<li><code class="status">[]</code>Finalize CI: shared setup, static checks, fresh artifact production, browser/conformance jobs and packed-consumer checks. Upload/restore all required formats and maps, not only <code>dist/axe.js</code>. Use sharding only where measured suite duration warrants it.</li>
+<li><code class="status">[]</code>Update <code>CONTRIBUTING.md</code>, <code>CLAUDE.md</code>, package scripts, hook config and old specs together. Document SDK compatibility, pack lifecycle, agent contract, benchmark methodology and policy-versus-accessibility semantics. Mark old roadmap decisions superseded; retain historical reports, not parallel active checklists.</li>
+<li><code class="status">[]</code>Audit deploy/release/generated-file workflows for obsolete paths. Report any required channel edits as explicit approval blockers; do not delete artifacts those workflows still consume. No canary publication or downstream-repo change as a shortcut.</li>
+<li><code class="status">[]</code>Record final dependency/config counts, cold/warm timing and bundle sizes against baseline. Remove temporary migration measurement code that provides no ongoing value.</li>
+</ul>
+<h4>6.2 Testing Strategy</h4><ul class="checklist">
+<li><code class="status">[]</code><code>pnpm validate</code>: from a fresh checkout, no stale <code>dist</code>, local links or runner cache masking missing work.</li>
+<li><code class="status">[]</code><code>rg -n 'grunt|karma|selenium|chromedriver|--browsers|npm ci|rolldown-vite' package.json packages/axe-core/package.json .github packages/axe-core/CONTRIBUTING.md CLAUDE.md</code>: manually classify every remaining match; exit 1 means no matches, not test failure.</li>
+<li><code class="status">[]</code><code>git diff --check</code>: clean implementation diff. Review CI results and documented single-file/watch commands before marking complete.</li>
+</ul><div class="loop"><strong>Exit:</strong> no unexplained legacy callers, one accurate contributor workflow and full gate green. An unapproved release dependency is a blocker, not permission to touch a live channel.</div>
+</div>
+</section>
+
+<section id="validation"><h2>Validation Commands</h2>
+<p><strong>Target root command contract.</strong> Implement scripts as their slices land; extend <code>validate</code> then, not before they exist. It must explicitly invoke required suites or equivalent workspace commands, never rely on absent package scripts. Platform command names below are proposed local interfaces, not installed tools.</p>
+<div class="table-scroll"><table><thead><tr><th>Command</th><th>Required scope</th></tr></thead><tbody>
+<tr><td><code>pnpm typecheck</code></td><td>Engine, helper/schema source, tests and tool configs. No emission. Dedicated configs where browser and Node globals differ.</td></tr>
+<tr><td><code>pnpm lint &amp;&amp; pnpm format</code></td><td>All maintained workspace source/config; correctness gaps retained; one hard formatter.</td></tr>
+<tr><td><code>pnpm build &amp;&amp; pnpm build:locales</code></td><td>Dependency-ordered validation/generation, all formats and locales, no tracked-file side effects.</td></tr>
+<tr><td><code>pnpm test</code></td><td>Fast pure/source tests plus real tests for helper packages. No echo successes.</td></tr>
+<tr><td><code>pnpm test:browser &amp;&amp; pnpm test:integration &amp;&amp; pnpm test:conformance</code></td><td>DOM and rule correctness in all configured engines; ACT/APG with full-document semantics and fresh distribution source.</td></tr>
+<tr><td><code>pnpm test:inventory &amp;&amp; pnpm test:tsc &amp;&amp; pnpm test:package</code></td><td>Nonempty and accounted-for suites, public types and isolated tarball consumers.</td></tr>
+<tr><td><code>pnpm test:policy &amp;&amp; pnpm test:rule-sdk &amp;&amp; pnpm test:enterprise</code></td><td>Policy resolution and isolation, SDK/legacy-adapter contracts and the enterprise pack's independent correctness corpus.</td></tr>
+<tr><td><code>pnpm test:incremental &amp;&amp; pnpm test:agent-authoring</code></td><td>Differential scan correctness, structured authoring tools, candidate containment and holdouts. Deterministic offline CI, no inference calls.</td></tr>
+<tr><td><code>pnpm bench:enterprise</code></td><td>Controlled runtime and memory comparison. Scheduled/manual experiment with an explicit baseline, not a noisy PR hard gate.</td></tr>
+<tr><td><code>pnpm test:coverage</code></td><td>Source-mapped Node/Chromium report. Scheduled/full validation initially; baseline-derived threshold only after measurement.</td></tr>
+<tr><td><code>pnpm validate</code></td><td>Required merge gate: all deterministic suites above; benchmark and coverage run separately. Build precedes every artifact-consuming suite.</td></tr>
+</tbody></table></div>
+<ul class="checklist"><li><code class="status">[]</code>All deterministic target commands executed in implementation CI; no successful empty suite or stale-artifact fallback. Benchmark and live authoring experiments carry their own executed reports.</li><li><code class="status">[]</code>Old behavior and public import paths accounted for; every intentional compatibility change separately approved. Novel logic has expert-reviewed expectations, not automatic golden-output updates.</li><li><code class="status">[]</code>Performance comparison reports environment, repetitions and full/incremental/cold/warm definitions; no timing claim inferred from vendor marketing.</li><li><code class="status">[]</code>Enterprise pilot and independent authoring holdouts demonstrate useful new rules without core edits, policy leakage or mislabeled accessibility claims.</li></ul>
+<div class="loop"><strong>Completion means executed evidence.</strong> Leave inaccessible checks unverified and mark blockers <code>[f]</code>. Do not call the program complete while required correctness or consumer checks remain blocked.</div>
+</section>
+
+<section id="notes"><h2>Notes</h2>
+<h3>Success bar</h3>
+<ul>
+<li><strong>Correctness:</strong> zero unexplained outcome drift in approved fixtures, all expected suites discovered, no unapproved dropped tests or weakened assertions. This is evidence for preserving the zero-false-positive guarantee, not a mathematical proof of it.</li>
+<li><strong>Lean architecture:</strong> explicit per-instance state, no post-write JS repair and no placeholder checks. A small stable SDK replaces dependence on internals; new modules must earn their place through the pilot. Capability growth is welcome; abstraction growth without evidence is not.</li>
+<li><strong>Speed:</strong> use the same machine/CI class and pinned browsers; report median and range of at least five runs for full build, focused edit-to-test and full CI. Separate cold installs, warm installs and task-cache hits. Aim for focused feedback under two seconds as a provisional goal, not a verified promise.</li>
+<li><strong>Size:</strong> record raw, minified, gzip and Brotli bytes separately with build mode/version. Require explanation for growth; reject the old ambiguous “250KB → 220KB” promise until units and baseline are known.</li>
+<li><strong>Types:</strong> public surface contains no new <code>any</code> escape hatches; migrated boundaries compile with strict settings and real consumers. Whole-repo elimination of every cast is not a prerequisite.</li>
+<li><strong>Product value:</strong> three enterprise rules run without core edits, policy is independently configurable and explainable, and an agent can author an accepted rule against unseen expert-owned cases. Measure time to accepted rule against a manual baseline; do not use generated-rule count as success.</li>
+<li><strong>Runtime value:</strong> retain at least one demonstrated optimization with no correctness regression. Evaluate 2× full-scan and 10× small-edit recheck stretch goals separately; report memory and invalidation costs and failed hypotheses honestly.</li>
+</ul>
+<h3>Explicit changes to the old plan</h3>
+<p>Phase 0 stays done; do not move files again. Foundation work remains, but tooling convergence is no longer the end goal. Replace the old Phase 4's bulk-conversion recipes with a first-class rule-platform workstream: SDK, analysis capabilities, policy packs, selective execution and AI-assisted authoring. Semantic improvements are in scope through reviewed experiments; blind API substitutions and mass rewrites are not. Keep simulated-browser support and existing consumer contracts until explicitly changed.</p>
+<h3>Approval and uncertainty</h3>
+<p>The user has explicitly expanded planning scope to architectural and rule-logic innovation, enterprise configuration and AI authoring. Before implementation, settle the pilot design system, initial capability set, SDK stabilization bar and upstream-compatible versus separately branded distribution strategy. Confirm the reference commit/release. Development Node policy, formatter promotion, external model/data use and any actual publishing still require their specific approvals.</p>
+<p>Current runtime support text conflicts with CI's Node 6/18 jobs; modern tool requirements alone do not resolve that policy. Initial registry observations are historical planning evidence, not a fresh compatibility check. Major-version guides, Vite+ fit, full browser behavior, real consumer resolution, incremental invalidation and agent-rule quality remain unverified. Recheck versions at implementation time; preserve local changes and name release-adjacent files before touching them.</p>
+<h3>Planning verification</h3>
+<p>Initial planning executed: direct engine compiler check (failed, 18 diagnostics), ACT and APG discovery (empty), focused locale test (19 passed, pre-existing artifact), source/config/spec inspection and read-only registry lookups. This revision adds source inspection of rule gathering/check scheduling, scan orchestration, cache ownership and documented check options; it does not rerun earlier checks. Plan validation runs on save. Full builds/tests, cross-browser execution, package checks, runtime benchmarks and agent-authoring experiments remain future work.</p>
+</section>
+<section id="amendments"><h2>Amendments</h2>
+<details><summary>2026-09-11T14:20:14Z · Expand from tooling convergence to a rule platform</summary>
+<p>User requested a more ambitious goal: improve legacy architectural limits, configurability and runtime speed, and enable AI agents to author enterprise design-system rules. Promoted rule innovation into primary scope; added explicit analysis/SDK/policy contracts, a three-rule pilot, agent authoring and independent verification, selective/incremental execution experiments, proposed files and validation commands. Replaced blanket deferral of new rule surfaces with evidence-gated incubation; kept compatibility and release-safety boundaries. Existing audit evidence and created metadata preserved. No implementation tasks executed.</p>
+</details></section>
+</main></body></html>
