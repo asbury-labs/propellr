@@ -34,7 +34,9 @@ Browser-backed test scripts, `bench:slice` and `browsers:install` default to thi
 project's `.tools/browsers` cache. An explicit `PLAYWRIGHT_BROWSERS_PATH` overrides
 that default. Tests never download browsers automatically; run `pnpm browsers:install`
 when provisioning is needed. On supported CI Linux, use
-`pnpm browsers:install --with-deps`. These scripts target macOS/Linux.
+`pnpm browsers:install --with-deps`. These scripts target macOS/Linux. On macOS, Vitest
+also defaults `MOZ_APP_DATA` to `.tools/firefox-app-data`, because app-data protection
+blocks Playwright's Firefox from an installed Firefox's data and its startup fails.
 
 `validate` runs
 build, strict source/type examples, lint, required Oxfmt, contract tests, real Unix
@@ -73,6 +75,7 @@ listener. Direct Node/Playwright commands still need the browser-cache environme
 
 ```sh
 export PLAYWRIGHT_BROWSERS_PATH="$PWD/.tools/browsers"
+export MOZ_APP_DATA="$PWD/.tools/firefox-app-data" # macOS, for Firefox targets
 node dist/host/daemon.js /tmp/propellr-local-$UID
 # Another terminal, same user:
 printf '%s\n' '{"command":"open","input":{"protocol":"propellr/0.1","requestId":"open-1","policy":{"id":"local-fixture","version":"1"},"target":{"kind":"managed","browser":"chromium"}}}' \

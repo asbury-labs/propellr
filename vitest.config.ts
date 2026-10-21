@@ -1,5 +1,14 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 import { playwright } from "@vitest/browser-playwright";
+
+// macOS app-data protection denies Playwright's ad-hoc-signed Firefox the installed
+// Firefox's ~/Library/Application Support/Firefox, so profile startup fails. Launches
+// inherit this environment, including the browser project's provider.
+if (process.platform === "darwin")
+  process.env["MOZ_APP_DATA"] ??= fileURLToPath(
+    new URL(".tools/firefox-app-data", import.meta.url),
+  );
 
 export default defineConfig({
   test: {
