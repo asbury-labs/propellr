@@ -15,7 +15,7 @@ becomes a supported scope, changes a gate, or is delivered over IPC.
 | Provider, exact model, client, synthetic disclosure, numeric spend caps   | **Approved 2026-09-28** (amendment below) |
 | TypeSafe MCA review (output reuse, distillation §2.3(b), testing §2.3(g)) | **Recorded 2026-09-28**, Tony, verbal     |
 | Two independent human adjudicators for the 240-case corpus                | **Planned:** Tony and one colleague       |
-| Native structured-output small LLM arm                                    | **Approved:** `claude-haiku-4-5-20251001` |
+| Native structured-output small LLM arm                                    | **Approved:** `claude-haiku-5-5` (10-21)  |
 
 A live lane requires a machine-checkable approval record (`decisionApprovalSchema`): provider,
 exact model, exact endpoint and adapter version, approver and date, synthetic-only disclosure,
@@ -75,6 +75,31 @@ unchanged. The rubric version is part of every cache key.
 Because the rubric changed, both provider arms rerun on dev under rubric 2. The dev results of
 September 28 (rubric 1) stay on record and are not replaced. The holdout remains sealed and runs
 once, with all three arms, under rubric 2. The approved caps are cumulative per arm across runs.
+
+## Amendment, October 21, 2026 (LLM arm moves to Claude Haiku 5.5, before any holdout use)
+
+Approved by Tony on October 21, 2026, in the Claude Code session of that date. The LLM arm moves
+from `claude-haiku-4-5-20251001` to `claude-haiku-5-5`. That is the model's fixed ID; it has no
+dated snapshot. Inputs, question wording, rubric 2, answer schemas, scoring, corpus and adoption
+bar are unchanged. The adapter becomes `propellr-component-llm/2` because the request changes:
+
+- **No temperature.** Haiku 5.5 rejects non-default sampling parameters.
+- **Adaptive thinking at effort `low`** (`thinking: {type: "adaptive"}`,
+  `output_config.effort: "low"`), with `max_tokens` 4096 so that thinking cannot crowd out the
+  JSON answer. The answer is read from the text block, and leading thinking blocks are skipped.
+  A `refusal` (Haiku 5.5 runs safety classifiers) or `max_tokens` stop is still
+  `invalid-response`.
+- **Prices:** Haiku 5.5 bills $0.10 input and $0.50 output per million tokens for prompts up to
+  100K tokens, and $0.50 and $2.50 above that. The spend guard takes one flat rate, so the
+  record pins the long-prompt card ($0.50 and $2.50). It may overstate spend but never
+  understates it.
+
+Record `llm-2026-10-21.json` keeps the same terms: 300 requests and $1.00, synthetic disclosure
+only, evaluation-only output reuse, distillation prohibited, adversarial testing not permitted.
+Its budget is separate from the Haiku 4.5 record's. The September 28 record and the Haiku 4.5
+dev results stay on record as evidence for those runs. They do not count as Haiku 5.5 results
+and no longer authorize the arm. Haiku 5.5 runs on dev before the holdout, which stays sealed
+and runs once with all three arms.
 
 ## Structural capture, `propellr-structure-capture/1`
 

@@ -1,5 +1,5 @@
-// Host-only, advisory LLM comparison arm: Claude Haiku 4.5 through the Messages API with
-// structured output. Native HTTPS, no SDK dependency (protocol amendment 2026-09-28). Same
+// Host-only, advisory LLM comparison arm: Claude Haiku 5.5 through the Messages API with
+// structured output. Native HTTPS, no SDK dependency (protocol amendments 2026-09-28, 2026-10-21). Same
 // text-free inputs, question wording and gates as the Jev adapter; never wired into operations.
 import { z } from "zod";
 import type { VersionRef } from "../contracts.js";
@@ -15,9 +15,10 @@ import {
 import type { DecisionResult } from "./component-decisions.js";
 import { BoundedTransport } from "./decision-transport.js";
 
-export const llmModel = "claude-haiku-4-5-20251001";
+export const llmModel = "claude-haiku-5-5";
 export const llmEndpoint = "https://api.anthropic.com/v1/messages";
-const MAX_TOKENS = 512;
+// Adaptive thinking counts toward max_tokens, so leave room for it before the JSON answer.
+const MAX_TOKENS = 4096;
 export const llmApprovalSchema = z
   .strictObject({
     provider: z.literal("anthropic"),
@@ -25,7 +26,7 @@ export const llmApprovalSchema = z
     client: z
       .strictObject({
         endpoint: z.literal(llmEndpoint),
-        adapter: z.literal("propellr-component-llm/1"),
+        adapter: z.literal("propellr-component-llm/2"),
       })
       .readonly(),
     approvedBy: z.string().min(1).max(128),
@@ -44,9 +45,10 @@ export const llmApprovalSchema = z
     // Ceilings approved on 2026-09-28; a record may lower them, never raise them.
     maxRequests: z.number().int().min(1).max(300),
     maxSpendUsd: z.number().positive().max(1),
-    // Published Claude Haiku 4.5 prices; understating them would weaken the spend guard.
-    pricePerMillionInputTokensUsd: z.literal(1),
-    pricePerMillionOutputTokensUsd: z.literal(5),
+    // Claude Haiku 5.5's long-prompt (over 100K tokens) rate card. The transport takes one flat
+    // rate, and the cheaper short-prompt card would understate any longer prompt.
+    pricePerMillionInputTokensUsd: z.literal(0.5),
+    pricePerMillionOutputTokensUsd: z.literal(2.5),
   })
   .readonly();
 export interface LlmClientOptions {
@@ -100,10 +102,14 @@ export function llmRequest(input: DecisionCase) {
   return {
     model: llmModel,
     max_tokens: MAX_TOKENS,
-    temperature: 0,
+    // Haiku 5.5 rejects non-default sampling parameters, so no temperature is sent.
+    thinking: { type: "adaptive" },
     system,
     messages: [{ role: "user", content: JSON.stringify({ state, questions }) }],
-    output_config: { format: { type: "json_schema", schema: outputSchema(input) } },
+    output_config: {
+      effort: "low",
+      format: { type: "json_schema", schema: outputSchema(input) },
+    },
   } as const;
 }
 
