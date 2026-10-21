@@ -971,6 +971,12 @@ test("the usage ledger records every live run and bounds the next client", () =>
   expect(jev.used.requests).toBe(9);
   expect(jev.maxRequests).toBe(291);
   expect(jev.maxSpendUsd).toBeCloseTo(1 - 0.000397908, 9);
+  // The Haiku arm made the same three runs; its cap is spend-enforced too.
+  const haiku = remainingBudget(ledger, `${evidence}/approvals/llm-2026-09-28.json`, caps);
+  expect(haiku.used).toMatchObject({ requests: 9 });
+  expect(haiku.used.spentUsd).toBeCloseTo(0.012954, 9);
+  expect(haiku.maxRequests).toBe(291);
+  expect(haiku.maxSpendUsd).toBeCloseTo(1 - 0.012954, 9);
   // An unknown approval has used nothing; an exhausted one leaves nothing.
   expect(remainingBudget(ledger, "other.json", caps)).toMatchObject({ maxRequests: 300 });
   expect(
