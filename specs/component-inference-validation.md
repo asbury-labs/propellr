@@ -439,8 +439,9 @@ Tests cover each case, including a real Chromium run of the stale name and the r
   membership-confidence threshold (Jev 0.80, Haiku ungated) and was never approved. The
   [semantic review plan](propellr-jev-semantic-review.html) parks the attribution holdout and
   specifies a floor/bar gate on per-question defect probability instead. The gate run's evidence
-  stays on the `feat/component-confidence-gate` branch: its manifest, archive (`d2e34807…`) and
-  Jev's run-to-run variation (wrong-family confidence 0.75, then 0.79, on identical requests).
+  stays at tag `archive/component-confidence-gate` (`1aeb8eff`, also `refs/pull/24/head`): its
+  manifest, archive (`d2e34807…`) and Jev's run-to-run variation (wrong-family confidence 0.75,
+  then 0.79, on identical requests).
 - **Ledger corrected.** The gate run made live calls (3 requests per arm: Jev $0.00014, Haiku
   $0.0044), but its manifest never reached `main`. Both runs are now in `usage-ledger.json`
   without an evidence path, so they count toward the cumulative caps. Totals: Jev 9 requests,
