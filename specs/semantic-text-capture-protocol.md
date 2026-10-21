@@ -61,13 +61,18 @@ whether the occurrence passes. `button-name` uses its existing successful `name(
 | `image-alt`         | `has-alt` (including explicitly empty alt), `aria-label`, `aria-labelledby`, `non-empty-title`, `presentational-role`                  |
 | `label`             | `implicit-label`, `explicit-label`, `aria-label`, `aria-labelledby`, `non-empty-title`, `non-empty-placeholder`, `presentational-role` |
 | `select-name`       | Same label/ARIA/title/presentation checks as implemented, without placeholder                                                          |
-| `input-button-name` | `non-empty-if-present`, `non-empty-value`, then ARIA/title/implicit/explicit label checks                                              |
+| `input-button-name` | `non-empty-if-present`, `non-empty-value`, then ARIA/title/implicit/explicit label checks, then `presentational-role`                  |
 | `input-image-alt`   | `non-empty-alt`, then ARIA/title/implicit/explicit label checks                                                                        |
 
 Attribute and content values are the compacted result already used by that check. Reference
 text uses the evaluator's root-local lookup order and duplicate-reference handling; reuse its
-computed strings, not an independent DOM query. For `someLabels`, reuse the first successful
-label's text. Button associated-label text uses that helper's existing combination.
+computed strings, not an independent DOM query. A rule's `aria-labelledby` name is every
+contributor `references()` visits (IDREF token order, missing IDs skipped, a repeated element
+kept once) joined with one space, then compacted, matching the separator `name()` already
+uses; never the first text alone. Contributor exclusion and truncation rules below apply to
+the joined name. `button-name` keeps `name()`'s own reference list. For `someLabels`, reuse
+the first successful label's text. Button associated-label text uses that helper's existing
+combination.
 A boolean-only success is not permission to run additional naming checks.
 
 ### Privacy takes precedence over text availability
@@ -232,7 +237,9 @@ No UI/labeling-sheet change in this phase.
 
 1. Every successful check/source in the seven-rule table; competing checks prove selection
    follows the rule, not an independent helper. Include empty alt, presentation, default
-   submit/reset, authored input-button value and CSS-hidden/ARIA-hidden reference passes.
+   submit/reset, authored input-button value, presentational input button, multi-reference
+   `aria-labelledby` (order, missing ID, repeated element) and CSS-hidden/ARIA-hidden
+   reference passes.
 2. Leak fixtures plant values, passwords, hidden inputs, textarea/selected-option and hidden
    text in names/context; none appears in host sidecar, raw naming evidence or outbound state.
    A legitimate hidden-reference pass remains unchanged with `name-unavailable` capture.
