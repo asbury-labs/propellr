@@ -34,7 +34,9 @@ Browser-backed test scripts, `bench:slice` and `browsers:install` default to thi
 project's `.tools/browsers` cache. An explicit `PLAYWRIGHT_BROWSERS_PATH` overrides
 that default. Tests never download browsers automatically; run `pnpm browsers:install`
 when provisioning is needed. On supported CI Linux, use
-`pnpm browsers:install --with-deps`. These scripts target macOS/Linux.
+`pnpm browsers:install --with-deps`. These scripts target macOS/Linux. On macOS, Vitest
+also defaults `MOZ_APP_DATA` to `.tools/firefox-app-data`, because app-data protection
+blocks Playwright's Firefox from an installed Firefox's data and its startup fails.
 
 `validate` runs
 build, strict source/type examples, lint, required Oxfmt, contract tests, real Unix
@@ -73,6 +75,7 @@ listener. Direct Node/Playwright commands still need the browser-cache environme
 
 ```sh
 export PLAYWRIGHT_BROWSERS_PATH="$PWD/.tools/browsers"
+export MOZ_APP_DATA="$PWD/.tools/firefox-app-data" # macOS, for Firefox targets
 node dist/host/daemon.js /tmp/propellr-local-$UID
 # Another terminal, same user:
 printf '%s\n' '{"command":"open","input":{"protocol":"propellr/0.1","requestId":"open-1","policy":{"id":"local-fixture","version":"1"},"target":{"kind":"managed","browser":"chromium"}}}' \
@@ -249,14 +252,15 @@ for the compiled fixture; `.vue` script blocks are not `tsc`-checked. See the
 `scanComponents(..., { structure: true })` adds text-free structural fingerprints
 (`propellr-structure-capture/1`) and `discoverTemplates` offers structural suggestions
 (`structural-template/1`), never supported scopes. Two host-only, unwired advisory adapters share
-one bounded transport (`src/host/decision-transport.ts`): Jev (`jev-1.13.0`) and Claude Haiku 4.5
-(`claude-haiku-4-5-20251001`, structured output), both native HTTPS with no SDK. Tony approved live
-runs (dev, then the holdout once) on September 28, 2026, with 300 requests and $1.00 per arm (records under
+one bounded transport (`src/host/decision-transport.ts`): Jev (`jev-1.13.0`) and Claude Haiku 5.5
+(`claude-haiku-5-5`, structured output, adaptive thinking at low effort), both native HTTPS with no
+SDK. Tony approved live runs (dev, then the holdout once) on September 28, 2026, and moved the LLM
+arm from Haiku 4.5 to Haiku 5.5 on October 21, 2026, with 300 requests and $1.00 per arm (records under
 `specs/component-inference-evidence/approvals/`). Run a lane with the record path and key in the
 environment, for example
 `PROPELLR_DECISION_APPROVAL=... TYPESAFE_API_KEY=... pnpm eval:components -- --provider jev`, or
 `PROPELLR_LLM_APPROVAL=... ANTHROPIC_API_KEY=...` with `--provider llm`. The holdout stays sealed
-until two adjudicators' labels exist. On dev (part rubric 2), both arms matched the heuristic's
+until two adjudicators' labels exist. On dev (part rubric 2), Jev and Haiku 4.5 matched the heuristic's
 membership choices (decision precision 0.75) and its repair groups (pairwise precision 0.868);
 **neither is adopted.** `pnpm labeling:sheet` builds the offline page for the two human labelers,
 and `pnpm labels:compare` compares their exports ([labeling guide](specs/component-labeling.md)).

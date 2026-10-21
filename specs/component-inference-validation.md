@@ -450,3 +450,27 @@ To resume: the attribution holdout is parked. Before any attribution labels are 
 labeling sheet needs separate variant and part answers, or an approved amendment narrowing the
 labels. Then amend the protocol to say how human labels replace the oracle, and run all three arms
 on the sealed holdout exactly once under rubric 2.
+
+## Claude Haiku 5.5 arm, October 21, 2026
+
+Tony moved the LLM comparison arm from Claude Haiku 4.5 to Claude Haiku 5.5 (protocol amendment of
+the same date). Base `main@a84deb40`, branch `feat/haiku-5-5-arm`.
+
+- **Adapter** `propellr-component-llm/2` (`src/host/component-llm.ts`): model `claude-haiku-5-5`,
+  no temperature (Haiku 5.5 rejects non-default sampling parameters), adaptive thinking at effort
+  `low`, `max_tokens` 4096 so thinking cannot crowd out the JSON answer. Structured output,
+  response checks, status handling and the shared transport are unchanged.
+- **Approval** [`llm-2026-10-21.json`](component-inference-evidence/approvals/llm-2026-10-21.json):
+  same terms as September 28 (300 requests, $1.00, synthetic only, evaluation-only outputs), with
+  its own budget. Prices are pinned to Haiku 5.5's long-prompt card ($0.50 input and $2.50 output
+  per million), because the transport takes one flat rate. The September 28 record no longer
+  parses under the current schema and stays as evidence for the Haiku 4.5 runs.
+- **Protocol digest** re-pinned in `tools/frozen-protocol.json` (`844ff9f5…`).
+- **Tests:** the request shape (no sampling parameters, adaptive thinking, effort `low`, 4096
+  tokens), a leading thinking block before the answer, the old snapshot refused as the wrong
+  model, reservation pricing, and both approval records (the new one accepted, the old one refused).
+
+Pinned `pnpm validate` passed all 331 tests (68 contract, 44 host, 13 playbook, 80
+parity/browser, 108 component, 18 reporting). **No live Haiku 5.5 call has been made.** The
+Haiku 4.5 dev results above do not carry over: Haiku 5.5 runs on dev under rubric 2 before the
+holdout.
