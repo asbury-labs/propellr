@@ -252,14 +252,15 @@ for the compiled fixture; `.vue` script blocks are not `tsc`-checked. See the
 `scanComponents(..., { structure: true })` adds text-free structural fingerprints
 (`propellr-structure-capture/1`) and `discoverTemplates` offers structural suggestions
 (`structural-template/1`), never supported scopes. Two host-only, unwired advisory adapters share
-one bounded transport (`src/host/decision-transport.ts`): Jev (`jev-1.13.0`) and Claude Haiku 4.5
-(`claude-haiku-4-5-20251001`, structured output), both native HTTPS with no SDK. Tony approved live
-runs (dev, then the holdout once) on September 28, 2026, with 300 requests and $1.00 per arm (records under
+one bounded transport (`src/host/decision-transport.ts`): Jev (`jev-1.13.0`) and Claude Haiku 5.5
+(`claude-haiku-5-5`, structured output, adaptive thinking at low effort), both native HTTPS with no
+SDK. Tony approved live runs (dev, then the holdout once) on September 28, 2026, and moved the LLM
+arm from Haiku 4.5 to Haiku 5.5 on October 21, 2026, with 300 requests and $1.00 per arm (records under
 `specs/component-inference-evidence/approvals/`). Run a lane with the record path and key in the
 environment, for example
 `PROPELLR_DECISION_APPROVAL=... TYPESAFE_API_KEY=... pnpm eval:components -- --provider jev`, or
 `PROPELLR_LLM_APPROVAL=... ANTHROPIC_API_KEY=...` with `--provider llm`. The holdout stays sealed
-until two adjudicators' labels exist. On dev (part rubric 2), both arms matched the heuristic's
+until two adjudicators' labels exist. On dev (part rubric 2), Jev and Haiku 4.5 matched the heuristic's
 membership choices (decision precision 0.75) and its repair groups (pairwise precision 0.868);
 **neither is adopted.** `pnpm labeling:sheet` builds the offline page for the two human labelers,
 and `pnpm labels:compare` compares their exports ([labeling guide](specs/component-labeling.md)).

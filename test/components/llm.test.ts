@@ -26,8 +26,8 @@ const input: DecisionCase = {
 const budget = {
   maxRequests: 100,
   maxSpendUsd: 1,
-  pricePerMillionInputTokensUsd: 1,
-  pricePerMillionOutputTokensUsd: 5,
+  pricePerMillionInputTokensUsd: 0.5,
+  pricePerMillionOutputTokensUsd: 2.5,
 };
 const answer = {
   membership: { choice: "ancestor-1", confidence: 0.8 },
@@ -84,7 +84,7 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 
-describe("Claude Haiku 4.5 comparison arm without keys", () => {
+describe("Claude Haiku 5.5 comparison arm without keys", () => {
   test("pinned request shape, mapped answers, exact cache and no logging", async () => {
     const logs = ["log", "info", "warn", "error", "debug"].map((method) =>
       vi.spyOn(console, method as "log"),
@@ -112,9 +112,10 @@ describe("Claude Haiku 4.5 comparison arm without keys", () => {
     expect(first?.headers["anthropic-version"]).toBe("2023-06-01");
     const body = JSON.parse(first!.body) as ReturnType<typeof llmRequest>;
     expect(body).toMatchObject({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 512,
-      temperature: 0,
+      model: "claude-haiku-5-5",
+      max_tokens: 4096,
+      thinking: { type: "adaptive" },
+      output_config: { effort: "low" },
     });
     expect(body.output_config.format.type).toBe("json_schema");
     expect(body.output_config.format.schema.properties.membership.properties.choice.enum).toEqual([
@@ -123,12 +124,31 @@ describe("Claude Haiku 4.5 comparison arm without keys", () => {
       "none",
       "insufficient-evidence",
     ]);
-    expect(JSON.stringify(body)).not.toMatch(/thinking|budget_tokens/);
+    expect(JSON.stringify(body)).not.toMatch(/budget_tokens|temperature|top_p|top_k/);
     for (const spy of logs) expect(spy).not.toHaveBeenCalled();
   });
 
+  test("a leading thinking block does not hide the answer", async () => {
+    const { client } = await serve((reply) =>
+      json(
+        reply,
+        200,
+        message({
+          content: [
+            { type: "thinking", thinking: "", signature: "sig" },
+            { type: "text", text: JSON.stringify(answer) },
+          ],
+        }),
+      ),
+    );
+    expect(await client().decide(input, signal())).toMatchObject({
+      state: "answered",
+      answers: { part: { choice: "button", confidence: 0.7 } },
+    });
+  });
+
   test.each([
-    ["wrong model", message({ model: "claude-haiku-4-5" })],
+    ["wrong model", message({ model: "claude-haiku-4-5-20251001" })],
     ["refusal", message({ stop_reason: "refusal" })],
     ["truncated", message({ stop_reason: "max_tokens" })],
     ["non-JSON text", message({}, "not json")],
@@ -193,8 +213,8 @@ describe("Claude Haiku 4.5 comparison arm without keys", () => {
   test("the reservation includes the output ceiling and reported usage replaces it", async () => {
     const { client, hits } = await serve((reply) => json(reply, 200, message()));
     const bytes = Buffer.byteLength(JSON.stringify(llmRequest(input)), "utf8");
-    const reservation = (bytes * 1 + 512 * 5) / 1_000_000;
-    // Input alone would fit; input plus the 512-token output ceiling does not.
+    const reservation = (bytes * 0.5 + 4096 * 2.5) / 1_000_000;
+    // Input alone would fit; input plus the 4096-token output ceiling does not.
     const tight = client({ budget: { ...budget, maxSpendUsd: reservation * 0.9 } });
     expect(await tight.decide(input, signal())).toMatchObject({
       code: "budget-exhausted",
@@ -204,7 +224,7 @@ describe("Claude Haiku 4.5 comparison arm without keys", () => {
     const decisions = client({ budget: { ...budget, maxSpendUsd: reservation * 1.01 } });
     expect(await decisions.decide(input, signal())).toMatchObject({ state: "answered" });
     // 900 input and 60 output tokens replace the reservation.
-    expect(decisions.usage.spentUsd).toBeCloseTo((900 * 1 + 60 * 5) / 1_000_000, 12);
+    expect(decisions.usage.spentUsd).toBeCloseTo((900 * 0.5 + 60 * 2.5) / 1_000_000, 12);
   });
 
   test("inputs outside the text-free grammar are refused before sending", async () => {
@@ -249,11 +269,13 @@ test("the committed approval records satisfy both live-lane schemas", async () =
     maxRequests: 300,
     maxSpendUsd: 1,
   });
-  expect(llmApprovalSchema.parse(await load("llm-2026-09-28.json"))).toMatchObject({
-    model: "claude-haiku-4-5-20251001",
+  expect(llmApprovalSchema.parse(await load("llm-2026-10-21.json"))).toMatchObject({
+    model: "claude-haiku-5-5",
     maxRequests: 300,
     maxSpendUsd: 1,
   });
+  // The Haiku 4.5 record stays as evidence for its runs but cannot authorize the current arm.
+  expect(llmApprovalSchema.safeParse(await load("llm-2026-09-28.json")).success).toBe(false);
 });
 
 test("approval schemas refuse raised ceilings, understated prices and missing usage policy", async () => {
@@ -262,7 +284,7 @@ test("approval schemas refuse raised ceilings, understated prices and missing us
       await readFile(`specs/component-inference-evidence/approvals/${name}`, "utf8"),
     ) as Record<string, unknown>;
   const jev = await load("jev-2026-09-28.json");
-  const llm = await load("llm-2026-09-28.json");
+  const llm = await load("llm-2026-10-21.json");
   for (const change of [
     { maxRequests: 301 },
     { maxSpendUsd: 1.01 },
@@ -275,8 +297,9 @@ test("approval schemas refuse raised ceilings, understated prices and missing us
   for (const change of [
     { maxRequests: 1000 },
     { maxSpendUsd: 10 },
-    { pricePerMillionInputTokensUsd: 0.5 },
-    { pricePerMillionOutputTokensUsd: 1 },
+    // The short-prompt rate card understates prompts over 100K tokens.
+    { pricePerMillionInputTokensUsd: 0.1 },
+    { pricePerMillionOutputTokensUsd: 0.5 },
     { usagePolicy: undefined },
     {
       usagePolicy: {

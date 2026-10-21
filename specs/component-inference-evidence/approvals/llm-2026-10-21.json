@@ -1,0 +1,21 @@
+{
+  "provider": "anthropic",
+  "model": "claude-haiku-5-5",
+  "client": {
+    "endpoint": "https://api.anthropic.com/v1/messages",
+    "adapter": "propellr-component-llm/2"
+  },
+  "approvedBy": "Tony",
+  "date": "2026-10-21",
+  "reference": "Claude Code session, 2026-10-21: move the comparison arm to Claude Haiku 5.5",
+  "syntheticDisclosureOnly": true,
+  "usagePolicy": {
+    "outputReuse": "evaluation-only",
+    "distillation": "prohibited",
+    "adversarialTesting": "not-permitted"
+  },
+  "maxRequests": 300,
+  "maxSpendUsd": 1,
+  "pricePerMillionInputTokensUsd": 0.5,
+  "pricePerMillionOutputTokensUsd": 2.5
+}
