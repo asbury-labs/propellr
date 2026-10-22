@@ -91,6 +91,8 @@ function outcome(scan: ScanResult, rule: string, id: string) {
   return result.occurrences.find(({ target }) => target.path.at(-1)?.selector === `#${id}`)
     ?.outcome;
 }
+const without = (record: object, key: string) =>
+  Object.fromEntries(Object.entries(record).filter(([name]) => name !== key));
 const passes = (scan: ScanResult) =>
   scan.rules.flatMap((result) =>
     result.state === "evaluated"
@@ -311,6 +313,11 @@ test("leak fixtures: controls, hidden text and editable content are never captur
     <div><span contenteditable="true">PLANTED-EDITABLE</span><button id="leak-context">Post</button></div>
     <div contenteditable="true"><button id="leak-editable">PLANTED-EDITABLE-NAME</button></div>
     <div contenteditable="true">PLANTED-EDITABLE-DIRECT <button id="leak-direct" aria-label="Bold"></button></div>
+    <select aria-label="Choice"><option id="choice" selected>PLANTED-SELECTED-REF</option></select>
+    <button id="leak-option" aria-labelledby="choice"></button>
+    <button id="leak-output"><output>PLANTED-OUTPUT</output></button>
+    <h3>Totals <output>PLANTED-HEADING-OUTPUT</output> <button>Edit</button></h3>
+    <div><button id="leak-heading">Pay</button></div>
   </main>`);
   const { scan, text } = await run(html);
   const target = at(text, "button-name", "leak-target");
@@ -337,6 +344,19 @@ test("leak fixtures: controls, hidden text and editable content are never captur
   expect(at(text, "button-name", "leak-editable").name).toEqual({
     state: "unavailable",
     reason: "excluded-source",
+  });
+  // Selected-option and output text are live state: a passing reference or contents is excluded.
+  for (const id of ["leak-option", "leak-output"]) {
+    expect(outcome(scan, "button-name", id), id).toBe("pass");
+    expect(at(text, "button-name", id).name, id).toEqual({
+      state: "unavailable",
+      reason: "excluded-source",
+    });
+  }
+  // Heading context excludes controls and their descendants, like container excerpts.
+  expect(named(text, "button-name", "leak-heading").heading).toEqual({
+    state: "available",
+    value: "Totals",
   });
   const password = targets(text).find(
     ({ rule, name }) =>
@@ -437,6 +457,26 @@ test("residual naming budget exhaustion is unavailable and never changes raw fin
   expect(outcome(exhausted.scan, "button-name", "first")).toBe("pass");
   expect(exhausted.scan.coverage.state).toBe("partial");
   expect(exhausted.text).toMatchObject({
+    state: "unavailable",
+    reason: { code: "text-capture-limit" },
+  });
+  // Exhaustion with no retained pass is still a limit, never an empty available capture.
+  const none = await run(
+    namingDocument(`<main><button aria-label="${"z".repeat(17_000)}"></button></main>`),
+    { rules: ["button-name"] },
+  );
+  expect(passes(none.scan)).toBe(0);
+  expect(none.text).toMatchObject({
+    state: "unavailable",
+    reason: { code: "text-capture-limit" },
+  });
+  // Empty text and comment nodes are charged as visited, so they cannot be walked for free.
+  const comments = await run(
+    namingDocument(`<main><div>${"<!---->".repeat(2_500)}<button id="c">Go</button></div></main>`),
+    { rules: ["button-name"] },
+  );
+  expect(outcome(comments.scan, "button-name", "c")).toBe("pass");
+  expect(comments.text).toMatchObject({
     state: "unavailable",
     reason: { code: "text-capture-limit" },
   });
@@ -662,7 +702,7 @@ test("a replacement that expands a string past 160 units makes the sidecar unava
 test("host validation fails closed and never echoes page text", async () => {
   const { context, target } = await open(
     namingDocument(
-      '<main><h2>Orders</h2><p>Recent <button id="ok">Refresh list</button></p><input type="button" id="v" value="Caption"></main>',
+      '<main><h2>Orders</h2><p>Recent <button id="ok">Refresh list</button></p><input type="button" id="v" value="Caption"><img id="pic" alt="Chart" src="/chart.png"></main>',
     ),
   );
   try {
@@ -736,6 +776,28 @@ test("host validation fails closed and never echoes page text", async () => {
         { ...capture, gaps: [{ code: "text-selection-incomplete", message: "Refresh list" }] },
       ],
       ["wrong discriminant", { ...capture, state: "complete" }],
+      [
+        "other epoch",
+        {
+          ...capture,
+          scan: {
+            ...(capture["scan"] as object),
+            epoch: (capture["scan"] as { epoch: number }).epoch + 1,
+          },
+        },
+      ],
+      ["missing scan identity", without(capture, "scan")],
+      [
+        "image rule without image fields",
+        {
+          ...capture,
+          targets: capture.targets.map((record) =>
+            (record["rule"] as { id: string }).id === "image-alt"
+              ? without(record, "image")
+              : record,
+          ),
+        },
+      ],
     ];
     for (const [label, value] of mutated) {
       const bound = bindTextCapture(result, value);
@@ -744,7 +806,7 @@ test("host validation fails closed and never echoes page text", async () => {
         reason: { code: "text-capture-invalid" },
         scan: { id: result.id, epoch: result.epoch },
       });
-      expect(JSON.stringify(bound), label).not.toMatch(/Refresh|Caption|Orders|Recent|nope/);
+      expect(JSON.stringify(bound), label).not.toMatch(/Refresh|Caption|Orders|Recent|nope|Chart/);
     }
     expect(bindTextCapture(result, undefined)).toMatchObject({
       state: "unavailable",
@@ -771,6 +833,21 @@ test("host validation fails closed and never echoes page text", async () => {
       state: "unavailable",
       reason: { code: "text-capture-invalid" },
     });
+    // Same rules and targets, changed text: target sets match, so only provenance tells them apart.
+    await target.page.evaluate('document.querySelector("#ok").textContent = "Reload list"');
+    const changed = await collectScan(
+      target,
+      request(target, seven),
+      scanContext,
+      new AbortController().signal,
+      target.documentId,
+      { bridge: "propellr-bridge/1", text: "propellr-text-capture/1" },
+    );
+    const current = bindTextCapture(changed.result, changed.text);
+    expect(JSON.stringify(current)).toContain("Reload list");
+    const old = bindTextCapture(changed.result, text);
+    expect(old).toMatchObject({ state: "unavailable", reason: { code: "text-capture-invalid" } });
+    expect(JSON.stringify(old)).not.toMatch(/Refresh|Reload/);
   } finally {
     await target.release();
     await context.close();

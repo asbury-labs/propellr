@@ -111,8 +111,10 @@ function recordIssues(record: Record): string[] {
     if (!record.name.value && record.check !== "has-alt") issues.push("Empty available name");
     if (record.name.value !== record.name.value.replace(/\s+/g, " ").trim())
       issues.push("Name is not compacted");
-    if ("image" in record && (record.image !== undefined) !== imageRules.has(record.rule.id))
-      issues.push("Image fields belong to image rules only");
+    // Required exactly for image rules: an absent property is as malformed as a stray one.
+    const image = "image" in record ? record.image : undefined;
+    if ((image !== undefined) !== imageRules.has(record.rule.id))
+      issues.push("Image fields belong to exactly the image rules");
   }
   if (utf8Bytes(JSON.stringify(record)) > textTargetByteLimit) issues.push("Target exceeds 1 KiB");
   return issues;
@@ -126,6 +128,14 @@ const diagnosticSchema = z
   .strictObject({ code: z.enum(codes), message: z.string().max(512) })
   .readonly()
   .refine(({ code, message }) => textDiagnostics[code] === message, "Unexpected diagnostic text");
+const scanShape = {
+  id: z
+    .string()
+    .max(128)
+    .regex(/^scan_[A-Za-z0-9-]+$/)
+    .transform((id) => id as ScanId),
+  epoch: z.number().int().min(1),
+};
 const envelope = {
   schema: z.literal("propellr-text-capture/1"),
   collector: versionRefSchema.refine(
@@ -138,12 +148,15 @@ const unique = (records: readonly Record[]) =>
   records.length;
 const withinBytes = (value: unknown) => utf8Bytes(JSON.stringify(value)) <= textCaptureByteLimit;
 
-// Browser collector output, before host binding and redaction.
+// Browser collector output, before host binding and redaction. The echoed scan identity is
+// checked against the completed scan before anything else is trusted.
+const provenance = { scan: z.strictObject(scanShape).readonly() };
 export const textCaptureSchema = z
   .discriminatedUnion("state", [
     z
       .strictObject({
         ...envelope,
+        ...provenance,
         state: z.literal("available"),
         targets: z.array(recordSchema).max(textTargetLimit).readonly(),
         gaps: z.array(diagnosticSchema).max(32).readonly(),
@@ -151,7 +164,12 @@ export const textCaptureSchema = z
       .readonly()
       .refine(({ targets }) => unique(targets), "Duplicate rule and target records"),
     z
-      .strictObject({ ...envelope, state: z.literal("unavailable"), reason: diagnosticSchema })
+      .strictObject({
+        ...envelope,
+        ...provenance,
+        state: z.literal("unavailable"),
+        reason: diagnosticSchema,
+      })
       .readonly(),
   ])
   .refine(withinBytes, "Text capture exceeds 64 KiB");
@@ -178,12 +196,7 @@ const reviewSchema = z.discriminatedUnion("state", [
 ]);
 const scanBindingSchema = z
   .strictObject({
-    id: z
-      .string()
-      .max(128)
-      .regex(/^scan_[A-Za-z0-9-]+$/)
-      .transform((id) => id as ScanId),
-    epoch: z.number().int().min(1),
+    ...scanShape,
     pageId: pageIdSchema,
     documentId: z
       .string()

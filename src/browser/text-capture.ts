@@ -4,7 +4,7 @@
 import type { RuleResult, Target, VersionRef } from "../contracts.js";
 import type { NameText, TextCapture, TextTarget } from "../review/contracts.js";
 import { structureRoles, textCollector, textDiagnostics, textRules } from "../analysis.js";
-import { compacted, takeNameBudget, text } from "./naming.js";
+import { compacted, takeNameBudget } from "./naming.js";
 import type { NamingBudget } from "./naming.js";
 
 export interface PassingName {
@@ -71,8 +71,14 @@ export function captureText(input: {
   readonly selected: readonly string[];
   readonly populationComplete: boolean;
   readonly budget: NamingBudget;
+  // Echoed so the host can reject a capture paired with another scan.
+  readonly scan: TextCapture["scan"];
 }): TextCapture {
-  const header = { schema: "propellr-text-capture/1", collector: textCollector } as const;
+  const header = {
+    schema: "propellr-text-capture/1",
+    collector: textCollector,
+    scan: input.scan,
+  } as const;
   const unavailable = (code: keyof typeof textDiagnostics): TextCapture => ({
     ...header,
     state: "unavailable",
@@ -98,8 +104,9 @@ export function captureText(input: {
       code: "text-population-incomplete",
       message: textDiagnostics["text-population-incomplete"],
     });
-  if (input.passing.length > 96) return unavailable("text-capture-limit");
   const { budget } = input;
+  // Raw evaluation may exhaust the shared budget before retaining any pass.
+  if (input.passing.length > 96 || budget.exhausted) return unavailable("text-capture-limit");
   const step = (characters = 0) => {
     if (!takeNameBudget(budget, characters)) throw new Limit();
   };
@@ -122,7 +129,7 @@ export function captureText(input: {
         const heading = nearest.get(record.node);
         let headingField: Field = { state: "absent" };
         if (heading) {
-          headingField = headingText.get(heading) ?? headingValue(heading, budget);
+          headingField = headingText.get(heading) ?? headingValue(heading, budget, step);
           headingText.set(heading, headingField);
         }
         const image =
@@ -197,14 +204,16 @@ function nearestHeadings(
   return nearest;
 }
 
-function headingValue(heading: Element, budget: NamingBudget): Field {
-  const result = text(heading, budget, false, new Set(), 0, true);
-  if (budget.exhausted) throw new Limit();
-  if (result.unsupported) return { state: "unavailable", reason: "unsupported" };
-  if (result.excluded) return { state: "unavailable", reason: "excluded-source" };
-  if (result.truncated) return { state: "unavailable", reason: "too-long" };
-  if (!result.value) return { state: "unavailable", reason: "empty" };
-  return { state: "available", value: result.value };
+// Context, not a name: the excerpt walk excludes controls and their descendants. Omitting the
+// heading itself (never a descendant) keeps one value per heading for every target.
+function headingValue(
+  heading: Element,
+  budget: NamingBudget,
+  step: (characters?: number) => void,
+): Field {
+  if ((heading as Partial<HTMLElement>).isContentEditable)
+    return { state: "unavailable", reason: "excluded-source" };
+  return excerpt(heading, heading, budget, step);
 }
 
 // Allowlisted tokens only: supported explicit role, else a supported implicit native role.
@@ -304,7 +313,9 @@ function excerpt(
     seen.add(current);
     if (current.nodeType === Node.TEXT_NODE) {
       const data = current as Text;
-      // Charge each bounded chunk before copying it; never collect then slice.
+      // Charge each bounded chunk before copying it; never collect then slice. Every visited
+      // node costs at least one step, so an empty text node is charged too.
+      if (!data.length) step();
       for (let offset = 0; offset < data.length; offset += 256) {
         const size = Math.min(256, data.length - offset);
         step(size);
@@ -312,10 +323,11 @@ function excerpt(
       }
       return;
     }
+    // Comments and other non-element nodes are charged before they are skipped.
+    step();
     if (current.nodeType !== Node.ELEMENT_NODE) return;
     const element = current as Element;
     if (depth > 64) throw new Limit();
-    step();
     if (
       element === node ||
       element.namespaceURI !== "http://www.w3.org/1999/xhtml" ||
@@ -327,10 +339,11 @@ function excerpt(
       excluded = true;
       return;
     }
-    const children =
+    // Iterate the live list: budget exhaustion stops before the rest is enumerated.
+    const children: Iterable<Node> =
       element.localName === "slot" && (element as HTMLSlotElement).assignedNodes().length
         ? (element as HTMLSlotElement).assignedNodes({ flatten: true })
-        : [...(element.shadowRoot ?? element).childNodes];
+        : (element.shadowRoot ?? element).childNodes;
     for (const child of children) walk(child, depth + 1);
     append(" ");
   };

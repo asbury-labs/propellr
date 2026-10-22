@@ -93,8 +93,11 @@ export function bindTextCapture(scan: ScanResult, raw: unknown): RedactedTextCap
   const parsed = textCaptureSchema.safeParse(raw);
   // Validation messages can quote page strings; only a fixed code leaves this function.
   if (!parsed.success) return unavailable("text-capture-invalid");
-  if (scan.coverage.state === "stale") return unavailable("text-capture-stale");
   const capture = parsed.data;
+  // Matching targets alone cannot tell two scans of an unchanged population apart.
+  if (capture.scan.id !== scan.id || capture.scan.epoch !== scan.epoch)
+    return unavailable("text-capture-invalid");
+  if (scan.coverage.state === "stale") return unavailable("text-capture-stale");
   if (capture.state === "unavailable") return unavailable(capture.reason.code);
   // Exactly one record per retained pass of a captured rule, at the same version and target.
   const passes = new Set(

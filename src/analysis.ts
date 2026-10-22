@@ -2,6 +2,7 @@ import type {
   Diagnostic,
   NonEmpty,
   RuleResult,
+  ScanId,
   ScanRequest,
   Target,
   VersionRef,
@@ -329,6 +330,8 @@ export function sixRuleRequest(target: Target, mode: ScanRequest["mode"] = "full
 }
 export interface BrowserScanInput {
   readonly target: Target;
+  // Scan identity echoed by opt-in text capture; set by the host whenever text is requested.
+  readonly scan?: { readonly id: ScanId; readonly epoch: number };
   readonly rules: NonEmpty<{ readonly rule: VersionRef; readonly options: JsonObject }>;
   // Optional enrichment in the same call; never changes rules, gaps or coverage.
   readonly components?: {

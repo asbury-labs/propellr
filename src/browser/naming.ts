@@ -183,8 +183,9 @@ export function text(
   }
   let value = "";
   let truncated = false;
-  // Contenteditable text is user input, not an authored name source.
-  let excluded = false;
+  // Contenteditable, option, output and field text is user or live state, not an authored name
+  // source. Capture metadata only: raw naming still reads it under the same budget.
+  let excluded = ["option", "datalist", "output", "select", "textarea"].includes(node.localName);
   for (const child of children(node)) {
     if (!takeNameBudget(budget)) break;
     if (child.nodeType === Node.TEXT_NODE) {

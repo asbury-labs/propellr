@@ -303,7 +303,7 @@ export function createAnalysis(): BrowserAnalysis {
     const namingBudget: NamingBudget = { nodes: 2000, characters: 16_384, exhausted: false };
     let namingLimitReported = false;
     // Opt-in text keeps each retained pass's own check text; off means none is recorded.
-    const capture = input.components?.text !== undefined;
+    const capture = input.components?.text !== undefined && input.scan !== undefined;
     const passing: PassingName[] = [];
     let occurrencesLimited = false;
     // Shared occurrence budget must not depend on caller selection order.
@@ -658,6 +658,7 @@ export function createAnalysis(): BrowserAnalysis {
               selected: input.rules.map(({ rule }) => rule.id),
               populationComplete: !unreadScope && !occurrencesLimited && !rawNamingExhausted,
               budget: namingBudget,
+              scan: input.scan!,
             }),
           }
         : {}),

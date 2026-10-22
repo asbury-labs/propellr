@@ -140,6 +140,7 @@ export async function collectScan(
       target: root,
       rules: resolvedRules,
       ...(components ? { components } : {}),
+      ...(components?.text ? { scan: { id, epoch } } : {}),
     };
     const output = JSON.parse(
       await target.page.evaluate(
