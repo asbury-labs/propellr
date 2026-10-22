@@ -316,26 +316,28 @@
             <dt>modified</dt>
             <dd>
               2026-09-29T14:02:53Z; 2026-09-29T14:23:20Z; 2026-09-29T16:06:45Z;
-              2026-09-29T19:07:51Z; 2026-09-29T19:22:01Z; 2026-09-29T19:29:04Z
+              2026-09-29T19:07:51Z; 2026-09-29T19:22:01Z; 2026-09-29T19:29:04Z;
+              2026-10-22T00:02:10Z; 2026-10-22T00:33:22Z
             </dd>
             <dt>commits</dt>
             <dd>
               0f8c6897 (planning base, branch docs/jev-integration-plan); 4bbb2223 (PR #25);
               ba797e27 (PR #25 rebased) ; 94d0c5b2 (main after #25);
               8c401680b6d5bb70ce825cdb66a0d7ee5fa8ddb3 (phase 1 protocol draft base;
-              feat/jev-semantic-review, uncommitted)
+              feat/jev-semantic-review, uncommitted); 84b197ea (phase 1 implementation base;
+              feat/semantic-text-capture)
             </dd>
             <dt>agent name</dt>
             <dd>
               claude-code / claude-opus-5-5; claude-code / claude-opus-5-5; claude-code /
               claude-opus-5-5 ; claude-code / claude-opus-5-5; pi / gpt-6.1-sol (phase 1 protocol
-              draft)
+              draft); claude-code / claude-opus-5-5 (phase 1 approval and implementation)
             </dd>
             <dt>session id</dt>
             <dd>
               e090228a-8284-4f44-814f-782d9c7da67b; e090228a-8284-4f44-814f-782d9c7da67b;
               e090228a-8284-4f44-814f-782d9c7da67b ; e090228a-8284-4f44-814f-782d9c7da67b;
-              01a0ee99-b915-77cf-a92d-7bd62abfda9f
+              01a0ee99-b915-77cf-a92d-7bd62abfda9f; ebbdd698-da9d-4435-8250-4ff5a6cafeaf
             </dd>
             <dt>back refs</dt>
             <dd>
@@ -346,7 +348,8 @@
             </dd>
             <dt>forward refs</dt>
             <dd>
-              none yet; <a href="semantic-text-capture-protocol.md">Phase 1 protocol draft</a>
+              none yet; <a href="semantic-text-capture-protocol.md">Phase 1 protocol draft</a>;
+              <a href="semantic-review-validation.md">Phase 1 evidence</a>
             </dd>
           </dl>
         </details>
@@ -1032,7 +1035,7 @@
         </div>
 
         <div class="phase">
-          <h3><code class="status">[wip]</code> Phase 1: Text-capture contract (prerequisite)</h3>
+          <h3><code class="status">[x]</code> Phase 1: Text-capture contract (prerequisite)</h3>
           <p>
             An opt-in capture of the minimum text needed to judge a name, bounded like structure
             capture, redacted on the host before any egress, and kept out of occurrence evidence.
@@ -1088,33 +1091,37 @@
               pages.
             </li>
             <li>
-              <code class="status">[wip]</code> Stop for approval. Draft ready; awaiting Tony's
+              <code class="status">[x]</code> Stop for approval. Draft ready; awaiting Tony's
               approval of fields, bounds, redaction and synthetic-only policy. No code or egress.
+              Approved by Tony on 2026-10-21; draft SHA-256 <code>2beadbeb…f2b8</code> recorded in
+              the protocol's Approval section.
             </li>
           </ul>
 
           <h4>2. Implement the capture and redaction</h4>
           <ul class="checklist">
             <li>
-              <code class="status">[]</code> <code>src/browser/text-capture.ts</code>: collect the
+              <code class="status">[x]</code> <code>src/browser/text-capture.ts</code>: collect the
               approved fields in the same guarded scan call as naming. Extend each passing check in
               <code>naming-rules.ts</code> to yield its text, bounded by <code>compact</code>, so
               the capture shares the rule's own result. Tests cover every passing check of every
-              naming rule. No Node imports and no runtime schemas in the browser.
+              naming rule. No Node imports and no runtime schemas in the browser. Done: every
+              allowlisted check of all seven rules is asserted; the bundle contains no Zod.
             </li>
             <li>
-              <code class="status">[]</code> <code>src/review/validation.ts</code>: host schema for
+              <code class="status">[x]</code> <code>src/review/validation.ts</code>: host schema for
               <code>propellr-text-capture/1</code> (available or unavailable with a diagnostic),
               validated like <code>structureSchema</code>.
             </li>
             <li>
-              <code class="status">[]</code> <code>src/host/redaction.ts</code>: deterministic,
+              <code class="status">[x]</code> <code>src/host/redaction.ts</code>: deterministic,
               versioned (<code>propellr-redaction/1</code>), applied before any adapter sees text.
+              Also binds the capture to its scan's retained passes.
             </li>
             <li>
-              <code class="status">[]</code> Opt-in flag on <code>scanComponents</code> or the scan
+              <code class="status">[x]</code> Opt-in flag on <code>scanComponents</code> or the scan
               request (<code>{ text: true }</code>). Default off, with no change to the scan result
-              shape when off.
+              shape when off. Done on <code>scanComponents</code>; no IPC command or capability.
             </li>
           </ul>
 
@@ -1143,18 +1150,20 @@
           </ul>
           <ul class="checklist">
             <li>
-              <code class="status">[]</code>
+              <code class="status">[x]</code>
               <code
                 >npm exec --yes --package=pnpm@12.4.1 -- pnpm build &amp;&amp;
                 PLAYWRIGHT_BROWSERS_PATH=$PWD/.tools/browsers node node_modules/vitest/vitest.mjs
                 run test/components/text-capture.test.ts</code
               >
-              — capture, leak, bounds, redaction and isolation cases pass.
+              — capture, leak, bounds, redaction and isolation cases pass. Evidence 2026-10-22: exit
+              0, 14 of 14 Chromium tests on the final head.
             </li>
             <li>
-              <code class="status">[]</code>
+              <code class="status">[x]</code>
               <code>npm exec --yes --package=pnpm@12.4.1 -- pnpm validate</code> — the whole suite,
-              types, lint and Oxfmt pass under pinned tools.
+              types, lint and Oxfmt pass under pinned tools. Evidence 2026-10-22T00:33Z: exit 0, 345
+              tests; see <a href="semantic-review-validation.md">phase 1 evidence</a>.
             </li>
           </ul>
           <div class="loop">
@@ -1803,6 +1812,34 @@
 
       <section id="amendments">
         <h2>Amendments</h2>
+        <details>
+          <summary>2026-10-22T00:33:22Z — Phase 1 approved and implemented; stop boundary</summary>
+          <p>
+            Tony approved the text-capture protocol on 2026-10-21. Approver, date and the draft's
+            SHA-256 (<code>2beadbeb…f2b8</code>, blob <code>00de8c90</code> at <code>main</code>
+            <code>84b197ea</code>) are in the protocol's Approval section. Implemented on
+            <code>feat/semantic-text-capture</code>: browser collector, host schemas, binding to
+            retained passes, <code>propellr-redaction/1</code> and the opt-in
+            <code>scanComponents(..., { text: true })</code> flag. No provider call, credential,
+            spend, text egress, IPC command or customer page.
+          </p>
+          <p>
+            Interpretations, recorded in
+            <a href="semantic-review-validation.md">phase 1 evidence</a>: heading lookup reuses the
+            reader's ordered facts and charges heading text only; a container excerpt shared by
+            targets the walk skips anyway is computed and charged once; element boundaries add a
+            space to excerpts; an unsupported explicit role is <code>unknown</code>; redaction
+            repeats its fixed rule order to a fixed point so that it is idempotent. Review fixes:
+            text directly inside an editable container, attribute compaction before the budget
+            charge, Unicode email addresses, and occurrence limits on non-naming rules. No
+            acceptance criterion was weakened.
+          </p>
+          <p>
+            Verification: pinned <code>pnpm validate</code> exit 0 with 345 tests; focused
+            text-capture command exit 0 with 14 tests. Phases 2–6 are not started; the phase 2
+            protocol and its approvals come next.
+          </p>
+        </details>
         <details>
           <summary>2026-09-29T19:22:01Z — Phase 1 protocol draft; approval gate reached</summary>
           <p>

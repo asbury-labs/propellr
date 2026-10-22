@@ -14,9 +14,11 @@ import { minimumSize, offsetDiameter } from "./geometry.js";
 import { composedContains, parent, visible, name } from "./naming.js";
 import type { NamingBudget } from "./naming.js";
 import { evaluateNamingRule, namingApplicability } from "./naming-rules.js";
-import { implementedRules, namingRules } from "../analysis.js";
+import { implementedRules, namingRules, textRules } from "../analysis.js";
 import { captureComponents } from "./components.js";
 import { captureStructure } from "./structure.js";
+import { captureText } from "./text-capture.js";
+import type { PassingName } from "./text-capture.js";
 
 interface Fact {
   readonly node: Element;
@@ -300,6 +302,10 @@ export function createAnalysis(): BrowserAnalysis {
     const targetsByNode = new Map(facts.map(({ node, target }) => [node, target.path]));
     const namingBudget: NamingBudget = { nodes: 2000, characters: 16_384, exhausted: false };
     let namingLimitReported = false;
+    // Opt-in text keeps each retained pass's own check text; off means none is recorded.
+    const capture = input.components?.text !== undefined && input.scan !== undefined;
+    const passing: PassingName[] = [];
+    let occurrencesLimited = false;
     // Shared occurrence budget must not depend on caller selection order.
     const orderedRules = input.rules.toSorted((a, b) => a.rule.id.localeCompare(b.rule.id));
     const rules: RuleResult[] = orderedRules.map(({ rule, options }) => {
@@ -317,11 +323,18 @@ export function createAnalysis(): BrowserAnalysis {
       const available = () => {
         if (count < 96) return true;
         limited = true;
+        // Only a limit on a captured naming rule reduces its population; geometry does not.
+        if (textRules.some((id) => id === rule.id)) occurrencesLimited = true;
         gap("occurrence-limit", "Scan occurrence budget exceeded");
         return false;
       };
+      let retain: PassingName | undefined;
       const add = (make: () => Occurrence) => {
-        if (available()) occurrences.push(make());
+        if (available()) {
+          occurrences.push(make());
+          if (retain) passing.push(retain);
+        }
+        retain = undefined;
       };
       if (rule.id === "button-name")
         for (const fact of facts.filter(
@@ -336,11 +349,21 @@ export function createAnalysis(): BrowserAnalysis {
           const role = fact.node.getAttribute("role");
           const unsupported =
             named.unsupported || (role !== null && role.toLowerCase() !== "button");
+          const outcome = unsupported ? "incomplete" : named.value ? "pass" : "violation";
+          // Recorded only when the occurrence is actually retained.
+          if (capture && outcome === "pass")
+            retain = {
+              rule,
+              node: fact.node,
+              target: fact.target,
+              check: named.source,
+              name: named.text,
+            };
           add(() =>
             occurrence(
               fact,
               rule.id,
-              unsupported ? "incomplete" : named.value ? "pass" : "violation",
+              outcome,
               {
                 kind: "name",
                 observed: { hasName: Boolean(named.value), source: named.source },
@@ -361,9 +384,16 @@ export function createAnalysis(): BrowserAnalysis {
           const applies = namingApplicability(fact.node, namingRule);
           if (applies === false) continue;
           if (!available()) break;
-          const result = evaluateNamingRule(fact.node, namingRule, namingBudget, applies, (node) =>
-            targetsByNode.get(node),
+          const result = evaluateNamingRule(
+            fact.node,
+            namingRule,
+            namingBudget,
+            applies,
+            (node) => targetsByNode.get(node),
+            capture,
           );
+          if (result.passing)
+            retain = { rule, node: fact.node, target: fact.target, ...result.passing };
           if (namingBudget.exhausted && !namingLimitReported) {
             namingLimitReported = true;
             gap("naming-limit", "Naming node, text or depth budget exceeded", fact.target);
@@ -605,6 +635,7 @@ export function createAnalysis(): BrowserAnalysis {
         : { rules: [], gaps: [reason] };
     };
     const output = raw();
+    const rawNamingExhausted = namingBudget.exhausted;
     if (!input.components) return output;
     // Enrichment reads the final raw results; it cannot add, drop or reorder findings.
     const violations = output.rules.flatMap((result) =>
@@ -618,6 +649,19 @@ export function createAnalysis(): BrowserAnalysis {
       ...output,
       components: captureComponents(facts, violations, unreadScope),
       ...(input.components.structure ? { structure: captureStructure(facts, violations) } : {}),
+      ...(capture
+        ? {
+            text: captureText({
+              facts,
+              passing,
+              results: output.rules === rules ? rules : undefined,
+              selected: input.rules.map(({ rule }) => rule.id),
+              populationComplete: !unreadScope && !occurrencesLimited && !rawNamingExhausted,
+              budget: namingBudget,
+              scan: input.scan!,
+            }),
+          }
+        : {}),
     };
   }
   return { scan, finish };

@@ -13,6 +13,8 @@ import {
   structureSchema,
 } from "../components/validation.js";
 import { resolveEvidence } from "../components/attribution.js";
+import type { RedactedTextCapture } from "../review/contracts.js";
+import { bindTextCapture } from "./redaction.js";
 import type { BrowserTarget } from "./browser.js";
 import { collectScan } from "./scan.js";
 
@@ -72,13 +74,14 @@ export async function scanComponents(
   signal: AbortSignal,
   registry: ComponentRegistry,
   expectedDocument = target.documentId,
-  options: { readonly structure?: boolean } = {},
+  options: { readonly structure?: boolean; readonly text?: boolean } = {},
 ): Promise<{
   readonly scan: ScanResult;
   readonly evidence: ComponentEvidence;
   readonly structure?: StructureCapture;
+  readonly text?: RedactedTextCapture;
 }> {
-  const { result, capture, structure } = await collectScan(
+  const { result, capture, structure, text } = await collectScan(
     target,
     request,
     context,
@@ -87,8 +90,11 @@ export async function scanComponents(
     {
       bridge: "propellr-bridge/1",
       ...(options.structure ? { structure: "propellr-structure/1" as const } : {}),
+      ...(options.text ? { text: "propellr-text-capture/1" as const } : {}),
     },
   );
+  // Opt-in, default off: no text collection and no added property. Only redacted text returns.
+  const textCapture = options.text ? { text: bindTextCapture(result, text) } : {};
   const parsed = capture === undefined ? undefined : captureSchema.safeParse(capture);
   const evidence = resolveEvidence({
     scan: result,
@@ -104,7 +110,7 @@ export async function scanComponents(
     manifests: registry.manifests,
     associated: registry.associated(target, expectedDocument),
   });
-  if (!options.structure) return { scan: result, evidence };
+  if (!options.structure) return { scan: result, evidence, ...textCapture };
   // Page-derived structure is validated like the bridge capture; invalid means unavailable.
   const parsedStructure =
     structure === undefined ? undefined : structureSchema.safeParse(structure);
@@ -121,5 +127,6 @@ export async function scanComponents(
             ? { code: "component-structure-invalid", message: "Structure failed validation" }
             : { code: "component-structure-unavailable", message: "No structure for this scope" },
         },
+    ...textCapture,
   };
 }

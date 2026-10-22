@@ -1,10 +1,15 @@
 // SPDX-License-Identifier: MPL-2.0
 // Canonical ANY/NONE combinations, separate from bounded accessible-name precedence.
 // Source pins/branches: specs/{naming-coverage,native-form-naming}-protocol.md, PROVENANCE.md.
+import { textForcedReasons } from "../analysis.js";
 import type { namingRules } from "../analysis.js";
 import type { Evidence, Occurrence, Target } from "../contracts.js";
+import type { NameText } from "../review/contracts.js";
 import {
-  nameString,
+  boundedName,
+  compacted,
+  joinedText,
+  nameText,
   parent,
   takeNameBudget,
   text,
@@ -64,8 +69,12 @@ export function evaluateNamingRule(
   budget: NamingBudget,
   applicable: Truth,
   targetPath: (node: Element) => Target["path"] | undefined,
+  capture = false,
 ) {
   const any: Check[] = [];
+  // Text behind the check that just ran; recorded only for the first successful ANY check.
+  let found: NameText | undefined;
+  let passing: { check: string; name: NameText } | undefined;
   const none: Check[] = [];
   const relationships = new Map<string, Target["path"][]>();
   let relationshipUnknown = false;
@@ -80,39 +89,58 @@ export function evaluateNamingRule(
   };
   const root = node.getRootNode() as Document | ShadowRoot;
   const attr = (key: string): Truth => {
-    const value = nameString(node.getAttribute(key) ?? "", budget);
-    return budget.exhausted ? null : Boolean(value);
+    const named = boundedName(node.getAttribute(key) ?? "", budget);
+    if (capture) found = nameText(named);
+    return budget.exhausted ? null : Boolean(named.value);
   };
   const check = (id: string, run: () => Truth) => {
     if (any.some((check) => check.result === true)) return;
+    found = undefined;
     const result = run();
     const paths = relationships.get(id);
     any.push({ id, result, ...(paths ? { related: paths } : {}) });
+    if (capture && result === true) passing = { check: id, name: found ?? unknown };
   };
+  // A success without recorded text is never presented as available text.
+  const unknown: NameText = { state: "unavailable", reason: "non-text-check" };
   let refs: Truth | undefined;
+  let refsText: NameText | undefined;
   const references = (): Truth => {
-    if (refs !== undefined) return refs;
+    if (refs !== undefined) {
+      found = refsText;
+      return refs;
+    }
     let value: Truth = false;
     const ids = node.getAttribute("aria-labelledby") ?? "";
     if (!takeNameBudget(budget, ids.length)) return (refs = null);
     const visited = new Set<Element>();
+    const parts: (ReturnType<typeof text> & { hidden: boolean })[] = [];
     for (const id of ids.trim().split(/\s+/)) {
       if (!id) continue;
       if (!takeNameBudget(budget)) break;
       const label = root.getElementById(id);
       if (!label || visited.has(label)) continue;
       visited.add(label);
-      const named = truth(
-        text(label, budget, !visible(label, budget), new Set(label === node ? [] : [node])),
-      );
+      const hidden = !visible(label, budget);
+      const result = text(label, budget, hidden, new Set(label === node ? [] : [node]));
+      parts.push({ ...result, hidden });
+      const named = truth(result);
       if (named === null) value = null;
       else if (named && value !== null) value = true;
     }
+    // Every visited contributor, in IDREF order, joined like name() joins references.
+    if (capture) found = refsText = joinedText(parts);
     return (refs = budget.exhausted ? null : value);
   };
   let contents: Truth | undefined;
+  let contentsText: NameText | undefined;
   const content = () => {
-    if (contents === undefined) contents = truth(text(node, budget, false, new Set(), 0, true));
+    if (contents === undefined) {
+      const result = text(node, budget, false, new Set(), 0, true);
+      contents = truth(result);
+      if (capture) contentsText = nameText(result);
+    }
+    found = contentsText;
     return contents;
   };
   let labels: Element[] | undefined;
@@ -136,7 +164,11 @@ export function evaluateNamingRule(
     }
     return (implicit = null);
   };
-  const labelText = (label: Element) => truth(text(label, budget, false, new Set([node])));
+  const labelText = (label: Element) => {
+    const result = text(label, budget, false, new Set([node]));
+    if (capture) found = nameText(result);
+    return truth(result);
+  };
   const someLabels = (values: Iterable<Element>): Truth => {
     let result: Truth = false;
     for (const label of values) {
@@ -187,6 +219,9 @@ export function evaluateNamingRule(
     check("presentational-role", () => presentation(node, budget));
     const alt = node.getAttribute("alt") ?? "";
     const bounded = takeNameBudget(budget, alt.length);
+    // has-alt is boolean; its text is the alt string this rule already reads for alt-space-value.
+    if (passing?.check === "has-alt" && bounded)
+      passing = { ...passing, name: nameText(compacted(alt)) };
     // Empty alt is valid; whitespace-only alt is a separate prohibition.
     const spaces = bounded ? /^\s+$/.test(alt) : null;
     const presentational = presentation(node, budget);
@@ -244,8 +279,11 @@ export function evaluateNamingRule(
             style.display === "none" ||
             style.visibility !== "visible" ||
             style.contentVisibility === "hidden"
-          )
+          ) {
+            // A boolean hidden-label success: naming may defer to it, capture must not read it.
+            found = { state: "unavailable", reason: "hidden-source" };
             return true;
+          }
         }
         const value = labelText(label);
         if (value === true) return true;
@@ -308,5 +346,15 @@ export function evaluateNamingRule(
     expected: { any: true, none: false },
     explanation: "Bounded canonical check combination; no name strings or control values retained",
   };
-  return { outcome, impact, evidence };
+  if (!capture || outcome !== "pass" || !passing) return { outcome, impact, evidence };
+  const forced = textForcedReasons[passing.check as keyof typeof textForcedReasons];
+  const type = node.localName === "input" ? node.getAttribute("type")?.toLowerCase() : undefined;
+  // Privacy takes precedence: password/hidden targets and value/default/presentation checks.
+  const name: NameText =
+    type === "password" || type === "hidden"
+      ? { state: "unavailable", reason: "excluded-target" }
+      : forced
+        ? { state: "unavailable", reason: forced }
+        : passing.name;
+  return { outcome, impact, evidence, passing: { check: passing.check, name } };
 }
