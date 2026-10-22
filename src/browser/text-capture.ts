@@ -4,7 +4,7 @@
 import type { RuleResult, Target, VersionRef } from "../contracts.js";
 import type { NameText, TextCapture, TextTarget } from "../review/contracts.js";
 import { structureRoles, textCollector, textDiagnostics, textRules } from "../analysis.js";
-import { compacted, takeNameBudget } from "./naming.js";
+import { compacted, parent, takeNameBudget } from "./naming.js";
 import type { NamingBudget } from "./naming.js";
 
 export interface PassingName {
@@ -50,16 +50,6 @@ const skipped = new Set([
   "picture",
   "button",
   "input",
-  "select",
-  "textarea",
-  "option",
-  "optgroup",
-  "datalist",
-  "output",
-]);
-// Context rooted inside one of these is control content, even though the walk starts below it.
-const controls = new Set([
-  "button",
   "select",
   "textarea",
   "option",
@@ -125,17 +115,19 @@ export function captureText(input: {
     const nearest = nearestHeadings(input.facts, input.passing);
     const headingText = new Map<Element, Field>();
     const excerpts = new Map<Element, Field>();
-    const controlled = new Map<Element, boolean>();
-    const withinControl = (root: Element) => {
-      let known = controlled.get(root);
+    const excludedRoots = new Map<Element, boolean>();
+    // Context rooted inside a control or embedded content is excluded, even though the excerpt
+    // walk starts below it. Selection stays root-local; this check follows composed parents
+    // across shadow roots and slots, charged per ancestor.
+    const withinExcluded = (root: Element) => {
+      let known = excludedRoots.get(root);
       if (known === undefined) {
         known = false;
-        // Bounded by depth and charged per ancestor; stops at the document or shadow root.
-        for (let current = root.parentElement; current && !known; current = current.parentElement) {
+        for (let current = parent(root); current && !known; current = parent(current)) {
           step();
-          known = controls.has(current.localName);
+          known = skipped.has(current.localName);
         }
-        controlled.set(root, known);
+        excludedRoots.set(root, known);
       }
       return known;
     };
@@ -155,7 +147,7 @@ export function captureText(input: {
         if (heading) {
           headingField =
             headingText.get(heading) ??
-            (withinControl(heading)
+            (withinExcluded(heading)
               ? { state: "unavailable", reason: "excluded-source" }
               : headingValue(heading, budget, step));
           headingText.set(heading, headingField);
@@ -168,7 +160,7 @@ export function captureText(input: {
           ...base,
           name: record.name,
           heading: headingField,
-          container: containerText(record.node, budget, step, excerpts, withinControl),
+          container: containerText(record.node, budget, step, excerpts, withinExcluded),
           sameName: sameName(record),
           ...(image ? { image } : {}),
         });
@@ -300,7 +292,7 @@ function containerText(
   budget: NamingBudget,
   step: (characters?: number) => void,
   excerpts: Map<Element, Field>,
-  withinControl: (root: Element) => boolean,
+  withinExcluded: (root: Element) => boolean,
 ): Field {
   let container: Element | null = null;
   for (let current = node.parentElement; current; current = current.parentElement) {
@@ -316,7 +308,7 @@ function containerText(
   }
   if (!container) return { state: "absent" };
   // isContentEditable inherits, so this also covers text directly inside an editable host.
-  if ((container as Partial<HTMLElement>).isContentEditable || withinControl(container))
+  if ((container as Partial<HTMLElement>).isContentEditable || withinExcluded(container))
     return { state: "unavailable", reason: "excluded-source" };
   // A skipped target's subtree is omitted either way, so its excerpt is shared and charged once.
   const shared = skipped.has(node.localName);

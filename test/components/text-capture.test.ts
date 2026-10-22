@@ -320,7 +320,10 @@ test("leak fixtures: controls, hidden text and editable content are never captur
     <div><button id="leak-heading">Pay</button></div>
     <output><h2>PLANTED-OUTPUT-HEADING</h2></output><div><button id="leak-nested-heading">Pay now</button></div>
     <output><label>PLANTED-OUTPUT-LABEL <button id="leak-nested-label" aria-label="Go"></button></label></output>
-  </main>`);
+    <output><x-scope id="leak-shadow-host"></x-scope></output>
+    <x-controlled><div>PLANTED-SLOTTED-OUTPUT <button id="leak-slotted" aria-label="Go"></button></div></x-controlled>
+    <canvas><div>PLANTED-CANVAS-FALLBACK <button id="leak-canvas" aria-label="Go"></button></div></canvas>
+  </main>${shadow("#leak-shadow-host", '<h2>PLANTED-SHADOW-HEADING</h2><div><button id="leak-shadow">Pay</button></div>')}<script>customElements.define("x-controlled",class extends HTMLElement{constructor(){super();this.attachShadow({mode:"open"}).innerHTML="<output><slot></slot></output>"}});</script>`);
   const { scan, text } = await run(html);
   const target = at(text, "button-name", "leak-target");
   expect(target).toMatchObject({
@@ -369,6 +372,16 @@ test("leak fixtures: controls, hidden text and editable content are never captur
     state: "unavailable",
     reason: "excluded-source",
   });
+  // The ancestry check crosses shadow roots and slots and covers embedded content.
+  expect(named(text, "button-name", "leak-shadow").heading).toEqual({
+    state: "unavailable",
+    reason: "excluded-source",
+  });
+  for (const id of ["leak-slotted", "leak-canvas"])
+    expect(named(text, "button-name", id).container, id).toEqual({
+      state: "unavailable",
+      reason: "excluded-source",
+    });
   const password = targets(text).find(
     ({ rule, name }) =>
       rule.id === "label" && name.state === "unavailable" && name.reason === "excluded-target",
