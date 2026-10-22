@@ -1,15 +1,15 @@
 # Semantic text-capture protocol, phase 1
 
-September 29, 2026. **Draft for Tony's approval, not frozen or implemented.** Plan:
-[Jev semantic review](propellr-jev-semantic-review.html), phase 1.
-Base `8c401680b6d5bb70ce825cdb66a0d7ee5fa8ddb3`, branch `feat/jev-semantic-review`.
+September 29, 2026. **Approved by Tony on October 21, 2026; frozen.** See
+[Approval](#approval). Plan: [Jev semantic review](propellr-jev-semantic-review.html), phase 1.
+Drafted on base `8c401680b6d5bb70ce825cdb66a0d7ee5fa8ddb3`; merged to `main` via #27 and #26.
 
 ## Approval boundary
 
 | Gate                                                            | State                                               |
 | --------------------------------------------------------------- | --------------------------------------------------- |
-| Capture fields, bounds, redaction and synthetic-only disclosure | **Pending Tony**                                    |
-| Capture/redaction implementation                                | Blocked until protocol approval                     |
+| Capture fields, bounds, redaction and synthetic-only disclosure | **Approved by Tony, 2026-10-21**                    |
+| Capture/redaction implementation                                | Authorized (phase 1, no-provider tests only)        |
 | Provider calls, credentials, spend and text egress              | Not authorized; separate phase 2–3 records required |
 | Customer pages, source, production or live channels             | Not authorized                                      |
 
@@ -257,5 +257,21 @@ After implementation, run the plan's focused build/Chromium text-capture command
 `pnpm validate`; record executed results in `specs/semantic-review-validation.md`. Until then
 these are requirements, not checked boxes or evidence of text-capture support.
 
-**Stop now for Tony's approval of this draft.** No runtime code, dependencies, provider calls,
-spend, customer data or disclosure are authorized by writing it.
+Writing the draft authorized no runtime code, dependencies, provider calls, spend, customer
+data or disclosure.
+
+## Approval
+
+| Field              | Value                                                                            |
+| ------------------ | -------------------------------------------------------------------------------- |
+| Approver           | Tony Kornmeier                                                                   |
+| Date               | 2026-10-21 (US Eastern), recorded 2026-10-22T00:02Z                              |
+| Approved scope     | Capture fields, bounds, redaction and synthetic-only disclosure, as drafted      |
+| Approved bytes     | `specs/semantic-text-capture-protocol.md` at `main` `84b197ea` (blob `00de8c90`) |
+| SHA-256            | `2beadbebb96d58abd200fc83425047bf6a35e45a3102bc5437c0bc6bfb96f2b8`               |
+| Authorizes         | Phase 1 implementation and its no-provider tests only                            |
+| Does not authorize | Provider calls, credentials, spend, text egress, customer pages or source        |
+
+The hash covers the approved draft's bytes, which stay in git history at that blob. Later edits
+to this file, including this section, are not part of the approved snapshot; the final revision
+that semantic evaluation pins is recorded separately when phase 2 freezes its protocol.

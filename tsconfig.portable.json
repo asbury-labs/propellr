@@ -7,6 +7,7 @@
     "src/analysis.ts",
     "src/reporting/**/*.ts",
     "src/components/**/*.ts",
+    "src/review/**/*.ts",
     "test/types/contracts.typecheck.ts",
     "test/types/portable.typecheck.ts",
     "test/types/components.typecheck.ts"

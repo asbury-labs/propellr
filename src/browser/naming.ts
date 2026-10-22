@@ -1,6 +1,23 @@
 // SPDX-License-Identifier: MPL-2.0
 // Bounded naming checks, not a complete accessible-name engine. See PROVENANCE.md.
-const compact = (text: string) => text.replace(/\s+/g, " ").trim().slice(0, 160);
+import type { NameText } from "../review/contracts.js";
+
+// Truncation is observed during the original compaction, never by re-reading the source.
+export function compacted(text: string): { value: string; truncated: boolean } {
+  const value = text.replace(/\s+/g, " ").trim();
+  return { value: value.slice(0, 160), truncated: value.length > 160 };
+}
+const compact = (text: string) => compacted(text).value;
+// Capture view of text a check already computed. Privacy reasons take precedence over text.
+export function nameText(
+  result: { readonly value: string; readonly truncated?: boolean; readonly excluded?: boolean },
+  hidden = false,
+): NameText {
+  if (hidden) return { state: "unavailable", reason: "hidden-source" };
+  if (result.excluded) return { state: "unavailable", reason: "excluded-source" };
+  if (result.truncated) return { state: "unavailable", reason: "truncated" };
+  return { state: "available", value: result.value };
+}
 export function parent(node: Element): Element | null {
   if (node.assignedSlot) return node.assignedSlot;
   if (node.parentElement) return node.parentElement;
@@ -47,8 +64,15 @@ export function takeNameBudget(budget: NamingBudget, characters = 0): boolean {
   budget.characters -= characters;
   return true;
 }
+// Compacts only after the charge succeeds; a refused string is never scanned.
+export function boundedName(
+  value: string,
+  budget: NamingBudget,
+): { value: string; truncated: boolean } {
+  return takeNameBudget(budget, value.length) ? compacted(value) : { value: "", truncated: false };
+}
 export function nameString(value: string, budget: NamingBudget): string {
-  return takeNameBudget(budget, value.length) ? compact(value) : "";
+  return boundedName(value, budget).value;
 }
 // Pinned canonical focusability for this native naming slice, not a browser tab-order API.
 export function focusable(node: Element): boolean {
@@ -111,16 +135,18 @@ export function text(
   seen = new Set<Element>(),
   depth = 0,
   contentsOnly = false,
-): { value: string; unsupported: boolean } {
-  if (seen.has(node)) return { value: "", unsupported: false };
+): { value: string; unsupported: boolean; truncated: boolean; excluded: boolean } {
+  const clean = { truncated: false, excluded: false };
+  if (seen.has(node)) return { value: "", unsupported: false, ...clean };
   if (depth >= 64 || !takeNameBudget(budget)) {
     budget.exhausted = true;
-    return { value: "", unsupported: true };
+    return { value: "", unsupported: true, ...clean };
   }
   seen.add(node);
   if (["script", "style", "template", "noscript"].includes(node.localName))
-    return { value: "", unsupported: false };
-  if (!includeHidden && !visible(node, budget)) return { value: "", unsupported: budget.exhausted };
+    return { value: "", unsupported: false, ...clean };
+  if (!includeHidden && !visible(node, budget))
+    return { value: "", unsupported: budget.exhausted, ...clean };
   let unsupported =
     node.namespaceURI !== "http://www.w3.org/1999/xhtml" ||
     node.hasAttribute("aria-owns") ||
@@ -142,26 +168,30 @@ export function text(
     if (role === "none" || role === "presentation") {
       const presentational = presentation(node, budget);
       if (presentational === true)
-        return { value: "", unsupported: unsupported || budget.exhausted };
+        return { value: "", unsupported: unsupported || budget.exhausted, ...clean };
       if (presentational === null) unsupported = true;
     } else if (role && role !== "img") unsupported = true;
   }
-  const label = contentsOnly ? "" : nameString(node.getAttribute("aria-label") ?? "", budget);
-  if (label || budget.exhausted)
-    return { value: label, unsupported: unsupported || budget.exhausted };
+  const label = contentsOnly
+    ? { value: "", truncated: false }
+    : boundedName(node.getAttribute("aria-label") ?? "", budget);
+  if (label.value || budget.exhausted)
+    return { ...label, unsupported: unsupported || budget.exhausted, excluded: false };
   if (node.localName === "img") {
-    return {
-      value: nameString(node.getAttribute("alt") ?? node.getAttribute("title") ?? "", budget),
-      unsupported,
-    };
+    const alt = boundedName(node.getAttribute("alt") ?? node.getAttribute("title") ?? "", budget);
+    return { ...alt, unsupported, excluded: false };
   }
   let value = "";
+  let truncated = false;
+  // Contenteditable text is user input, not an authored name source.
+  let excluded = false;
   for (const child of children(node)) {
     if (!takeNameBudget(budget)) break;
     if (child.nodeType === Node.TEXT_NODE) {
       const textNode = child as Text;
       if (!takeNameBudget(budget, textNode.length)) break;
       value += textNode.substringData(0, textNode.length);
+      if ((node as Partial<HTMLElement>).isContentEditable) excluded = true;
     } else if (child.nodeType === Node.ELEMENT_NODE) {
       const element = child as Element;
       if (seen.has(element) || (!includeHidden && !visible(element, budget))) continue;
@@ -173,28 +203,62 @@ export function text(
       const result = text(element, budget, includeHidden, seen, depth + 1);
       value += result.value;
       unsupported ||= result.unsupported;
+      truncated ||= result.truncated;
+      excluded ||= result.excluded;
     }
     if (budget.exhausted) break;
   }
-  const result =
-    compact(value) || (contentsOnly ? "" : nameString(node.getAttribute("title") ?? "", budget));
-  return { value: result, unsupported: unsupported || budget.exhausted };
+  const contents = compacted(value);
+  if (contents.value)
+    return {
+      value: contents.value,
+      unsupported: unsupported || budget.exhausted,
+      truncated: truncated || contents.truncated,
+      excluded,
+    };
+  const title = contentsOnly
+    ? { value: "", truncated: false }
+    : boundedName(node.getAttribute("title") ?? "", budget);
+  return { ...title, unsupported: unsupported || budget.exhausted, excluded: false };
 }
+// Combined name of several contributors. Any hidden, excluded or truncated part makes it unavailable.
+export function joinedText(
+  parts: readonly (ReturnType<typeof text> & { readonly hidden?: boolean })[],
+): NameText {
+  const joined = compacted(parts.map((part) => part.value).join(" "));
+  return nameText(
+    {
+      value: joined.value,
+      truncated: joined.truncated || parts.some((part) => part.truncated),
+      excluded: parts.some((part) => part.excluded),
+    },
+    parts.some((part) => part.hidden),
+  );
+}
+// The successful candidate also reports its own text for opt-in capture; nothing is re-read.
 export function name(
   node: Element,
   budget: NamingBudget,
-): { value: string; source: string; unsupported: boolean } {
-  if (budget.exhausted) return { value: "", source: "none", unsupported: true };
+): { value: string; source: string; unsupported: boolean; text: NameText } {
+  const none: NameText = { state: "unavailable", reason: "truncated" };
+  if (budget.exhausted) return { value: "", source: "none", unsupported: true, text: none };
+  const attribute = (key: string, source: string) => {
+    const named = boundedName(node.getAttribute(key) ?? "", budget);
+    return { value: named.value, source, unsupported: false, text: nameText(named) };
+  };
   function* candidates() {
     const refs = node.getAttribute("aria-labelledby") ?? "";
     const root = node.getRootNode() as Document | ShadowRoot;
-    const referenced: ReturnType<typeof text>[] = [];
+    const referenced: (ReturnType<typeof text> & { hidden: boolean })[] = [];
     if (takeNameBudget(budget, refs.length)) {
       for (const id of refs.trim().split(/\s+/)) {
         if (!id) continue;
         if (!takeNameBudget(budget)) break;
         const label = root.getElementById(id);
-        if (label) referenced.push(text(label, budget, !visible(label, budget)));
+        if (label) {
+          const hidden = !visible(label, budget);
+          referenced.push({ ...text(label, budget, hidden), hidden });
+        }
         if (budget.exhausted) break;
       }
     }
@@ -203,12 +267,9 @@ export function name(
         value: compact(referenced.map((result) => result.value).join(" ")),
         source: "aria-labelledby",
         unsupported: referenced.some((result) => result.unsupported),
+        text: joinedText(referenced),
       };
-    yield {
-      value: nameString(node.getAttribute("aria-label") ?? "", budget),
-      source: "aria-label",
-      unsupported: false,
-    };
+    yield attribute("aria-label", "aria-label");
     if (node.localName === "button") {
       const values: ReturnType<typeof text>[] = [];
       for (const label of (node as HTMLButtonElement).labels ?? []) {
@@ -219,21 +280,26 @@ export function name(
         value: compact(values.map((result) => result.value).join(" ")),
         source: "label",
         unsupported: values.some((result) => result.unsupported),
+        text: joinedText(values),
       };
     }
-    yield { ...text(node, budget, false, new Set(), 0, true), source: "contents" };
+    const contents = text(node, budget, false, new Set(), 0, true);
     yield {
-      value: nameString(node.getAttribute("title") ?? "", budget),
-      source: "title",
-      unsupported: false,
+      value: contents.value,
+      source: "contents",
+      unsupported: contents.unsupported,
+      text: nameText(contents),
     };
+    yield attribute("title", "title");
   }
-  let unsupported: { value: string; source: string; unsupported: boolean } | undefined;
+  let unsupported:
+    | { value: string; source: string; unsupported: boolean; text: NameText }
+    | undefined;
   // button-name is an OR of naming checks. Stop after a supported positive check.
   for (const candidate of candidates()) {
     if (budget.exhausted) return { ...candidate, unsupported: true };
     if (candidate.value && !candidate.unsupported) return candidate;
     if (candidate.unsupported) unsupported ??= candidate;
   }
-  return unsupported ?? { value: "", source: "none", unsupported: false };
+  return unsupported ?? { value: "", source: "none", unsupported: false, text: none };
 }

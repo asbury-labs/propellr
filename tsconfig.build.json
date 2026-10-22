@@ -11,6 +11,7 @@
     "src/validation.ts",
     "src/host/**/*.ts",
     "src/reporting/**/*.ts",
-    "src/components/**/*.ts"
+    "src/components/**/*.ts",
+    "src/review/**/*.ts"
   ]
 }

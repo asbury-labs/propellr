@@ -268,6 +268,20 @@ See the
 [inference protocol](specs/component-inference-protocol.md) and
 [evidence](specs/component-inference-validation.md).
 
+## Semantic text capture (Jev semantic review, phase 1)
+
+`scanComponents(..., { text: true })` adds an opt-in sidecar (`propellr-text-capture/1`) for
+elements that pass the seven naming rules: the text of the check that passed, an allowlisted
+role, nearest heading, a short container excerpt, a same-name count and image alt/basename.
+Control values, password and hidden inputs, hidden, inert, `aria-hidden` and editable text are
+never captured; unavailable fields carry fixed reasons. The host validates and binds it to the
+scan's retained passes, then applies `propellr-redaction/1` (URL query/fragment, email, phone,
+digit runs, tokens) before returning it; raw strings are discarded. It shares the naming budget,
+so a dense page can make the sidecar unavailable while the scan stays valid. Off by default, no
+IPC command, and never part of reports or gates. No provider receives it yet. See the
+[protocol](specs/semantic-text-capture-protocol.md) and
+[evidence](specs/semantic-review-validation.md).
+
 ## Boundaries and limits
 
 - `src/contracts.ts`: portable public types; verdicts, coverage, groups and gate
