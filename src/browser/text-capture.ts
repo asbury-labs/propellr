@@ -57,6 +57,16 @@ const skipped = new Set([
   "datalist",
   "output",
 ]);
+// Context rooted inside one of these is control content, even though the walk starts below it.
+const controls = new Set([
+  "button",
+  "select",
+  "textarea",
+  "option",
+  "optgroup",
+  "datalist",
+  "output",
+]);
 const bytes = (value: unknown) => new TextEncoder().encode(JSON.stringify(value)).byteLength;
 
 export function captureText(input: {
@@ -115,6 +125,20 @@ export function captureText(input: {
     const nearest = nearestHeadings(input.facts, input.passing);
     const headingText = new Map<Element, Field>();
     const excerpts = new Map<Element, Field>();
+    const controlled = new Map<Element, boolean>();
+    const withinControl = (root: Element) => {
+      let known = controlled.get(root);
+      if (known === undefined) {
+        known = false;
+        // Bounded by depth and charged per ancestor; stops at the document or shadow root.
+        for (let current = root.parentElement; current && !known; current = current.parentElement) {
+          step();
+          known = controls.has(current.localName);
+        }
+        controlled.set(root, known);
+      }
+      return known;
+    };
     const targets: TextTarget[] = [];
     for (const record of input.passing) {
       const base = {
@@ -129,7 +153,11 @@ export function captureText(input: {
         const heading = nearest.get(record.node);
         let headingField: Field = { state: "absent" };
         if (heading) {
-          headingField = headingText.get(heading) ?? headingValue(heading, budget, step);
+          headingField =
+            headingText.get(heading) ??
+            (withinControl(heading)
+              ? { state: "unavailable", reason: "excluded-source" }
+              : headingValue(heading, budget, step));
           headingText.set(heading, headingField);
         }
         const image =
@@ -140,7 +168,7 @@ export function captureText(input: {
           ...base,
           name: record.name,
           heading: headingField,
-          container: containerText(record.node, budget, step, excerpts),
+          container: containerText(record.node, budget, step, excerpts, withinControl),
           sameName: sameName(record),
           ...(image ? { image } : {}),
         });
@@ -224,8 +252,12 @@ function role(node: Element, step: (characters?: number) => void): TextTarget["r
     const token = explicit.trim().toLowerCase();
     return roles.has(token) ? (token as TextTarget["role"]) : "unknown";
   }
-  const type = node.getAttribute("type")?.toLowerCase() ?? "";
-  step(type.length);
+  const type = node.getAttribute("type");
+  step(type?.length ?? 0);
+  return implicitRole(node, type?.toLowerCase() ?? "");
+}
+
+function implicitRole(node: Element, type: string): TextTarget["role"] {
   switch (node.localName) {
     case "button":
       return "button";
@@ -268,6 +300,7 @@ function containerText(
   budget: NamingBudget,
   step: (characters?: number) => void,
   excerpts: Map<Element, Field>,
+  withinControl: (root: Element) => boolean,
 ): Field {
   let container: Element | null = null;
   for (let current = node.parentElement; current; current = current.parentElement) {
@@ -283,7 +316,7 @@ function containerText(
   }
   if (!container) return { state: "absent" };
   // isContentEditable inherits, so this also covers text directly inside an editable host.
-  if ((container as Partial<HTMLElement>).isContentEditable)
+  if ((container as Partial<HTMLElement>).isContentEditable || withinControl(container))
     return { state: "unavailable", reason: "excluded-source" };
   // A skipped target's subtree is omitted either way, so its excerpt is shared and charged once.
   const shared = skipped.has(node.localName);
@@ -365,6 +398,9 @@ function imageFields(node: Element, step: (characters?: number) => void): Image 
   const altValue = alt === null ? undefined : compacted(alt);
   const src = node.getAttribute("src");
   step(src?.length ?? 0);
+  // The page-controlled base URL is parsed with src, so it is charged before resolution too.
+  const base = src ? node.baseURI : "";
+  step(base.length);
   return {
     alt:
       altValue === undefined
@@ -372,7 +408,7 @@ function imageFields(node: Element, step: (characters?: number) => void): Image 
         : altValue.truncated
           ? { state: "unavailable", reason: "too-long" }
           : { state: "available", value: altValue.value },
-    basename: basename(src, node.baseURI),
+    basename: basename(src, base),
   };
 }
 

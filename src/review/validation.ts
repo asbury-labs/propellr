@@ -93,9 +93,11 @@ const imageRules = new Set<string>(["image-alt", "input-image-alt"]);
 const forced = new Map<string, string>(Object.entries(textForcedReasons));
 function recordIssues(record: Record): string[] {
   const issues: string[] = [];
-  const rule = record.rule.id as keyof typeof textChecks;
-  if (!(textChecks[rule] as readonly string[]).includes(record.check))
-    issues.push("Check is not allowlisted for this rule");
+  // An unknown rule already failed ruleSchema; refinements still run, so never assume a table.
+  const checks = textChecks[record.rule.id as keyof typeof textChecks] as
+    | readonly string[]
+    | undefined;
+  if (!checks?.includes(record.check)) issues.push("Check is not allowlisted for this rule");
   const reason = forced.get(record.check);
   if (reason !== undefined && record.name.state === "available")
     issues.push("Check never yields capturable text");

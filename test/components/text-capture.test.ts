@@ -318,6 +318,8 @@ test("leak fixtures: controls, hidden text and editable content are never captur
     <button id="leak-output"><output>PLANTED-OUTPUT</output></button>
     <h3>Totals <output>PLANTED-HEADING-OUTPUT</output> <button>Edit</button></h3>
     <div><button id="leak-heading">Pay</button></div>
+    <output><h2>PLANTED-OUTPUT-HEADING</h2></output><div><button id="leak-nested-heading">Pay now</button></div>
+    <output><label>PLANTED-OUTPUT-LABEL <button id="leak-nested-label" aria-label="Go"></button></label></output>
   </main>`);
   const { scan, text } = await run(html);
   const target = at(text, "button-name", "leak-target");
@@ -357,6 +359,15 @@ test("leak fixtures: controls, hidden text and editable content are never captur
   expect(named(text, "button-name", "leak-heading").heading).toEqual({
     state: "available",
     value: "Totals",
+  });
+  // A heading or container nested inside a control is control content, though the walk starts below it.
+  expect(named(text, "button-name", "leak-nested-heading").heading).toEqual({
+    state: "unavailable",
+    reason: "excluded-source",
+  });
+  expect(named(text, "button-name", "leak-nested-label").container).toEqual({
+    state: "unavailable",
+    reason: "excluded-source",
   });
   const password = targets(text).find(
     ({ rule, name }) =>
@@ -467,6 +478,18 @@ test("residual naming budget exhaustion is unavailable and never changes raw fin
   );
   expect(passes(none.scan)).toBe(0);
   expect(none.text).toMatchObject({
+    state: "unavailable",
+    reason: { code: "text-capture-limit" },
+  });
+  // The page-controlled base URL is charged before a short src is resolved against it.
+  const base = await run(
+    namingDocument(
+      `<base href="https://cdn.example/${"a/".repeat(8_500)}"><main><img id="p" alt="Photo" src="p.png"></main>`,
+    ),
+    { rules: ["image-alt"] },
+  );
+  expect(outcome(base.scan, "image-alt", "p")).toBe("pass");
+  expect(base.text).toMatchObject({
     state: "unavailable",
     reason: { code: "text-capture-limit" },
   });
@@ -787,6 +810,30 @@ test("host validation fails closed and never echoes page text", async () => {
         },
       ],
       ["missing scan identity", without(capture, "scan")],
+      [
+        "unknown rule",
+        { ...capture, targets: [{ ...first, rule: { id: "other-rule", version: "1" } }] },
+      ],
+      [
+        "another allowlisted check",
+        {
+          ...capture,
+          targets: capture.targets.map((record) =>
+            record["check"] === "contents" ? { ...record, check: "aria-label" } : record,
+          ),
+        },
+      ],
+      [
+        "value check renamed",
+        {
+          ...capture,
+          targets: capture.targets.map((record) =>
+            record["check"] === "non-empty-value"
+              ? { ...record, check: "aria-label", name: { state: "available", value: "Caption" } }
+              : record,
+          ),
+        },
+      ],
       [
         "image rule without image fields",
         {

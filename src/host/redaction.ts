@@ -1,7 +1,7 @@
 // Host-only propellr-redaction/1 and capture binding (specs/semantic-text-capture-protocol.md).
 // Runs after boundary validation and before any adapter, cache, log, archive or provider sees
 // text. Only the redacted sidecar is returned; raw captured strings are discarded here.
-import type { ScanResult } from "../contracts.js";
+import type { Evidence, ScanResult } from "../contracts.js";
 import type {
   RedactedField,
   RedactedTextCapture,
@@ -76,6 +76,21 @@ const key = (rule: ScanResult["rules"][number]["rule"], target: TextTarget["targ
     target.path.map(({ kind, selector }) => [kind, selector]),
   ]);
 
+// The successful check the raw scan retained: the name source for button-name, else the first
+// true ANY check. A capture record must name exactly this check.
+function passedCheck(rule: string, evidence: readonly Evidence[]): string | undefined {
+  const observed = evidence[0]?.observed;
+  if (observed === null || typeof observed !== "object" || Array.isArray(observed)) return;
+  const record = observed as { readonly [key: string]: unknown };
+  if (rule === "button-name")
+    return typeof record["source"] === "string" ? record["source"] : undefined;
+  if (!Array.isArray(record["any"])) return;
+  const first = (record["any"] as readonly unknown[]).find(
+    (entry) => (entry as { result?: unknown } | null)?.result === true,
+  ) as { id?: unknown } | undefined;
+  return typeof first?.id === "string" ? first.id : undefined;
+}
+
 // Binds the page-derived capture to its completed raw scan, then redacts it.
 export function bindTextCapture(scan: ScanResult, raw: unknown): RedactedTextCapture {
   const root = scan.scope.include[0];
@@ -99,18 +114,28 @@ export function bindTextCapture(scan: ScanResult, raw: unknown): RedactedTextCap
     return unavailable("text-capture-invalid");
   if (scan.coverage.state === "stale") return unavailable("text-capture-stale");
   if (capture.state === "unavailable") return unavailable(capture.reason.code);
-  // Exactly one record per retained pass of a captured rule, at the same version and target.
-  const passes = new Set(
+  // Exactly one record per retained pass of a captured rule, at the same version, target and
+  // successful check.
+  const passes = new Map(
     scan.rules.flatMap((result) =>
       result.state === "evaluated" && (textRules as readonly string[]).includes(result.rule.id)
         ? result.occurrences
             .filter(({ outcome }) => outcome === "pass")
-            .map(({ target }) => key(result.rule, target))
+            .map(
+              ({ target, evidence }) =>
+                [key(result.rule, target), passedCheck(result.rule.id, evidence)] as const,
+            )
         : [],
     ),
   );
   const records = new Set(capture.targets.map(({ rule, target }) => key(rule, target)));
-  if (records.size !== passes.size || [...records].some((record) => !passes.has(record)))
+  if (
+    records.size !== passes.size ||
+    capture.targets.some(({ rule, target, check }) => {
+      const passed = passes.get(key(rule, target));
+      return passed === undefined || passed !== check;
+    })
+  )
     return unavailable("text-capture-invalid");
   try {
     const redacted = capture.targets.map(redactTarget);
