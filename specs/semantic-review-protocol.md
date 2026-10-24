@@ -36,8 +36,18 @@ absent. A candidate is advisory. Phase 2 and 3 add no IPC command or advertised 
 ## Population and applicability
 
 A case is one target record in a redacted text capture (`propellr-redaction/1`) whose name is
-available, non-empty and not `redacted-unavailable`. Code decides which questions apply; the
-model is never asked a question whose evidence is missing:
+available, non-empty and not `redacted-unavailable`.
+
+A captured `name` is the text of the rule's successful check, not a full accessible-name
+computation: `link-name` captures visible contents ahead of an overriding `aria-label`, for
+example. The rubric judges the name a screen reader announces, so the corpus must make the two
+equal. Invariant, checked by the corpus test: for every case, the captured name equals the
+computed accessible name that Chromium reports for the element (CDP `Accessibility`), and no case
+has competing name sources. A page that breaks it fails the test and is fixed before use. Results
+are claimed only for names that meet this invariant, not for successful-check text in general.
+
+Code decides which questions apply; the model is never asked a question whose evidence is
+missing:
 
 | Question          | Applies when                                                                  |
 | ----------------- | ----------------------------------------------------------------------------- |
@@ -127,7 +137,9 @@ gate input:
 
 - `generic`, `filename`: `p = noul`.
 - `distinguishable`: `p = 1 − noul`.
-- `descriptive`: `p = 1 − score / 3`, from the score's probability-weighted position.
+- `descriptive`: the probability of a defect level, matching the binary label below. Jev:
+  `p = P(level 0) + P(level 1)` from the Score distribution; the `score` position is validated
+  but unused. Haiku: `p = 1` for level 0 or 1, `p = 0` for level 2 or 3.
 - Heuristic arm: `p = 1` where its rule applies, abstain otherwise.
 
 Choice, Score and model confidence are not used. Gates, dispositions and metrics are per
@@ -170,8 +182,7 @@ in [0,1] and otherwise unused; `legend` must equal the sent levels. Anything els
 **LLM**, `claude-haiku-5-5` with adapter settings from the October 21 amendment of the
 attribution protocol (no temperature, adaptive thinking at effort `low`, `max_tokens` 4096,
 structured output). Answer schema: one `{probability}` per Noul and `{level}`, an integer 0–3,
-for `descriptive`, so its descriptive `p` takes only the values 1, ⅔, ⅓ and 0. It has no
-score distribution. Validation: answer keys must equal the asked question keys, every
+for `descriptive`, so its descriptive `p` is 1 or 0. It has no score distribution. Validation: answer keys must equal the asked question keys, every
 `probability` finite in [0,1], every `level` an integer from 0 to 3, no other fields. A
 `refusal` or `max_tokens` stop is `invalid-response`.
 
@@ -214,8 +225,8 @@ support rule below can be met. At least 2 cases per family use German, Spanish, 
 Japanese, descriptive and generic. Misleading names (a name that contradicts its heading or container) appear in every family. Each
 page's passing naming population is exactly its 20 cases, all seven naming rules are selected,
 and the page fits the shared 2,000-step naming budget. A corpus test asserts, in Chromium, that
-every page yields an available capture with 20 cases, complete same-name counts and no redacted
-field. No case is adversarial or injection-shaped (`adversarialTesting: "not-permitted"`).
+every page yields an available capture with 20 cases, complete same-name counts, no redacted
+field and every captured name equal to the computed accessible name. No case is adversarial or injection-shaped (`adversarialTesting: "not-permitted"`).
 
 Truth comes only from human labels (phase 3). Families carry no oracle answers in code. The
 authoring intent per case (for example "filename-like") is recorded for corpus checks and is
@@ -321,7 +332,11 @@ Labeler time: about 600 judgments per person; roughly two hours each, unmeasured
   never answers `descriptive`; the plan allows abstaining where its rule does not apply.
 - **Image descriptiveness.** `descriptive` judges an image that is not a link or button by what
   it shows or conveys, since it has no action or destination.
-- **Descriptive labels.** Labelers pick a level; levels 0–1 are a defect and 2–3 are not.
+- **Descriptive labels.** Labelers pick a level; levels 0–1 are a defect and 2–3 are not. The
+  plan's `p = 1 − score / (L − 1)` is replaced by the probability of a defect level, so `p` is
+  calibrated against that binary truth.
+- **Name equals accessible name.** The corpus is restricted to cases whose captured check text
+  equals Chromium's computed accessible name.
 - **Matched precision.** Defined as criterion 3 above; the plan did not define it.
 - **Request mode.** Both modes run on dev and one is frozen before gate derivation, following the
   plan's capacity note. This raises dev request counts.
