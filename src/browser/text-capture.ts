@@ -331,7 +331,8 @@ function excerpt(
   const seen = new Set<Node>();
   const append = (chunk: string) => {
     out = `${out}${chunk}`.replace(/\s+/g, " ");
-    if (out.trimStart().length > 160) throw new TooLong();
+    // Compare the trimmed excerpt: a boundary space after exactly 160 units is not content.
+    if (out.trim().length > 160) throw new TooLong();
   };
   const walk = (current: Node, depth: number): void => {
     if (seen.has(current)) return;

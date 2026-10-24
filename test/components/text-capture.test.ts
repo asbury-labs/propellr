@@ -403,9 +403,11 @@ test("strings over 160 UTF-16 units are field-unavailable, never prefixes", asyn
     <button id="e80" aria-label="${"😀".repeat(80)}"></button>
     <button id="e81" aria-label="${"😀".repeat(81)}"></button>
     <button id="long-contents">${"word ".repeat(40)}</button>
+    <h2>${"g".repeat(160)}<button>Edit</button></h2>
+    <p>${"k".repeat(160)}<button id="x160" aria-label="Save"></button></p>
   </main>`);
   const { scan, text } = await run(html, { rules: ["button-name"] });
-  for (const id of ["s160", "s161", "e80", "e81", "long-contents"])
+  for (const id of ["s160", "s161", "e80", "e81", "long-contents", "x160"])
     expect(outcome(scan, "button-name", id), id).toBe("pass");
   const s160 = named(text, "button-name", "s160");
   // Letters outside hex keep the token rule from applying; this checks the length bound only.
@@ -434,6 +436,10 @@ test("strings over 160 UTF-16 units are field-unavailable, never prefixes", asyn
     state: "unavailable",
     reason: "truncated",
   });
+  // Exactly 160 units followed by a skipped element: the boundary space is not counted.
+  const x160 = named(text, "button-name", "x160");
+  expect(x160.heading).toEqual({ state: "available", value: "g".repeat(160) });
+  expect(x160.container).toEqual({ state: "available", value: "k".repeat(160) });
   expect(JSON.stringify(text)).not.toContain("b".repeat(100));
 });
 
