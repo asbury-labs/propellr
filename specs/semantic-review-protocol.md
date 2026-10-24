@@ -105,10 +105,11 @@ high:
    specific content or purpose."
 
 **`generic`**, Noul. Instructions: "Is the accessible name in `target.name` generic wording that
-could label almost any link or control, in any language, rather than words about this
-element's own action, object or destination?" True: "The name is placeholder wording such as
-'click here', 'more' or 'button'." False: "The name contains words specific to what this
-element does or where it leads."
+could label almost any link, control or image, in any language, rather than words about this
+element's own action, object or destination, or, for an image that is not a link or button,
+what the image shows or conveys?" True: "The name is placeholder wording such as 'click here',
+'more', 'button' or 'image'." False: "The name contains words specific to what this element
+does, where it leads, or what this image shows or conveys."
 
 **`filename`**, Noul. Instructions: "Does the image's accessible name in `target.name` (alt text
 `target.image.alt`) read like a file name or storage identifier rather than text written for
@@ -138,7 +139,8 @@ gate input:
 - `generic`, `filename`: `p = noul`.
 - `distinguishable`: `p = 1 − noul`.
 - `descriptive`: the probability of a defect level, matching the binary label below. Jev:
-  `p = P(level 0) + P(level 1)` from the Score distribution; the `score` position is validated
+  `p = (P(level 0) + P(level 1)) / (P(level 0) + P(level 1) + P(level 2) + P(level 3))`,
+  the accepted distribution renormalized to sum to exactly 1; the `score` position is validated
   but unused. Haiku: `p = 1` for level 0 or 1, `p = 0` for level 2 or 3.
 - Heuristic arm: `p = 1` where its rule applies, abstain otherwise.
 
@@ -330,8 +332,8 @@ Labeler time: about 600 judgments per person; roughly two hours each, unmeasured
 - **Score levels.** `descriptive` has 4 levels, described as situations; the plan left L open.
 - **Heuristic scope.** The heuristic only flags (`p = 1`) and never asserts a non-defect, and it
   never answers `descriptive`; the plan allows abstaining where its rule does not apply.
-- **Image descriptiveness.** `descriptive` judges an image that is not a link or button by what
-  it shows or conveys, since it has no action or destination.
+- **Images.** `descriptive` and `generic` judge an image that is not a link or button by what it
+  shows or conveys, since it has no action or destination.
 - **Descriptive labels.** Labelers pick a level; levels 0–1 are a defect and 2–3 are not. The
   plan's `p = 1 − score / (L − 1)` is replaced by the probability of a defect level, so `p` is
   calibrated against that binary truth.
