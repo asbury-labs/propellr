@@ -317,7 +317,7 @@
             <dd>
               2026-09-29T14:02:53Z; 2026-09-29T14:23:20Z; 2026-09-29T16:06:45Z;
               2026-09-29T19:07:51Z; 2026-09-29T19:22:01Z; 2026-09-29T19:29:04Z;
-              2026-10-22T00:02:10Z; 2026-10-22T00:33:22Z
+              2026-10-22T00:02:10Z; 2026-10-22T00:33:22Z; 2026-10-23T12:36:35Z
             </dd>
             <dt>commits</dt>
             <dd>
@@ -325,19 +325,22 @@
               ba797e27 (PR #25 rebased) ; 94d0c5b2 (main after #25);
               8c401680b6d5bb70ce825cdb66a0d7ee5fa8ddb3 (phase 1 protocol draft base;
               feat/jev-semantic-review, uncommitted); 84b197ea (phase 1 implementation base;
-              feat/semantic-text-capture)
+              feat/semantic-text-capture); 9e18521f (phase 2 protocol draft base;
+              docs/semantic-review-protocol)
             </dd>
             <dt>agent name</dt>
             <dd>
               claude-code / claude-opus-5-5; claude-code / claude-opus-5-5; claude-code /
               claude-opus-5-5 ; claude-code / claude-opus-5-5; pi / gpt-6.1-sol (phase 1 protocol
-              draft); claude-code / claude-opus-5-5 (phase 1 approval and implementation)
+              draft); claude-code / claude-opus-5-5 (phase 1 approval and implementation);
+              claude-code / claude-opus-5-5 (phase 2 protocol draft)
             </dd>
             <dt>session id</dt>
             <dd>
               e090228a-8284-4f44-814f-782d9c7da67b; e090228a-8284-4f44-814f-782d9c7da67b;
               e090228a-8284-4f44-814f-782d9c7da67b ; e090228a-8284-4f44-814f-782d9c7da67b;
-              01a0ee99-b915-77cf-a92d-7bd62abfda9f; ebbdd698-da9d-4435-8250-4ff5a6cafeaf
+              01a0ee99-b915-77cf-a92d-7bd62abfda9f; ebbdd698-da9d-4435-8250-4ff5a6cafeaf;
+              ebbdd698-da9d-4435-8250-4ff5a6cafeaf
             </dd>
             <dt>back refs</dt>
             <dd>
@@ -349,7 +352,8 @@
             <dt>forward refs</dt>
             <dd>
               none yet; <a href="semantic-text-capture-protocol.md">Phase 1 protocol draft</a>;
-              <a href="semantic-review-validation.md">Phase 1 evidence</a>
+              <a href="semantic-review-validation.md">Phase 1 evidence</a>;
+              <a href="semantic-review-protocol.md">Phase 2 protocol draft</a>
             </dd>
           </dl>
         </details>
@@ -1812,6 +1816,29 @@
 
       <section id="amendments">
         <h2>Amendments</h2>
+        <details>
+          <summary>2026-10-23T12:36:35Z — Phase 2 protocol draft; approval gate reached</summary>
+          <p>
+            Drafted <a href="semantic-review-protocol.md">the semantic review protocol</a> (rubric
+            <code>semantic-naming@1</code>) on <code>docs/semantic-review-protocol</code> from
+            <code>main</code> <code>9e18521f</code>. It fixes question wording, applicability, the
+            provider-state projection, the three arms, the corpus composition, the floor/bar rule,
+            metrics, the adoption bar and proposed phase 3 ceilings. Not frozen and not pinned until
+            Tony approves it.
+          </p>
+          <p>
+            Deviations listed for approval: Noul and Score have no exit value, so one
+            <code>exit</code> Noul per case with a fixed 0.5 threshold covers every question;
+            <code>descriptive</code> has 4 situation levels; the heuristic only flags and never
+            answers <code>descriptive</code>; matched precision is defined; both request modes run
+            on dev and one is frozen before gate derivation. Corpus quotas are fixed so that dev has
+            16 positives for <code>filename</code> and <code>distinguishable</code>.
+          </p>
+          <p>
+            No code, dependency, provider call, credential, spend, text egress or customer page.
+            Phase 2 tasks stay unchecked until the protocol is approved and built.
+          </p>
+        </details>
         <details>
           <summary>2026-10-22T00:33:22Z — Phase 1 approved and implemented; stop boundary</summary>
           <p>
