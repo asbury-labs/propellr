@@ -80,16 +80,19 @@ instructions are complete because question IDs are not sent to the model.
 **`descriptive`**, Score. Instructions: "A screen reader user hears the accessible name in
 `target.name`, possibly on its own in a list of links or controls. Using that name, the nearest
 heading `target.heading` and the surrounding text `target.container` when present, which
-situation describes how well the user can tell what this element does or where it leads?"
-Levels, low to high:
+situation describes how well the user can tell what this element does or where it leads, or,
+for an image that is not a link or button, what the image shows or conveys?" Levels, low to
+high:
 
-0. "Neither the name nor the heading and surrounding text say what the element does or where
-   it leads, or the name contradicts what the heading and surrounding text say it is for."
+0. "Neither the name nor the heading and surrounding text say what the element does, where it
+   leads or what the image shows, or the name contradicts what the heading and surrounding text
+   say it is for."
 1. "The name is vague, such as one general word. The heading or surrounding text hints at the
-   purpose, but the user still has to guess."
+   purpose or the image's content, but the user still has to guess."
 2. "The name together with the heading or surrounding text makes the element's specific action
-   or destination clear."
-3. "The name on its own states the element's specific action or destination."
+   or destination, or the image's specific content or purpose, clear."
+3. "The name on its own states the element's specific action or destination, or the image's
+   specific content or purpose."
 
 **`generic`**, Noul. Instructions: "Is the accessible name in `target.name` generic wording that
 could label almost any link or control, in any language, rather than words about this
@@ -156,15 +159,21 @@ French `ici`, `cliquez ici`, `plus`, `en savoir plus`; Japanese `こちら`, `�
 **Jev** (`src/host/semantic-review.ts`), `jev-1.13.0` at the pinned TypeSafe endpoint, over
 `BoundedTransport` with the attribution adapter's bounds: 64 KiB request, 10 s total deadline,
 at most 3 attempts, retries only on 429, 529 and network errors, no redirects, 256 KiB response
-cap, no body logging. Strict response validation: the model must match, answer keys must equal
-the asked question keys, every number finite in [0,1], and a score's probabilities must cover
-exactly levels 0–3 and sum to 1 ± 0.02. Anything else is `invalid-response` and undecided.
+cap, no body logging. Strict response validation: the model must match and answer keys must
+equal the asked question keys. A Noul answer is `{type: "noul", noul}` with `noul` finite in
+[0,1]. The `descriptive` answer is `{type: "score", score, probabilities, legend, confidence}`:
+`score` finite in [0,3]; `probabilities` keyed exactly `"0"`–`"3"`, each finite in [0,1],
+summing to 1 ± 0.02; `score` within 0.02 of the probability-weighted level; `confidence` finite
+in [0,1] and otherwise unused; `legend` must equal the sent levels. Anything else is
+`invalid-response` and undecided.
 
 **LLM**, `claude-haiku-5-5` with adapter settings from the October 21 amendment of the
 attribution protocol (no temperature, adaptive thinking at effort `low`, `max_tokens` 4096,
 structured output). Answer schema: one `{probability}` per Noul and `{level}`, an integer 0–3,
-for `descriptive`, so its descriptive `p` takes only the values 1, ⅔, ⅓ and 0. Same validation
-rules; a `refusal` or `max_tokens` stop is `invalid-response`.
+for `descriptive`, so its descriptive `p` takes only the values 1, ⅔, ⅓ and 0. It has no
+score distribution. Validation: answer keys must equal the asked question keys, every
+`probability` finite in [0,1], every `level` an integer from 0 to 3, no other fields. A
+`refusal` or `max_tokens` stop is `invalid-response`.
 
 **Cache.** Exact canonical input plus model, adapter, rubric, redaction and capture versions;
 validated answers only. Repeated dev runs measure run-to-run variation, so the cache is scoped
@@ -175,7 +184,12 @@ to a single run and never carries answers between runs.
 Two modes run on dev for each provider arm: **per-target** (one request per case, its applicable
 questions fanned out) and **per-page** (one request per corpus page, all cases as
 `targets[i]`, questions per case). Per-target isolates state; per-page can see when same-named
-controls share identical context, which per-target cannot. One mode per arm is frozen by
+controls share identical context, which per-target cannot. Each per-page question is the frozen
+per-target wording with every `target` path rewritten to `targets[i]` (for example
+`targets[3].name`), prefixed with "Answer only about `targets[i]`, the element with ID
+`targets[i].id`; use other entries only to compare." Question IDs stay invisible to the model;
+the index in the wording binds each answer to its case, and the evaluator maps answers back by
+the question ID it generated for that index. One mode per arm is frozen by
 amendment after the dev runs and before gate derivation, on dev metrics only. The holdout runs
 only the frozen mode.
 
@@ -196,8 +210,8 @@ Every family uses the same composition, so that each split covers every question
 | 8                | Links, buttons and form controls: descriptive, generic and misleading names |
 
 The fixed counts give dev 16 positive cases for `filename` and for `distinguishable`, so the
-support rule below can be met. At least 2 cases per family use German, Spanish, French or Japanese, descriptive and generic.
-Misleading names (a name that contradicts its heading or container) appear in every family. Each
+support rule below can be met. At least 2 cases per family use German, Spanish, French or
+Japanese, descriptive and generic. Misleading names (a name that contradicts its heading or container) appear in every family. Each
 page's passing naming population is exactly its 20 cases, all seven naming rules are selected,
 and the page fits the shared 2,000-step naming budget. A corpus test asserts, in Chromium, that
 every page yields an available capture with 20 cases, complete same-name counts and no redacted
@@ -211,7 +225,10 @@ never truth.
 
 The generalized labeling sheet (`--corpus semantic`) shows each labeler the same projected state
 the arms see, one page at a time, with opaque case IDs and the private key kept off the page.
-Per asked question a labeler answers `defect`, `not-defect` or `cannot-tell`. Tony and one
+For `generic`, `filename` and `distinguishable` a labeler answers `defect`, `not-defect` or
+`cannot-tell`. For `descriptive` a labeler picks the rubric level (0–3) or `cannot-tell`; the
+binary label is fixed now: levels 0 and 1 (the user has to guess) are `defect`, levels 2 and 3
+are `not-defect`. Levels are kept for agreement reporting. Tony and one
 colleague label all 240 cases independently. `pnpm labels:compare` records agreement, Cohen's
 kappa per question and every disagreement.
 
@@ -302,6 +319,9 @@ Labeler time: about 600 judgments per person; roughly two hours each, unmeasured
 - **Score levels.** `descriptive` has 4 levels, described as situations; the plan left L open.
 - **Heuristic scope.** The heuristic only flags (`p = 1`) and never asserts a non-defect, and it
   never answers `descriptive`; the plan allows abstaining where its rule does not apply.
+- **Image descriptiveness.** `descriptive` judges an image that is not a link or button by what
+  it shows or conveys, since it has no action or destination.
+- **Descriptive labels.** Labelers pick a level; levels 0–1 are a defect and 2–3 are not.
 - **Matched precision.** Defined as criterion 3 above; the plan did not define it.
 - **Request mode.** Both modes run on dev and one is frozen before gate derivation, following the
   plan's capacity note. This raises dev request counts.
